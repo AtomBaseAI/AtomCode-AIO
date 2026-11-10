@@ -67,6 +67,11 @@ export const StudentPasswordResetSchema = z.object({
     password: z.string().optional()
 })
 
+/**
+ * One student record inside a JSON import file (admin/students import).
+ * Core identity fields are required; contact/social fields are optional.
+ * Password is never part of the file — imported students get the default.
+ */
 export const ImportStudentSchema = z.object({
     name: z.string().min(1, {
         message: "Name is required",
@@ -86,6 +91,9 @@ export const ImportStudentSchema = z.object({
     batch: z.string().min(1, {
         message: "Batch is required",
     }),
+    phone: z.string().optional(),
+    github: z.string().optional(),
+    linkedin: z.string().optional(),
 });
 
 export const BulkImportStudentsSchema = z.array(ImportStudentSchema);

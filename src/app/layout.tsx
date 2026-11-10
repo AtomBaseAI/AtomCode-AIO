@@ -2,15 +2,27 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { CLIENT_NAME } from "@/config/branding";
+import { getBrandingSettings } from "@/lib/branding-settings";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
-export const metadata: Metadata = {
-  title: CLIENT_NAME,
-  description: "Atom Code — Campus coding platform (Admin / Staff / Student)",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // Browser tab title follows the admin-configured client name
+  // (DB override → env default). Fault-tolerant: never blocks rendering.
+  try {
+    const { clientName } = await getBrandingSettings();
+    return {
+      title: clientName,
+      description: "Atom Code — Campus coding platform (Admin / Staff / Student)",
+    };
+  } catch {
+    return {
+      title: "Atom Code Campus",
+      description: "Atom Code — Campus coding platform (Admin / Staff / Student)",
+    };
+  }
+}
 
 export const viewport: Viewport = {
   themeColor: [

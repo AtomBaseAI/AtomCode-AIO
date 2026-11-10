@@ -54,6 +54,31 @@ export const StaffPasswordResetSchema = z.object({
     password: z.string().optional()
 })
 
+/**
+ * One staff record inside a JSON import file (admin/staffs import).
+ * Core identity fields are required; contact fields are optional.
+ * Password is never part of the file — imported staff get the default.
+ */
+export const ImportStaffSchema = z.object({
+    name: z.string().min(1, {
+        message: "Name is required",
+    }),
+    email: z.string().email({
+        message: "Email is required",
+    }),
+    staffnumber: z.string().min(1, {
+        message: "Staff ID is required",
+    }),
+    department: z.string().min(1, {
+        message: "Department is required",
+    }),
+    phone: z.string().optional(),
+});
+
+export const BulkImportStaffSchema = z.array(ImportStaffSchema);
+
+export type BulkImportStaffType = z.infer<typeof BulkImportStaffSchema>;
+
 
 
 export type StaffTableType = z.infer<typeof StaffTableSchema>

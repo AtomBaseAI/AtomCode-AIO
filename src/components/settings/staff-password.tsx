@@ -27,13 +27,17 @@ import { useState, useTransition } from 'react'
 import { FormError } from '@/components/auth/form-error'
 import { FormSuccess } from '@/components/auth/form-success'
 import { toast } from 'sonner'
+import { resetOwnPasswordStaff } from '@/actions/staff'
 
 // Local schema (staff-specific): canonical @/schemas/staff-schema StaffPasswordResetSchema
-// has no confirmpassword field (admin's reset-staff flow resets to a default password),
-// while staff settings lets the staff member choose their own password.
+// describes the admin's reset-to-default flow, while staff settings lets the
+// staff member change their own password (current password required).
 const StaffOwnPasswordResetSchema = z
     .object({
         id: z.string(),
+        currentpassword: z.string().min(1, {
+            message: "Current password is required"
+        }),
         password: z.string().min(6, {
             message: "Minimum 6 characters required"
         }),
@@ -46,15 +50,12 @@ const StaffOwnPasswordResetSchema = z
         message: "Passwords do not match"
     });
 
-export type ResetStaffPasswordAction = (
-    values: z.infer<typeof StaffOwnPasswordResetSchema>
-) => Promise<{ success?: string; error?: string }>;
-
-const StaffPassword = ({ uid, resetAction }: { uid: string; resetAction: ResetStaffPasswordAction }) => {
+const StaffPassword = ({ uid }: { uid: string }) => {
     const form = useForm<z.infer<typeof StaffOwnPasswordResetSchema>>({
         resolver: zodResolver(StaffOwnPasswordResetSchema),
         defaultValues: {
             id: uid,
+            currentpassword: undefined,
             password: undefined,
             confirmpassword: undefined
         }
@@ -67,12 +68,14 @@ const StaffPassword = ({ uid, resetAction }: { uid: string; resetAction: ResetSt
         setError("")
         setSuccess("")
         startTransition(() => {
-            resetAction(values)
+            resetOwnPasswordStaff(values)
                 .then((data) => {
                     if (data.success) {
                         form.reset()
                         setOpen(false)
                         toast.success(data.success);
+                    } else if (data.error) {
+                        setError(data.error);
                     }
                 })
                 .catch(() => toast.error("Something went wrong!"));
@@ -114,6 +117,26 @@ const StaffPassword = ({ uid, resetAction }: { uid: string; resetAction: ResetSt
                                     <div className="grid gap-1">
                                         <FormField
                                             control={form.control}
+                                            name="currentpassword"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Current Password</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            type="password"
+                                                            placeholder='******'
+                                                            autoComplete='current-password'
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="grid gap-1">
+                                        <FormField
+                                            control={form.control}
                                             name="password"
                                             render={({ field }) => (
                                                 <FormItem>
@@ -123,6 +146,7 @@ const StaffPassword = ({ uid, resetAction }: { uid: string; resetAction: ResetSt
                                                             {...field}
                                                             type="password"
                                                             placeholder='******'
+                                                            autoComplete='new-password'
                                                         />
                                                     </FormControl>
                                                     <FormMessage />
@@ -143,6 +167,7 @@ const StaffPassword = ({ uid, resetAction }: { uid: string; resetAction: ResetSt
                                                             {...field}
                                                             type="password"
                                                             placeholder='******'
+                                                            autoComplete='new-password'
                                                         />
                                                     </FormControl>
                                                     <FormMessage />

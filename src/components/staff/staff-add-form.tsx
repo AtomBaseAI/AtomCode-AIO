@@ -35,8 +35,11 @@ import { AddStaffSchema } from "@/schemas/staff-schema"
 import { addstudent } from "@/actions/student"
 import { toast } from "sonner"
 import { addstaff } from "@/actions/staff"
+import { useLookups } from "@/hooks/use-lookups"
 const AddStaff = () => {
 
+    // Admin-managed department list (falls back to built-ins while loading).
+    const { departments } = useLookups()
     const form = useForm<z.infer<typeof AddStaffSchema>>({
         resolver: zodResolver(AddStaffSchema),
         defaultValues: {
@@ -201,16 +204,9 @@ const AddStaff = () => {
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                            <SelectItem value="cse">CSE</SelectItem>
-                                                            <SelectItem value="it">IT</SelectItem>
-                                                            <SelectItem value="iot">IOT</SelectItem>
-                                                            <SelectItem value="cys">Cyber Security</SelectItem>
-                                                            <SelectItem value="aids">AI & DS</SelectItem>
-                                                            <SelectItem value="aiml">AI & ML</SelectItem>
-                                                            <SelectItem value="mech">Mechanical</SelectItem>
-                                                            <SelectItem value="civil">Civil</SelectItem>
-                                                            <SelectItem value="eee">EEE</SelectItem>
-                                                            <SelectItem value="ece">ECE</SelectItem>
+                                                            {departments.map((dept) => (
+                                                                <SelectItem key={dept.value} value={dept.value}>{dept.label ?? dept.value}</SelectItem>
+                                                            ))}
                                                         </SelectContent>
                                                     </Select>
                                                     <FormMessage />

@@ -39,6 +39,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { StaffUpdateSchema } from "@/schemas/staff-schema";
 import { updatestaff } from "@/actions/staff";
+import { useLookups } from "@/hooks/use-lookups";
 interface EditStaffFormProps {
     staff: z.infer<typeof StaffUpdateSchema>
     /** Custom trigger element (defaults to the "Edit" button). */
@@ -49,6 +50,8 @@ interface EditStaffFormProps {
 
 const EditStaffForm = ({ staff, trigger, onSuccess }: EditStaffFormProps) => {
     const router = useRouter();
+    // Admin-managed department list (falls back to built-ins while loading).
+    const { departments } = useLookups()
     const form = useForm<z.infer<typeof StaffUpdateSchema>>({
         resolver: zodResolver(StaffUpdateSchema),
         defaultValues: {
@@ -211,16 +214,9 @@ const EditStaffForm = ({ staff, trigger, onSuccess }: EditStaffFormProps) => {
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                            <SelectItem value="cse">CSE</SelectItem>
-                                                            <SelectItem value="it">IT</SelectItem>
-                                                            <SelectItem value="iot">IOT</SelectItem>
-                                                            <SelectItem value="cys">Cyber Security</SelectItem>
-                                                            <SelectItem value="aids">AI & DS</SelectItem>
-                                                            <SelectItem value="aiml">AI & ML</SelectItem>
-                                                            <SelectItem value="mech">Mechanical</SelectItem>
-                                                            <SelectItem value="civil">Civil</SelectItem>
-                                                            <SelectItem value="eee">EEE</SelectItem>
-                                                            <SelectItem value="ece">ECE</SelectItem>
+                                                            {departments.map((dept) => (
+                                                                <SelectItem key={dept.value} value={dept.value}>{dept.label ?? dept.value}</SelectItem>
+                                                            ))}
                                                         </SelectContent>
                                                     </Select>
                                                     <FormMessage />

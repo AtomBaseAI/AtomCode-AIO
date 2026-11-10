@@ -20,7 +20,8 @@ import { StudentRegisterSchema } from "@/schemas/auth-schema"
 import { FormError } from "./form-error"
 import { FormSuccess } from "./form-success"
 import { registerStudent as register } from "@/actions/register"
-import Link from "next/link"
+import { useVerifiedRegisterCode } from "@/components/auth/register-gate"
+import { useLookups } from "@/hooks/use-lookups"
 
 import {
     Select,
@@ -32,6 +33,10 @@ import {
 
 
 export function RegisterFormStudent() {
+    // Code + role verified by the <RegisterGate> wrapping this form.
+    const accessCode = useVerifiedRegisterCode()?.code ?? ""
+    // Admin-managed batch/department lists (falls back to built-ins while loading).
+    const { batches, departments } = useLookups()
     const form = useForm<z.infer<typeof StudentRegisterSchema>>({
         resolver: zodResolver(StudentRegisterSchema),
         defaultValues: {
@@ -51,7 +56,7 @@ export function RegisterFormStudent() {
         setError("")
         setSuccess("")
         startTransition(() => {
-            register(values)
+            register(values, accessCode)
                 .then((data) => {
                     setError(data.error)
                     setSuccess(data.success)
@@ -158,12 +163,9 @@ export function RegisterFormStudent() {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="2021-2025">2021-2025</SelectItem>
-                                                <SelectItem value="2022-2026">2022-2026</SelectItem>
-                                                <SelectItem value="2023-2027">2023-2027</SelectItem>
-                                                <SelectItem value="2024-2028">2024-2028</SelectItem>
-                                                <SelectItem value="2025-2029">2025-2029</SelectItem>
-                                                <SelectItem value="2026-2030">2026-2030</SelectItem>
+                                                {batches.map((batch) => (
+                                                    <SelectItem key={batch.value} value={batch.value}>{batch.value}</SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -185,16 +187,9 @@ export function RegisterFormStudent() {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="cse">CSE</SelectItem>
-                                                <SelectItem value="it">IT</SelectItem>
-                                                <SelectItem value="iot">IOT</SelectItem>
-                                                <SelectItem value="cys">Cyber Security</SelectItem>
-                                                <SelectItem value="aids">AI & DS</SelectItem>
-                                                <SelectItem value="aiml">AI & ML</SelectItem>
-                                                <SelectItem value="mech">Mechanical</SelectItem>
-                                                <SelectItem value="civil">Civil</SelectItem>
-                                                <SelectItem value="eee">EEE</SelectItem>
-                                                <SelectItem value="ece">ECE</SelectItem>
+                                                {departments.map((dept) => (
+                                                    <SelectItem key={dept.value} value={dept.value}>{dept.label ?? dept.value}</SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -240,7 +235,6 @@ export function RegisterFormStudent() {
                     </div>
                 </form>
             </Form>
-            <p>Already have an account ? <Link href='/login' className="text-primary font-bold ml-3 underline"> Login </Link></p>
         </div>
     )
 }

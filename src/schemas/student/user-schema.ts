@@ -25,6 +25,9 @@ export const StudentUpdateSchema = z.object({
 
 export const StudentPasswordResetSchema = z.object({
     id: z.string(),
+    currentpassword: z.string().min(1, {
+        message: "Current password is required"
+    }),
     password: z.string().min(6, {
         message: "Minimum 6 characters required"
     }),

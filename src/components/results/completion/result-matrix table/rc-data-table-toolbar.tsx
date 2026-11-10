@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableViewOptions } from "@/components/data-tables/data-table-view-options"
 import { DataTableFacetedFilter } from "@/components/data-tables/data-table-faceted-filter"
-import { bathces, departments, sections } from "@/components/data-tables/data-table-config-data"
+import { sections } from "@/components/data-tables/data-table-config-data"
+import { useLookups } from "@/hooks/use-lookups"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -15,6 +16,9 @@ interface DataTableToolbarProps<TData> {
 export function RCDataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
+  // Live batch/department filter options (admin-managed via Settings → System).
+  const { batches, departments } = useLookups()
+
   const isFiltered = table.getState().columnFilters.length > 0
 
   return (
@@ -32,7 +36,7 @@ export function RCDataTableToolbar<TData>({
           <DataTableFacetedFilter
             column={table.getColumn("batch")}
             title="Batch"
-            options={bathces}
+            options={batches}
           />
         )}
         {table.getColumn("department") && (

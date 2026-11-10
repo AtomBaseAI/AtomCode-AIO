@@ -1,3 +1,9 @@
+// NOTE: `departments` and `bathces` below are the shared LIVE lookup lists —
+// useLookups() (src/hooks/use-lookups.ts) refreshes them in place from
+// /api/lookups with the admin-managed values (Admin → Settings → System).
+// The arrays below are the built-in defaults used until (or instead of) the
+// fetch result.
+
 import {
   BookA,
   CalendarClock,

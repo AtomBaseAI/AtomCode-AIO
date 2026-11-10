@@ -15,6 +15,12 @@ export const authRoutes = ["/login", "/register", "/forgot-password"];
 /** Auth.js's own endpoints — the proxy never touches them. */
 export const apiAuthPrefix = "/api/auth";
 
+/**
+ * Public API endpoints reachable without a session (read-only).
+ * Currently: batch/department lookups for the pre-login register page.
+ */
+export const publicApiPrefixes = ["/api/lookups"];
+
 /** Desktop (Electron) API — authenticates via Bearer tokens per route. */
 export const desktopApiPrefix = "/api/desktop";
 

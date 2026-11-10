@@ -4,17 +4,18 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 
 /**
- * Admin guard for the question-groups API.
+ * Admin guard for admin-only API routes (question groups, students …).
  * Returns a 401/403 response when the caller is not an authenticated admin.
+ * `subject` only customizes the error copy.
  */
-export async function requireAdminApi() {
+export async function requireAdminApi(subject = "question groups") {
     const session = await auth();
     const role = (session?.user as { role?: string } | undefined)?.role;
     if (!session?.user) {
         return {
             ok: false as const,
             response: NextResponse.json(
-                { error: "You must be signed in to manage question groups." },
+                { error: `You must be signed in to manage ${subject}.` },
                 { status: 401 }
             ),
         };
@@ -23,7 +24,7 @@ export async function requireAdminApi() {
         return {
             ok: false as const,
             response: NextResponse.json(
-                { error: "Only admins can manage question groups." },
+                { error: `Only admins can manage ${subject}.` },
                 { status: 403 }
             ),
         };

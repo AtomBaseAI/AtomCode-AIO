@@ -6,10 +6,8 @@ import { StudentDataTable } from "@/components/student/student-table/s-data-tabl
 
 import { getAllStudents } from "@/data/students"
 import AddStudent from "@/components/student/student-add-form"
+import { StudentImportExportMenu } from "@/components/student/student-import-export-menu"
 import { StudentTableSchema } from "@/schemas/student-schema"
-import { Button } from "@/components/ui/button"
-import { UploadCloud } from "lucide-react"
-import Link from "next/link"
 
 async function fetchStudents() {
   const students = await getAllStudents()
@@ -30,13 +28,8 @@ export default async function StudentsData() {
             </p>
           </div>
           <div className="flex justify-center items-center gap-x-4">
+            <StudentImportExportMenu />
             <AddStudent />
-            <Link href='/admin/students/import'>
-              <Button>
-                <UploadCloud className="mr-2" />
-                Bulk Upload
-              </Button>
-            </Link>
           </div>
         </div>
         <StudentDataTable data={students} columns={columns} />

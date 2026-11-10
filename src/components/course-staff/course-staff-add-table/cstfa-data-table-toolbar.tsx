@@ -9,7 +9,7 @@ import { useState } from "react"
 import { LoaderIcon } from "lucide-react"
 import { toast } from "sonner"
 import { DataTableFacetedFilter } from "@/components/data-tables/data-table-faceted-filter"
-import { departments } from "@/components/data-tables/data-table-config-data"
+import { useLookups } from "@/hooks/use-lookups"
 import { addcoursestaffs } from "@/actions/staffcourse"
 
 interface DataTableToolbarProps<TData> {
@@ -23,6 +23,9 @@ export function CSTFADataTableToolbar<TData>({
 }: DataTableToolbarProps<TData>) {
 
   const [loading, setLoading] = useState(false);
+  // Live department filter options (admin-managed via Settings → System).
+  const { departments } = useLookups()
+
   const isFiltered = table.getState().columnFilters.length > 0;
   const selectedRowCount = table.getSelectedRowModel().rows.length;
 

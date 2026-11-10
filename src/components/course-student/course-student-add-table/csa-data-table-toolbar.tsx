@@ -10,7 +10,8 @@ import { useState } from "react"
 import { LoaderIcon } from "lucide-react"
 import { toast } from "sonner"
 import { DataTableFacetedFilter } from "@/components/data-tables/data-table-faceted-filter"
-import { bathces, departments, sections } from "@/components/data-tables/data-table-config-data"
+import { sections } from "@/components/data-tables/data-table-config-data"
+import { useLookups } from "@/hooks/use-lookups"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -23,6 +24,9 @@ export function CSADataTableToolbar<TData>({
 }: DataTableToolbarProps<TData>) {
 
   const [loading, setLoading] = useState(false);
+  // Live batch/department filter options (admin-managed via Settings → System).
+  const { batches, departments } = useLookups()
+
   const isFiltered = table.getState().columnFilters.length > 0;
   const selectedRowCount = table.getSelectedRowModel().rows.length;
 
@@ -61,7 +65,7 @@ export function CSADataTableToolbar<TData>({
           <DataTableFacetedFilter
             column={table.getColumn("batch")}
             title="Batch"
-            options={bathces}
+            options={batches}
           />
         )}
         {table.getColumn("department") && (

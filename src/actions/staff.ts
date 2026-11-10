@@ -1,11 +1,11 @@
 "use server"
-import Papa from "papaparse";
 import { db } from "@/lib/db"
+import { auth } from "@/auth"
 // import bcrypt from 'bcryptjs'
 import * as z from 'zod'
 import { revalidatePath } from "next/cache"
 import { AddStaffSchema, DeleteStaffSchema, StaffPasswordResetSchema, StaffUpdateSchema } from "@/schemas/staff-schema"
-import { genSaltSync, hashSync } from 'bcrypt-ts';
+import { compareSync, genSaltSync, hashSync } from 'bcrypt-ts';
 import { requireAdmin } from "@/lib/action-guards";
 
 export const addstaff = async (values: z.infer<typeof AddStaffSchema>) => {
@@ -74,9 +74,17 @@ export const updatestaff = async (
 }
 
 
+/**
+ * Admin-side reset — sets a staff account back to the default password.
+ * No current password needed (the admin is acting on someone else's
+ * account), but the caller must be an authenticated admin.
+ */
 export const resetpasswordstaff = async (
     values: z.infer<typeof StaffPasswordResetSchema>
 ) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can reset staff passwords." };
+
     const uid = values.id;
     const password = "Staff@Atom"
     // const hashedPassword = await bcrypt.hash(password, 10)
@@ -92,6 +100,49 @@ export const resetpasswordstaff = async (
         }
     })
     return { success: "Default Password Updated !" }
+}
+
+/** Schema shape for the staff self-service password change (see component). */
+export type StaffOwnPasswordResetInput = {
+    id: string;
+    currentpassword: string;
+    password: string;
+    confirmpassword: string;
+};
+
+/**
+ * Self-service password change for the signed-in staff member.
+ * - Requires a session with the staff role and uses the session id —
+ *   never the client-supplied one — so this cannot be aimed at other staff.
+ * - The current password must match before the new password is written.
+ */
+export const resetOwnPasswordStaff = async (
+    values: StaffOwnPasswordResetInput
+) => {
+    const session = await auth();
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    if (!session?.user || role !== "staff") {
+        return { error: "Unauthorized" };
+    }
+
+    const staff = await db.staff.findUnique({
+        where: { id: session.user.id }
+    });
+    if (!staff?.password) {
+        return { error: "Account not found" };
+    }
+
+    if (!compareSync(values.currentpassword, staff.password)) {
+        return { error: "Current password is incorrect" };
+    }
+
+    const salt = genSaltSync(10);
+    const hashedPassword = hashSync(values.password, salt);
+    await db.staff.update({
+        where: { id: staff.id },
+        data: { password: hashedPassword },
+    });
+    return { success: "Password Updated !" };
 }
 
 export const deletestaffsbulk = async (ids: string[]) => {

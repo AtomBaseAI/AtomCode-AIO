@@ -5,6 +5,7 @@ import {
   authRoutes,
   publicRoutes,
   apiAuthPrefix,
+  publicApiPrefixes,
   desktopApiPrefix,
   roleHome,
 } from "@/routes";
@@ -56,6 +57,10 @@ export default auth((req) => {
   // 2. App API surface — JSON 401, no redirects.
   if (pathname.startsWith("/api/")) {
     if (session) return NextResponse.next();
+    // Read-only public endpoints (e.g. register-page lookups).
+    if (publicApiPrefixes.some((p) => pathname.startsWith(p))) {
+      return NextResponse.next();
+    }
     return NextResponse.json(
       { error: "Authentication required." },
       { status: 401 }

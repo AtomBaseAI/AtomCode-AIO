@@ -1,10 +1,9 @@
 "use server"
-import Papa from "papaparse";
 import { db } from "@/lib/db"
 // import bcrypt from 'bcryptjs'
 import * as z from 'zod'
 import { revalidatePath } from "next/cache"
-import { AddStudentSchema, BulkImportStudentsSchema, DeleteStudentSchema, StudentPasswordResetSchema, StudentUpdateSchema } from "@/schemas/student-schema"
+import { AddStudentSchema, DeleteStudentSchema, StudentPasswordResetSchema, StudentUpdateSchema } from "@/schemas/student-schema"
 import { genSaltSync, hashSync } from 'bcrypt-ts';
 import { requireAdmin } from "@/lib/action-guards";
 
@@ -76,9 +75,17 @@ export const updatestudent = async (
 }
 
 
+/**
+ * Admin-side reset — sets a student account back to the default password.
+ * No current password needed (the admin is acting on someone else's
+ * account), but the caller must be an authenticated admin.
+ */
 export const resetpasswordstudent = async (
     values: z.infer<typeof StudentPasswordResetSchema>
 ) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can reset student passwords." };
+
     const uid = values.id;
     const password = "User@Atom"
     const salt = genSaltSync(10);
@@ -96,46 +103,6 @@ export const resetpasswordstudent = async (
 }
 
 
-
-export const importstudents = async (csvData: string) => {
-
-    const parsedData = Papa.parse(csvData, {
-        header: true,
-        skipEmptyLines: true,
-    });
-
-    const validationResult = BulkImportStudentsSchema.safeParse(parsedData.data);
-
-    if (!validationResult.success) {
-        return { error: "Invalid data in the CSV file" };
-    }
-
-    const students = validationResult.data;
-
-    // const defaultPassword = await bcrypt.hash("User@Atom", 10);
-    const salt = genSaltSync(10);
-    const defaultPassword = hashSync("User@Atom", salt);
-    for (const student of students) {
-        const existingUser = await db.user.findUnique({
-            where: { email: student.email },
-        });
-
-        if (existingUser) {
-            return { error: `Email already exists: ${student.email}` };
-        }
-
-        await db.user.create({
-            data: {
-                ...student,
-                password: defaultPassword,
-                isTwoFactorEnabled: false,
-            },
-        });
-    }
-
-    revalidatePath("/admin/students")
-    return { success: "All students imported successfully!" };
-};
 
 export const deletestudentsbulk = async (ids: string[]) => {
     const session = await requireAdmin();

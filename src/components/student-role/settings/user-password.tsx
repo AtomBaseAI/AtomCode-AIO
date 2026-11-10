@@ -34,6 +34,7 @@ const UserPassword = ({ uid }: { uid: string }) => {
         resolver: zodResolver(StudentPasswordResetSchema),
         defaultValues: {
             id: uid,
+            currentpassword: undefined,
             password: undefined,
             confirmpassword: undefined
         }
@@ -48,12 +49,12 @@ const UserPassword = ({ uid }: { uid: string }) => {
         startTransition(() => {
             resetpasswordstudent(values)
                 .then((data) => {
-                    // setError(data.error)
-                    // setSuccess(data.success)
                     if (data.success) {
                         form.reset()
                         setOpen(false)
                         toast.success(data.success);
+                    } else if (data.error) {
+                        setError(data.error);
                     }
                 })
                 .catch(() => toast.error("Something went wrong!"));
@@ -95,6 +96,26 @@ const UserPassword = ({ uid }: { uid: string }) => {
                                     <div className="grid gap-1">
                                         <FormField
                                             control={form.control}
+                                            name="currentpassword"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Current Password</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            type="password"
+                                                            placeholder='******'
+                                                            autoComplete='current-password'
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="grid gap-1">
+                                        <FormField
+                                            control={form.control}
                                             name="password"
                                             render={({ field }) => (
                                                 <FormItem>
@@ -104,6 +125,7 @@ const UserPassword = ({ uid }: { uid: string }) => {
                                                             {...field}
                                                             type="password"
                                                             placeholder='******'
+                                                            autoComplete='new-password'
                                                         />
                                                     </FormControl>
                                                     <FormMessage />
@@ -124,6 +146,7 @@ const UserPassword = ({ uid }: { uid: string }) => {
                                                             {...field}
                                                             type="password"
                                                             placeholder='******'
+                                                            autoComplete='new-password'
                                                         />
                                                     </FormControl>
                                                     <FormMessage />

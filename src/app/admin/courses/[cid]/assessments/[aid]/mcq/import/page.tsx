@@ -1,6 +1,5 @@
 "use client"
 import { importmcqs } from "@/actions/mcq";
-import { importstudents } from "@/actions/student";
 import BackBtn from "@/components/backbtn";
 import { Button } from "@/components/ui/button";
 import { Download, Loader, UploadCloud } from "lucide-react";

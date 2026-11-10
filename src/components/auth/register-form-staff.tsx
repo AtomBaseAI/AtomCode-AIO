@@ -26,9 +26,15 @@ import { StaffRegisterSchema } from "@/schemas/auth-schema"
 import { FormError } from "@/components/auth/form-error"
 import { FormSuccess } from "@/components/auth/form-success"
 import { registerStaff as register } from "@/actions/register"
+import { useVerifiedRegisterCode } from "@/components/auth/register-gate"
+import { useLookups } from "@/hooks/use-lookups"
 
 
 export function RegisterFormStaff() {
+    // Code + role verified by the <RegisterGate> wrapping this form.
+    const accessCode = useVerifiedRegisterCode()?.code ?? ""
+    // Admin-managed department list (falls back to built-ins while loading).
+    const { departments } = useLookups()
     const form = useForm<z.infer<typeof StaffRegisterSchema>>({
         resolver: zodResolver(StaffRegisterSchema),
         defaultValues: {
@@ -49,7 +55,7 @@ export function RegisterFormStaff() {
         setError("")
         setSuccess("")
         startTransition(() => {
-            register(values)
+            register(values, accessCode)
                 .then((data) => {
                     setError(data.error)
                     setSuccess(data.success)
@@ -157,16 +163,9 @@ export function RegisterFormStaff() {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="cse">CSE</SelectItem>
-                                                <SelectItem value="it">IT</SelectItem>
-                                                <SelectItem value="iot">IOT</SelectItem>
-                                                <SelectItem value="cys">Cyber Security</SelectItem>
-                                                <SelectItem value="aids">AI & DS</SelectItem>
-                                                <SelectItem value="aiml">AI & ML</SelectItem>
-                                                <SelectItem value="mech">Mechanical</SelectItem>
-                                                <SelectItem value="civil">Civil</SelectItem>
-                                                <SelectItem value="eee">EEE</SelectItem>
-                                                <SelectItem value="ece">ECE</SelectItem>
+                                                {departments.map((dept) => (
+                                                    <SelectItem key={dept.value} value={dept.value}>{dept.label ?? dept.value}</SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />

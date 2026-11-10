@@ -1,29 +1,12 @@
 import { auth } from "@/auth";
 import StaffPassword from "@/components/settings/staff-password";
 import Image from "next/image"
-import { db } from "@/lib/db";
-import { genSaltSync, hashSync } from "bcrypt-ts";
 
 const getSessionstaff = async () => {
   const session = await auth();
   return session;
 }
 
-// Staff-specific own-password reset as an inline server action.
-// (canonical @/actions/staff resetpasswordstaff is the admin flow: it resets a
-// staff account to the default password and ignores the submitted value)
-const resetOwnPassword = async (
-  values: { id: string; password: string; confirmpassword: string }
-) => {
-  "use server";
-  const salt = genSaltSync(10);
-  const hashedPassword = hashSync(values.password, salt);
-  await db.staff.update({
-    where: { id: values.id },
-    data: { password: hashedPassword },
-  });
-  return { success: "Password Updated !" };
-};
 const Settings = async () => {
   const staffsession = await getSessionstaff();
   if (staffsession?.user?.id === undefined) {
@@ -43,7 +26,9 @@ const Settings = async () => {
         <div className="w-full max-w-md sm:w-2/3 lg:w-1/3 shadow rounded-lg overflow-hidden dark:border dark:border-slate-700">
           <div className="relative h-40 bg-gradient-to-r from-indigo-500 to-purple-600">
             <div className="flex flex-row absolute top-2 right-2 w-1/2 items-center justify-end gap-2">
-              <StaffPassword uid={staffx.id} resetAction={resetOwnPassword} />
+              {/* StaffPassword verifies the current password server-side via
+                  the resetOwnPasswordStaff action in @/actions/staff */}
+              <StaffPassword uid={staffx.id} />
             </div>
             <div className="absolute bottom-0 left-0 w-full transform translate-y-1/2 flex justify-center">
               <Image

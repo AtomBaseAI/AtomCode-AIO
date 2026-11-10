@@ -37,6 +37,7 @@ import { FormError } from "@/components/auth/form-error"
 import { FormSuccess } from "@/components/auth/form-success"
 import { StudentUpdateSchema } from "@/schemas/student-schema"
 import { updatestudent } from "@/actions/student"
+import { useLookups } from "@/hooks/use-lookups"
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 interface EditStudentFormProps {
@@ -49,6 +50,8 @@ interface EditStudentFormProps {
 
 const EditStudentForm = ({ student, trigger, onSuccess }: EditStudentFormProps) => {
     const router = useRouter();
+    // Admin-managed batch/department lists (falls back to built-ins while loading).
+    const { batches, departments } = useLookups()
     const form = useForm<z.infer<typeof StudentUpdateSchema>>({
         resolver: zodResolver(StudentUpdateSchema),
         defaultValues: {
@@ -221,12 +224,9 @@ const EditStudentForm = ({ student, trigger, onSuccess }: EditStudentFormProps) 
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                            <SelectItem value="2021-2025">2021-2025</SelectItem>
-                                                            <SelectItem value="2022-2026">2022-2026</SelectItem>
-                                                            <SelectItem value="2023-2027">2023-2027</SelectItem>
-                                                            <SelectItem value="2024-2028">2024-2028</SelectItem>
-                                                            <SelectItem value="2025-2029">2025-2029</SelectItem>
-                                                            <SelectItem value="2026-2030">2026-2030</SelectItem>
+                                                            {batches.map((batch) => (
+                                                                <SelectItem key={batch.value} value={batch.value}>{batch.value}</SelectItem>
+                                                            ))}
                                                         </SelectContent>
                                                     </Select>
                                                     <FormMessage />
@@ -249,16 +249,9 @@ const EditStudentForm = ({ student, trigger, onSuccess }: EditStudentFormProps) 
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                            <SelectItem value="cse">CSE</SelectItem>
-                                                            <SelectItem value="it">IT</SelectItem>
-                                                            <SelectItem value="iot">IOT</SelectItem>
-                                                            <SelectItem value="cys">Cyber Security</SelectItem>
-                                                            <SelectItem value="aids">AI & DS</SelectItem>
-                                                            <SelectItem value="aiml">AI & ML</SelectItem>
-                                                            <SelectItem value="mech">Mechanical</SelectItem>
-                                                            <SelectItem value="civil">Civil</SelectItem>
-                                                            <SelectItem value="eee">EEE</SelectItem>
-                                                            <SelectItem value="ece">ECE</SelectItem>
+                                                            {departments.map((dept) => (
+                                                                <SelectItem key={dept.value} value={dept.value}>{dept.label ?? dept.value}</SelectItem>
+                                                            ))}
                                                         </SelectContent>
                                                     </Select>
                                                     <FormMessage />

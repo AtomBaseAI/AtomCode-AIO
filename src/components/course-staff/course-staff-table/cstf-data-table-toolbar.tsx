@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { DataTableViewOptions } from "@/components/data-tables/data-table-view-options"
 import { DataTableFacetedFilter } from "@/components/data-tables/data-table-faceted-filter"
 
-import { departments } from "@/components/data-tables/data-table-config-data"
+import { useLookups } from "@/hooks/use-lookups"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -17,6 +17,9 @@ interface DataTableToolbarProps<TData> {
 export function CSTFDataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
+  // Live department filter options (admin-managed via Settings → System).
+  const { departments } = useLookups()
+
   const isFiltered = table.getState().columnFilters.length > 0
 
   return (

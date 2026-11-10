@@ -49,6 +49,25 @@ model Setting {
   updatedAt DateTime @updatedAt
 }
 
+/**
+ * Registration/profile lookup lists managed from Admin → Settings → System.
+ * The UI (register forms, student/staff forms, table filters) renders these
+ * dynamically instead of hard-coded lists.
+ * - Batch.value is the display string (e.g. "2025-2029") stored on User.batch.
+ * - Department.value is the stored token on User.department/Staff.department
+ *   (kept short, e.g. "cse"), label is the display name (e.g. "CSE").
+ */
+model Batch {
+  id    String @id @default(cuid())
+  value String @unique
+}
+
+model Department {
+  id    String @id @default(cuid())
+  value String @unique
+  label String
+}
+
 model Staff {
   id          String        @id @default(cuid())
   name        String?

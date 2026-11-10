@@ -1,31 +1,30 @@
-import { getPlatformSettings } from "@/lib/platform-settings";
+import { isMaintenanceMode } from "@/lib/platform-settings";
+import { getBrandingSettings } from "@/lib/branding-settings";
 import Image from "next/image";
+import Link from "next/link";
+import { UserPlus } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LoginForm } from "@/components/auth/login-form";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import { HexagonPattern } from "@/components/magicui/hexagon-pattern";
 import { Card } from "@/components/ui/card";
-import {
-  APP_STATUS,
-  CLIENT_BANNER,
-  CLIENT_NAME,
-  POWEREDBY_NAME,
-  POWEREDBY_STATUS,
-  POWEREDBY_URL,
-  VENDOR_LOGO,
-  VENDOR_NAME,
-} from "@/config/branding";
 
 export default async function Login() {
   // Maintenance switch: admin DB setting wins, env fallback keeps the
   // original NEXT_PUBLIC_APP_STATUS behavior when the DB is unreachable.
-  let maintenance = APP_STATUS !== "true";
-  try {
-    const settings = await getPlatformSettings();
-    maintenance = settings.maintenanceMode || maintenance;
-  } catch {
-    // fall back to env-only behavior
-  }
+  const maintenance = await isMaintenanceMode();
+
+  // Client details (white-label branding) — DB overrides, env defaults.
+  const {
+    clientBanner,
+    clientName,
+    poweredbyName,
+    poweredbyStatus,
+    poweredbyUrl,
+    vendorLogo,
+    vendorName,
+  } = await getBrandingSettings();
+
   return (
     <div className="relative flex min-h-svh flex-col bg-muted/40 p-4 dark:bg-background md:p-6 lg:p-8">
       {/* Magic UI hexagon pattern — page background, fades from top-left toward bottom-right */}
@@ -40,12 +39,12 @@ export default async function Login() {
       <header className="z-30 flex items-center justify-between">
         <div className="flex items-center gap-2 text-lg font-medium">
           <Image
-            src={VENDOR_LOGO}
-            alt={`${VENDOR_NAME} logo`}
+            src={vendorLogo}
+            alt={`${vendorName} logo`}
             height={20}
             width={20}
           />
-          {VENDOR_NAME}
+          {vendorName}
         </div>
         <ThemeToggle />
       </header>
@@ -75,7 +74,7 @@ export default async function Login() {
             <div className="relative hidden flex-col justify-between overflow-hidden border-r bg-muted p-8 lg:flex dark:border-border dark:bg-zinc-900">
               <div className="relative flex w-full flex-1 items-center justify-center py-6">
                 <Image
-                  src={CLIENT_BANNER}
+                  src={clientBanner}
                   width={1280}
                   height={800}
                   priority
@@ -83,25 +82,6 @@ export default async function Login() {
                   className="h-auto w-full rounded-2xl shadow-lg dark:shadow-none"
                 />
               </div>
-
-              {POWEREDBY_STATUS && (
-                <div className="relative z-20">
-                  <blockquote className="space-y-2">
-                    <p className="text-lg">
-                      Powered by{" "}
-                      <span className="text-blue-600 font-bold">
-                        <a
-                          href={POWEREDBY_URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {POWEREDBY_NAME}
-                        </a>
-                      </span>
-                    </p>
-                  </blockquote>
-                </div>
-              )}
             </div>
 
             {/* Right — form (50%) */}
@@ -109,7 +89,7 @@ export default async function Login() {
               <div className="mx-auto flex w-full max-w-[350px] flex-col justify-center space-y-6">
                 <div className="flex flex-col space-y-2 text-center">
                   <h1 className="text-2xl font-semibold tracking-tight">
-                    {CLIENT_NAME}
+                    {clientName}
                   </h1>
                   <p className="text-sm text-muted-foreground">
                     Enter your email &amp; password below to login your account
@@ -145,6 +125,40 @@ export default async function Login() {
           </div>
         </Card>
       </main>
+
+      {/* Bottom bar — "Powered by" bottom-left, register button bottom-right
+          (exactly opposite the theme toggle in the top-right header).
+          The register entry point is hidden while maintenance mode is on —
+          self-registration is blocked server-side too. */}
+      <div className="relative z-30 flex items-center justify-between">
+        {poweredbyStatus ? (
+          <footer className="text-lg">
+            Powered by{" "}
+            <a
+              href={poweredbyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-blue-600 hover:underline dark:text-blue-400"
+            >
+              {poweredbyName}
+            </a>
+          </footer>
+        ) : (
+          <span aria-hidden />
+        )}
+
+        {!maintenance && (
+          <Link
+            href="/register"
+            aria-label="Create an account"
+            title="Create an account"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent text-black shadow-none transition-colors hover:bg-transparent hover:text-primary dark:text-white"
+          >
+            <UserPlus className="h-5 w-5" aria-hidden />
+            <span className="sr-only">Register</span>
+          </Link>
+        )}
+      </div>
     </div>
   );
 }
