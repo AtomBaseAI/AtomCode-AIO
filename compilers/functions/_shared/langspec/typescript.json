@@ -1,0 +1,12 @@
+{
+  "language": "typescript",
+  "label": "TypeScript (tsc transpile → Node.js)",
+  "bin": ["node"],
+  "entryFile": "program.js",
+  "defaultProfile": "typescript-5.9",
+  "dropPrivileges": true,
+  "limits": { "nproc": 128, "fileSizeKB": 32768, "runTimeoutMs": 8000 },
+  "profiles": {
+    "typescript-5.9": {}
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "language": "javascript",
+  "label": "JavaScript (Node.js)",
+  "bin": ["node"],
+  "entryFile": "main.js",
+  "defaultProfile": "javascript-browser",
+  "dropPrivileges": true,
+  "limits": { "nproc": 128, "fileSizeKB": 32768, "runTimeoutMs": 5000 },
+  "profiles": {
+    "javascript-browser": { "nodeFlags": ["--no-warnings"] }
+  }
+}

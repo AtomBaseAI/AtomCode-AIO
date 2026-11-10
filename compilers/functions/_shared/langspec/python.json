@@ -1,0 +1,15 @@
+{
+  "language": "python",
+  "label": "Python (CPython)",
+  "bin": ["python3.12", "python3.11", "python3"],
+  "entryFile": "main.py",
+  "defaultProfile": "python-3.12",
+  "dropPrivileges": true,
+  "limits": { "addressSpaceKB": 1048576, "nproc": 128, "fileSizeKB": 32768, "runTimeoutMs": 20000 },
+  "profiles": {
+    "python-3.11": {},
+    "python-3.12": {},
+    "python-3.13": {},
+    "python-3.14": {}
+  }
+}

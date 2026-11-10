@@ -1,0 +1,11 @@
+{
+  "language": "sql",
+  "label": "SQL (SQLite in-memory)",
+  "bin": [],
+  "defaultProfile": "sqlite-3.54",
+  "dropPrivileges": false,
+  "limits": { "runTimeoutMs": 10000 },
+  "profiles": {
+    "sqlite-3.54": {}
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "language": "java",
+  "label": "Java (javac + OpenJDK JVM)",
+  "bin": ["java"],
+  "defaultProfile": "java-17",
+  "dropPrivileges": true,
+  "limits": { "nproc": 256, "fileSizeKB": 65536, "runTimeoutMs": 30000 },
+  "profiles": {
+    "java-8":  { "release": "8" },
+    "java-11": { "release": "11" },
+    "java-17": { "release": "17" },
+    "java-21": { "release": "21" }
+  }
+}

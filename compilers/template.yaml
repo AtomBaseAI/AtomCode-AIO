@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  AtomCode Lambda compilers — one code-execution function per language
+  (c, cpp, java, python, ruby, sql, javascript, typescript) plus an
+  all-in-one function that dispatches on the request's `language` field.
+  Deployed as container images with public Function URLs. Replaces the
+  browser WASM execution engine when wired into the app.
+
+# ─────────────────────────────── globals ──────────────────────────────────
+Globals:
+  Function:
+    PackageType: Image
+    Architectures: [x86_64]
+    Timeout: 300          # covers compile (30s) + up to N testcase runs
+    MemorySize: 1024
+
+# ────────────────────────────── parameters ────────────────────────────────
+Parameters:
+  AtomToken:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: >
+      Optional shared secret. When non-empty, every request must send the
+      header `x-atom-token: <value>`. Leave empty to keep the functions open
+      (NOT recommended for production).
+
+# ─────────────────────────────── resources ────────────────────────────────
+Resources:
+
+  AtomCFn:
+    Type: AWS::Serverless::Function
+    Metadata: { DockerContext: ./functions, Dockerfile: c/Dockerfile }
+    Properties:
+      FunctionName: !Sub "atomcode-c-${AWS::StackName}"
+      Environment: { Variables: { ATOM_TOKEN: !Ref AtomToken } }
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors: { AllowOrigins: ["*"], AllowHeaders: ["*"], AllowMethods: ["*"] }
+
+  AtomCppFn:
+    Type: AWS::Serverless::Function
+    Metadata: { DockerContext: ./functions, Dockerfile: cpp/Dockerfile }
+    Properties:
+      FunctionName: !Sub "atomcode-cpp-${AWS::StackName}"
+      Environment: { Variables: { ATOM_TOKEN: !Ref AtomToken } }
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors: { AllowOrigins: ["*"], AllowHeaders: ["*"], AllowMethods: ["*"] }
+
+  AtomJavaFn:
+    Type: AWS::Serverless::Function
+    Metadata: { DockerContext: ./functions, Dockerfile: java/Dockerfile }
+    Properties:
+      FunctionName: !Sub "atomcode-java-${AWS::StackName}"
+      MemorySize: 2048
+      Environment: { Variables: { ATOM_TOKEN: !Ref AtomToken } }
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors: { AllowOrigins: ["*"], AllowHeaders: ["*"], AllowMethods: ["*"] }
+
+  AtomPythonFn:
+    Type: AWS::Serverless::Function
+    Metadata: { DockerContext: ./functions, Dockerfile: python/Dockerfile }
+    Properties:
+      FunctionName: !Sub "atomcode-python-${AWS::StackName}"
+      Environment: { Variables: { ATOM_TOKEN: !Ref AtomToken } }
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors: { AllowOrigins: ["*"], AllowHeaders: ["*"], AllowMethods: ["*"] }
+
+  AtomRubyFn:
+    Type: AWS::Serverless::Function
+    Metadata: { DockerContext: ./functions, Dockerfile: ruby/Dockerfile }
+    Properties:
+      FunctionName: !Sub "atomcode-ruby-${AWS::StackName}"
+      Environment: { Variables: { ATOM_TOKEN: !Ref AtomToken } }
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors: { AllowOrigins: ["*"], AllowHeaders: ["*"], AllowMethods: ["*"] }
+
+  AtomSqlFn:
+    Type: AWS::Serverless::Function
+    Metadata: { DockerContext: ./functions, Dockerfile: sql/Dockerfile }
+    Properties:
+      FunctionName: !Sub "atomcode-sql-${AWS::StackName}"
+      MemorySize: 512
+      Environment: { Variables: { ATOM_TOKEN: !Ref AtomToken } }
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors: { AllowOrigins: ["*"], AllowHeaders: ["*"], AllowMethods: ["*"] }
+
+  AtomJavascriptFn:
+    Type: AWS::Serverless::Function
+    Metadata: { DockerContext: ./functions, Dockerfile: javascript/Dockerfile }
+    Properties:
+      FunctionName: !Sub "atomcode-javascript-${AWS::StackName}"
+      Environment: { Variables: { ATOM_TOKEN: !Ref AtomToken } }
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors: { AllowOrigins: ["*"], AllowHeaders: ["*"], AllowMethods: ["*"] }
+
+  AtomTypescriptFn:
+    Type: AWS::Serverless::Function
+    Metadata: { DockerContext: ./functions, Dockerfile: typescript/Dockerfile }
+    Properties:
+      FunctionName: !Sub "atomcode-typescript-${AWS::StackName}"
+      Environment: { Variables: { ATOM_TOKEN: !Ref AtomToken } }
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors: { AllowOrigins: ["*"], AllowHeaders: ["*"], AllowMethods: ["*"] }
+
+  # ── every language in ONE image — single Function URL for the whole app ──
+  AtomAllFn:
+    Type: AWS::Serverless::Function
+    Metadata: { DockerContext: ./functions, Dockerfile: all/Dockerfile }
+    Properties:
+      FunctionName: !Sub "atomcode-all-${AWS::StackName}"
+      MemorySize: 3008
+      Environment: { Variables: { ATOM_TOKEN: !Ref AtomToken } }
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors: { AllowOrigins: ["*"], AllowHeaders: ["*"], AllowMethods: ["*"] }
+
+# ─────────────────────────────── outputs ──────────────────────────────────
+Outputs:
+  UrlC:        { Value: !GetAtt AtomCFn.FunctionUrl }
+  UrlCpp:      { Value: !GetAtt AtomCppFn.FunctionUrl }
+  UrlJava:     { Value: !GetAtt AtomJavaFn.FunctionUrl }
+  UrlPython:   { Value: !GetAtt AtomPythonFn.FunctionUrl }
+  UrlRuby:     { Value: !GetAtt AtomRubyFn.FunctionUrl }
+  UrlSql:      { Value: !GetAtt AtomSqlFn.FunctionUrl }
+  UrlJavascript: { Value: !GetAtt AtomJavascriptFn.FunctionUrl }
+  UrlTypescript: { Value: !GetAtt AtomTypescriptFn.FunctionUrl }
+  UrlAllInOne:
+    Description: Single endpoint for the whole app → set as LAMBDA_JUDGE_URL / NEXT_PUBLIC_LAMBDA_URL
+    Value: !GetAtt AtomAllFn.FunctionUrl

@@ -1,0 +1,15 @@
+{
+  "name": "atomcode-compilers",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AWS Lambda compilers/execution functions for AtomCode (C, C++, Java, Python, Ruby, SQL, JavaScript, TypeScript).",
+  "type": "module",
+  "scripts": {
+    "test:local": "node test/local-test.mjs",
+    "deploy": "bash deploy.sh"
+  },
+  "dependencies": {
+    "sql.js": "1.13.0",
+    "typescript": "5.9.3"
+  }
+}

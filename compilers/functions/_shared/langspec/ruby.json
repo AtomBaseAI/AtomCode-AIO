@@ -1,0 +1,13 @@
+{
+  "language": "ruby",
+  "label": "Ruby (CRuby)",
+  "bin": ["ruby"],
+  "entryFile": "main.rb",
+  "defaultProfile": "ruby-3.4",
+  "dropPrivileges": true,
+  "limits": { "nproc": 128, "fileSizeKB": 32768, "runTimeoutMs": 20000 },
+  "profiles": {
+    "ruby-3.4": {},
+    "ruby-3.2": {}
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "language": "cpp",
+  "label": "C++ (GNU g++)",
+  "bin": ["g++"],
+  "entryFile": "main.cpp",
+  "defaultProfile": "cpp-cpp17",
+  "dropPrivileges": true,
+  "limits": { "addressSpaceKB": 1048576, "nproc": 128, "fileSizeKB": 32768, "runTimeoutMs": 10000 },
+  "profiles": {
+    "cpp-cpp11": { "std": "c++11" },
+    "cpp-cpp14": { "std": "c++14" },
+    "cpp-cpp17": { "std": "c++17" },
+    "cpp-cpp20": { "std": "c++20" }
+  }
+}

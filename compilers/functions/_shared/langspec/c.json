@@ -1,0 +1,14 @@
+{
+  "language": "c",
+  "label": "C (GCC)",
+  "bin": ["gcc"],
+  "entryFile": "main.c",
+  "defaultProfile": "c-c17",
+  "dropPrivileges": true,
+  "limits": { "addressSpaceKB": 1048576, "nproc": 128, "fileSizeKB": 32768, "runTimeoutMs": 10000 },
+  "profiles": {
+    "c-c99":  { "std": "c99" },
+    "c-c11":  { "std": "c11" },
+    "c-c17":  { "std": "c17" }
+  }
+}

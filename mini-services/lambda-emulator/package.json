@@ -1,0 +1,12 @@
+{
+  "name": "lambda-emulator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local AtomCode Lambda compiler emulator — serves compilers/functions/_shared/handler.mjs over HTTP exactly like an AWS Lambda Function URL (port 3030). Used for end-to-end testing of the app's /api/execute/lambda integration without an AWS deployment.",
+  "scripts": {
+    "dev": "bun --hot index.js"
+  },
+  "dependencies": {
+    "sql.js": "1.13.0"
+  }
+}

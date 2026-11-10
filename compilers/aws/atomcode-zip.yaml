@@ -1,0 +1,230 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# AtomCode compilers — ZIP deployment (NO ECR, NO container images)
+#
+# Three plain Lambda functions built from ZIP archives in S3:
+#
+#   core → python · ruby · javascript · typescript · sql   (bundled runtimes)
+#   gcc  → c · cpp                                         (bundled gcc/g++)
+#         gcc.zip MUST run on nodejs22.x — that runtime is Amazon Linux 2023
+#         (glibc 2.34) and matches the mirrored amazonlinux:2023 toolchain.
+#         nodejs20.x is Amazon Linux 2 (glibc 2.26): its ld.so cannot load
+#         AL2023 binaries ("version GLIBC_2.34 not found").
+#   java → java                                            (java21 managed
+#                                                           runtime; the JVM
+#                                                           is provided by
+#                                                           Lambda, the judge
+#                                                           jar bundles ECJ)
+#
+# Java notes: a JVM cannot fit Lambda's 250 MB unzip limit as toolchain files,
+# but the managed java21 runtime ships the JVM itself — the judge jar is only
+# ~6 MB. Compilation uses the runtime's JDK compiler with a bundled ECJ as a
+# guaranteed fallback (see compilers/functions/java-zip).
+#
+#   • Open access — no token, no auth. Anyone with the URLs can run code.
+#   • Region      — launch this stack in ap-south-1 (Mumbai).
+#   • The GitHub Actions workflow deploy-compilers-zip.yml builds the zips,
+#     uploads them to S3 and passes the locations as parameters.
+# ─────────────────────────────────────────────────────────────────────────────
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  AtomCode compiler Lambdas from ZIP (no ECR): core (python/ruby/js/ts/sql)
+  + gcc (c/cpp) + java (java21 managed runtime), public Function URLs, open
+  access. Deploy in ap-south-1.
+
+Parameters:
+  CoreBucket:
+    Type: String
+    Description: S3 bucket holding atomcode-core.zip
+  CoreKey:
+    Type: String
+    Description: S3 key of the core zip (e.g. core/run-7.zip)
+  GccBucket:
+    Type: String
+    Description: S3 bucket holding atomcode-gcc.zip
+  GccKey:
+    Type: String
+    Description: S3 key of the gcc zip (e.g. gcc/run-7.zip)
+  JavaBucket:
+    Type: String
+    Description: S3 bucket holding atomcode-java.zip
+  JavaKey:
+    Type: String
+    Description: S3 key of the java zip (e.g. java/run-7.zip)
+
+Resources:
+  AtomCodeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "atomcode-zip-role-${AWS::StackName}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  AtomCoreFn:
+    Type: AWS::Lambda::Function
+    DependsOn: AtomCodeRole
+    Properties:
+      FunctionName: !Sub "atomcode-zip-core-${AWS::StackName}"
+      Runtime: nodejs20.x
+      Handler: handler.handler          # resolves handler.mjs (ESM)
+      Role: !GetAtt AtomCodeRole.Arn
+      Code:
+        S3Bucket: !Ref CoreBucket
+        S3Key: !Ref CoreKey
+      Architectures: [x86_64]
+      MemorySize: 1024
+      Timeout: 300
+      EphemeralStorage:
+        Size: 2048
+      Environment:
+        Variables: {}                   # intentionally NO ATOM_TOKEN → open
+
+  AtomCoreUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt AtomCoreFn.Arn
+      AuthType: NONE
+      Cors:
+        AllowOrigins: ["*"]
+        AllowHeaders: ["*"]
+        AllowMethods: ["*"]
+        AllowCredentials: false
+
+  # CFN does NOT auto-grant public invoke when you declare AWS::Lambda::Url
+  # as a resource (the console does). And Lambda's anonymous URL path requires
+  # BOTH actions in the resource policy — granting only InvokeFunctionUrl
+  # still yields: 403 "requires both lambda:InvokeFunctionUrl and
+  # lambda:InvokeFunction permissions" (proven in CI runs 13-14). Hence each
+  # function gets TWO Permission resources: the URL grant (below) and the
+  # unscoped InvokeFunction grant (FunctionUrlAuthType must be OMITTED for the
+  # second one — the AddPermission API rejects that pairing).
+  AtomCoreUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AtomCoreFn
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+  AtomCoreFnInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AtomCoreFn
+      Action: lambda:InvokeFunction
+      Principal: "*"
+
+  AtomGccFn:
+    Type: AWS::Lambda::Function
+    DependsOn: AtomCodeRole
+    Properties:
+      FunctionName: !Sub "atomcode-zip-gcc-${AWS::StackName}"
+      # nodejs22.x = AL2023 runtime (glibc 2.34) — MUST match the
+      # amazonlinux:2023 toolchain mirror. nodejs20.x (AL2, glibc 2.26)
+      # cannot execute AL2023 binaries at all.
+      Runtime: nodejs22.x
+      Handler: handler.handler
+      Role: !GetAtt AtomCodeRole.Arn
+      Code:
+        S3Bucket: !Ref GccBucket
+        S3Key: !Ref GccKey
+      Architectures: [x86_64]
+      MemorySize: 1024
+      Timeout: 300
+      EphemeralStorage:
+        Size: 2048
+      Environment:
+        Variables: {}                   # intentionally NO ATOM_TOKEN → open
+
+  AtomGccUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt AtomGccFn.Arn
+      AuthType: NONE
+      Cors:
+        AllowOrigins: ["*"]
+        AllowHeaders: ["*"]
+        AllowMethods: ["*"]
+        AllowCredentials: false
+
+  AtomGccUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AtomGccFn
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+  AtomGccFnInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AtomGccFn
+      Action: lambda:InvokeFunction
+      Principal: "*"
+
+  AtomJavaFn:
+    Type: AWS::Lambda::Function
+    DependsOn: AtomCodeRole
+    Properties:
+      FunctionName: !Sub "atomcode-zip-java-${AWS::StackName}"
+      Runtime: java21
+      Handler: com.atomcode.judge.JudgeHandler   # RequestStreamHandler
+      Role: !GetAtt AtomCodeRole.Arn
+      Code:
+        S3Bucket: !Ref JavaBucket
+        S3Key: !Ref JavaKey
+      Architectures: [x86_64]
+      MemorySize: 2048                  # headroom for javac + the run JVM
+      Timeout: 300
+      EphemeralStorage:
+        Size: 2048
+      Environment:
+        Variables: {}                   # NO ATOM_TOKEN (open) · ATOM_COMPILER auto
+
+  AtomJavaUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt AtomJavaFn.Arn
+      AuthType: NONE
+      Cors:
+        AllowOrigins: ["*"]
+        AllowHeaders: ["*"]
+        AllowMethods: ["*"]
+        AllowCredentials: false
+
+  AtomJavaUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AtomJavaFn
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+  AtomJavaFnInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AtomJavaFn
+      Action: lambda:InvokeFunction
+      Principal: "*"
+
+Outputs:
+  CoreUrl:
+    Description: python · ruby · javascript · typescript · sql
+    Value: !GetAtt AtomCoreUrl.FunctionUrl
+  GccUrl:
+    Description: c · cpp
+    Value: !GetAtt AtomGccUrl.FunctionUrl
+  JavaUrl:
+    Description: java (java21 managed runtime + bundled ECJ fallback)
+    Value: !GetAtt AtomJavaUrl.FunctionUrl
+  JudgeUrlsJson:
+    Description: Ready-to-paste LAMBDA_JUDGE_URLS value for the app .env.
+    Value: !Sub >-
+      {"python":"${AtomCoreUrl.FunctionUrl}","ruby":"${AtomCoreUrl.FunctionUrl}",
+      "javascript":"${AtomCoreUrl.FunctionUrl}","typescript":"${AtomCoreUrl.FunctionUrl}",
+      "sql":"${AtomCoreUrl.FunctionUrl}","c":"${AtomGccUrl.FunctionUrl}",
+      "cpp":"${AtomGccUrl.FunctionUrl}","java":"${AtomJavaUrl.FunctionUrl}"}

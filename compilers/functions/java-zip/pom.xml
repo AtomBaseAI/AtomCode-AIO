@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AtomCode — Java judge Lambda (java21 managed runtime, ZIP deployment, no ECR).
+
+  A single shaded fat JAR is the whole deployment zip:
+
+    target/atomcode-java-judge.jar   (~6 MB: judge + Jackson + ECJ)
+
+  The JVM itself is provided by Lambda's java21 runtime, so the 250 MB ZIP
+  limit is a non-issue. Compilation of user code:
+
+    1. javax.tools JavaCompiler (ToolProvider) — in-process javac, used when
+       the runtime ships the Corretto JDK.
+    2. Bundled ECJ 3.33.0 — guaranteed fallback that works on a JRE-only
+       runtime. Selection: ATOM_COMPILER=system|ecj|auto (default auto).
+
+  User code runs as a subprocess (`java -cp out Main`) with stdin piped,
+  streams capped at 200k chars and a hard timeout that kills the whole
+  process tree.
+
+  Local contract testing (no AWS needed):
+
+    mvn -q package
+    echo '{"code":"public class Main{public static void main(String[] a){System.out.println(42);}}"}' \
+      | java -jar target/atomcode-java-judge.jar
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.atomcode</groupId>
+  <artifactId>java-judge</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>AtomCode Java Judge (java21 ZIP Lambda)</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+  </properties>
+
+  <dependencies>
+    <!-- RequestStreamHandler + Context -->
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-lambda-java-core</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+    <!-- request/response JSON (mirrors the Node handler's JSON contract) -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.17.2</version>
+    </dependency>
+    <!-- guaranteed compiler fallback when the runtime is JRE-only.
+         3.42.0 = first-class Java 21 support (release flag up to 21) -->
+    <dependency>
+      <groupId>org.eclipse.jdt</groupId>
+      <artifactId>ecj</artifactId>
+      <version>3.42.0</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>atomcode-java-judge</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals><goal>shade</goal></goals>
+            <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <!-- lets `java -jar` run the judge locally against System.in -->
+                  <mainClass>com.atomcode.judge.JudgeHandler</mainClass>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>module-info.class</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

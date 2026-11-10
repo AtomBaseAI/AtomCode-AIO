@@ -1,0 +1,94 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# AtomCode compilers — plain CloudFormation template (NO SAM, NO CLI needed)
+#
+# Launches ONE all-in-one Lambda (every language: c, cpp, java, python, ruby,
+# sql, javascript, typescript) with a public Function URL.
+#
+#   • Open access  — no token, no auth. Anyone with the URL can run code.
+#   • Region       — launch this stack in ap-south-1 (Mumbai).
+#   • How it gets the code — the GitHub Actions workflow in this repo builds
+#     the container image, pushes it to ECR and passes it as `ImageUri`.
+#
+# Console path:  CloudFormation → Create stack → Upload this file →
+#                paste ImageUri → launch in ap-south-1.
+# GitHub path:   just push — .github/workflows/deploy-compilers.yml does all of it.
+# ─────────────────────────────────────────────────────────────────────────────
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  AtomCode compiler Lambda (all-in-one) with a public Function URL.
+  Open access — no token required. Deploy in ap-south-1 (Mumbai).
+
+Parameters:
+  ImageUri:
+    Type: String
+    Description: >
+      Full ECR image URI of the built all-in-one image, e.g.
+      123456789012.dkr.ecr.ap-south-1.amazonaws.com/atomcode-compilers:run-1
+      (the GitHub Actions workflow passes this automatically; its run log
+      also prints it).
+
+Resources:
+  # ── execution role (CloudWatch Logs only — that's all the function needs)
+  AtomCodeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "atomcode-lambda-role-${AWS::StackName}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # ── the compiler Lambda (container image, all languages in one)
+  AtomCodeFn:
+    Type: AWS::Lambda::Function
+    DependsOn: AtomCodeRole
+    Properties:
+      FunctionName: !Sub "atomcode-compilers-${AWS::StackName}"
+      PackageType: Image
+      Code:
+        ImageUri: !Ref ImageUri
+      Role: !GetAtt AtomCodeRole.Arn
+      Architectures: [x86_64]
+      MemorySize: 3008          # ~1 vCPU — one compile/run at a time
+      Timeout: 300              # covers compile (30s) + up to 10 testcase runs
+      EphemeralStorage:
+        Size: 2048              # /tmp scratch space for compile artifacts (MB)
+      Environment:
+        Variables: {}           # intentionally NO ATOM_TOKEN → endpoints open
+
+  # ── public URL (no auth, CORS open — matches "anyone, anywhere")
+  AtomCodeUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt AtomCodeFn.Arn
+      AuthType: NONE
+      Cors:
+        AllowOrigins: ["*"]
+        AllowHeaders: ["*"]
+        AllowMethods: ["*"]
+        AllowCredentials: false
+
+  # CFN does NOT auto-grant public invoke for AWS::Lambda::Url resources
+  # (the console does). Without this, POSTs return "Forbidden. Invoking a
+  # Function URL requires both lambda:InvokeFunctionUrl and
+  # lambda:InvokeFunction permissions."
+  AtomCodeUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AtomCodeFn
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+Outputs:
+  FunctionUrl:
+    Description: >
+      All-in-one compiler endpoint → put this in the app .env as
+      NEXT_PUBLIC_LAMBDA_URL (no token needed).
+    Value: !GetAtt AtomCodeUrl.FunctionUrl
+  FunctionName:
+    Value: !Ref AtomCodeFn
