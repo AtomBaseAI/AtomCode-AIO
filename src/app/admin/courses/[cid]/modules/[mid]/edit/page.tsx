@@ -4,13 +4,16 @@ import { format } from 'date-fns';
 import EditCourseForm from "@/components/course/course-edit-form";
 import BackBtn from "@/components/backbtn";
 import { getModuleById } from "@/data/modules";
+import { getCourseById } from "@/data/courses";
 import EditModule from "@/components/module/module-edit-form";
+import { TopbarBreadcrumb } from "@/components/topbar-title";
 
-const EditModulex = async ({ params }: { params: Promise<{ mid: string}> }) => {
+const EditModulex = async ({ params }: { params: Promise<{ cid: string; mid: string}> }) => {
 
-  const { mid } = await params
+  const { cid, mid } = await params
   // const moduleId = parseInt(mid, 10);
   const moduleog = await getModuleById(mid)
+  const course = await getCourseById(cid)
   const modulex = {
     id: moduleog?.id ?? '',
     title: moduleog?.title ?? '',
@@ -25,10 +28,16 @@ const EditModulex = async ({ params }: { params: Promise<{ mid: string}> }) => {
   }
   return (
     <>
+      <TopbarBreadcrumb
+        items={[
+          { label: "Courses", href: "/admin/courses" },
+          { label: course?.title ?? "Course", href: `/admin/courses/${cid}/modules` },
+          { label: moduleog?.title ?? "Module" },
+        ]}
+      />
       <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
         <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">{moduleog?.title.toLocaleUpperCase()}</h2>
           </div>
         </div>
 

@@ -10,6 +10,9 @@ const Topbar = ({ name, email, image }: UserSessionProps) => {
 
     return (
         <header className="sticky top-0 w-full flex items-center h-20 px-4 sm:px-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm z-30">
+            {/* Left slot — pages can render their title here (see TopbarTitle).
+                Empty by default so every other page's layout is untouched. */}
+            <div id="topbar-title-slot" className="flex min-w-0 flex-1 items-center" />
             <div className="flex flex-shrink-0 items-center ml-auto">
                 <button className="inline-flex items-center p-2  rounded-lg">
                     <span className="sr-only">User Menu</span>

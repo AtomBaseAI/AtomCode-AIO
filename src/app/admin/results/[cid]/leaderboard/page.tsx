@@ -5,6 +5,7 @@ import { RankAnimation } from "@/components/results/leaderboard/rank-animations"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { leaderboardData } from "@/data/results"
 import LeaderboardExportButton from "@/export/result-export/leaderboard-export-button"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 const CourseLeaderboard = async ({ params }: { params: Promise<{ cid: string}> }) => {
     const { cid } = await params
@@ -22,12 +23,16 @@ const CourseLeaderboard = async ({ params }: { params: Promise<{ cid: string}> }
     }
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Analysis", href: "/admin/results" },
+                    { label: course?.title ?? "Course" },
+                    { label: "Leaderboard" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full justify-center items-center">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2 w-full">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">
-                            Course Leaderboard
-                        </h2>
                         <p className="text-muted-foreground">
                             Completed Students : {LeaderboardDatax?.length}
                         </p>

@@ -1,4 +1,5 @@
 import { getModuleById } from '@/data/modules'
+import { getCourseById } from '@/data/courses'
 import React from 'react'
 import BackBtn from '@/components/backbtn'
 import { getModuleMCQsByModuleId } from '@/data/mcq'
@@ -9,6 +10,7 @@ import MExport from '@/export/module-export/module-export-button'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { UploadCloud } from 'lucide-react'
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 async function fetchModule(mid: string) {
     const modulez = await getModuleById(mid)
@@ -23,6 +25,7 @@ const ViewModule = async ({ params }: { params: Promise<{ cid: string; mid: stri
     const { cid, mid } = await params
     // const moduleId = parseInt(mid, 10);
     const modulez = await fetchModule(mid)
+    const course = await getCourseById(cid)
     const modulex = await fetchModuleMCQs(mid)
 
     const mcqData = modulex?.map(mcq => ({
@@ -35,12 +38,17 @@ const ViewModule = async ({ params }: { params: Promise<{ cid: string; mid: stri
     // console.log(mcqData)
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/admin/courses" },
+                    { label: course?.title ?? "Course", href: `/admin/courses/${cid}/modules` },
+                    { label: modulez?.title ?? "Module", href: `/admin/courses/${cid}/modules/${mid}/edit` },
+                    { label: "MCQ Questions" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">
-                            {modulez?.title}
-                        </h2>
                         <p className="text-muted-foreground">
                             Module MCQs : {modulex?.length}
                         </p>

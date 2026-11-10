@@ -3,6 +3,7 @@ import EditStudentForm from "@/components/student/student-edit-form"
 import ResetPasswordStudent from "@/components/student/student-reset-model"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getStudentById } from "@/data/students"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 const EditStudent = async ({ params }: { params: Promise<{ uid: string}> }) => {
 
@@ -24,10 +25,15 @@ const EditStudent = async ({ params }: { params: Promise<{ uid: string}> }) => {
     };
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Students", href: "/admin/students" },
+                    { label: student?.name ?? "Student" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">{student?.name}</h2>
                         <p className="text-muted-foreground">
                             {student?.rollnumber}
                         </p>

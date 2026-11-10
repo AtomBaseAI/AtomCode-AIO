@@ -1,13 +1,14 @@
 "use client"
 import { importmcqs } from "@/actions/mcq";
 import BackBtn from "@/components/backbtn";
+import { TopbarBreadcrumb } from "@/components/topbar-title";
 import { Button } from "@/components/ui/button";
 import { Download, Loader, UploadCloud } from "lucide-react";
 import { use, useState } from "react";
 import { toast } from "sonner";
 
 export default function MCQImport({ params }: { params: Promise<{ cid: string; mid: string }> }) {
-    const { mid } = use(params)
+    const { cid, mid } = use(params)
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
     const mcqtype: string = 'module'
@@ -41,6 +42,14 @@ export default function MCQImport({ params }: { params: Promise<{ cid: string; m
     };
     return (
         <div className="h-[80vh] w-full flex justify-center items-center">
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/admin/courses" },
+                    { label: "Course", href: `/admin/courses/${cid}/modules` },
+                    { label: "MCQ Questions", href: `/admin/courses/${cid}/modules/${mid}/mcq` },
+                    { label: "Import" },
+                ]}
+            />
             {!uploading ? (
                 <div className="flex flex-col items-center border-2 border-violet-500 hover:border-violet-800 border-dashed rounded-md h-[20rem] w-[25rem]">
                     <div className="flex h-1/6 justify-center items-center w-5/6">

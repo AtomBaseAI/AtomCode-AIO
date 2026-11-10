@@ -4,8 +4,10 @@ import { getAllQuestionsByLang } from "@/data/questions"
 import BackBtn from "@/components/backbtn"
 import { AssessmentQuestionTableSchema } from "@/schemas/assessment-schema"
 import { getAssessmentById, getAssessmentCodeQuestionsById } from "@/data/assessments"
+import { getCourseById } from "@/data/courses"
 import { AQuestionAddDataTable } from '@/components/assessment-questions/assessment-question-add-table/aqa-data-table'
 import { columns } from '@/components/assessment-questions/assessment-question-add-table/aqa-columns'
+import { TopbarBreadcrumb } from '@/components/topbar-title'
 
 async function fetchAssessment(aid: string) {
     const assessmentz = await getAssessmentById(aid)
@@ -26,6 +28,7 @@ async function fetchQestoinbyLang(lang: string) {
 const AddAssessmentQuestions = async ({ params }: { params: Promise<{ cid: string; aid: string}> }) => {
     const { cid, aid } = await params
     const assessmentz = await fetchAssessment(aid)
+    const course = await getCourseById(cid)
     const assessmentq = await fetchassessmentquestions(aid)
     const questionsLang = await fetchQestoinbyLang(assessmentz.language)
 
@@ -39,12 +42,18 @@ const AddAssessmentQuestions = async ({ params }: { params: Promise<{ cid: strin
     // console.log(filteredQuestions)
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/admin/courses" },
+                    { label: course?.title ?? "Course", href: `/admin/courses/${cid}/assessments` },
+                    { label: assessmentz?.title ?? "Assessment", href: `/admin/courses/${cid}/assessments/${aid}/edit` },
+                    { label: "Code Questions", href: `/admin/courses/${cid}/assessments/${aid}/code` },
+                    { label: "Add" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">
-                            {assessmentz?.title}
-                        </h2>
                         <p className="text-muted-foreground flex items-center justify-center">
                             Add new Questions
                         </p>

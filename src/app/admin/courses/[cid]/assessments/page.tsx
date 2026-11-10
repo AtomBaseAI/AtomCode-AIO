@@ -8,6 +8,7 @@ import { getAllAssessmentsByCourseId } from "@/data/assessments"
 import AddAssessment from "@/components/assessment/assessment-add-form"
 import { AssessmentDataTable } from "@/components/assessment/assessment-table/a-data-table"
 import { columns } from "@/components/assessment/assessment-table/a-columns"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 async function fetchAssessments(cid: string) {
     const assessments = await getAllAssessmentsByCourseId(cid)
@@ -24,10 +25,16 @@ export default async function AssessmentsData({ params }: { params: Promise<{ ci
     // console.log(assessments)
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/admin/courses" },
+                    { label: course?.title ?? "Course", href: `/admin/courses/${cid}/edit` },
+                    { label: "Assessments" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">{course?.title}</h2>
                         <p className="text-muted-foreground">
                             All Assessments : {assessments.length}
                         </p>

@@ -3,6 +3,7 @@ import SubmitCourseModule from '@/components/student-role/submit-module'
 import { Button } from '@/components/ui/button'
 import { getUserModuleResultByUserIdCourseIdModuleId } from '@/data/student/module-result'
 import { getCourseModuleByModuleID } from '@/data/student/modules'
+import { TopbarBreadcrumb } from '@/components/topbar-title'
 import { AlertCircle, ChevronLeft, ChevronRight, CircleSlash, Code, Lock, Puzzle } from 'lucide-react'
 import Link from 'next/link'
 
@@ -61,6 +62,13 @@ const PrepareModules = async ({ params }: { params: Promise<{ cid: string, mid: 
     }
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/student/courses" },
+                    { label: moduleData?.courseName ?? "Course", href: `/student/courses/${cid}/module` },
+                    { label: moduleData?.moduleName ?? "Module" },
+                ]}
+            />
             <main className="flex min-h-screen min-w-screen flex-row">
                 <div className="w-full h-screen flex flex-col items-center justify-center flex-grow">
                     <div className="h-full w-full flex flex-col mx-4 items-center justify-center gap-y-8">

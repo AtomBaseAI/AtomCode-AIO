@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { UploadCloud } from 'lucide-react'
 import { getAssessmentById } from '@/data/assessments'
+import { getCourseById } from '@/data/courses'
+import { TopbarBreadcrumb } from '@/components/topbar-title'
 
 async function fetchAssessment(aid: string) {
   const assessmentz = await getAssessmentById(aid)
@@ -24,6 +26,7 @@ const AssessmentMCQ = async ({ params }: { params: Promise<{ cid: string; aid: s
   const { cid, aid } = await params
   // const moduleId = parseInt(mid, 10);
   const assessmentz = await fetchAssessment(aid)
+  const course = await getCourseById(cid)
   const assessmentx = await fetchAssessmentMCQs(aid)
 
   const mcqData = assessmentx?.map(mcq => ({
@@ -36,12 +39,17 @@ const AssessmentMCQ = async ({ params }: { params: Promise<{ cid: string; aid: s
   console.log(mcqData)
   return (
     <>
+      <TopbarBreadcrumb
+        items={[
+          { label: "Courses", href: "/admin/courses" },
+          { label: course?.title ?? "Course", href: `/admin/courses/${cid}/assessments` },
+          { label: assessmentz?.title ?? "Assessment", href: `/admin/courses/${cid}/assessments/${aid}/edit` },
+          { label: "MCQ Questions" },
+        ]}
+      />
       <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
         <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              {assessmentz?.title}
-            </h2>
             <p className="text-muted-foreground">
               Assessment MCQs : {assessmentx?.length}
             </p>

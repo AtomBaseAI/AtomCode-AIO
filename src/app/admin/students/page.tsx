@@ -8,6 +8,7 @@ import { getAllStudents } from "@/data/students"
 import AddStudent from "@/components/student/student-add-form"
 import { StudentImportExportMenu } from "@/components/student/student-import-export-menu"
 import { StudentTableSchema } from "@/schemas/student-schema"
+import { TopbarTitle } from "@/components/topbar-title"
 
 async function fetchStudents() {
   const students = await getAllStudents()
@@ -19,11 +20,11 @@ export default async function StudentsData() {
 
   return (
     <>
+      <TopbarTitle>Students</TopbarTitle>
       <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
         <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Students</h2>
-            <p className="text-muted-foreground">
+            <p className="text-xl font-semibold tracking-tight text-muted-foreground">
               All Students
             </p>
           </div>

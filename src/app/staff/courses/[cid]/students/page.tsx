@@ -5,6 +5,7 @@ import React from 'react'
 import { Users } from "lucide-react"
 import BackBtn from '@/components/backbtn'
 import { getCourseById } from '@/data/courses'
+import { TopbarBreadcrumb } from '@/components/topbar-title'
 import { CourseStudentDataTable } from '@/components/course-student/course-student-table/cs-data-table'
 import { columns } from '@/components/staff/course-student/course-student-table/cs-columns'
 import { StudentTableSchema } from '@/schemas/student-schema'
@@ -25,12 +26,16 @@ const CourseStudents = async ({ params }: { params: Promise<{ cid }> }) => {
   const course = await getCourseById(cid)
   return (
     <>
+      <TopbarBreadcrumb
+        items={[
+          { label: "Courses", href: "/staff/courses" },
+          { label: course?.title ?? "Course", href: `/staff/courses/${cid}` },
+          { label: "Students" },
+        ]}
+      />
       <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
         <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              {course?.title}
-            </h2>
             <p className="text-muted-foreground">
               Course Students : {studentsdata?.length}
             </p>

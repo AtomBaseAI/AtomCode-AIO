@@ -12,6 +12,7 @@ import { GroupMcqAddForm } from "@/components/question-group/group-mcq-add-form"
 import { AddMcqsDialog } from "@/components/question-group/add-mcqs-dialog"
 import { GroupMcqImportExportMenu } from "@/components/question-group/group-mcq-import-export-menu"
 import BackBtn from "@/components/backbtn"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 import type { GroupMcqRow } from "@/schemas/group-mcq-schema"
 
 const GroupMcqQuestionsPage = async ({
@@ -82,11 +83,14 @@ const GroupMcqQuestionsPage = async ({
 
     return (
         <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Question Groups", href: "/admin/questions-groups" },
+                    { label: group?.title ?? "Group" },
+                ]}
+            />
             <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight">
-                        {group.title}
-                    </h2>
                     <p className="text-muted-foreground">
                         {group.description || "No description"} ·{" "}
                         {inGroup.length} MCQ question

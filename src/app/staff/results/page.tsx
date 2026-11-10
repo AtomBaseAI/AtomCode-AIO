@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip"
 import { getAllStaffCourses } from "@/data/staff/courses"
 import { auth } from "@/auth"
+import { TopbarTitle } from "@/components/topbar-title"
 
 const getSession = async () => {
   const session = await auth();
@@ -34,6 +35,7 @@ const Results = async () => {
   if (coursesData.length === 0) {
     return (
       <div className="w-full h-[75vh] flex flex-col gap-2 justify-center items-center">
+        <TopbarTitle>Analysis</TopbarTitle>
         <div className=" shadow-lg rounded-md overflow-hidden w-[20rem] order-first lg:order-none border hover:border-primary" >
           <div className="py-5 px-6 sm:px-8 flex flex-col justify-center items-center gap-5">
             <Book className="h-10 w-10 text-yellow-400" />
@@ -45,6 +47,7 @@ const Results = async () => {
   }
   return (
     <div className='w-full flex flex-col gap-2 mx-8 px-8'>
+      <TopbarTitle>Analysis</TopbarTitle>
       <div className="h-full w-full mx-auto flex flex-wrap flex-row justify-start gap-x-4 gap-y-4">
         {coursesData.map((course, index) => (
           <React.Fragment key={index}>

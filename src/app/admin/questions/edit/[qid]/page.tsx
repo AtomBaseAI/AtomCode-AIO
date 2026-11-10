@@ -3,6 +3,7 @@ import CodeEditor from "@/components/ide/codeeditor"
 import EditQuestionForm from "@/components/question/question-edit-form"
 import { getQuestionById } from "@/data/questions"
 import { getAllQuestionGroups } from "@/data/question-groups"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 
 const EditQuestion = async ({ params }: { params: Promise<{ qid: string}> }) => {
@@ -38,10 +39,15 @@ const EditQuestion = async ({ params }: { params: Promise<{ qid: string}> }) => 
     };
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Questions", href: "/admin/questions" },
+                    { label: question?.title ?? "Question" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">{question?.title}</h2>
                     </div>
                 </div>
 

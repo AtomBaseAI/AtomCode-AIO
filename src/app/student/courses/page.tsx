@@ -2,6 +2,7 @@ import { Book, CalendarCheck, CalendarX, Terminal, User } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 import { getAllUserCourses } from '@/data/student/courses'
+import { TopbarTitle } from '@/components/topbar-title'
 import { auth } from '@/auth'
 import { Progress } from '@/components/ui/progress'
 
@@ -29,6 +30,7 @@ const Courses = async () => {
   const coursesData = await getAllUserCourses(uid);
   return (
     <>
+      <TopbarTitle>Courses</TopbarTitle>
       <div className='w-full flex flex-col gap-2'>
         {coursesData.length === 0 ? (
           <div className="w-full h-[75vh] flex flex-col gap-2 justify-center items-center">

@@ -1,6 +1,7 @@
 
 import { Book, BookAIcon, Clock, Trophy } from 'lucide-react'
 import CalenderLayout from '@/components/student-role/custom-calender'
+import { TopbarTitle } from '@/components/topbar-title'
 import { auth } from '@/auth';
 import { getAllUserCourses } from '@/data/student/courses';
 
@@ -25,6 +26,7 @@ const Dashboard = async () => {
 
   return (
     <>
+      <TopbarTitle>Dashboard</TopbarTitle>
       <div className="w-full flex flex-col gap-2 justify-center items-center">
         <section className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 w-[92%]">
           <div className="flex items-center p-8 shadow-md rounded-md border hover:border-purple-600">

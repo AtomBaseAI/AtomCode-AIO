@@ -3,6 +3,7 @@ import { columns } from "@/components/staff/results/analysis/analysis-students/m
 import { ResultAnalysisStudentsDataTable } from "@/components/results/analysis/analysis-students/mas-data-table"
 import { getStudentsDataByCourseIdByModule } from "@/data/analysis"
 import { getCourseModuleTitlesByModuleId } from "@/data/modules"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 import { ResultAnalysisStudentSchema } from "@/schemas/result-analysis-schema"
 import { z } from "zod"
 
@@ -20,12 +21,16 @@ const ResultAnalysisStudents = async ({ params }: { params: Promise<{ cid, mid }
     const titles = await getCourseModuleTitlesByModuleId(mid);
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Analysis", href: "/staff/results" },
+                    { label: titles?.courseTitle ?? "Course", href: `/staff/results/${cid}/analysis` },
+                    { label: titles?.moduleTitle ?? "Module" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">
-                            {titles?.moduleTitle}
-                        </h2>
                         <p className="text-muted-foreground">
                             {titles?.courseTitle}
                         </p>

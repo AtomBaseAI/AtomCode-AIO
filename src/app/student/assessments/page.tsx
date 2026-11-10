@@ -4,6 +4,7 @@ import { auth } from '@/auth'
 import { z } from "zod"
 import { AssessmentTableSchema } from "@/schemas/student/assessment-schema"
 import { getAssessmentsByUserId } from "@/data/student/assessments"
+import { TopbarTitle } from "@/components/topbar-title"
 
 async function fetchAssessments(uid: string) {
   const assessments = await getAssessmentsByUserId(uid)
@@ -35,6 +36,7 @@ const Assesments = async () => {
   const assessmentData = await fetchAssessments(uid)
   return (
     <div className='w-full flex flex-col gap-2'>
+      <TopbarTitle>Assessments</TopbarTitle>
       {assessmentData.length === 0 ? (
         <div className="w-full h-[75vh] flex flex-col gap-2 justify-center items-center">
           <div className=" shadow-lg rounded-md overflow-hidden w-[20rem] order-first lg:order-none border hover:border-primary" >

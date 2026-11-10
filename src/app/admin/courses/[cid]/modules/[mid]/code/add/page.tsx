@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { Button } from '@/components/ui/button'
 import { getModuleById, getModuleQuestionsByModuleId } from '@/data/modules'
+import { getCourseById } from '@/data/courses'
 import { ModuleQuestionTableSchema, ModuleTableSchema } from '@/schemas/module-schema'
 import Link from 'next/link'
 import React from 'react'
@@ -10,6 +11,7 @@ import { MQuestionAddDataTable } from "@/components/module-questions/module-ques
 import { columns } from "@/components/module-questions/module-question-add-table/mqa-columns"
 import { MQADataTableToolbar } from "@/components/module-questions/module-question-add-table/mqa-data-table-toolbar"
 import BackBtn from "@/components/backbtn"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 async function fetchModule(mid: string) {
     const modulez = await getModuleById(mid)
@@ -30,6 +32,7 @@ async function fetchQestoinbyLang(lang: string) {
 const AddModuleQuestions = async ({ params }: { params: Promise<{ cid: string; mid: string}> }) => {
     const { cid, mid } = await params
     const modulez = await fetchModule(mid)
+    const course = await getCourseById(cid)
     const moduleq = await fetchmodulequestions(mid)
     const questionsLang = await fetchQestoinbyLang(modulez.language)
 
@@ -43,12 +46,18 @@ const AddModuleQuestions = async ({ params }: { params: Promise<{ cid: string; m
 
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/admin/courses" },
+                    { label: course?.title ?? "Course", href: `/admin/courses/${cid}/modules` },
+                    { label: modulez?.title ?? "Module", href: `/admin/courses/${cid}/modules/${mid}/edit` },
+                    { label: "Code Questions", href: `/admin/courses/${cid}/modules/${mid}/code` },
+                    { label: "Add" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">
-                            {modulez?.title}
-                        </h2>
                         <p className="text-muted-foreground flex items-center justify-center">
                             Add new Questions
                         </p>

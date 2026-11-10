@@ -3,6 +3,7 @@ import ModuleSelector from '@/components/workspace/module-selector';
 import { getAllCoursesModules } from '@/data/staff/courses';
 import { Book } from 'lucide-react';
 import React from 'react'
+import { TopbarTitle } from '@/components/topbar-title';
 
 
 const getSession = async () => {
@@ -26,6 +27,7 @@ const WorkSpace = async () => {
     if (courses.length === 0) {
         return (
             <div className="w-full h-[75vh] flex flex-col gap-2 justify-center items-center">
+                <TopbarTitle>Workspace</TopbarTitle>
                 <div className=" shadow-lg rounded-md overflow-hidden w-[20rem] order-first lg:order-none border hover:border-primary" >
                     <div className="py-5 px-6 sm:px-8 flex flex-col justify-center items-center gap-5">
                         <Book className="h-10 w-10 text-yellow-400" />
@@ -37,6 +39,7 @@ const WorkSpace = async () => {
     }
     return (
         <div className="w-full h-[80vh] flex flex-col gap-2 justify-center items-center">
+            <TopbarTitle>Workspace</TopbarTitle>
 
             <ModuleSelector courses={courses} />
         </div>

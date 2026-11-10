@@ -3,6 +3,7 @@ import { Layers, Users, CalendarRange, Hexagon, FileVideo, Star, Book } from 'lu
 import { getCoursesWithMetadata } from '@/data/staff/courses';
 import { auth } from '@/auth';
 import { formatDate } from '@/lib/utils';
+import { TopbarTitle } from '@/components/topbar-title';
 // import { getStaffsCount } from '@/data/staffs';
 
 const getSession = async () => {
@@ -25,6 +26,7 @@ const Dashboard = async () => {
   if (courses.length === 0) {
     return (
       <div className="w-full h-[75vh] flex flex-col gap-2 justify-center items-center">
+        <TopbarTitle>Dashboard</TopbarTitle>
         <div className=" shadow-lg rounded-md overflow-hidden w-[20rem] order-first lg:order-none border hover:border-primary" >
           <div className="py-5 px-6 sm:px-8 flex flex-col justify-center items-center gap-5">
             <Book className="h-10 w-10 text-yellow-400" />
@@ -36,6 +38,7 @@ const Dashboard = async () => {
   }
   return (
     <>
+      <TopbarTitle>Dashboard</TopbarTitle>
       <div className="w-full flex flex-row flex-wrap gap-2 justify-start items-start px-3">
         {courses.map((course) => (
           <div key={course.id} className='w-[18rem] h-[14rem] flex flex-col justify-center items-center shadow-md rounded-md border hover:border-purple-600'>

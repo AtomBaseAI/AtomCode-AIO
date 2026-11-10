@@ -1,4 +1,5 @@
 import { getAllMCQByModuleId } from '@/data/student/mcq';
+import { getCourseModuleByModuleID } from '@/data/student/modules';
 import MCQView from '@/components/student-role/practice/mcq/mcq-view';
 import {
     ContextMenu,
@@ -10,13 +11,14 @@ import { auth } from '@/auth';
 import Link from 'next/link';
 import { CircleSlash } from 'lucide-react';
 import { MCQ } from '@/schemas/student/mcq-schema';
+import { TopbarBreadcrumb } from '@/components/topbar-title';
 
 const getSessionUserID = async () => {
     const session = await auth();
     return session?.user?.id
 }
 
-const MCQMain = async ({ params }: { params: Promise<{ mid: string, umid: string }> }) => {
+const MCQMain = async ({ params }: { params: Promise<{ cid: string, mid: string, umid: string }> }) => {
     const uid = await getSessionUserID()
     if (uid === null || uid === undefined) {
         return (
@@ -33,12 +35,21 @@ const MCQMain = async ({ params }: { params: Promise<{ mid: string, umid: string
             </>
         )
     }
-    const { mid, umid } = await params;
+    const { mid, umid, cid } = await params;
+    const courseModule = await getCourseModuleByModuleID(mid)
     const ModuleMCQs = (await getAllMCQByModuleId(mid))
         .filter((mcq): mcq is MCQ => mcq.moduleId !== null);
 
     return (
         <ContextMenu>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/student/courses" },
+                    { label: courseModule?.courseName ?? "Course", href: `/student/courses/${cid}/module` },
+                    { label: "Practice", href: `/student/practice/${cid}/${mid}` },
+                    { label: "MCQ" },
+                ]}
+            />
             <ContextMenuTrigger>
                 <MCQView mcqs={ModuleMCQs} mid={mid} uid={uid} umid={umid} />
             </ContextMenuTrigger>

@@ -7,6 +7,7 @@ import { StudentTableSchema } from '@/schemas/student-schema'
 import { CourseStudentAddDataTable } from "@/components/course-student/course-student-add-table/csa-data-table"
 import { columns } from "@/components/course-student/course-student-add-table/csa-columns"
 import { getstudentsbycourseid } from "@/actions/usercourse"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 async function fetchStudents(cid: string) {
     const students = await getstudentsbycourseid(cid)
@@ -33,12 +34,17 @@ const CourseStudentsAdd = async ({ params }: { params: Promise<{ cid: string}> }
     const filterStudents = allstudents.filter(student => !coursestudents?.includes(student.id));
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/admin/courses" },
+                    { label: course?.title ?? "Course", href: `/admin/courses/${cid}/students` },
+                    { label: "Students", href: `/admin/courses/${cid}/students` },
+                    { label: "Add" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">
-                            {course?.title}
-                        </h2>
                         <p className="text-muted-foreground">
                             Assign Students
                         </p>

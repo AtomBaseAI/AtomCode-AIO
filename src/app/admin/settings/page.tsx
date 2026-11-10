@@ -23,6 +23,7 @@ import { LookupManager } from "@/components/settings/lookup-manager";
 import { getPlatformSettings, getRegistrationCode } from "@/lib/platform-settings";
 import { getBrandingSettings } from "@/lib/branding-settings";
 import { getLookups } from "@/lib/lookup";
+import { TopbarTitle } from "@/components/topbar-title";
 
 const Settings = async () => {
   const session = await auth();
@@ -60,8 +61,8 @@ const Settings = async () => {
 
   return (
     <div className="flex w-full flex-1 flex-col gap-6 pb-8">
+      <TopbarTitle>Settings</TopbarTitle>
       <header className="w-full">
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground">
           Manage your account, platform configuration and integrations
         </p>

@@ -1,10 +1,13 @@
 import { format } from "date-fns";
 import BackBtn from "@/components/backbtn";
 import { getAssessmentById } from "@/data/assessments";
+import { getCourseById } from "@/data/courses";
 import EditAssessment from "@/components/assessment/assessment-edit-form";
+import { TopbarBreadcrumb } from "@/components/topbar-title";
 
-const EditAssessmentx = async ({ params }: { params: Promise<{ aid: string}> }) => {
-  const { aid } = await params;
+const EditAssessmentx = async ({ params }: { params: Promise<{ cid: string; aid: string}> }) => {
+  const { cid, aid } = await params;
+  const course = await getCourseById(cid);
   const assessment = await getAssessmentById(aid);
 
   if (!assessment) {
@@ -26,11 +29,15 @@ const EditAssessmentx = async ({ params }: { params: Promise<{ aid: string}> }) 
 
   return (
     <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
+      <TopbarBreadcrumb
+        items={[
+          { label: "Courses", href: "/admin/courses" },
+          { label: course?.title ?? "Course", href: `/admin/courses/${cid}/assessments` },
+          { label: assessment?.title ?? "Assessment" },
+        ]}
+      />
       <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            {initialData.title.toUpperCase()}
-          </h2>
         </div>
       </div>
 

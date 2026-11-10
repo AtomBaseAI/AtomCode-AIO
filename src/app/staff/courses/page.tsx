@@ -4,6 +4,7 @@ import { getAllStaffCourses } from "@/data/staff/courses"
 import { CourseDataTable } from "@/components/course/course-table/c-data-table"
 import { columns } from "@/components/staff/course/course-table/c-columns"
 import { auth } from "@/auth"
+import { TopbarTitle } from "@/components/topbar-title"
 
 const getSession = async () => {
   const session = await auth();
@@ -26,11 +27,11 @@ export default async function CoursesData() {
   const courses = await fetchCourses(staffID)
   return (
     <>
+      <TopbarTitle>Courses</TopbarTitle>
       <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
         <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Courses</h2>
-            <p className="text-muted-foreground">
+            <p className="text-xl font-semibold tracking-tight text-muted-foreground">
               All Courses : {courses.length}
             </p>
           </div>

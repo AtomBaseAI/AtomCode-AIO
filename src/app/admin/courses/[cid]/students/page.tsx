@@ -9,6 +9,7 @@ import { CourseStudentDataTable } from '@/components/course-student/course-stude
 import { columns } from '@/components/course-student/course-student-table/cs-columns'
 import { StudentTableSchema } from '@/schemas/student-schema'
 import { getstudentsbycourseid } from "@/actions/usercourse"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 async function fetchStudents(cid: string) {
   const students = await getstudentsbycourseid(cid)
@@ -25,12 +26,16 @@ const CourseStudents = async ({ params }: { params: Promise<{ cid: string}> }) =
   const course = await getCourseById(cid)
   return (
     <>
+      <TopbarBreadcrumb
+        items={[
+          { label: "Courses", href: "/admin/courses" },
+          { label: course?.title ?? "Course", href: `/admin/courses/${cid}/edit` },
+          { label: "Students" },
+        ]}
+      />
       <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
         <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              {course?.title}
-            </h2>
             <p className="text-muted-foreground">
               Course Students : {studentsdata?.length}
             </p>

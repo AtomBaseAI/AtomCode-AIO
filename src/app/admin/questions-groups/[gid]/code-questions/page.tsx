@@ -11,6 +11,7 @@ import { AddQuestionsDialog } from "@/components/question-group/add-questions-di
 import { QuestionImportExportMenu } from "@/components/question-group/question-import-export-menu"
 import AddQuestion from "@/components/question/question-add-form"
 import BackBtn from "@/components/backbtn"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 const GroupQuestionsPage = async ({
     params,
@@ -63,11 +64,14 @@ const GroupQuestionsPage = async ({
 
     return (
         <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Question Groups", href: "/admin/questions-groups" },
+                    { label: group?.title ?? "Group" },
+                ]}
+            />
             <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight">
-                        {group.title}
-                    </h2>
                     <p className="text-muted-foreground">
                         {group.description || "No description"} ·{" "}
                         {inGroup.length} question

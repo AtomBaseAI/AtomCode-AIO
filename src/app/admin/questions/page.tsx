@@ -6,6 +6,7 @@ import { QuestionTableSchema } from "@/schemas/question-schema"
 import { QuestionDataTable } from "@/components/question/question-table/q-data-table"
 import { columns } from "@/components/question/question-table/q-columns"
 import { Button } from "@/components/ui/button"
+import { TopbarTitle } from "@/components/topbar-title"
 
 async function fetchQuestions() {
   const questions = await getAllQuestions()
@@ -21,10 +22,10 @@ export default async function QuestionsData() {
 
   return (
     <>
+      <TopbarTitle>Questions</TopbarTitle>
       <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
         <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Questions</h2>
             <p className="text-muted-foreground">
               Browse and manage all questions — new questions are created
               inside a{" "}

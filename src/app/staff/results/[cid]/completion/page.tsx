@@ -4,6 +4,7 @@ import { ResultMatrixTable } from '@/components/results/completion/result-matrix
 import { courseCompletionData } from '@/data/results';
 import { ResultTableStudentType } from '@/schemas/result-matrix-schema';
 import React from 'react'
+import { TopbarBreadcrumb } from '@/components/topbar-title'
 import CompletionExportButton from '@/export/result-export/completion-export-button';
 
 const CourseCompletion = async ({ params }: { params: Promise<{ cid }> }) => {
@@ -13,19 +14,29 @@ const CourseCompletion = async ({ params }: { params: Promise<{ cid }> }) => {
   if (CourseCompletionDatax === null) {
     return (
       <>
+        <TopbarBreadcrumb
+          items={[
+            { label: "Analysis", href: "/staff/results" },
+            { label: "Course" },
+            { label: "Completion" },
+          ]}
+        />
         No Data Available !
       </>
     )
   }
   return (
     <>
+      <TopbarBreadcrumb
+        items={[
+          { label: "Analysis", href: "/staff/results" },
+          { label: CourseCompletionDatax?.coursename ?? "Course" },
+          { label: "Completion" },
+        ]}
+      />
       <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full justify-center items-center">
         <div className="flex flex-wrap items-center justify-between gap-2 space-y-2 w-full">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              Result Matrix
-            </h2>
-
             <p className="text-muted-foreground">
               {CourseCompletionDatax?.coursename}
             </p>

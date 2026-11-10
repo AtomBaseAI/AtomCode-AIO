@@ -2,6 +2,7 @@
 import { Book, CalendarCheck, CalendarX, } from 'lucide-react'
 import { getCourseById, getCourseProgress } from '@/data/student/courses'
 import { Progress } from '@/components/ui/progress'
+import { TopbarBreadcrumb } from '@/components/topbar-title'
 import { auth } from '@/auth'
 
 interface coursecomponentprops {
@@ -29,10 +30,15 @@ const CourseLayout = async ({ children, params }: coursecomponentprops) => {
     const CourseProgress: number = await fetchProgress(courseId, uid)
     return (
         <div className="w-full flex flex-col gap-2">
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/student/courses" },
+                    { label: coursedata?.title ?? "Course" },
+                ]}
+            />
             <div className="py-10 sm:py-8 mx-8 border-2 rounded-md">
                 <div className="mx-auto grid max-w-7xl gap-x-8 gap-y-10 px-6 lg:px-2 xl:grid-cols-3">
                     <div className="max-w-3xl flex flex-col h-full items-start justify-center">
-                        <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl"> {coursedata?.title} </h2>
                         <div className='w-full flex flex-row justify-start items-center gap-4'>
                             <Progress value={CourseProgress} className='w-[60%]' />
                             <div className='w-[20] h-full flex justify-center items-center text-primary font-bold'>

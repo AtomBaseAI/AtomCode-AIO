@@ -5,8 +5,10 @@ import { Package, Plus } from "lucide-react"
 import BackBtn from '@/components/backbtn'
 import MExport from '@/export/module-export/module-export-button'
 import { getAssessmentById, getAssessmentCodeQuestionsById } from '@/data/assessments'
+import { getCourseById } from '@/data/courses'
 import { AQuestionDataTable } from '@/components/assessment-questions/assessment-question-table/aq-data-table'
 import { columns } from '@/components/assessment-questions/assessment-question-table/aq-columns'
+import { TopbarBreadcrumb } from '@/components/topbar-title'
 
 async function fetchAssessment(aid: string) {
   const az = await getAssessmentById(aid)
@@ -21,6 +23,7 @@ const AssessmentCode = async ({ params }: { params: Promise<{ cid: string; aid: 
   const { cid, aid } = await params
   // const moduleId = parseInt(mid, 10);
   const az = await fetchAssessment(aid)
+  const course = await getCourseById(cid)
   const ax = await fetchAssessmentQuestions(aid)
   const questionsData = ax || [];
   // console.log(questionsData)
@@ -52,12 +55,17 @@ const AssessmentCode = async ({ params }: { params: Promise<{ cid: string; aid: 
   }));
   return (
     <>
+      <TopbarBreadcrumb
+        items={[
+          { label: "Courses", href: "/admin/courses" },
+          { label: course?.title ?? "Course", href: `/admin/courses/${cid}/assessments` },
+          { label: az?.title ?? "Assessment", href: `/admin/courses/${cid}/assessments/${aid}/edit` },
+          { label: "Code Questions" },
+        ]}
+      />
       <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
         <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              {az?.title}
-            </h2>
             <p className="text-muted-foreground">
               Module Problems : {ax?.length}
             </p>

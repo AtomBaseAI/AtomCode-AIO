@@ -5,6 +5,7 @@ import { getStudentsDataByCourseIdByModule } from "@/data/analysis"
 import { getCourseModuleTitlesByModuleId } from "@/data/modules"
 import { ResultAnalysisStudentSchema } from "@/schemas/result-analysis-schema"
 import { z } from "zod"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 async function fetchResultAnalysisStudents(cid: string, mid: string) {
     const resultdata = await getStudentsDataByCourseIdByModule(cid, mid)
@@ -20,12 +21,16 @@ const ResultAnalysisStudents = async ({ params }: { params: Promise<{ cid: strin
     const titles = await getCourseModuleTitlesByModuleId(mid);
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Analysis", href: "/admin/results" },
+                    { label: titles?.courseTitle ?? "Course", href: `/admin/results/${cid}/analysis` },
+                    { label: titles?.moduleTitle ?? "Module" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">
-                            {titles?.moduleTitle}
-                        </h2>
                         <p className="text-muted-foreground">
                             {titles?.courseTitle}
                         </p>

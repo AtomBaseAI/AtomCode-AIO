@@ -5,6 +5,7 @@ import { getUserById } from "@/data/student/user";
 import { Edit, Github, ImagePlus, Key, Linkedin } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link";
+import { TopbarTitle } from "@/components/topbar-title";
 
 
 const getSessionUserID = async () => {
@@ -31,6 +32,7 @@ const Settings = async () => {
   };
   return (
     <>
+      <TopbarTitle>Settings</TopbarTitle>
       {/* flex-1 instead of rigid h-[80vh]: centers the card in the actual
           leftover space under the topbar — no forced page overflow */}
       <div className="flex w-full flex-1 flex-col items-center justify-center gap-2">

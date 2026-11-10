@@ -6,6 +6,7 @@ import { ModuleAnalysisSchema } from "@/schemas/result-analysis-schema"
 import { getCourseById } from "@/data/courses"
 import { ModuleAnalysisDataTable } from "@/components/results/analysis/ma-data-table"
 import { columns } from "@/components/results/analysis/ma-columns"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 async function fetchModulesdata(cid: string) {
   const modules = await getmoduleresults(cid)
@@ -23,10 +24,15 @@ const CourseAnalysis = async ({ params }: { params: Promise<{ cid: string}> }) =
   }
   return (
     <>
+      <TopbarBreadcrumb
+        items={[
+          { label: "Analysis", href: "/admin/results" },
+          { label: course?.title ?? "Course" },
+        ]}
+      />
       <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
         <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">{course?.title}</h2>
             <p className="text-muted-foreground">
               All Modules : {modules.length}
             </p>

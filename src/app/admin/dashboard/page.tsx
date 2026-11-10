@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
+import { TopbarTitle } from '@/components/topbar-title';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -166,8 +167,8 @@ const Dashboard = async () => {
 
   return (
     <div className="flex w-full flex-col items-center gap-6 pb-8">
+      <TopbarTitle>Dashboard</TopbarTitle>
       <header className="w-[92%]">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground">Platform overview at a glance</p>
       </header>
 

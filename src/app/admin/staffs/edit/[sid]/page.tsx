@@ -2,6 +2,7 @@ import BackBtn from "@/components/backbtn"
 import EditStaffForm from "@/components/staff/staff-edit-form"
 import ResetPasswordStaff from "@/components/staff/staff-reset-model"
 import { getStaffById } from "@/data/staffs"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 const EditStudent = async ({ params }: { params: Promise<{ sid: string}> }) => {
 
@@ -18,10 +19,15 @@ const EditStudent = async ({ params }: { params: Promise<{ sid: string}> }) => {
     };
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Staffs", href: "/admin/staffs" },
+                    { label: staff?.name ?? "Staff" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">{staff?.name}</h2>
                         <p className="text-muted-foreground">
                             {staff?.staffnumber}
                         </p>

@@ -8,6 +8,7 @@ import { getAllStaffs } from "@/data/staffs"
 import { StaffTableSchema } from "@/schemas/staff-schema"
 import { CourseStaffAddDataTable } from "@/components/course-staff/course-staff-add-table/cstfa-data-table"
 import { columns } from "@/components/course-staff/course-staff-add-table/cstfa-columns"
+import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 async function fetchStaffs(cid: string) {
     const staffs = await getstaffsbycourseid(cid)
@@ -31,12 +32,17 @@ const CourseStaffsAdd = async ({ params }: { params: Promise<{ cid: string}> }) 
     const filterStaffs = allstaffs.filter(staff => !coursestaffs?.includes(staff.id));
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/admin/courses" },
+                    { label: course?.title ?? "Course", href: `/admin/courses/${cid}/staffs` },
+                    { label: "Staffs", href: `/admin/courses/${cid}/staffs` },
+                    { label: "Add" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">
-                            {course?.title}
-                        </h2>
                         <p className="text-muted-foreground">
                             Assign Staffs
                         </p>

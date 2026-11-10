@@ -4,6 +4,7 @@ import { getCourseById } from "@/data/courses"
 import { format } from 'date-fns';
 import EditCourseForm from "@/components/course/course-edit-form";
 import BackBtn from "@/components/backbtn";
+import { TopbarBreadcrumb } from "@/components/topbar-title";
 
 const EditCourse = async ({ params }: { params: Promise<{ cid: string}> }) => {
 
@@ -22,10 +23,15 @@ const EditCourse = async ({ params }: { params: Promise<{ cid: string}> }) => {
     }
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/admin/courses" },
+                    { label: course?.title ?? "Course" },
+                ]}
+            />
             <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">{course?.title}</h2>
                     </div>
                 </div>
 

@@ -1,9 +1,10 @@
-import { getModuleQuestionsByModuleId } from '@/data/student/modules';
+import { getCourseModuleByModuleID, getModuleQuestionsByModuleId } from '@/data/student/modules';
 
 import CodeView from '@/components/student-role/practice/code/code-view';
 import { CircleSlash } from 'lucide-react';
 import Link from 'next/link';
 import { auth } from '@/auth';
+import { TopbarBreadcrumb } from '@/components/topbar-title';
 const getSessionUserID = async () => {
     const session = await auth();
     return session?.user?.id
@@ -28,8 +29,17 @@ const CodeMain = async ({ params }: { params: Promise<{ mid: string, cid: string
         )
     }
     const ModuleQuestions = await getModuleQuestionsByModuleId(mid, uid) || [];
+    const courseModule = await getCourseModuleByModuleID(mid)
     return (
         <>
+            <TopbarBreadcrumb
+                items={[
+                    { label: "Courses", href: "/student/courses" },
+                    { label: courseModule?.courseName ?? "Course", href: `/student/courses/${cid}/module` },
+                    { label: "Practice", href: `/student/practice/${cid}/${mid}` },
+                    { label: "Code" },
+                ]}
+            />
             <CodeView questions={ModuleQuestions} mid={mid} uid={uid} cid={cid} umid={umid} />
         </>
     )

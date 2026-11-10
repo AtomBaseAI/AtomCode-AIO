@@ -4,6 +4,7 @@ import { Book, DownloadCloud, PieChart, Trophy } from "lucide-react"
 import Link from "next/link"
 import React from "react"
 import { z } from "zod"
+import { TopbarTitle } from "@/components/topbar-title"
 
 import {
   Tooltip,
@@ -23,6 +24,7 @@ const Results = async () => {
   // console.log(coursesData)
   return (
     <div className='w-full flex flex-col gap-2 mx-8 px-8'>
+      <TopbarTitle>Analysis</TopbarTitle>
       <div className="h-full w-full mx-auto flex flex-wrap flex-row justify-start gap-x-4 gap-y-4">
         {
           coursesData.length === 0 ? (
