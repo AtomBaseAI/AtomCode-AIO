@@ -13,10 +13,9 @@ import { useEffect, useState, useTransition } from 'react'
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { eclipse } from '@uiw/codemirror-theme-eclipse';
-import { Check, LoaderIcon, Play, X } from 'lucide-react';
+import { Check, LoaderIcon, Play, X, AlertTriangle, CircleCheck, CircleX } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from "sonner"
-import { Separator } from '../ui/separator';
 import { useRouter } from 'next/navigation';
 import { autocompletion } from "@codemirror/autocomplete";
 import type { Extension } from "@codemirror/state";
@@ -85,6 +84,8 @@ const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: st
         setTestcase3Status("");
         setCompileCount(0);
         setErrorCount(0);
+        setError(false);
+        setErrorTitle("Compilation Error");
         setExecuting(false);
         setExecutingTestcases(false);
         setScore(0)
@@ -99,6 +100,8 @@ const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: st
     const [executingTestcases, setExecutingTestcases] = useState(false)
     const [RunTestModel, setRunTestModel] = useState(false)
     const [error, setError] = useState(false)
+    const [errorTitle, setErrorTitle] = useState<string>("Compilation Error")
+    const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
     const [samplesuccess, setSamplesuccess] = useState(false)
     const [outputData, setOutputData] = useState<string | null>(null)
     const [userCode, setUserCode] = useState(`// code here ! \n\n`)
@@ -170,6 +173,7 @@ const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: st
             } else {
                 toast.error(res.timedOut ? "Execution timed out!" : "Compilation Error!");
                 setError(true);
+                setErrorTitle(res.timedOut ? "Execution Timed Out" : "Compilation Error");
                 setOutputData(res.output || res.stderr);
                 setErrorCount(errorCount + 1);
                 setShowSubmit(false)
@@ -250,6 +254,7 @@ const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: st
     const closeRunModel = () => {
         setShowModal(false);
         setError(false)
+        setErrorTitle("Compilation Error")
         setOutputData(null)
     }
 
@@ -330,11 +335,16 @@ const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: st
         )
     }
     return (
-        <main className="flex min-h-screen min-w-screen flex-row">
-            <aside className="sticky top-0 left-0 z-50 hidden sm:flex sm:flex-col w-20 h-screen border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
+        // Full-viewport IDE takeover (sm+): fixed inset-0 detaches the IDE from
+        // the document flow, so the page itself never scrolls — the question
+        // rail stays pinned (h-full of the viewport) and the exit button can
+        // never slide under the status bar. Mobile keeps normal flow so the
+        // topbar/nav stay reachable (the rail is hidden below sm anyway).
+        <main className="flex min-h-svh w-full flex-row sm:fixed sm:inset-0 sm:z-40 sm:w-auto sm:min-h-0 sm:bg-background sm:overflow-hidden">
+            <aside className="hidden sm:flex sm:flex-col w-20 shrink-0 h-full border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
                 <div className="flex-grow flex flex-col justify-between">
                     {/* question queue */}
-                    <nav className="flex flex-col my-4 space-y-4 overflow-y-auto max-h-[calc(100vh-10rem)]">
+                    <nav className="flex flex-col my-4 space-y-4 overflow-y-auto flex-1 min-h-0">
                         {questionData.map((question: CodeQuestion, index: number) => (
                             <Button
                                 key={index}
@@ -348,7 +358,9 @@ const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: st
                         ))}
                     </nav>
 
-                    <div className="inline-flex flex-col items-center justify-center h-30 w-20 ">
+                    {/* Auto height (was fixed h-30): 120px clipped the 3-button
+                        cluster so the exit button poked out over the status bar */}
+                    <div className="inline-flex flex-col items-center justify-center w-20 shrink-0 pb-3">
                         <Button
                             className="hover:text-primary bg-transparent hover:bg-transparent border-0 shadow-none text-black dark:text-white  cursor-pointer"
                             size="icon"
@@ -361,12 +373,14 @@ const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: st
                             <span className="sr-only">Toggle fullscreen</span>
                         </Button>
                         <ThemeToggle className="my-4" />
-                        <Button className={`inline-flex items-center justify-center p-3 mx-4 my-1 transition-colors bg-primary`} onClick={handleRoute} disabled={routeBtnLoading}>
-                            <span className='h-6 w-6'>
-                                {
-                                    routeBtnLoading ? <Loader className="animate-spin p-1" /> : <LogOut fill='none' />
-                                }
-                            </span>
+                        <Button
+                            className="bg-transparent hover:bg-destructive/10 shadow-none border-0 text-black dark:text-white hover:text-destructive cursor-pointer"
+                            size="icon"
+                            onClick={() => setExitConfirmOpen(true)}
+                            disabled={routeBtnLoading}
+                        >
+                            {routeBtnLoading ? <Loader className="h-6 w-6 animate-spin" /> : <LogOut className="h-6 w-6" />}
+                            <span className="sr-only">Exit to workspace</span>
                         </Button>
                     </div>
                 </div>
@@ -375,22 +389,22 @@ const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: st
                 <div className="h-full w-full flex flex-col mx-4 items-center ">
                     <ResizablePanelGroup
                         direction="horizontal"
-                        className="max-w-full max-h-screen rounded-lg border">
+                        className="max-w-full w-full sm:h-full rounded-lg border">
 
                         <ResizablePanel defaultSize={50} minSize={20}>
-                            <div className="flex h-screen items-center justify-center">
+                            <div className="flex h-screen sm:h-full items-center justify-center">
                                 <CodeQuestion Question={currentQuestion} />
                             </div>
                         </ResizablePanel>
                         <ResizableHandle withHandle />
                         <ResizablePanel defaultSize={50} minSize={40}>
-                            <div className="flex h-screen items-center justify-center">
+                            <div className="flex h-screen sm:h-full items-center justify-center">
                                 {isSubmitted ? (
-                                    <div className='h-screen w-full overflow-y-auto dark:bg-[#1e1e1e] flex justify-center items-center '>
+                                    <div className='h-screen sm:h-full w-full overflow-y-auto dark:bg-[#1e1e1e] flex justify-center items-center '>
                                         Code Submitted !
                                     </div>
                                 ) : (
-                                    <div className='flex h-screen items-center justify-center w-full flex-col'
+                                    <div className='flex h-screen sm:h-full items-center justify-center w-full flex-col'
                                     >
                                         <div className='h-[95%] w-full overflow-y-auto dark:bg-[#1e1e1e] '>
                                             <CodeMirror
@@ -450,50 +464,72 @@ const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: st
                 </div>
             </div>
             <AlertDialog open={showModal}>
-                <AlertDialogContent aria-describedby={undefined}>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            <div className='flex flex-row justify-center items-center h-full'>
-
-                                <h2 className='w-1/2 px-2'>Expected Output</h2>
-                                <h2 className='w-1/2 px-2'>Program Output</h2>
+                <AlertDialogContent aria-describedby={undefined} className="sm:max-w-xl">
+                    {executing ? (
+                        // Running — neutral progress state, no output panes yet
+                        <div className='flex flex-col items-center justify-center gap-4 py-10'>
+                            <LoaderIcon className='h-8 w-8 animate-spin text-muted-foreground' />
+                            <p className='text-sm font-medium text-muted-foreground'>Compiling &amp; running your code…</p>
+                        </div>
+                    ) : error ? (
+                        // Compile / runtime failure — dedicated error view,
+                        // deliberately WITHOUT the Expected/Program Output panes
+                        <>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle className='flex items-center gap-2 text-destructive'>
+                                    <AlertTriangle className='h-5 w-5 shrink-0' />
+                                    {errorTitle}
+                                </AlertDialogTitle>
+                            </AlertDialogHeader>
+                            <div className='max-h-[300px] overflow-y-auto rounded-md border border-destructive/30 bg-destructive/10 p-3'>
+                                <pre className='whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-destructive'>
+                                    {outputData}
+                                </pre>
                             </div>
-                        </AlertDialogTitle>
-                        {error ?
-                            (
-                                <div className='bg-gray-700/30 w-full h-[150px] rounded-md p-2 font-bold overflow-y-auto overflow-x-hidden'>
-                                    <pre className='whitespace-pre-wrap break-words overflow-x-auto max-w-full'>
-                                        {outputData}
-                                    </pre>
-                                </div>
-                            )
-                            : (
-                                <div className='flex flex-grow flex-row justify-around items-center w-full py-2'>
-                                    <div className='bg-gray-700/30 w-[48%] h-[150px] rounded-md p-2 font-bold overflow-y-auto overflow-x-hidden'>
-                                        <pre className='whitespace-pre-wrap break-words overflow-x-auto max-w-full'>
-                                            {currentQuestion.sampleoutput1}
-                                        </pre>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel className='w-full sm:w-auto' onClick={closeRunModel}>Close</AlertDialogCancel>
+                            </AlertDialogFooter>
+                        </>
+                    ) : (
+                        // Program ran — expected vs actual output comparison
+                        <>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle className='flex items-center gap-2'>
+                                    {samplesuccess ? (
+                                        <>
+                                            <CircleCheck className='h-5 w-5 shrink-0 text-green-500' />
+                                            Sample Testcase Passed
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CircleX className='h-5 w-5 shrink-0 text-red-500' />
+                                            Sample Testcase Failed
+                                        </>
+                                    )}
+                                </AlertDialogTitle>
+                                <div className='grid w-full grid-cols-2 gap-3 pt-1'>
+                                    <div className='space-y-1.5'>
+                                        <p className='text-xs font-semibold uppercase tracking-wide text-muted-foreground'>Expected Output</p>
+                                        <div className='h-[140px] overflow-y-auto overflow-x-hidden rounded-md border bg-muted/40 p-2.5'>
+                                            <pre className='whitespace-pre-wrap break-words font-mono text-sm'>
+                                                {currentQuestion.sampleoutput1}
+                                            </pre>
+                                        </div>
                                     </div>
-                                    <Separator orientation='vertical' className='mx-2' />
-                                    <div className='bg-gray-700/30 w-[48%] h-[150px] rounded-md p-2 font-bold overflow-y-auto overflow-x-hidden'>
-                                        {executing ? (
-                                            <span className='h-full w-full flex items-center justify-center'>
-                                                <LoaderIcon className="h-6 w-6 animate-spin" />
-                                            </span>
-                                        ) : (
-
-                                            <pre>
+                                    <div className='space-y-1.5'>
+                                        <p className='text-xs font-semibold uppercase tracking-wide text-muted-foreground'>Program Output</p>
+                                        <div className='h-[140px] overflow-y-auto overflow-x-hidden rounded-md border bg-muted/40 p-2.5'>
+                                            <pre className='whitespace-pre-wrap break-words font-mono text-sm'>
                                                 {outputData}
                                             </pre>
-                                        )}
+                                        </div>
                                     </div>
                                 </div>
-                            )}
-                    </AlertDialogHeader>
-                    {!executing && (
-                        <AlertDialogFooter>
-                            <AlertDialogCancel className='bg-primary hover:bg-primary/80 text-white w-full ' onClick={closeRunModel}>Close</AlertDialogCancel>
-                        </AlertDialogFooter>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel className='w-full sm:w-auto' onClick={closeRunModel}>Close</AlertDialogCancel>
+                            </AlertDialogFooter>
+                        </>
                     )}
                 </AlertDialogContent>
             </AlertDialog>
@@ -568,6 +604,29 @@ const CodeView = ({ questions, mid, cid, }: { questions: CodeQuestion[], mid: st
                             <AlertDialogCancel className='bg-primary hover:bg-primary/80 text-white w-full' onClick={closeTestCaseModel}>Close</AlertDialogCancel>
                         </AlertDialogFooter>
                     )}
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Staff exit guard — confirm before leaving the IDE so a stray
+                click on the rail's exit button can't lose unsaved code */}
+            <AlertDialog open={exitConfirmOpen} onOpenChange={setExitConfirmOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Exit to workspace?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You are about to leave the code editor. Any code you haven&apos;t run yet will not be saved.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={routeBtnLoading}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            className='bg-primary hover:bg-primary/80 text-white'
+                            onClick={handleRoute}
+                            disabled={routeBtnLoading}
+                        >
+                            {routeBtnLoading ? <Loader className='animate-spin' /> : 'Yes, exit'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
         </main>

@@ -35,6 +35,12 @@ const Sidebar = () => {
     }
   }, [])
 
+  // The staff Atom IDE pages (/staff/atom/...) render their own question-rail
+  // navigation (CodeView's <aside>). The default staff sidebar must not stack
+  // on top of it, so it stays hidden on those routes. The guard sits AFTER all
+  // hooks to keep the hook order stable across navigations.
+  if (pathname.startsWith('/staff/atom')) return null
+
   const toggleFullscreen = () => {
     if (fullscreen) {
       exitFullscreen()
