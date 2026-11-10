@@ -1,3 +1,4 @@
+import { getPlatformSettings } from "@/lib/platform-settings";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LoginForm } from "@/components/auth/login-form";
@@ -15,7 +16,16 @@ import {
   VENDOR_NAME,
 } from "@/config/branding";
 
-export default function Login() {
+export default async function Login() {
+  // Maintenance switch: admin DB setting wins, env fallback keeps the
+  // original NEXT_PUBLIC_APP_STATUS behavior when the DB is unreachable.
+  let maintenance = APP_STATUS !== "true";
+  try {
+    const settings = await getPlatformSettings();
+    maintenance = settings.maintenanceMode || maintenance;
+  } catch {
+    // fall back to env-only behavior
+  }
   return (
     <div className="relative flex min-h-svh flex-col bg-muted/40 p-4 dark:bg-background md:p-6 lg:p-8">
       {/* Magic UI hexagon pattern — page background, fades from top-left toward bottom-right */}
@@ -106,15 +116,28 @@ export default function Login() {
                   </p>
                 </div>
 
-                {APP_STATUS === "true" ? (
+                {!maintenance ? (
                   <LoginForm />
                 ) : (
-                  <div>
-                    <p className="text-center text-yellow-600">
-                      The application is currently under Maintenance !{" "}
-                    </p>
-                    <br />
-                    <p className="text-center">Please try again later.</p>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-center text-yellow-600">
+                        The application is currently under Maintenance !{" "}
+                      </p>
+                      <br />
+                      <p className="text-center">Please try again later.</p>
+                    </div>
+                    {/* Admin bypass — students see the notice only; the
+                        collapsible sign-in keeps the admin from being
+                        locked out while maintenance is enabled. */}
+                    <details className="group rounded-lg border border-dashed px-4 py-3">
+                      <summary className="cursor-pointer list-none text-center text-sm text-muted-foreground hover:text-foreground">
+                        Administrator? Sign in
+                      </summary>
+                      <div className="mt-4">
+                        <LoginForm />
+                      </div>
+                    </details>
                   </div>
                 )}
               </div>

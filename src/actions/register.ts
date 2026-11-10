@@ -6,6 +6,7 @@ import {
   StudentRegisterSchema,
 } from "@/schemas/auth-schema";
 import { db } from "@/lib/db";
+import { getPlatformSettings } from "@/lib/platform-settings";
 import * as z from "zod";
 import { genSaltSync, hashSync } from "bcrypt-ts";
 
@@ -35,6 +36,12 @@ export const registerAdmin = async (values: z.infer<typeof RegisterSchema>) => {
 export const registerStaff = async (
   values: z.infer<typeof StaffRegisterSchema>
 ) => {
+  // Admin can disable staff self-registration from /admin/settings.
+  const staffSettings = await getPlatformSettings();
+  if (!staffSettings.allowStaffRegister) {
+    return { error: "Staff registration is currently disabled by the administrator" };
+  }
+
   const validatedFields = StaffRegisterSchema.safeParse(values);
   if (!validatedFields.success) {
     return { error: "Invalid details" };
@@ -60,6 +67,12 @@ export const registerStaff = async (
 export const registerStudent = async (
   values: z.infer<typeof StudentRegisterSchema>
 ) => {
+  // Admin can disable student self-registration from /admin/settings.
+  const studentSettings = await getPlatformSettings();
+  if (!studentSettings.allowStudentRegister) {
+    return { error: "Student registration is currently disabled by the administrator" };
+  }
+
   const validatedFields = StudentRegisterSchema.safeParse(values);
   if (!validatedFields.success) {
     return { error: "Invalid details" };

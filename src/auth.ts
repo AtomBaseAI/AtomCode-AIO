@@ -48,7 +48,7 @@ export const LOGIN_ERRORS: Record<string, string> = {
   "rate-limited": `Too many failed attempts. Try again in ${LOGIN_LOCKOUT_MINUTES} minutes.`,
 };
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({

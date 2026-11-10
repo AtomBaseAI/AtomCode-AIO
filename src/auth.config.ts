@@ -43,10 +43,18 @@ export const authConfig = {
      * object). The role is frozen into the JWT — no DB lookups needed to
      * know a caller's role for the life of the session.
      */
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = (user as { role?: AtomRole }).role;
         token.picture = user.image ?? token.picture;
+      }
+      // Profile self-updates (unstable_update in the settings action) merge
+      // the fresh name/email into the JWT so the UI reflects them without
+      // forcing a re-login.
+      if (trigger === "update" && session) {
+        const patch = session as { name?: string; email?: string };
+        if (patch.name) token.name = patch.name;
+        if (patch.email) token.email = patch.email;
       }
       return token;
     },

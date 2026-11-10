@@ -37,6 +37,18 @@ model Admin {
   password String
 }
 
+/**
+ * Platform settings — simple key-value store edited from the admin
+ * settings page (maintenance mode, self-registration toggles, ...).
+ * Values are strings ("true"/"false" for flags) so new keys never need
+ * a migration; consumers parse through src/lib/platform-settings.ts.
+ */
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model Staff {
   id          String        @id @default(cuid())
   name        String?

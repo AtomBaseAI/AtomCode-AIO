@@ -1,86 +1,206 @@
 import React, { Suspense } from 'react';
-import { Layers, Users, ShipWheel, Package, LoaderIcon } from 'lucide-react';
-import { getQuestionsCount } from '@/data/questions';
-import { getStudentsCount } from '@/data/students';
-import { getCoursesCount } from '@/data/courses';
-import { getStaffsCount } from '@/data/staffs';
+import {
+  Layers,
+  Users,
+  ShipWheel,
+  Package,
+  BookOpen,
+  FileQuestion,
+  ClipboardCheck,
+  Send,
+  type LucideIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+  AssessmentParticipationBar,
+  CourseEnrollmentBar,
+  DifficultyDonut,
+  QuestionsLanguageBar,
+  StudentsDepartmentBar,
+  SubmissionStatusDonut,
+} from '@/components/dashboard/dashboard-charts';
+import {
+  getAssessmentParticipation,
+  getCourseEnrollments,
+  getDashboardCounts,
+  getPracticeSubmissionStatus,
+  getQuestionsByDifficulty,
+  getQuestionsByLanguage,
+  getStudentsByDepartment,
+  type DashboardCounts,
+} from '@/data/dashboard';
+
+/* ------------------------------------------------------------------ */
+/* Stat cards                                                          */
+/* ------------------------------------------------------------------ */
+
+function StatCard({
+  href,
+  icon: Icon,
+  label,
+  value,
+  sub,
+}: {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  value: number;
+  sub?: string;
+}) {
+  return (
+    <Link href={href} className="group block h-full" aria-label={`${label}: ${value}`}>
+      <div className="flex h-full items-center gap-5 rounded-md border bg-card p-6 shadow-md transition-all group-hover:border-purple-600 group-hover:shadow-lg">
+        <div className="inline-flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-md bg-purple-100 text-purple-600 dark:bg-purple-950/20">
+          <Icon className="h-6 w-6" aria-hidden />
+        </div>
+        <div className="min-w-0">
+          <span className="block text-3xl font-bold leading-tight">{value}</span>
+          <span className="block truncate text-sm text-gray-500 dark:text-gray-400">
+            {label}
+          </span>
+          {sub && (
+            <span className="block text-xs text-gray-400 dark:text-gray-500">{sub}</span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Streaming chart panels (async server components)                    */
+/* ------------------------------------------------------------------ */
+
+function PanelSkeleton() {
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <div className="h-5 w-40 animate-pulse rounded bg-muted" />
+        <div className="h-3 w-56 animate-pulse rounded bg-muted" />
+      </CardHeader>
+      <CardContent>
+        <div className="h-[240px] w-full animate-pulse rounded-md bg-muted" />
+      </CardContent>
+    </Card>
+  );
+}
+
+async function LanguagePanel() {
+  const data = await getQuestionsByLanguage();
+  return <QuestionsLanguageBar data={data} />;
+}
+
+async function DifficultyPanel() {
+  const data = await getQuestionsByDifficulty();
+  return <DifficultyDonut data={data} />;
+}
+
+async function DepartmentPanel() {
+  const data = await getStudentsByDepartment();
+  return <StudentsDepartmentBar data={data} />;
+}
+
+async function EnrollmentPanel() {
+  const data = await getCourseEnrollments();
+  return <CourseEnrollmentBar data={data} />;
+}
+
+async function SubmissionPanel() {
+  const data = await getPracticeSubmissionStatus();
+  return <SubmissionStatusDonut data={data} />;
+}
+
+async function AssessmentPanel() {
+  const data = await getAssessmentParticipation();
+  return <AssessmentParticipationBar data={data} />;
+}
+
+/* ------------------------------------------------------------------ */
+/* Dashboard                                                           */
+/* ------------------------------------------------------------------ */
+
 const Dashboard = async () => {
-  const [questioncount, studentcount, coursecount, staffcount] = await Promise.all([
-    getQuestionsCount(),
-    getStudentsCount(),
-    getCoursesCount(),
-    getStaffsCount(),
-  ]);
+  const counts: DashboardCounts = await getDashboardCounts();
+  const totalSubmissions =
+    counts.practiceSubmissions + counts.mcqSubmissions + counts.assessmentAttempts;
+
+  const cards: {
+    href: string;
+    icon: LucideIcon;
+    label: string;
+    value: number;
+    sub?: string;
+  }[] = [
+    { href: '/admin/courses', icon: Layers, label: 'Total Courses', value: counts.courses },
+    { href: '/admin/courses', icon: BookOpen, label: 'Total Modules', value: counts.modules },
+    { href: '/admin/students', icon: Users, label: 'Total Students', value: counts.students },
+    { href: '/admin/staffs', icon: ShipWheel, label: 'Total Staffs', value: counts.staffs },
+    {
+      href: '/admin/questions',
+      icon: Package,
+      label: 'Code Questions',
+      value: counts.codeQuestions,
+    },
+    {
+      href: '/admin/questions',
+      icon: FileQuestion,
+      label: 'MCQ Questions',
+      value: counts.mcqQuestions,
+    },
+    {
+      href: '/admin/courses',
+      icon: ClipboardCheck,
+      label: 'Assessments',
+      value: counts.assessments,
+    },
+    {
+      href: '/admin/results',
+      icon: Send,
+      label: 'Total Submissions',
+      value: totalSubmissions,
+      sub: 'practice · mcq · assessments',
+    },
+  ];
 
   return (
-    <>
-      <div className="w-full flex flex-col gap-2 justify-center items-center">
-        <section className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 w-[92%]">
-          <Link href='/admin/courses'>
-            <div className="flex items-center p-8 shadow-md rounded-md border hover:border-purple-600">
-              <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-purple-600 bg-purple-100 dark:bg-purple-950/20 rounded-md mr-6">
-                <span className="h-6 w-6">
-                  <Layers fill="none" />
-                </span>
-              </div>
-              <div>
-                <Suspense fallback={<LoaderIcon className='h-3 w-3 animate-spin' />}>
-                  <span className="block text-2xl font-bold">{coursecount}</span>
-                </Suspense>
-                <span className="block text-gray-500">Total Courses</span>
-              </div>
-            </div>
-          </Link>
-          <Link href='/admin/students'>
-            <div className="flex items-center p-8 shadow-md rounded-md border hover:border-purple-600">
-              <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-purple-600 bg-purple-100 dark:bg-purple-950/20 rounded-md mr-6">
-                <span className="h-6 w-6">
-                  <Users fill="none" />
-                </span>
-              </div>
-              <div>
-                <Suspense fallback={<LoaderIcon className='h-3 w-3 animate-spin' />}>
-                  <span className="block text-2xl font-bold">{studentcount}</span>
-                </Suspense>
-                <span className="block text-gray-500">Total Students</span>
-              </div>
-            </div>
-          </Link>
-          <Link href='/admin/staffs'>
-            <div className="flex items-center p-8 shadow-md rounded-md border hover:border-purple-600">
-              <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-purple-600 bg-purple-100 dark:bg-purple-950/20 rounded-md mr-6">
-                <span className="h-6 w-6">
-                  <ShipWheel fill="none" />
-                </span>
-              </div>
-              <div>
-                <Suspense fallback={<LoaderIcon className='h-3 w-3 animate-spin' />}>
-                  <span className="block text-2xl font-bold">{staffcount}</span>
-                </Suspense>
-                <span className="block text-gray-500">Total Staffs</span>
-              </div>
-            </div>
-          </Link>
-          <Link href='/admin/questions'>
-            <div className="flex items-center p-8 shadow-md rounded-md border hover:border-purple-600">
-              <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-purple-600 bg-purple-100 dark:bg-purple-950/20 rounded-md mr-6">
-                <span className="h-6 w-6">
-                  <Package fill="none" />
-                </span>
-              </div>
-              <div>
-                <Suspense fallback={<LoaderIcon className='h-3 w-3 animate-spin' />}>
-                  <span className="block text-2xl font-bold">{questioncount}</span>
-                </Suspense>
-                <span className="block text-gray-500">Total Questions</span>
-              </div>
-            </div>
-          </Link>
-        </section>
-      </div>
-    </>
+    <div className="flex w-full flex-col items-center gap-6 pb-8">
+      <header className="w-[92%]">
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">Platform overview at a glance</p>
+      </header>
+
+      <section
+        aria-label="Key statistics"
+        className="grid w-[92%] gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        {cards.map((c) => (
+          <StatCard key={c.label} {...c} />
+        ))}
+      </section>
+
+      <section aria-label="Analytics charts" className="grid w-[92%] gap-6 xl:grid-cols-3">
+        <Suspense fallback={<PanelSkeleton />}>
+          <LanguagePanel />
+        </Suspense>
+        <Suspense fallback={<PanelSkeleton />}>
+          <DifficultyPanel />
+        </Suspense>
+        <Suspense fallback={<PanelSkeleton />}>
+          <DepartmentPanel />
+        </Suspense>
+        <Suspense fallback={<PanelSkeleton />}>
+          <EnrollmentPanel />
+        </Suspense>
+        <Suspense fallback={<PanelSkeleton />}>
+          <SubmissionPanel />
+        </Suspense>
+        <Suspense fallback={<PanelSkeleton />}>
+          <AssessmentPanel />
+        </Suspense>
+      </section>
+    </div>
   );
 };
 

@@ -1,7 +1,7 @@
 "use client"
 import *as z from 'zod'
 import { Button } from '@/components/ui/button'
-import { Key, LoaderIcon, Trash } from 'lucide-react'
+import { Key, LoaderIcon } from 'lucide-react'
 import {
     Dialog,
     DialogClose,
@@ -61,9 +61,10 @@ const AdminPassword = ({ uid }: { uid: string }) => {
         <>
             <Dialog open={open} onOpenChange={setOpen} >
                 <DialogTrigger asChild>
-                    <div className="cursor-pointer p-2 rounded-md bg-primary border border-white hover:bg-primary/80 hover:border-slate-300">
-                        <Key className="h-6 w-6 text-white hover:text-gray-200/80" />
-                    </div>
+                    <Button variant="outline" size="sm" className="gap-1.5">
+                        <Key className="h-3.5 w-3.5" aria-hidden />
+                        Change password
+                    </Button>
                 </DialogTrigger>
                 <DialogContent aria-describedby={undefined} className="sm:max-w-[425px]">
                     <DialogHeader>
