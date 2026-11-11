@@ -3,6 +3,9 @@ import { db } from "@/lib/db";
 interface CourseWithCounts {
     modulescount: number;
     assessmentscount: number;
+    studentscount: number;
+    staffscount: number;
+    feedbackscount: number;
 }
 
 export const getAllCourses = async (): Promise<CourseWithCounts[]> => {
@@ -19,6 +22,9 @@ export const getAllCourses = async (): Promise<CourseWithCounts[]> => {
                     select: {
                         modules: true,
                         assessments: true,
+                        userCourses: true,
+                        staffCourses: true,
+                        feedbacks: true,
                     },
                 },
             },
@@ -29,6 +35,9 @@ export const getAllCourses = async (): Promise<CourseWithCounts[]> => {
                 ...course,
                 modulescount: course._count.modules,
                 assessmentscount: course._count.assessments,
+                studentscount: course._count.userCourses,
+                staffscount: course._count.staffCourses,
+                feedbackscount: course._count.feedbacks,
             };
         });
 

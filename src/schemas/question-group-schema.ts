@@ -5,8 +5,7 @@ export const AddQuestionGroupSchema = z.object({
         message: "Title is required"
     }).max(120, {
         message: "Title is too long"
-    }),
-    description: z.string().optional()
+    })
 });
 
 export const UpdateQuestionGroupSchema = z.object({
@@ -17,20 +16,20 @@ export const UpdateQuestionGroupSchema = z.object({
         message: "Title is required"
     }).max(120, {
         message: "Title is too long"
-    }),
-    description: z.string().optional()
+    })
 });
 
 /** Row shape used by the groups table on /admin/questions-groups. */
 export type QuestionGroupRow = {
     id: string;
     title: string;
-    description: string | null;
     createdAt: string;
     /** Code questions (CodeQuestion) inside the group. */
     questionCount: number;
     /** MCQ questions (MCQQuestion) inside the group. */
     mcqCount: number;
+    /** Topics (Topic) inside the group. */
+    topicCount: number;
 };
 
 /** Slim question shape used inside group pickers / group question tables. */

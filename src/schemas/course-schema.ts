@@ -29,7 +29,10 @@ export const CourseTableSchema = z.object({
     language: z.string(),
     completionOrder: z.string(),
     modulescount: z.number(),
-    assessmentscount: z.number()
+    assessmentscount: z.number(),
+    studentscount: z.number().optional(),
+    staffscount: z.number().optional(),
+    feedbackscount: z.number().optional()
 })
 
 

@@ -4,8 +4,12 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Pencil, Code2, FileText, LoaderIcon, Tags } from "lucide-react"
-import { useEffect, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import type { ReactNode } from "react"
+import {
+    TopicCombobox,
+    useGroupTopics,
+} from "@/components/question/topic-select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import * as z from "zod"
@@ -100,6 +104,53 @@ const EditQuestionForm = ({
     })
     const { reset } = form;
     const selectedLang = form.watch("lang");
+
+    // Topic / sub topic options come from the question's group topic
+    // registry (default "general" is always offered). Ungrouped questions
+    // fall back to ["general"] + their current values.
+    const { topics: groupTopics, loading: topicsLoading } = useGroupTopics(
+        question.questionGroupId
+    );
+    const watchedTopic = form.watch("topic");
+    const watchedSubtopic = form.watch("subtopic");
+
+    const topicOptions = useMemo(() => {
+        const names = groupTopics.map((t) => t.name);
+        const current = (watchedTopic ?? "").trim();
+        if (current && !names.some((n) => n.toLowerCase() === current.toLowerCase())) {
+            names.push(current);
+        }
+        return names.length > 0 ? names : ["general"];
+    }, [groupTopics, watchedTopic]);
+
+    const subTopicOptions = useMemo(() => {
+        const parent = groupTopics.find(
+            (t) => t.name.toLowerCase() === (watchedTopic ?? "").toLowerCase()
+        );
+        const names = parent
+            ? parent.subtopics.map((s) => s.name)
+            : ["general"];
+        const current = (watchedSubtopic ?? "").trim();
+        if (current && !names.some((n) => n.toLowerCase() === current.toLowerCase())) {
+            names.push(current);
+        }
+        return names.length > 0 ? names : ["general"];
+    }, [groupTopics, watchedTopic, watchedSubtopic]);
+
+    const handleTopicChange = (name: string) => {
+        form.setValue("topic", name);
+        // Keep the pair consistent — fall back to the default sub topic.
+        const parent = groupTopics.find(
+            (t) => t.name.toLowerCase() === name.toLowerCase()
+        );
+        const subs = parent
+            ? parent.subtopics.map((s) => s.name)
+            : ["general"];
+        const current = form.getValues("subtopic");
+        if (!current || !subs.includes(current)) {
+            form.setValue("subtopic", "general");
+        }
+    };
 
     // Update form values when `question` prop changes
     useEffect(() => {
@@ -470,12 +521,15 @@ const EditQuestionForm = ({
                                             <FormItem>
                                                 <FormLabel>Topic</FormLabel>
                                                 <FormControl>
-                                                    <Input
-                                                        {...field}
+                                                    <TopicCombobox
+                                                        options={topicOptions}
+                                                        value={field.value ?? ""}
+                                                        onChange={handleTopicChange}
                                                         disabled={isLoading}
-                                                        placeholder="(optional)"
-                                                        type="text"
-                                                        autoComplete='false'
+                                                        placeholder="Select topic"
+                                                        searchPlaceholder="Search topic…"
+                                                        emptyText="No topic found."
+                                                        loading={topicsLoading}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -489,12 +543,15 @@ const EditQuestionForm = ({
                                             <FormItem>
                                                 <FormLabel>Sub Topic</FormLabel>
                                                 <FormControl>
-                                                    <Input
-                                                        {...field}
+                                                    <TopicCombobox
+                                                        options={subTopicOptions}
+                                                        value={field.value ?? ""}
+                                                        onChange={(name) => form.setValue("subtopic", name)}
                                                         disabled={isLoading}
-                                                        placeholder="(optional)"
-                                                        type="text"
-                                                        autoComplete='false'
+                                                        placeholder="Select sub topic"
+                                                        searchPlaceholder="Search sub topic…"
+                                                        emptyText="No sub topic found."
+                                                        loading={topicsLoading}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />

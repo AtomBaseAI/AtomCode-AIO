@@ -8,7 +8,7 @@
  * POST /api/question-groups/[id]/mcq-questions/create.
  */
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Code2, FileText, LoaderIcon, Puzzle } from "lucide-react"
@@ -44,6 +44,10 @@ import {
 import CodeEditorField from "@/components/code/code-editor-field"
 import { languages } from "@/components/question/question-table/q-config-data"
 import { GroupMcqSchema } from "@/schemas/group-mcq-schema"
+import {
+    TopicCombobox,
+    useGroupTopics,
+} from "@/components/question/topic-select"
 
 interface GroupMcqAddFormProps {
     /** The group this dialog creates MCQs inside (locked — not selectable). */
@@ -77,13 +81,55 @@ export const GroupMcqAddForm = ({
             codesnippet: "",
             iscodesnippet: false,
             snippetLang: "python",
-            topic: "",
-            subtopic: "",
+            topic: "general",
+            subtopic: "general",
         },
     })
 
     const isCodeSnippet = form.watch("iscodesnippet")
     const snippetLang = form.watch("snippetLang")
+
+    // Topic / sub topic options come from the group's topic registry
+    // (default "general" is always offered).
+    const { topics: groupTopics, loading: topicsLoading } = useGroupTopics(
+        lockedGroup.id
+    )
+    const watchedTopic = form.watch("topic")
+    const watchedSubtopic = form.watch("subtopic")
+
+    const topicOptions = useMemo(() => {
+        const names = groupTopics.map((t) => t.name)
+        if (watchedTopic && !names.includes(watchedTopic)) names.push(watchedTopic)
+        return names.length > 0 ? names : ["general"]
+    }, [groupTopics, watchedTopic])
+
+    const subTopicOptions = useMemo(() => {
+        const parent = groupTopics.find(
+            (t) => t.name.toLowerCase() === (watchedTopic ?? "").toLowerCase()
+        )
+        const names = parent
+            ? parent.subtopics.map((s) => s.name)
+            : ["general"]
+        if (watchedSubtopic && !names.includes(watchedSubtopic)) {
+            names.push(watchedSubtopic)
+        }
+        return names.length > 0 ? names : ["general"]
+    }, [groupTopics, watchedTopic, watchedSubtopic])
+
+    const handleTopicChange = (name: string) => {
+        form.setValue("topic", name)
+        // Keep the pair consistent — fall back to the default sub topic.
+        const parent = groupTopics.find(
+            (t) => t.name.toLowerCase() === name.toLowerCase()
+        )
+        const subs = parent
+            ? parent.subtopics.map((s) => s.name)
+            : ["general"]
+        const current = form.getValues("subtopic")
+        if (!current || !subs.includes(current)) {
+            form.setValue("subtopic", "general")
+        }
+    }
 
     const handleModalClose = () => {
         form.reset()
@@ -237,13 +283,15 @@ export const GroupMcqAddForm = ({
                                                 <FormItem>
                                                     <FormLabel>Topic</FormLabel>
                                                     <FormControl>
-                                                        <Input
-                                                            {...field}
+                                                        <TopicCombobox
+                                                            options={topicOptions}
                                                             value={field.value ?? ""}
+                                                            onChange={handleTopicChange}
                                                             disabled={isLoading}
-                                                            placeholder="(optional)"
-                                                            type="text"
-                                                            autoComplete="false"
+                                                            placeholder="Select topic"
+                                                            searchPlaceholder="Search topic…"
+                                                            emptyText="No topic found."
+                                                            loading={topicsLoading}
                                                         />
                                                     </FormControl>
                                                     <FormMessage />
@@ -257,13 +305,15 @@ export const GroupMcqAddForm = ({
                                                 <FormItem>
                                                     <FormLabel>Sub Topic</FormLabel>
                                                     <FormControl>
-                                                        <Input
-                                                            {...field}
+                                                        <TopicCombobox
+                                                            options={subTopicOptions}
                                                             value={field.value ?? ""}
+                                                            onChange={(name) => form.setValue("subtopic", name)}
                                                             disabled={isLoading}
-                                                            placeholder="(optional)"
-                                                            type="text"
-                                                            autoComplete="false"
+                                                            placeholder="Select sub topic"
+                                                            searchPlaceholder="Search sub topic…"
+                                                            emptyText="No sub topic found."
+                                                            loading={topicsLoading}
                                                         />
                                                     </FormControl>
                                                     <FormMessage />

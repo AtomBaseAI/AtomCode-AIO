@@ -25,6 +25,19 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+    ConfirmDeleteInput,
+    isConfirmDeleteText,
+} from "@/components/ui/confirm-delete"
+import {
     Table,
     TableBody,
     TableCell,
@@ -48,8 +61,8 @@ const SNIPPET_FILTER_OPTIONS = [
     { label: "No", value: "no" },
 ]
 
-/** Remove-from-group action, styled like the shared table action buttons. */
-const RemoveFromGroupButton = ({
+/** Permanent-delete action with phrase confirmation, styled like the shared table actions. */
+const DeleteMcqButton = ({
     groupId,
     mcqId,
     title,
@@ -59,10 +72,13 @@ const RemoveFromGroupButton = ({
     title: string
 }) => {
     const router = useRouter()
-    const [isRemoving, setIsRemoving] = React.useState(false)
+    const [open, setOpen] = React.useState(false)
+    const [confirmText, setConfirmText] = React.useState("")
+    const [isDeleting, setIsDeleting] = React.useState(false)
 
-    const handleRemove = () => {
-        setIsRemoving(true)
+    const handleDelete = () => {
+        if (!isConfirmDeleteText(confirmText)) return
+        setIsDeleting(true)
         fetch(
             `/api/question-groups/${groupId}/mcq-questions?mcqId=${mcqId}`,
             { method: "DELETE" }
@@ -73,28 +89,64 @@ const RemoveFromGroupButton = ({
                     toast.error(data?.error ?? "Something went wrong!")
                     return
                 }
-                toast.success(`"${title}" removed from the group`)
+                toast.success(`"${title}" permanently deleted`)
+                setOpen(false)
                 router.refresh()
             })
             .catch(() => toast.error("Network error — please try again."))
-            .finally(() => setIsRemoving(false))
+            .finally(() => setIsDeleting(false))
     }
 
     return (
-        <Button
-            variant="outline"
-            size="icon"
-            className="border-destructive bg-transparent hover:bg-red-400/20"
-            aria-label={`Remove ${title} from group`}
-            onClick={handleRemove}
-            disabled={isRemoving}
+        <Dialog
+            open={open}
+            onOpenChange={(o) => {
+                setConfirmText("")
+                setOpen(o)
+            }}
         >
-            {isRemoving ? (
-                <LoaderIcon className="size-5 animate-spin text-destructive" />
-            ) : (
-                <Trash className="size-5 bg-transparent text-destructive" />
-            )}
-        </Button>
+            <DialogTrigger asChild>
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="border-destructive bg-transparent hover:bg-red-400/20"
+                    aria-label={`Delete MCQ ${title}`}
+                >
+                    <Trash className="size-5 bg-transparent text-destructive" />
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Delete MCQ</DialogTitle>
+                    <DialogDescription>
+                        This permanently deletes &quot;{title}&quot;. This
+                        action is irreversible — are you sure?
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-3">
+                    <ConfirmDeleteInput
+                        value={confirmText}
+                        onValueChange={setConfirmText}
+                    />
+                    <span className="grid w-full grid-cols-2 gap-2">
+                        <DialogClose asChild>
+                            <Button className="w-full">Cancel</Button>
+                        </DialogClose>
+                        <Button
+                            variant="destructive"
+                            className="w-full"
+                            disabled={isDeleting || !isConfirmDeleteText(confirmText)}
+                            onClick={handleDelete}
+                        >
+                            {isDeleting && (
+                                <LoaderIcon className="mr-2 size-4 animate-spin" />
+                            )}
+                            Delete
+                        </Button>
+                    </span>
+                </div>
+            </DialogContent>
+        </Dialog>
     )
 }
 
@@ -188,7 +240,7 @@ export const getGroupMcqColumns = (
                 <div className="flex items-center">
                     <span className="flex gap-2">
                         <GroupMcqEditForm groupId={groupId} mcq={mcq} />
-                        <RemoveFromGroupButton
+                        <DeleteMcqButton
                             groupId={groupId}
                             mcqId={mcq.id}
                             title={mcq.title}
@@ -366,17 +418,19 @@ export function GroupMcqDataTable({ groupId, data }: GroupMcqDataTableProps) {
                             return {
                                 error:
                                     (data as { error?: string }).error ??
-                                    "Failed to remove MCQs from the group.",
+                                    "Failed to delete MCQs.",
                             }
                         return {
                             success:
                                 (data as { success?: string }).success ??
-                                "MCQ(s) removed from the group.",
+                                "MCQ(s) permanently deleted.",
+                            skipped: (data as { skipped?: number }).skipped,
                         }
                     }}
-                    label="Remove from group"
-                    dialogTitle="Remove selected MCQs from the group"
-                    dialogDescription="The MCQs stay in the question bank; they are only detached from this group."
+                    label="Delete MCQs"
+                    dialogTitle="Delete selected MCQs"
+                    dialogDescription="This permanently deletes the selected MCQs, including all their options and metadata. This action cannot be undone."
+                    requirePhrase
                 />
             </BulkActionBar>
         </div>

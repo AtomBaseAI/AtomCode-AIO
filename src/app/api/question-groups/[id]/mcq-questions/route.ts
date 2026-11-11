@@ -7,67 +7,8 @@ import { GroupMcqUpdateSchema } from "@/schemas/group-mcq-schema";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-const AddMcqsSchema = z.object({
-    mcqIds: z.array(z.string().min(1)).min(1, {
-        message: "Select at least one MCQ",
-    }),
-});
-
 async function getGroupOr404(id: string) {
     return db.questionGroup.findUnique({ where: { id } });
-}
-
-/**
- * POST /api/question-groups/[id]/mcq-questions — move existing MCQs into
- * this group.
- * Body: { mcqIds: string[] }
- * An MCQ can live in only one group, so MCQs already in another group are
- * moved (their previous membership is replaced).
- */
-export async function POST(req: Request, ctx: RouteContext) {
-    const guard = await requireAdminApi();
-    if (!guard.ok) return guard.response;
-
-    const { id } = await ctx.params;
-    const group = await getGroupOr404(id);
-    if (!group) {
-        return NextResponse.json({ error: "Group not found" }, { status: 404 });
-    }
-
-    const body = await req.json().catch(() => null);
-    const parsed = AddMcqsSchema.safeParse(body);
-    if (!parsed.success) {
-        return NextResponse.json(
-            { error: parsed.error.issues[0]?.message ?? "Invalid input" },
-            { status: 400 }
-        );
-    }
-
-    // Verify every id is a real MCQ before connecting.
-    const uniqueIds = Array.from(new Set(parsed.data.mcqIds));
-    const found = await db.mCQQuestion.findMany({
-        where: { id: { in: uniqueIds } },
-        select: { id: true },
-    });
-    if (found.length !== uniqueIds.length) {
-        return NextResponse.json(
-            { error: "One or more selected questions no longer exist." },
-            { status: 400 }
-        );
-    }
-
-    await db.questionGroup.update({
-        where: { id },
-        data: {
-            mcqQuestions: {
-                connect: uniqueIds.map((qid) => ({ id: qid })),
-            },
-        },
-    });
-
-    return NextResponse.json({
-        success: `${uniqueIds.length} MCQ(s) added to "${group.title}"`,
-    });
 }
 
 /**
@@ -118,8 +59,9 @@ export async function PUT(req: Request, ctx: RouteContext) {
 }
 
 /**
- * DELETE /api/question-groups/[id]/mcq-questions?mcqId=… — remove one MCQ
- * from this group (the MCQ itself is kept, ungrouped).
+ * DELETE /api/question-groups/[id]/mcq-questions?mcqId=… — permanently delete
+ * one MCQ that belongs to this group (MCQs are managed exclusively inside
+ * question groups; there is no global bank to detach back to).
  * Bulk mode: { mcqIds: string[] } JSON body.
  */
 export async function DELETE(req: Request, ctx: RouteContext) {
@@ -159,52 +101,35 @@ export async function DELETE(req: Request, ctx: RouteContext) {
     }
 
     if (bulkIds.length > 0) {
-        // Verify which of the ids actually belong to this group.
-        const connected = await db.mCQQuestion.findMany({
+        // Scoped by questionGroupId — only MCQs that actually belong to this
+        // group are deleted, in one atomic statement.
+        const result = await db.mCQQuestion.deleteMany({
             where: { id: { in: bulkIds }, questionGroupId: id },
-            select: { id: true },
         });
-        if (connected.length === 0) {
+        if (result.count === 0) {
             return NextResponse.json(
                 { error: "None of the selected questions belong to this group." },
                 { status: 404 }
             );
         }
 
-        await db.questionGroup.update({
-            where: { id },
-            data: {
-                mcqQuestions: {
-                    disconnect: connected.map((q) => ({ id: q.id })),
-                },
-            },
-        });
-
-        const detached = bulkIds.length - connected.length;
+        const skipped = bulkIds.length - result.count;
         return NextResponse.json({
-            success: `${connected.length} MCQ(s) removed from the group`,
-            count: connected.length,
-            ...(detached > 0 ? { skipped: detached } : {}),
+            success: `${result.count} MCQ(s) permanently deleted`,
+            count: result.count,
+            ...(skipped > 0 ? { skipped } : {}),
         });
     }
 
-    const mcq = await db.mCQQuestion.findFirst({
+    const result = await db.mCQQuestion.deleteMany({
         where: { id: mcqId!, questionGroupId: id },
-        select: { id: true },
     });
-    if (!mcq) {
+    if (result.count === 0) {
         return NextResponse.json(
             { error: "This MCQ does not belong to the group." },
             { status: 404 }
         );
     }
 
-    await db.questionGroup.update({
-        where: { id },
-        data: {
-            mcqQuestions: { disconnect: { id: mcqId! } },
-        },
-    });
-
-    return NextResponse.json({ success: "MCQ removed from the group" });
+    return NextResponse.json({ success: "MCQ permanently deleted" });
 }

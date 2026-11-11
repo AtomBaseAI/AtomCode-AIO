@@ -238,12 +238,34 @@ model CodeQuestion {
 model QuestionGroup {
   id           String         @id @default(uuid())
   title        String
-  description  String?        @db.Text
   createdAt    DateTime       @default(now())
   questions    CodeQuestion[]
   mcqQuestions MCQQuestion[]
+  topics       Topic[]
 
   @@index([title])
+}
+
+model Topic {
+  id        String        @id @default(uuid())
+  name      String
+  groupId   String
+  group     QuestionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  subtopics SubTopic[]
+  createdAt DateTime      @default(now())
+
+  @@unique([groupId, name])
+  @@index([groupId])
+}
+
+model SubTopic {
+  id      String @id @default(uuid())
+  name    String
+  topicId String
+  topic   Topic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, name])
+  @@index([topicId])
 }
 
 model UserCodeQuestionData {
@@ -263,7 +285,7 @@ model UserCodeQuestionData {
   testcase2status String?
   testcase3status String?
   user            User         @relation(fields: [userId], references: [id])
-  codeQuestion    CodeQuestion @relation(fields: [questionId], references: [id])
+  codeQuestion    CodeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   module          Module       @relation(fields: [moduleId], references: [id])
 
   @@unique([userId, questionId])
@@ -394,7 +416,7 @@ model userAssessmentCodeData {
   testcase2status String?
   testcase3status String?
   user            User         @relation(fields: [userId], references: [id])
-  codeQuestion    CodeQuestion @relation(fields: [questionId], references: [id])
+  codeQuestion    CodeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   assessments     Assessments  @relation(fields: [assessmentId], references: [id])
 
   @@unique([userId, questionId])

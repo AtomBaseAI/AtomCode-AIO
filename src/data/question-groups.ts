@@ -6,7 +6,7 @@ export const getAllQuestionGroups = () => {
             orderBy: { createdAt: "desc" },
             include: {
                 _count: {
-                    select: { questions: true, mcqQuestions: true }
+                    select: { questions: true, mcqQuestions: true, topics: true }
                 }
             }
         })
@@ -48,38 +48,6 @@ export const getQuestionGroupsCount = () => {
 }
 
 /**
- * Questions that can be moved into the given group — everything that is
- * not already inside it (ungrouped questions + questions of other groups).
- */
-export const getQuestionsAvailableForGroup = async (gid: string) => {
-    try {
-        const questions = await db.codeQuestion.findMany({
-            where: {
-                OR: [
-                    { questionGroupId: null },
-                    { questionGroupId: { not: gid } },
-                ],
-            },
-            orderBy: { title: "asc" },
-            select: {
-                id: true,
-                title: true,
-                lang: true,
-                difficulty: true,
-                maxscore: true,
-                topic: true,
-                subtopic: true,
-                questionGroup: { select: { title: true } },
-            },
-        })
-        return questions
-    }
-    catch {
-        return null
-    }
-}
-
-/**
  * MCQ questions currently inside the given group.
  */
 export const getMcqQuestionsForGroup = async (gid: string) => {
@@ -113,40 +81,21 @@ export const getMcqQuestionsForGroup = async (gid: string) => {
 }
 
 /**
- * MCQ questions that can be moved into the given group — everything that is
- * not already inside it (ungrouped MCQs + MCQs of other groups).
+ * Topics of a question group with their subtopics. Used by the topics page.
+ * Ordered alphabetically — the UI promotes the default "general" topic.
  */
-export const getMcqsAvailableForGroup = async (gid: string) => {
+export const getTopicsForGroup = async (gid: string) => {
     try {
-        const mcqs = await db.mCQQuestion.findMany({
-            where: {
-                OR: [
-                    { questionGroupId: null },
-                    { questionGroupId: { not: gid } },
-                ],
-            },
-            orderBy: { title: "asc" },
-            select: {
-                id: true,
-                title: true,
-                description: true,
-                topic: true,
-                subtopic: true,
-                Option1: true,
-                Option2: true,
-                Option3: true,
-                Option4: true,
-                CorrectOption: true,
-                referenceimg: true,
-                codesnippet: true,
-                snippetLang: true,
-                iscodesnippet: true,
-                questionGroup: { select: { title: true } },
-            },
+        const topics = await db.topic.findMany({
+            where: { groupId: gid },
+            orderBy: { name: "asc" },
+            include: { subtopics: { orderBy: { name: "asc" } } },
         })
-        return mcqs
+        return topics
     }
     catch {
         return null
     }
 }
+
+

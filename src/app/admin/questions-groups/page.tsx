@@ -1,7 +1,3 @@
-import Link from "next/link"
-import { Package } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
 import { getAllQuestionGroups } from "@/data/question-groups"
 import { GroupsDataTable } from "@/components/question-group/groups-data-table"
 import { GroupFormDialog } from "@/components/question-group/group-form-dialog"
@@ -12,10 +8,10 @@ export default async function QuestionGroupsPage() {
     const rows = (groups ?? []).map((g) => ({
         id: g.id,
         title: g.title,
-        description: g.description,
         createdAt: g.createdAt.toISOString(),
         questionCount: g._count.questions,
         mcqCount: g._count.mcqQuestions,
+        topicCount: g._count.topics,
     }))
 
     return (
@@ -28,11 +24,6 @@ export default async function QuestionGroupsPage() {
                     </p>
                 </div>
                 <div className="flex justify-center items-center gap-x-4">
-                    <Button variant="outline" className="gap-2" asChild>
-                        <Link href="/admin/questions">
-                            <Package className="size-4" /> All Questions
-                        </Link>
-                    </Button>
                     <GroupFormDialog mode="create" />
                 </div>
             </div>

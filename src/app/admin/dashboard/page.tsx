@@ -139,13 +139,13 @@ const Dashboard = async () => {
     { href: '/admin/students', icon: Users, label: 'Total Students', value: counts.students },
     { href: '/admin/staffs', icon: ShipWheel, label: 'Total Staffs', value: counts.staffs },
     {
-      href: '/admin/questions',
+      href: '/admin/questions-groups',
       icon: Package,
       label: 'Code Questions',
       value: counts.codeQuestions,
     },
     {
-      href: '/admin/questions',
+      href: '/admin/questions-groups',
       icon: FileQuestion,
       label: 'MCQ Questions',
       value: counts.mcqQuestions,

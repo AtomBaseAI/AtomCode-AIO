@@ -52,7 +52,11 @@ function TooltipContent({
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className="bg-primary fill-primary z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]" />
+        {/* Arrow inherits the content's background color (bg-inherit) so it always
+            matches the bubble — custom-colored tooltips (bg-cyan-500, bg-amber-500,
+            bg-lime-500, ... at 20+ call sites) previously rendered with a hardcoded
+            bg-primary/fill-primary arrow, producing a mismatched two-color tooltip. */}
+        <TooltipPrimitive.Arrow className="bg-inherit fill-none z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]" />
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   )

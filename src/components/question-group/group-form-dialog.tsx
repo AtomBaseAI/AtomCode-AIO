@@ -26,14 +26,13 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import {
     AddQuestionGroupSchema,
 } from "@/schemas/question-group-schema"
 
 interface GroupFormDialogProps {
     mode: "create" | "edit"
-    group?: { id: string; title: string; description: string | null }
+    group?: { id: string; title: string }
 }
 
 /**
@@ -53,7 +52,6 @@ export function GroupFormDialog({ mode, group }: GroupFormDialogProps) {
         resolver: zodResolver(AddQuestionGroupSchema),
         defaultValues: {
             title: group?.title ?? "",
-            description: group?.description ?? "",
         },
     })
 
@@ -63,7 +61,6 @@ export function GroupFormDialog({ mode, group }: GroupFormDialogProps) {
             setError("")
             form.reset({
                 title: group?.title ?? "",
-                description: group?.description ?? "",
             })
         }
     }
@@ -78,7 +75,6 @@ export function GroupFormDialog({ mode, group }: GroupFormDialogProps) {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                       title: values.title,
-                      description: values.description || "",
                   }),
               })
             : fetch("/api/question-groups", {
@@ -86,7 +82,6 @@ export function GroupFormDialog({ mode, group }: GroupFormDialogProps) {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                       title: values.title,
-                      description: values.description || "",
                   }),
               })
 
@@ -101,7 +96,7 @@ export function GroupFormDialog({ mode, group }: GroupFormDialogProps) {
                     isEdit ? "Question group updated!" : "Question group created!"
                 )
                 setOpen(false)
-                form.reset({ title: "", description: "" })
+                form.reset({ title: "" })
                 startTransition(() => router.refresh())
             })
             .catch(() => setError("Network error — please try again."))
@@ -155,24 +150,6 @@ export function GroupFormDialog({ mode, group }: GroupFormDialogProps) {
                                             placeholder="e.g. Loops & Iterations"
                                             type="text"
                                             autoComplete="off"
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            {...field}
-                                            disabled={isSubmitting}
-                                            placeholder="(optional)"
-                                            className="resize-none min-h-[90px]"
                                         />
                                     </FormControl>
                                     <FormMessage />

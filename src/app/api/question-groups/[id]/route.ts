@@ -43,8 +43,8 @@ export async function GET(_req: Request, ctx: RouteContext) {
 }
 
 /**
- * PATCH /api/question-groups/[id] — rename / re-describe a group.
- * Body: { title, description? }
+ * PATCH /api/question-groups/[id] — rename a group.
+ * Body: { title }
  */
 export async function PATCH(req: Request, ctx: RouteContext) {
     const guard = await requireAdminApi();
@@ -80,7 +80,6 @@ export async function PATCH(req: Request, ctx: RouteContext) {
         where: { id },
         data: {
             title,
-            description: parsed.data.description?.trim() || null,
         },
     });
 

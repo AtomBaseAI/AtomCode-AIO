@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdminApi } from "@/lib/api-admin-guard";
 import { AddQuestionGroupSchema } from "@/schemas/question-group-schema";
+import { ensureGeneralTopic } from "@/lib/topics";
 
 /** Case-insensitive duplicate title check (excluding `excludeId` when given). */
 async function titleExists(title: string, excludeId?: string) {
@@ -33,7 +34,6 @@ export async function GET() {
         groups: groups.map((g) => ({
             id: g.id,
             title: g.title,
-            description: g.description,
             createdAt: g.createdAt,
             questionCount: g._count.questions,
         })),
@@ -42,7 +42,7 @@ export async function GET() {
 
 /**
  * POST /api/question-groups — create a question group.
- * Body: { title, description? }
+ * Body: { title }
  */
 export async function POST(req: Request) {
     const guard = await requireAdminApi();
@@ -74,9 +74,11 @@ export async function POST(req: Request) {
     const group = await db.questionGroup.create({
         data: {
             title,
-            description: parsed.data.description?.trim() || null,
         },
     });
+
+    // Every new group starts with the default "general" topic + subtopic.
+    await ensureGeneralTopic(group.id);
 
     return NextResponse.json({ group }, { status: 201 });
 }

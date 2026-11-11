@@ -275,3 +275,13 @@ html[data-magicui-theme-vt="active"]::view-transition-group(root) {
 /* tabs dark-mode restyle */
 
 /* course stats restyle */
+
+/* Tooltip arrow color matching (fixes two-color tooltip glitch):
+   Radix wraps the Arrow <svg> in an anonymous <span> (its positioning layer).
+   `bg-inherit` on the svg alone would inherit the transparent span, NOT the
+   colored bubble — so the background must be chained: content -> span -> svg.
+   Works for the default bg-primary bubble AND every custom bg-*-500 call site
+   (c-modules, c-assessments, c-delete, staff/module tables, etc.). */
+[data-slot="tooltip-content"] > span:last-child {
+  background-color: inherit;
+}

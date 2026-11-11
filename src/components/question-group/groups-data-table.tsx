@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { ColumnDef } from "@tanstack/react-table"
 import { Cross2Icon } from "@radix-ui/react-icons"
-import { Code2, Puzzle } from "lucide-react"
+import { Code2, ListTree, Puzzle } from "lucide-react"
 
 import {
     ColumnFiltersState,
@@ -57,22 +57,6 @@ export const groupColumns: ColumnDef<QuestionGroupRow>[] = [
         },
     },
     {
-        accessorKey: "description",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} name="Description" />
-        ),
-        cell: ({ row }) => {
-            const description: string | null = row.getValue("description")
-            return (
-                <div className="flex space-x-2">
-                    <span className="max-w-[320px] truncate text-muted-foreground">
-                        {description ? description : "—"}
-                    </span>
-                </div>
-            )
-        },
-    },
-    {
         accessorKey: "questionCount",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} name="Code Questions" />
@@ -107,6 +91,26 @@ export const groupColumns: ColumnDef<QuestionGroupRow>[] = [
                     >
                         <Puzzle className="size-3.5" />
                         {row.getValue("mcqCount")}
+                    </Badge>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: "topicCount",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} name="Topics" />
+        ),
+        cell: ({ row }) => {
+            return (
+                <div className="flex items-center">
+                    <Badge
+                        variant="outline"
+                        className="gap-1.5"
+                        title="Topics in this group"
+                    >
+                        <ListTree className="size-3.5" />
+                        {row.getValue("topicCount")}
                     </Badge>
                 </div>
             )
@@ -170,12 +174,24 @@ export const groupColumns: ColumnDef<QuestionGroupRow>[] = [
                                 <Puzzle className="size-5 text-primary" />
                             </Link>
                         </Button>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="border-primary bg-transparent hover:bg-purple-700/10"
+                            aria-label={`Open topics of ${group.title}`}
+                            asChild
+                        >
+                            <Link
+                                href={`/admin/questions-groups/${group.id}/topics`}
+                            >
+                                <ListTree className="size-5 text-primary" />
+                            </Link>
+                        </Button>
                         <GroupFormDialog
                             mode="edit"
                             group={{
                                 id: group.id,
                                 title: group.title,
-                                description: group.description,
                             }}
                         />
                         <GroupDeleteDialog

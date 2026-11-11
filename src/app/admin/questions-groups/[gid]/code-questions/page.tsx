@@ -2,12 +2,8 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-    getQuestionGroupById,
-    getQuestionsAvailableForGroup,
-} from "@/data/question-groups"
+import { getQuestionGroupById } from "@/data/question-groups"
 import { GroupQuestionsDataTable } from "@/components/question-group/group-questions-data-table"
-import { AddQuestionsDialog } from "@/components/question-group/add-questions-dialog"
 import { QuestionImportExportMenu } from "@/components/question-group/question-import-export-menu"
 import AddQuestion from "@/components/question/question-add-form"
 import BackBtn from "@/components/backbtn"
@@ -50,18 +46,6 @@ const GroupQuestionsPage = async ({
         groupTitle: group.title,
     }))
 
-    const availableRaw = await getQuestionsAvailableForGroup(gid)
-    const available = (availableRaw ?? []).map((q) => ({
-        id: q.id,
-        title: q.title,
-        lang: q.lang,
-        difficulty: q.difficulty,
-        maxscore: q.maxscore,
-        topic: q.topic,
-        subtopic: q.subtopic,
-        groupTitle: q.questionGroup?.title ?? null,
-    }))
-
     return (
         <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
             <TopbarBreadcrumb
@@ -73,7 +57,6 @@ const GroupQuestionsPage = async ({
             <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                 <div>
                     <p className="text-muted-foreground">
-                        {group.description || "No description"} ·{" "}
                         {inGroup.length} question
                         {inGroup.length === 1 ? "" : "s"} in this group
                     </p>
@@ -83,11 +66,6 @@ const GroupQuestionsPage = async ({
                         lockedGroup={{ id: group.id, title: group.title }}
                         triggerLabel="Create Question"
                     />
-                    <AddQuestionsDialog
-                        groupId={group.id}
-                        groupTitle={group.title}
-                        available={available}
-                    />
                     <QuestionImportExportMenu
                         groupId={group.id}
                         groupTitle={group.title}
@@ -95,7 +73,7 @@ const GroupQuestionsPage = async ({
                     <BackBtn />
                 </div>
             </div>
-            <GroupQuestionsDataTable groupId={group.id} data={inGroup} />
+            <GroupQuestionsDataTable data={inGroup} />
         </div>
     )
 }

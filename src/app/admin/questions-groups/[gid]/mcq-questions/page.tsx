@@ -5,11 +5,9 @@ import { Button } from "@/components/ui/button"
 import {
     getQuestionGroupById,
     getMcqQuestionsForGroup,
-    getMcqsAvailableForGroup,
 } from "@/data/question-groups"
 import { GroupMcqDataTable } from "@/components/question-group/group-mcq-data-table"
 import { GroupMcqAddForm } from "@/components/question-group/group-mcq-add-form"
-import { AddMcqsDialog } from "@/components/question-group/add-mcqs-dialog"
 import { GroupMcqImportExportMenu } from "@/components/question-group/group-mcq-import-export-menu"
 import BackBtn from "@/components/backbtn"
 import { TopbarBreadcrumb } from "@/components/topbar-title"
@@ -78,9 +76,6 @@ const GroupMcqQuestionsPage = async ({
     const inGroupRaw = await getMcqQuestionsForGroup(gid)
     const inGroup = (inGroupRaw ?? []).map(toGroupMcqRow)
 
-    const availableRaw = await getMcqsAvailableForGroup(gid)
-    const available = (availableRaw ?? []).map(toGroupMcqRow)
-
     return (
         <div className="flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full">
             <TopbarBreadcrumb
@@ -92,7 +87,6 @@ const GroupMcqQuestionsPage = async ({
             <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                 <div>
                     <p className="text-muted-foreground">
-                        {group.description || "No description"} ·{" "}
                         {inGroup.length} MCQ question
                         {inGroup.length === 1 ? "" : "s"} in this group
                     </p>
@@ -101,11 +95,6 @@ const GroupMcqQuestionsPage = async ({
                     <GroupMcqAddForm
                         lockedGroup={{ id: group.id, title: group.title }}
                         triggerLabel="Create MCQ"
-                    />
-                    <AddMcqsDialog
-                        groupId={group.id}
-                        groupTitle={group.title}
-                        available={available}
                     />
                     <GroupMcqImportExportMenu
                         groupId={group.id}

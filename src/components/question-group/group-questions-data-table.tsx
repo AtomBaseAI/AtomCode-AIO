@@ -3,9 +3,6 @@
 import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { Cross2Icon } from "@radix-ui/react-icons"
-import { LoaderIcon, Trash } from "lucide-react"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
 
 import {
     ColumnFiltersState,
@@ -40,62 +37,12 @@ import { BulkActionBar } from "@/components/data-tables/bulk-action-bar"
 import { BulkActionButton } from "@/components/data-tables/bulk-action-button"
 import { difficulties, languages } from "@/components/question/question-table/q-config-data"
 import QEdit from "@/components/question/question-table/q-edit"
+import DeleteQuestion from "@/components/question/question-table/q-delete"
+import { deletequestionsbulk } from "@/actions/question"
 import type { GroupQuestionRow } from "@/schemas/question-group-schema"
 
-/** Remove-from-group action, styled like the shared table action buttons. */
-const RemoveFromGroupButton = ({
-    groupId,
-    qid,
-    title,
-}: {
-    groupId: string
-    qid: string
-    title: string
-}) => {
-    const router = useRouter()
-    const [isRemoving, setIsRemoving] = React.useState(false)
-
-    const handleRemove = () => {
-        setIsRemoving(true)
-        fetch(
-            `/api/question-groups/${groupId}/questions?questionId=${qid}`,
-            { method: "DELETE" }
-        )
-            .then(async (res) => {
-                const data = await res.json().catch(() => null)
-                if (!res.ok) {
-                    toast.error(data?.error ?? "Something went wrong!")
-                    return
-                }
-                toast.success(`"${title}" removed from the group`)
-                router.refresh()
-            })
-            .catch(() => toast.error("Network error — please try again."))
-            .finally(() => setIsRemoving(false))
-    }
-
-    return (
-        <Button
-            variant="outline"
-            size="icon"
-            className="border-destructive bg-transparent hover:bg-red-400/20"
-            aria-label={`Remove ${title} from group`}
-            onClick={handleRemove}
-            disabled={isRemoving}
-        >
-            {isRemoving ? (
-                <LoaderIcon className="size-5 animate-spin text-destructive" />
-            ) : (
-                <Trash className="size-5 bg-transparent text-destructive" />
-            )}
-        </Button>
-    )
-}
-
 /** Columns for the questions that live inside a question group. */
-export const getGroupQuestionColumns = (
-    groupId: string
-): ColumnDef<GroupQuestionRow>[] => [
+export const getGroupQuestionColumns = (): ColumnDef<GroupQuestionRow>[] => [
     {
         accessorKey: "title",
         header: ({ column }) => (
@@ -212,11 +159,7 @@ export const getGroupQuestionColumns = (
                 <div className="flex items-center">
                     <span className="flex gap-2">
                         <QEdit qid={qst.id} />
-                        <RemoveFromGroupButton
-                            groupId={groupId}
-                            qid={qst.id}
-                            title={qst.title}
-                        />
+                        <DeleteQuestion qid={qst.id} />
                     </span>
                 </div>
             )
@@ -226,7 +169,6 @@ export const getGroupQuestionColumns = (
 ]
 
 interface GroupQuestionsDataTableProps {
-    groupId: string
     data: GroupQuestionRow[]
 }
 
@@ -237,7 +179,6 @@ interface GroupQuestionsDataTableProps {
  * sortable headers, pagination).
  */
 export function GroupQuestionsDataTable({
-    groupId,
     data,
 }: GroupQuestionsDataTableProps) {
     const [sorting, setSorting] = React.useState<SortingState>([])
@@ -248,8 +189,8 @@ export function GroupQuestionsDataTable({
     const [rowSelection, setRowSelection] = React.useState({})
 
     const columns = React.useMemo(
-        () => getGroupQuestionColumns(groupId),
-        [groupId]
+        () => getGroupQuestionColumns(),
+        []
     )
 
     const allColumns = React.useMemo<ColumnDef<GroupQuestionRow>[]>(
@@ -386,31 +327,11 @@ export function GroupQuestionsDataTable({
             <BulkActionBar table={table}>
                 <BulkActionButton
                     table={table}
-                    action={async (ids) => {
-                        const res = await fetch(
-                            `/api/question-groups/${groupId}/questions`,
-                            {
-                                method: "DELETE",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ questionIds: ids }),
-                            }
-                        )
-                        const data = await res.json().catch(() => ({}))
-                        if (!res.ok)
-                            return {
-                                error:
-                                    (data as { error?: string }).error ??
-                                    "Failed to remove questions from the group.",
-                            }
-                        return {
-                            success:
-                                (data as { success?: string }).success ??
-                                "Question(s) removed from the group.",
-                        }
-                    }}
-                    label="Remove from group"
-                    dialogTitle="Remove selected questions from the group"
-                    dialogDescription="The questions stay in the question bank; they are only detached from this group."
+                    action={deletequestionsbulk}
+                    label="Delete questions"
+                    dialogTitle="Delete selected questions"
+                    dialogDescription="This permanently deletes the selected questions from the question bank, including their submission data. This action cannot be undone."
+                    requirePhrase
                 />
             </BulkActionBar>
         </div>
