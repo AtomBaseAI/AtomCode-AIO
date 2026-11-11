@@ -60,13 +60,10 @@ const Settings = async () => {
   const aiModel = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
   return (
-    <div className="flex w-full flex-1 flex-col gap-6 pb-8">
+    // Same content-span spacing rule as /admin/questions-groups:
+    // p-4 (mobile) / md:p-8 (desktop) top + left padding, full-width column.
+    <div className="flex h-full w-full flex-1 flex-col gap-6 p-4 pb-8 md:p-8">
       <TopbarTitle>Settings</TopbarTitle>
-      <header className="w-full">
-        <p className="text-sm text-muted-foreground">
-          Manage your account, platform configuration and integrations
-        </p>
-      </header>
 
       {/* ---------------- Profile — full width ---------------- */}
       <Card>

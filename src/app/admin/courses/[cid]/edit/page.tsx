@@ -15,7 +15,8 @@ const EditCourse = async ({ params }: { params: Promise<{ cid: string}> }) => {
         title: course?.title || '',
         startdate: course?.startdate ?? new Date(),
         enddate: course?.enddate ?? new Date(),
-        language: course?.language || ''
+        language: course?.language || '',
+        completionOrder: (course?.completionOrder ?? 'openflow') as 'daywise' | 'queue' | 'openflow',
     };
     const formattedDates = {
         FStartDate: course?.startdate ? new Date(course?.startdate) : null,
@@ -76,6 +77,14 @@ const EditCourse = async ({ params }: { params: Promise<{ cid: string}> }) => {
                                 </div>
                                 <div className="flex items-center justify-center  w-[70%] p-1">
                                     {coursex.language}
+                                </div>
+                            </div>
+                            <div className="flex flex-row border shadow flex-1 col-span-2">
+                                <div className="h-full bg-primary/90 text-white rounded-md w-[30%] text-center p-1">
+                                    Completion Order
+                                </div>
+                                <div className="flex items-center justify-center capitalize w-[70%] p-1">
+                                    {coursex.completionOrder}
                                 </div>
                             </div>
                         </div>

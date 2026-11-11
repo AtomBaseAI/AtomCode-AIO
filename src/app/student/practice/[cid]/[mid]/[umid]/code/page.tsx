@@ -1,6 +1,8 @@
 import { getCourseModuleByModuleID, getModuleQuestionsByModuleId } from '@/data/student/modules';
 
 import CodeView from '@/components/student-role/practice/code/code-view';
+import ModuleLockedScreen from '@/components/student-role/module-locked';
+import { getStudentModuleLock } from '@/lib/module-access';
 import { CircleSlash } from 'lucide-react';
 import Link from 'next/link';
 import { auth } from '@/auth';
@@ -27,6 +29,11 @@ const CodeMain = async ({ params }: { params: Promise<{ mid: string, cid: string
                 </div>
             </>
         )
+    }
+    // Completion-order gate — deep links cannot bypass the module lock.
+    const lock = await getStudentModuleLock(uid, mid)
+    if (lock.found && lock.locked) {
+        return <ModuleLockedScreen lock={lock} backHref={`/student/courses/${cid}/module`} />
     }
     const ModuleQuestions = await getModuleQuestionsByModuleId(mid, uid) || [];
     const courseModule = await getCourseModuleByModuleID(mid)

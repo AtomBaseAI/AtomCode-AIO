@@ -23,6 +23,7 @@ const EditModulex = async ({ params }: { params: Promise<{ cid: string; mid: str
     maxscore: moduleog?.maxscore ?? 0,
     concepturl: moduleog?.concepturl ?? ''
   }
+  const moduleCompletionOrder = course?.completionOrder ?? 'openflow'
   const formattedDates = {
     FStartDate: moduleog?.moduledate ? new Date(moduleog?.moduledate) : null,
   }
@@ -47,7 +48,7 @@ const EditModulex = async ({ params }: { params: Promise<{ cid: string; mid: str
               <h4 className="text-primary font-bold">Module Details</h4>
               <div className="flex gap-4">
                 {/* <EditCourseForm course={coursex} /> */}
-                <EditModule modulez={modulex} />
+                <EditModule modulez={modulex} completionOrder={moduleCompletionOrder} />
                 <BackBtn />
               </div>
             </div>

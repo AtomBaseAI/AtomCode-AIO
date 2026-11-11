@@ -7,6 +7,9 @@ export const getAllModulesByCourseId = async (id: string) => {
                 courseId: id,
                 modulestatus: "active",
             },
+            // createdAt defines the module sequence (queue-type courses);
+            // title breaks ties for rows created in the same instant.
+            orderBy: [{ createdAt: "asc" }, { title: "asc" }],
             select: {
                 id: true,
                 title: true,
@@ -14,6 +17,9 @@ export const getAllModulesByCourseId = async (id: string) => {
                 moduledate: true,
                 maxscore: true,
                 concepturl: true,
+                course: {
+                    select: { completionOrder: true },
+                },
                 _count: {
                     select: {
                         codeQuestions: true,
@@ -37,6 +43,7 @@ export const getAllModulesByCourseId = async (id: string) => {
             moduledate: module.moduledate,
             concepturl: module.concepturl,
             maxscore: module.maxscore,
+            completionOrder: module.course.completionOrder,
             questionscount: module._count.codeQuestions,
             mcqcount: module._count.mcqQuestions,
             modulereference: module.reference,

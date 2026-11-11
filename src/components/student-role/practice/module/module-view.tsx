@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Check, Code, Play, Star } from "lucide-react";
+import { Check, Code, Lock, Play, Star } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import ModuleAction from "./module-action";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import ConceptPreview from "./concept-preview";
 import { formatDate, getISTParts } from "@/lib/utils";
+import type { ModuleLockState } from "@/lib/module-access";
 
 interface ModuleResultType {
     id: string;
@@ -34,6 +35,7 @@ interface ModuleDataType {
     moduledate: Date;
     concepturl: string | null;
     maxscore: number | null;
+    completionOrder?: string;
     questionscount: number,
     mcqcount: number,
     modulereference: Reference[] | [];
@@ -107,7 +109,7 @@ const determineFeedbackStatus = (feedbackDate: Date): { status: string, statusCl
 };
 
 
-const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, uid, cid }: { ModulesData: ModuleDataType[] | null, CourseFeedbackData: CourseFeedback[] | null, ModulesResults: ModuleResultType[] | null, uid: string, cid: string }) => {
+const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, lockStates, uid, cid }: { ModulesData: ModuleDataType[] | null, CourseFeedbackData: CourseFeedback[] | null, ModulesResults: ModuleResultType[] | null, lockStates: Record<string, ModuleLockState>, uid: string, cid: string }) => {
     const [mergedModules, setMergedModules] = useState<MergedModuleType[]>([]);
     const [selectedModule, setSelectedModule] = useState<MergedModuleType | null>(null);
 
@@ -193,11 +195,15 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, uid, cid 
                         {mergedModules.map((module, index) => {
                             const isCompleted = module.modulestatus === 'submitted';
                             const isCurrent = selectedModule?.id === module.id;
+                            const lockState = lockStates[module.id];
+                            const isLocked = lockState?.locked ?? false;
                             const cardStateClass = isCompleted
                                 ? 'border-green-500 bg-green-50/60 dark:bg-green-950/20 hover:border-green-500'
-                                : isCurrent
-                                    ? 'border-primary hover:border-primary'
-                                    : 'hover:border-primary';
+                                : isLocked
+                                    ? 'opacity-75'
+                                    : isCurrent
+                                        ? 'border-primary hover:border-primary'
+                                        : 'hover:border-primary';
                             return (
                             <AccordionItem
                                 value={`item-1${index}`}
@@ -211,6 +217,12 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, uid, cid 
                                             <span className="inline-flex items-center gap-1 rounded-full border border-green-300 bg-green-100 px-2 py-0.5 text-[11px] font-semibold text-green-800 dark:border-green-700 dark:bg-green-900/40 dark:text-green-300">
                                                 <Check className="h-3 w-3" />
                                                 Completed
+                                            </span>
+                                        )}
+                                        {isLocked && (
+                                            <span className="inline-flex items-center gap-1 rounded-full border border-yellow-300 bg-yellow-100 px-2 py-0.5 text-[11px] font-semibold text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">
+                                                <Lock className="h-3 w-3" />
+                                                Locked
                                             </span>
                                         )}
                                     </span>
@@ -239,7 +251,13 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, uid, cid 
                         })}
                     </Accordion>
                 </div>
-                <ModuleAction Module={selectedModule} cid={cid} uid={uid} />
+                <ModuleAction
+                    Module={selectedModule}
+                    cid={cid}
+                    uid={uid}
+                    lockState={selectedModule ? lockStates[selectedModule.id] : undefined}
+                    completionOrder={ModulesData?.[0]?.completionOrder}
+                />
             </div>
         </div >
     );

@@ -111,6 +111,12 @@ model Course {
   startdate          DateTime
   enddate            DateTime
   language           String
+  // How students progress through the course modules:
+  //   daywise  — each module unlocks on (and after) its moduledate
+  //   queue    — modules unlock strictly in sequence; the next module unlocks
+  //              only after the previous one is completed (moduledate ignored)
+  //   openflow — all modules open to everyone in any order at any time
+  completionOrder    String               @default("openflow")
   userCourses        UserCourse[]
   staffCourses       StaffCourse[]
   assessments        Assessments[]
@@ -137,6 +143,9 @@ model Module {
   courseId             String
   course               Course                 @relation(fields: [courseId], references: [id])
   moduledate           DateTime
+  // Creation timestamp — defines the deterministic module sequence used by
+  // queue-type courses ("previous module" = the one created before this one).
+  createdAt            DateTime               @default(now())
   modulestatus         String
   language             String
   maxscore             Int

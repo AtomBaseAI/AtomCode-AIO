@@ -41,10 +41,18 @@ import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { AddModuleSchema } from "@/schemas/module-schema"
 import { addmodule } from "@/actions/module"
+import { normalizeCompletionOrder } from "@/lib/module-access"
 import { toast } from "sonner"
 type CData = {
     cid: string,
-    lang: string
+    lang: string,
+    /** Parent course completion order — controls the Module Date helper text. */
+    completionOrder?: string
+}
+const MODULE_DATE_HINTS: Record<string, string> = {
+    daywise: "Students can access this module only on and after this date — locked until then.",
+    queue: "Informational only — modules unlock in sequence as students complete the previous module.",
+    openflow: "Informational only — all modules are open in any order at any time.",
 }
 const AddModule = ({ cdata }: { cdata: CData }) => {
 
@@ -125,7 +133,12 @@ const AddModule = ({ cdata }: { cdata: CData }) => {
                                             name="moduledate"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col">
-                                                    <FormLabel>Module Date</FormLabel>
+                                                    <FormLabel>
+                                                        Module Date
+                                                        {normalizeCompletionOrder(cdata.completionOrder) === "daywise" && (
+                                                            <span className="text-primary"> (unlock date)</span>
+                                                        )}
+                                                    </FormLabel>
                                                     <Popover>
                                                         <PopoverTrigger asChild>
                                                             <FormControl>
@@ -157,6 +170,9 @@ const AddModule = ({ cdata }: { cdata: CData }) => {
                                                             />
                                                         </PopoverContent>
                                                     </Popover>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {MODULE_DATE_HINTS[normalizeCompletionOrder(cdata.completionOrder)]}
+                                                    </p>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}

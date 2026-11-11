@@ -18,7 +18,8 @@ export default async function ModulesData({ params }: { params: Promise<{ cid: s
     const course = await getCourseById(cid)
     const courseData = {
         cid: course?.id || '',
-        lang: course?.language || ''
+        lang: course?.language || '',
+        completionOrder: course?.completionOrder || 'openflow',
     }
     // console.log(modules)
     return (

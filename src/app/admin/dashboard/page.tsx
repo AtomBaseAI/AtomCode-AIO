@@ -166,22 +166,21 @@ const Dashboard = async () => {
   ];
 
   return (
-    <div className="flex w-full flex-col items-center gap-6 pb-8">
+    // Same content-span spacing rule as /admin/questions-groups:
+    // p-4 (mobile) / md:p-8 (desktop) top + left padding, full-width column.
+    <div className="flex h-full w-full flex-1 flex-col gap-6 p-4 pb-8 md:p-8">
       <TopbarTitle>Dashboard</TopbarTitle>
-      <header className="w-[92%]">
-        <p className="text-sm text-muted-foreground">Platform overview at a glance</p>
-      </header>
 
       <section
         aria-label="Key statistics"
-        className="grid w-[92%] gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid w-full gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         {cards.map((c) => (
           <StatCard key={c.label} {...c} />
         ))}
       </section>
 
-      <section aria-label="Analytics charts" className="grid w-[92%] gap-6 xl:grid-cols-3">
+      <section aria-label="Analytics charts" className="grid w-full gap-6 xl:grid-cols-3">
         <Suspense fallback={<PanelSkeleton />}>
           <LanguagePanel />
         </Suspense>

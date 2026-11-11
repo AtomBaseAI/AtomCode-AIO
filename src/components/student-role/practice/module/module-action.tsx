@@ -7,7 +7,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from "@/components/ui/button"
 import { enterFullscreen, exitFullscreen, fullscreenCheck } from "@/hooks/fullscreen"
 import { useEffect, useState, useTransition } from "react"
-import { isBefore, isEqual } from 'date-fns';
 import { formatDate } from '@/lib/utils';
 import {
     Table,
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/table"
 import { toast } from "sonner"
 import { startModule } from "@/actions/submitmodule"
+import type { ModuleLockState } from "@/lib/module-access"
 
 interface Reference {
     link: string;
@@ -33,6 +33,7 @@ interface MergedModuleType {
     title: string;
     modulestatus: string;
     moduledate: Date;
+    completionOrder?: string;
     totalmcqscore: number | null;
     usermcqscore: number | null;
     totalquestionscore: number | null;
@@ -47,10 +48,10 @@ interface MergedModuleType {
     modulereference: Reference[];
 }
 
-const ModuleAction = ({ Module, uid, cid }: { Module: MergedModuleType | null, uid: string, cid: string }) => {
-    // const [modu]
-    const currentDate = new Date();
-    const isUnlocked = Module?.moduledate ? isBefore(new Date(Module.moduledate), currentDate) || isEqual(new Date(Module.moduledate), currentDate) : false;
+const ModuleAction = ({ Module, uid, cid, lockState, completionOrder }: { Module: MergedModuleType | null, uid: string, cid: string, lockState?: ModuleLockState, completionOrder?: string }) => {
+    // Lock state is computed on the server (module-access) — the UI only
+    // renders it. Falls back to "unlocked" when the state is missing.
+    const isUnlocked = !(lockState?.locked ?? false);
     const [isLoading, startTransition] = useTransition()
     const navigate = useRouter()
     const [loadingRoute, setLoadingRoute] = useState(false)
@@ -84,7 +85,7 @@ const ModuleAction = ({ Module, uid, cid }: { Module: MergedModuleType | null, u
 
                         }
                         else {
-                            toast.error("error while starting module")
+                            toast.error(data.error ?? "error while starting module")
                             setLoadingRoute(false)
                         }
                     })
@@ -154,9 +155,15 @@ const ModuleAction = ({ Module, uid, cid }: { Module: MergedModuleType | null, u
                                                         <CardHeader>
                                                             <CardTitle>{Module?.title} </CardTitle>
                                                             <CardDescription>
-                                                                {Module?.moduledate
-                                                                    ? formatDate(Module.moduledate)
-                                                                    : "No Date Available"}
+                                                                {completionOrder === "daywise" && Module?.moduledate
+                                                                    ? `Available from ${formatDate(Module.moduledate)}`
+                                                                    : completionOrder === "queue"
+                                                                        ? "Sequence mode — finish modules in order"
+                                                                        : completionOrder === "openflow"
+                                                                            ? "Open mode — any module, any order, any time"
+                                                                            : Module?.moduledate
+                                                                                ? formatDate(Module.moduledate)
+                                                                                : "No Date Available"}
                                                             </CardDescription>
                                                         </CardHeader>
                                                         <CardContent className="grid gap-4">
@@ -268,9 +275,19 @@ const ModuleAction = ({ Module, uid, cid }: { Module: MergedModuleType | null, u
                                                 <p className="text-sm font-medium leading-none">
                                                     Practice Locked !
                                                 </p>
-                                                <p className="text-sm font-medium"> (Unlocks on <span className="text-green-600 font-bold"> {Module?.moduledate
-                                                    ? formatDate(Module.moduledate)
-                                                    : "No Date Available"}</span>)</p>
+                                                {lockState?.reason === "prerequisite" ? (
+                                                    <p className="text-sm font-medium text-center">
+                                                        Complete{" "}
+                                                        <span className="text-green-600 font-bold">
+                                                            &quot;{lockState.prerequisiteTitle ?? "the previous module"}&quot;
+                                                        </span>{" "}
+                                                        to unlock this module
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-sm font-medium"> (Unlocks on <span className="text-green-600 font-bold"> {Module?.moduledate
+                                                        ? formatDate(Module.moduledate)
+                                                        : "No Date Available"}</span>)</p>
+                                                )}
                                             </CardContent>
                                         </Card>
                                     </div>

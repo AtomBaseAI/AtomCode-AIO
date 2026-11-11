@@ -14,6 +14,7 @@ export const getAllCourses = async (): Promise<CourseWithCounts[]> => {
                 startdate: true,
                 enddate: true,
                 language: true,
+                completionOrder: true,
                 _count: {
                     select: {
                         modules: true,

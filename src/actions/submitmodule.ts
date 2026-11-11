@@ -2,11 +2,26 @@
 import { db } from "@/lib/db";
 import { startUserModelDataSchema, upateUserModelSchemaCode, upateUserModelSchemaMCQ, UserModuleDataSchema } from "@/schemas/student/usersavemodule-schema";
 import { revalidatePath } from "next/cache";
+import { getStudentModuleLock } from "@/lib/module-access";
 
 import * as z from 'zod';
 
 
 export const startModule = async (data: z.infer<typeof startUserModelDataSchema>) => {
+  // Server-side enforcement of the course completion order — the lock
+  // badges in the UI are cosmetic; this is the real gate.
+  const lock = await getStudentModuleLock(data.userId, data.moduleId);
+  if (lock.found && lock.locked) {
+    if (lock.reason === "date") {
+      return { error: "Module is locked — it unlocks on its scheduled module date." };
+    }
+    return {
+      error: lock.prerequisiteTitle
+        ? `Module is locked — complete "${lock.prerequisiteTitle}" first.`
+        : "Module is locked — complete the previous module first.",
+    };
+  }
+
   await db.userModuleData.create({
     data: {
       userId: data.userId,

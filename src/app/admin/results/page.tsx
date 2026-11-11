@@ -23,7 +23,9 @@ const Results = async () => {
   const coursesData = await fetchCourses()
   // console.log(coursesData)
   return (
-    <div className='w-full flex flex-col gap-2 mx-8 px-8'>
+    // Same content-span spacing rule as /admin/questions-groups:
+    // p-4 (mobile) / md:p-8 (desktop) top + left padding, full-width column.
+    <div className='flex h-full flex-1 flex-col space-y-2 p-4 md:p-8 w-full'>
       <TopbarTitle>Analysis</TopbarTitle>
       <div className="h-full w-full mx-auto flex flex-wrap flex-row justify-start gap-x-4 gap-y-4">
         {

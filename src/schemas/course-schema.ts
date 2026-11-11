@@ -1,5 +1,9 @@
 import * as z from "zod"
 
+/** Course completion order — how students progress through modules. */
+export const completionOrderSchema = z.enum(["daywise", "queue", "openflow"], {
+    message: "Completion order is required",
+})
 
 export const AddCourseSchema = z.object({
     title: z.string().min(1, {
@@ -10,6 +14,7 @@ export const AddCourseSchema = z.object({
     language: z.string().min(1, {
         message: "Language is required"
     }),
+    completionOrder: completionOrderSchema,
 });
 
 export const DeleteCourseSchema = z.object({
@@ -22,9 +27,11 @@ export const CourseTableSchema = z.object({
     startdate: z.date(),
     enddate: z.date(),
     language: z.string(),
+    completionOrder: z.string(),
     modulescount: z.number(),
     assessmentscount: z.number()
 })
+
 
 
 export const CourseUpdateSchema = z.object({
@@ -33,6 +40,7 @@ export const CourseUpdateSchema = z.object({
     startdate: z.date(),
     enddate: z.date(),
     language: z.string(),
+    completionOrder: completionOrderSchema,
 })
 
 

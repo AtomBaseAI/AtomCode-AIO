@@ -4,6 +4,9 @@ export const getAllModulesByCourseId = async (id: string) => {
     try {
         const modulesdata = await db.module.findMany({
             where: { courseId: id },
+            // createdAt defines the module sequence (queue-type courses);
+            // title breaks ties for rows created in the same instant.
+            orderBy: [{ createdAt: "asc" }, { title: "asc" }],
             select: {
                 id: true,
                 title: true,
@@ -13,6 +16,9 @@ export const getAllModulesByCourseId = async (id: string) => {
                 maxscore: true,
                 concepturl: true,
                 courseId: true,
+                course: {
+                    select: { completionOrder: true },
+                },
                 _count: {
                     select: {
                         codeQuestions: true,
@@ -23,6 +29,8 @@ export const getAllModulesByCourseId = async (id: string) => {
         })
         const modules = modulesdata.map(module => ({
             ...module,
+            courseCompletionOrder: module.course.completionOrder,
+            course: undefined,
             questionscount: module._count.codeQuestions,
             mcqcount: module._count.mcqQuestions
         }));

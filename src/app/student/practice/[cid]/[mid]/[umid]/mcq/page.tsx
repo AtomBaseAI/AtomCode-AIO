@@ -1,6 +1,8 @@
 import { getAllMCQByModuleId } from '@/data/student/mcq';
 import { getCourseModuleByModuleID } from '@/data/student/modules';
 import MCQView from '@/components/student-role/practice/mcq/mcq-view';
+import ModuleLockedScreen from '@/components/student-role/module-locked';
+import { getStudentModuleLock } from '@/lib/module-access';
 import {
     ContextMenu,
     ContextMenuContent,
@@ -36,6 +38,11 @@ const MCQMain = async ({ params }: { params: Promise<{ cid: string, mid: string,
         )
     }
     const { mid, umid, cid } = await params;
+    // Completion-order gate — deep links cannot bypass the module lock.
+    const lock = await getStudentModuleLock(uid, mid)
+    if (lock.found && lock.locked) {
+        return <ModuleLockedScreen lock={lock} backHref={`/student/courses/${cid}/module`} />
+    }
     const courseModule = await getCourseModuleByModuleID(mid)
     const ModuleMCQs = (await getAllMCQByModuleId(mid))
         .filter((mcq): mcq is MCQ => mcq.moduleId !== null);

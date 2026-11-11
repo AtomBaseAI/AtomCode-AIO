@@ -42,6 +42,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { ModuleUpdateSchema } from "@/schemas/module-schema"
 import { updatemodule } from "@/actions/module"
+import { normalizeCompletionOrder } from "@/lib/module-access"
 import { toast } from "sonner"
 type moduleData = {
     id: string;
@@ -58,8 +59,15 @@ interface EditModuleProps {
     trigger?: ReactNode
     /** Called after a successful update (e.g. to refresh table data). */
     onSuccess?: () => void
+    /** Parent course completion order — controls the Module Date helper text. */
+    completionOrder?: string
 }
-const EditModule = ({ modulez, trigger, onSuccess }: EditModuleProps) => {
+const MODULE_DATE_HINTS: Record<string, string> = {
+    daywise: "Students can access this module only on and after this date — locked until then.",
+    queue: "Informational only — modules unlock in sequence as students complete the previous module.",
+    openflow: "Informational only — all modules are open in any order at any time.",
+}
+const EditModule = ({ modulez, trigger, onSuccess, completionOrder }: EditModuleProps) => {
 
     const form = useForm<z.input<typeof ModuleUpdateSchema>, any, z.output<typeof ModuleUpdateSchema>>({
         resolver: zodResolver(ModuleUpdateSchema),
@@ -154,7 +162,12 @@ const EditModule = ({ modulez, trigger, onSuccess }: EditModuleProps) => {
                                             name="moduledate"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col">
-                                                    <FormLabel>Module Date</FormLabel>
+                                                    <FormLabel>
+                                                        Module Date
+                                                        {normalizeCompletionOrder(completionOrder) === "daywise" && (
+                                                            <span className="text-primary"> (unlock date)</span>
+                                                        )}
+                                                    </FormLabel>
                                                     <Popover>
                                                         <PopoverTrigger asChild>
                                                             <FormControl>
@@ -186,6 +199,9 @@ const EditModule = ({ modulez, trigger, onSuccess }: EditModuleProps) => {
                                                             />
                                                         </PopoverContent>
                                                     </Popover>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {MODULE_DATE_HINTS[normalizeCompletionOrder(completionOrder)]}
+                                                    </p>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}

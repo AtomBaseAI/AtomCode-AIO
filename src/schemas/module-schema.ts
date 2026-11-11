@@ -28,7 +28,10 @@ export const ModuleTableSchema = z.object({
     questionscount: z.number(),
     mcqcount: z.number(),
     maxscore: z.number(),
-    concepturl: z.string().nullable().optional()
+    concepturl: z.string().nullable().optional(),
+    // Parent course's completion order — used by the edit form to show the
+    // right helper text under the Module Date field.
+    courseCompletionOrder: z.string().optional(),
 })
 
 export const ModuleQuestionTableSchema = z.object({

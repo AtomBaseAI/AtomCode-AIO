@@ -1,8 +1,10 @@
 import { auth } from '@/auth'
 import SubmitCourseModule from '@/components/student-role/submit-module'
+import ModuleLockedScreen from '@/components/student-role/module-locked'
 import { Button } from '@/components/ui/button'
 import { getUserModuleResultByUserIdCourseIdModuleId } from '@/data/student/module-result'
 import { getCourseModuleByModuleID } from '@/data/student/modules'
+import { getStudentModuleLock } from '@/lib/module-access'
 import { TopbarBreadcrumb } from '@/components/topbar-title'
 import { AlertCircle, ChevronLeft, ChevronRight, CircleSlash, Code, Lock, Puzzle } from 'lucide-react'
 import Link from 'next/link'
@@ -41,6 +43,12 @@ const PrepareModules = async ({ params }: { params: Promise<{ cid: string, mid: 
     const { mid, cid } = await params
     // const ModuleID = parseInt(mid, 10)
     // const CourseID = parseInt(cid, 10)
+    // Completion-order gate (daywise / queue / openflow) — real enforcement,
+    // independent of the UI lock badges.
+    const lock = await getStudentModuleLock(uid, mid)
+    if (lock.found && lock.locked) {
+        return <ModuleLockedScreen lock={lock} backHref={`/student/courses/${cid}/module`} />
+    }
     const moduleData = await getCourseModuleData(mid);
     const userModuleData = await getCourseModuleSubmissionData(uid, cid, mid)
     // console.log(moduleData)

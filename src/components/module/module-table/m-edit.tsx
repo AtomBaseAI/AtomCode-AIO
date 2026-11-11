@@ -27,6 +27,7 @@ const MEdit = ({ module }: { module: ModuleTableType }) => {
     return (
         <EditModule
             modulez={moduleData}
+            completionOrder={module.courseCompletionOrder}
             trigger={
                 <Button
                     variant="outline"

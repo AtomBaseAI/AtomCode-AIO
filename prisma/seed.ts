@@ -111,6 +111,7 @@ async function main() {
         startdate: new Date(now.getTime() - 7 * 864e5),
         enddate: new Date(now.getTime() + 60 * 864e5),
         language: "java",
+        completionOrder: "openflow",
       },
     });
 
@@ -173,6 +174,8 @@ async function main() {
         title: "Java Basics",
         courseId: course.id,
         moduledate: new Date(now.getTime() - 5 * 864e5),
+        // Explicit createdAt keeps the queue sequence deterministic.
+        createdAt: new Date(now.getTime() - 6 * 864e5),
         modulestatus: "active",
         language: "java",
         maxscore: 40,
@@ -187,6 +190,8 @@ async function main() {
         title: "OOP in Java",
         courseId: course.id,
         moduledate: new Date(now.getTime() + 3 * 864e5),
+        // Created after "Java Basics" — second in the queue sequence.
+        createdAt: new Date(now.getTime() - 5 * 864e5),
         modulestatus: "active",
         language: "java",
         maxscore: 40,

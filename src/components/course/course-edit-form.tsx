@@ -43,6 +43,10 @@ import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { updatecourse } from "@/actions/course"
 import { istTodayLocalStart } from '@/lib/utils'
+import {
+    COMPLETION_ORDER_DESCRIPTIONS,
+    type CompletionOrder,
+} from "@/lib/module-access"
 import { toast } from "sonner"
 interface EditCourseFormProps {
     course: z.infer<typeof CourseUpdateSchema>
@@ -62,8 +66,10 @@ const EditCourseForm = ({ course, trigger, onSuccess }: EditCourseFormProps) => 
             startdate: course.startdate || undefined,
             enddate: course.enddate || undefined,
             language: course.language,
+            completionOrder: course.completionOrder ?? "openflow",
         }
     })
+    const selectedOrder = form.watch("completionOrder") as CompletionOrder | undefined
     const [open, setOpen] = useState(false)
     const [isLoading, startTransition] = useTransition()
     const [error, setError] = useState<string | undefined>("")
@@ -76,6 +82,7 @@ const EditCourseForm = ({ course, trigger, onSuccess }: EditCourseFormProps) => 
             startdate: course.startdate || undefined,
             enddate: course.enddate || undefined,
             language: course.language,
+            completionOrder: course.completionOrder ?? "openflow",
         })
     }, [course, form])
     const handleSubmit = (values: z.infer<typeof CourseUpdateSchema>) => {
@@ -243,6 +250,39 @@ const EditCourseForm = ({ course, trigger, onSuccess }: EditCourseFormProps) => 
                                                             <SelectItem value="ruby">Ruby</SelectItem>
                                                         </SelectContent>
                                                     </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="grid gap-1">
+                                        <FormField
+                                            control={form.control}
+                                            name="completionOrder"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Completion Order</FormLabel>
+                                                    <Select
+                                                        onValueChange={field.onChange}
+                                                        defaultValue={field.value}
+                                                        disabled={isLoading}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select completion order" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="daywise">Daywise</SelectItem>
+                                                            <SelectItem value="queue">Queue</SelectItem>
+                                                            <SelectItem value="openflow">Openflow</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    {selectedOrder && (
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {COMPLETION_ORDER_DESCRIPTIONS[selectedOrder]}
+                                                        </p>
+                                                    )}
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
