@@ -85,6 +85,12 @@ export const DeleteModuleQuestionSchema = z.object({
     mid: z.string()
 })
 
+/** Detach an MCQ from a module (the MCQ row itself is never deleted). */
+export const RemoveModuleMCQSchema = z.object({
+    id: z.string(),
+    mid: z.string()
+})
+
 export type ModuleTableType = z.infer<typeof ModuleTableSchema>
 export type ModuleQuestionTableType = z.infer<typeof ModuleQuestionTableSchema>
 export type ModuleQuestionTableQuestionType = z.infer<typeof ModuleQuestionTableQuestionSchema>

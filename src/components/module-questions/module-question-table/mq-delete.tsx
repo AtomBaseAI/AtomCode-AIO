@@ -1,6 +1,6 @@
 import *as z from 'zod'
 import { Button } from '@/components/ui/button'
-import { LoaderIcon, Trash } from 'lucide-react'
+import { Link2Off, LoaderIcon } from 'lucide-react'
 import {
     Dialog,
     DialogClose,
@@ -16,7 +16,6 @@ import {
     FormControl,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage
 } from "@/components/ui/form"
 
@@ -24,18 +23,20 @@ import { useForm } from "react-hook-form"
 import { Input } from "@/components/ui/input"
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, useTransition } from 'react'
-import { FormError } from '@/components/auth/form-error'
-import { FormSuccess } from '@/components/auth/form-success'
 import { useParams } from 'next/navigation'
 import { DeleteModuleQuestionSchema } from '@/schemas/module-schema'
-import { deletemodulequestionx } from '@/actions/module'
-import { ConfirmDeleteInput, isConfirmDeleteText } from '@/components/ui/confirm-delete'
+import { removemodulequestion } from '@/actions/module'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
-
-
-
-const DeleteModuleQuestion = ({ qid, mid }: { qid: string, mid: string }) => {
+/**
+ * Row-level "Remove" action for the module code-questions table.
+ *
+ * This only detaches the question from the module (many-to-many disconnect):
+ * the question itself stays in the question bank and can be re-added later,
+ * so it is intentionally NOT styled/worded as a destructive delete.
+ */
+const RemoveModuleQuestion = ({ qid, mid }: { qid: string, mid: string }) => {
 
     const form = useForm<z.infer<typeof DeleteModuleQuestionSchema>>({
         resolver: zodResolver(DeleteModuleQuestionSchema),
@@ -45,27 +46,21 @@ const DeleteModuleQuestion = ({ qid, mid }: { qid: string, mid: string }) => {
         }
     })
 
+    const router = useRouter()
     const [isLoading, startTransition] = useTransition()
     const [open, setOpen] = useState(false)
-    const [error, setError] = useState<string | undefined>("")
-    const [success, setSuccess] = useState<string | undefined>("")
-    const [confirmText, setConfirmText] = useState("")
     const handleSubmit = (values: z.infer<typeof DeleteModuleQuestionSchema>) => {
-        setError("")
-        setSuccess("")
-        if (!isConfirmDeleteText(confirmText)) {
-            setError("Type the confirmation phrase to enable delete")
-            return
-        }
         startTransition(() => {
-            deletemodulequestionx(values.id, values.mid)
+            removemodulequestion(values.id, values.mid)
                 .then((data) => {
-                    // setError(data.error)
-                    // setSuccess(data.success)
+                    if (data.error) {
+                        toast.error(data.error)
+                    }
                     if (data.success) {
                         form.reset()
                         setOpen(false)
-                        toast.success(data.success);
+                        toast.success(data.success)
+                        router.refresh()
                     }
                 })
                 .catch(() => toast.error("Something went wrong!"));
@@ -74,18 +69,25 @@ const DeleteModuleQuestion = ({ qid, mid }: { qid: string, mid: string }) => {
     return (
         <>
 
-            <Dialog open={open} onOpenChange={(o) => { setConfirmText(""); setOpen(o) }} >
+            <Dialog open={open} onOpenChange={(o) => setOpen(o)} >
                 <DialogTrigger asChild>
-                    <Button variant='outline' size='icon' className="border-destructive bg-transparent hover:bg-red-400/20">
-                        <Trash className="size-5 bg-transparent text-destructive" />
+                    <Button
+                        variant='outline'
+                        size='icon'
+                        title="Remove from module"
+                        className="border-amber-500/70 bg-transparent hover:bg-amber-500/15"
+                    >
+                        <Link2Off className="size-5 bg-transparent text-amber-500" />
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Delete Question</DialogTitle>
+                        <DialogTitle>Remove Question from Module</DialogTitle>
                     </DialogHeader>
                     <DialogDescription>
-                        This action is irreversable, Are you sure want to delete ?
+                        This will detach the question from this module. The question
+                        itself stays in the question bank and can be added back at
+                        any time.
                     </DialogDescription>
                     <div className="grid gap-6">
                         <Form {...form}>
@@ -127,20 +129,17 @@ const DeleteModuleQuestion = ({ qid, mid }: { qid: string, mid: string }) => {
                                         />
                                     </div>
 
-                                    <FormError message={error} />
-                                    <FormSuccess message={success} />
-                                    <ConfirmDeleteInput value={confirmText} onValueChange={setConfirmText} />
                                     <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
-                                            <Button className='w-full'>
+                                            <Button variant='outline' className='w-full'>
                                                 Cancel
                                             </Button>
                                         </DialogClose>
-                                        <Button disabled={isLoading || !isConfirmDeleteText(confirmText)} variant='destructive' className='w-full'>
+                                        <Button disabled={isLoading} className='w-full'>
                                             {isLoading && (
                                                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
                                             )}
-                                            Delete
+                                            Remove
                                         </Button>
                                     </span>
                                 </div>
@@ -154,4 +153,4 @@ const DeleteModuleQuestion = ({ qid, mid }: { qid: string, mid: string }) => {
     )
 }
 
-export default DeleteModuleQuestion
+export default RemoveModuleQuestion

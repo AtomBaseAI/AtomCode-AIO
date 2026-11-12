@@ -3,13 +3,12 @@ import { getCourseById } from '@/data/courses'
 import React from 'react'
 import BackBtn from '@/components/backbtn'
 import { getModuleMCQsByModuleId } from '@/data/mcq'
-import { MCQDataTable } from '@/components/mcq/mcq-table/mc-data-table'
-import { columns } from '@/components/mcq/mcq-table/mc-columns'
-import AddMCQForm from '@/components/mcq/mcq-add-form'
+import { ModuleMCQDataTable } from '@/components/module-questions/module-mcq-table/mmc-data-table'
+import { columns } from '@/components/module-questions/module-mcq-table/mmc-columns'
 import MExport from '@/export/module-export/module-export-button'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { UploadCloud } from 'lucide-react'
+import { Puzzle, UploadCloud } from 'lucide-react'
 import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 async function fetchModule(mid: string) {
@@ -23,7 +22,6 @@ async function fetchModuleMCQs(mid: string) {
 
 const ViewModule = async ({ params }: { params: Promise<{ cid: string; mid: string}> }) => {
     const { cid, mid } = await params
-    // const moduleId = parseInt(mid, 10);
     const modulez = await fetchModule(mid)
     const course = await getCourseById(cid)
     const modulex = await fetchModuleMCQs(mid)
@@ -35,7 +33,7 @@ const ViewModule = async ({ params }: { params: Promise<{ cid: string; mid: stri
         topic: mcq.topic || undefined,
         subtopic: mcq.subtopic || undefined
     })) || [];
-    // console.log(mcqData)
+
     return (
         <>
             <TopbarBreadcrumb
@@ -54,19 +52,20 @@ const ViewModule = async ({ params }: { params: Promise<{ cid: string; mid: stri
                         </p>
                     </div>
                     <div className="flex justify-center items-center gap-x-4">
-                        {/* <Button className="bg-green-500 hover:bg-green-700 text-white"> <Puzzle className="mr-2" /> Add MCQ</Button> */}
+                        <Link href={`/admin/courses/${cid}/modules/${mid}/mcq/add`}>
+                            <Button className="bg-green-500 hover:bg-green-700 text-white"> <Puzzle className="mr-2" /> Add MCQ</Button>
+                        </Link>
                         <Link href={`/admin/courses/${cid}/modules/${mid}/mcq/import`}>
                             <Button>
                                 <UploadCloud className="mr-2" />
                                 Bulk Upload
                             </Button>
                         </Link>
-                        <AddMCQForm mid={mid} aid={""} mcqtype='module' />
                         <MExport data={mcqData} fileName={`${modulez?.title}-MCQ.csv`} />
                         <BackBtn />
                     </div>
                 </div>
-                <MCQDataTable data={mcqData} columns={columns} />
+                <ModuleMCQDataTable data={mcqData} columns={columns} mid={mid} />
             </div>
         </>
     )

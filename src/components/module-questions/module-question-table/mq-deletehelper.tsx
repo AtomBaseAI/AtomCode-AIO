@@ -1,6 +1,6 @@
 
 import React from 'react'
-import DeleteModuleQuestion from '@/components/module-questions/module-question-table/mq-delete'
+import RemoveModuleQuestion from '@/components/module-questions/module-question-table/mq-delete'
 import { useParams } from 'next/navigation'
 
 interface Params {
@@ -8,13 +8,17 @@ interface Params {
     mid: string; 
 }
 
-const QuestionDeleteHelper = ({ qid }: { qid: string }) => {
+/**
+ * Resolves the current module id from the route params and renders the
+ * row-level "Remove from module" action for a code question.
+ */
+const QuestionRemoveHelper = ({ qid }: { qid: string }) => {
     const { mid } = useParams<Params>();
     return (
         <>
-            <DeleteModuleQuestion qid={qid} mid={mid}/>
+            <RemoveModuleQuestion qid={qid} mid={mid}/>
         </>
     )
 }
 
-export default QuestionDeleteHelper
+export default QuestionRemoveHelper

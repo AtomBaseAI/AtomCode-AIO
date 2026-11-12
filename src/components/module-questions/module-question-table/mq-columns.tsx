@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { DataTableColumnHeader } from "@/components/data-tables/data-table-column-header"
 import { textFilterFn } from "@/components/data-tables/topic-subtopic-filters"
 import { ModuleQuestionTableQuestionType } from "@/schemas/module-schema"
-import QuestionDeleteHelper from "@/components/module-questions/module-question-table/mq-deletehelper"
+import QuestionRemoveHelper from "@/components/module-questions/module-question-table/mq-deletehelper"
 import MQPreview from "./preview/mq-preview"
 
 
@@ -106,7 +106,7 @@ export const columns: ColumnDef<ModuleQuestionTableQuestionType>[] = [
         <div className="flex items-center">
           <span className="flex gap-2">
             <MQPreview question={question}/>
-            <QuestionDeleteHelper qid={qid} />
+            <QuestionRemoveHelper qid={qid} />
           </span>
         </div>
       )

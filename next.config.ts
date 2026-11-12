@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   // Vercel does not use `output: "standalone"` — it deploys via its own Build
   // Output API, so plain `next build` / `next start` is the default here.
   output: process.env.BUILD_STANDALONE === "true" ? "standalone" : undefined,
+  // Allow the sandbox preview gateway hosts to fetch dev assets (HMR,
+  // static chunks) — Next 16 blocks unknown cross-origin dev requests.
+  allowedDevOrigins: ["*.space-z.ai", "*.cn-hongkong-vpc.fcapp.run"],
   typescript: {
     ignoreBuildErrors: true,
   },
