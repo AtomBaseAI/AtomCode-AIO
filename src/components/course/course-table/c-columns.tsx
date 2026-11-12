@@ -6,6 +6,7 @@ import { CourseTableType } from "@/schemas/course-schema"
 import { formatDate } from '@/lib/utils';
 import DeleteCourse from "@/components/course/course-table/c-delete"
 import CEdit from "@/components/course/course-table/c-edit"
+import { CourseExportDialog } from "@/components/course/course-table/c-export"
 import CModules from "@/components/course/course-table/c-modules"
 import CStudents from "@/components/course/course-table/c-students"
 import CFeedbacks from "@/components/course/course-table/c-feedbacks";
@@ -150,6 +151,7 @@ export const columns: ColumnDef<CourseTableType>[] = [
             <CStudents cid={cid} count={row.original.studentscount} />
             <CStaffs cid={cid} count={row.original.staffscount} />
             <CFeedbacks cid={cid} count={row.original.feedbackscount} />
+            <CourseExportDialog course={row.original} />
             <CEdit course={row.original} />
             <DeleteCourse cid={cid} />
           </span>
