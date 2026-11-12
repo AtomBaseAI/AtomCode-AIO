@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { json, fail, preflight, authGuard } from "@/lib/desktop-auth";
 import { isEnrolledInModule, ensureUserModuleData } from "@/lib/desktop-helpers";
+import { recalcCourseCompletion } from "@/lib/course-progress";
 
 /**
  * POST /api/desktop/student/practice/module
@@ -34,6 +35,9 @@ export async function POST(req: Request) {
         where: { id: umd.id },
         data: { modulestatus: "submitted" },
       });
+      // Keep the stored course completion percentage in sync for the
+      // admin/staff dashboards.
+      await recalcCourseCompletion(uid, mod.courseId);
       return json({ success: true, message: "Module submitted!", umid: umd.id });
     }
 

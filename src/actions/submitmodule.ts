@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { startUserModelDataSchema, upateUserModelSchemaCode, upateUserModelSchemaMCQ, UserModuleDataSchema } from "@/schemas/student/usersavemodule-schema";
 import { revalidatePath } from "next/cache";
 import { getStudentModuleLock } from "@/lib/module-access";
+import { recalcCourseCompletion } from "@/lib/course-progress";
 
 import * as z from 'zod';
 
@@ -124,6 +125,12 @@ export const endModule = async (umid: string) => {
       modulestatus: 'submitted'
     }
   });
+
+  // Persist the course-level completion percentage so the admin & staff
+  // dashboards (which aggregate the stored UserCourse field) stay accurate.
+  if (checkdata.userId && checkdata.courseId) {
+    await recalcCourseCompletion(checkdata.userId, checkdata.courseId);
+  }
 
   revalidatePath('/student/courses');
   return { success: "Module Submitted" };

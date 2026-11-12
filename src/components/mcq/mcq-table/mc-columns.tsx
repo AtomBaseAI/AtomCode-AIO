@@ -30,7 +30,7 @@ export const columns: ColumnDef<MCQTableType>[] = [
   {
     accessorKey: "CorrectOption",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} name="CorrectOption" />
+      <DataTableColumnHeader column={column} name="Correct Option" />
     ),
     cell: ({ row }) => {
       return (
