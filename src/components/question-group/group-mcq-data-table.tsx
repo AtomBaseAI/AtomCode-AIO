@@ -37,6 +37,7 @@ import {
     ConfirmDeleteInput,
     isConfirmDeleteText,
 } from "@/components/ui/confirm-delete"
+import SmartDeleteCleanup from "@/components/ui/smart-delete-cleanup"
 import {
     Table,
     TableBody,
@@ -129,11 +130,14 @@ const DeleteMcqButton = ({
                 <DialogHeader>
                     <DialogTitle>Delete MCQ</DialogTitle>
                     <DialogDescription>
-                        This permanently deletes &quot;{title}&quot;. This
-                        action is irreversible — are you sure?
+                        This permanently deletes &quot;{title}&quot; and
+                        detaches it from any module, assessment or question
+                        group. This action cannot be undone.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-3">
+                    {/* Cleanup sections — run before the final delete */}
+                    <SmartDeleteCleanup entity="mcq-question" id={mcqId} />
                     <ConfirmDeleteInput
                         value={confirmText}
                         onValueChange={setConfirmText}

@@ -30,6 +30,8 @@ import { toast } from 'sonner'
 import { DeleteStaffSchema } from '@/schemas/staff-schema'
 import { deletestaff } from '@/actions/staff'
 import { ConfirmDeleteInput, isConfirmDeleteText } from '@/components/ui/confirm-delete'
+import SmartDeleteCleanup from '@/components/ui/smart-delete-cleanup'
+
 const DeleteStaff = ({ uid }: { uid: string }) => {
     const form = useForm<z.infer<typeof DeleteStaffSchema>>({
         resolver: zodResolver(DeleteStaffSchema),
@@ -81,6 +83,9 @@ const DeleteStaff = ({ uid }: { uid: string }) => {
                         This action is irreversable, Are you sure want to delete ?
                     </DialogDescription>
                     <div className="grid gap-6">
+                        {/* Cleanup sections — run before the final delete */}
+                        <SmartDeleteCleanup entity="staff" id={uid} />
+
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
                                 <div className="grid gap-2">
@@ -106,6 +111,9 @@ const DeleteStaff = ({ uid }: { uid: string }) => {
                                     <FormError message={error} />
                                     <FormSuccess message={success} />
                                     <ConfirmDeleteInput value={confirmText} onValueChange={setConfirmText} />
+                                    <p className="text-muted-foreground text-xs">
+                                        Tip: the delete button below also clears any records left behind automatically.
+                                    </p>
                                     <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
                                             <Button className='w-full'>

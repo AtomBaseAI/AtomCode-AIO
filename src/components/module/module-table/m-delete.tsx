@@ -28,13 +28,7 @@ import { FormSuccess } from '@/components/auth/form-success'
 import { DeleteModuleSchema } from '@/schemas/module-schema'
 import { deletemodule } from '@/actions/module'
 import { ConfirmDeleteInput, isConfirmDeleteText } from '@/components/ui/confirm-delete'
-
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
+import SmartDeleteCleanup from '@/components/ui/smart-delete-cleanup'
 
 const DeleteModule = ({ mid }: { mid: string }) => {
     const form = useForm<z.infer<typeof DeleteModuleSchema>>({
@@ -74,27 +68,29 @@ const DeleteModule = ({ mid }: { mid: string }) => {
         <>
             <Dialog open={open} onOpenChange={(o) => { setConfirmText(""); setOpen(o) }} >
                 <DialogTrigger asChild>
-                    {/* <TooltipProvider>
-                        <Tooltip >
-                            <TooltipTrigger asChild> */}
-                                <Button variant='outline' size='icon' className="border-destructive bg-transparent hover:bg-red-400/20">
-                                    <Trash className="size-5 bg-transparent text-destructive" />
-                                </Button>
-                            {/* </TooltipTrigger>
-                            <TooltipContent side='top' className='bg-red-500'>
-                                <p className='z-50'>Delete Module</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider> */}
+                    <Button
+                        variant='outline'
+                        size='icon'
+                        aria-label='Delete module'
+                        title='Delete module'
+                        className="border-destructive bg-transparent hover:bg-red-400/20"
+                    >
+                        <Trash className="size-5 bg-transparent text-destructive" />
+                    </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Delete Module</DialogTitle>
                     </DialogHeader>
                     <DialogDescription>
-                        This action is irreversable, Are you sure want to delete ?
+                        This permanently removes the module along with its code
+                        questions, MCQs, references and all student progress for
+                        it. This action cannot be undone.
                     </DialogDescription>
                     <div className="grid gap-6">
+                        {/* Cleanup sections — run before the final delete */}
+                        <SmartDeleteCleanup entity="module" id={mid} />
+
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
                                 <div className="grid gap-2">
@@ -118,6 +114,9 @@ const DeleteModule = ({ mid }: { mid: string }) => {
                                     <FormError message={error} />
                                     <FormSuccess message={success} />
                                     <ConfirmDeleteInput value={confirmText} onValueChange={setConfirmText} />
+                                    <p className="text-muted-foreground text-xs">
+                                        Tip: the delete button below also clears any records left behind automatically.
+                                    </p>
                                     <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
                                             <Button className='w-full'>

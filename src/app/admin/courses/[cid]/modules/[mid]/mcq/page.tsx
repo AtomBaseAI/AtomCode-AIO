@@ -8,7 +8,7 @@ import { columns } from '@/components/module-questions/module-mcq-table/mmc-colu
 import MExport from '@/export/module-export/module-export-button'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Puzzle, UploadCloud } from 'lucide-react'
+import { Puzzle } from 'lucide-react'
 import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 async function fetchModule(mid: string) {
@@ -54,12 +54,6 @@ const ViewModule = async ({ params }: { params: Promise<{ cid: string; mid: stri
                     <div className="flex justify-center items-center gap-x-4">
                         <Link href={`/admin/courses/${cid}/modules/${mid}/mcq/add`}>
                             <Button className="bg-green-500 hover:bg-green-700 text-white"> <Puzzle className="mr-2" /> Add MCQ</Button>
-                        </Link>
-                        <Link href={`/admin/courses/${cid}/modules/${mid}/mcq/import`}>
-                            <Button>
-                                <UploadCloud className="mr-2" />
-                                Bulk Upload
-                            </Button>
                         </Link>
                         <MExport data={mcqData} fileName={`${modulez?.title}-MCQ.csv`} />
                         <BackBtn />

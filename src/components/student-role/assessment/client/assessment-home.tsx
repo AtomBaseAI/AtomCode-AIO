@@ -39,7 +39,11 @@ export default function UserAssessmentHome({ data, uaid, aid, uid }: Props) {
     // }
     const storedCount = localStorage.getItem("tabSwitchCount")
     if (storedCount) {
-      setTabSwitchCount(Number.parseInt(storedCount))
+      // Deferred (microtask) so we do not call setState synchronously in the
+      // effect body; the value is rendered, so it must stay client-only.
+      queueMicrotask(() => {
+        setTabSwitchCount(Number.parseInt(storedCount))
+      })
     }
 
   }, [router])

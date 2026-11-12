@@ -121,7 +121,7 @@ const AssessmentCodeView = ({ questions, aid, uid, uaid, status }: { questions: 
     const [score2, setScore2] = useState<number>(0);
     const [score3, setScore3] = useState<number>(0);
     const [versionProfileId, setVersionProfileId] = useState<string | undefined>(undefined);
-    const [codeStatus, setCodeStatus] = useState("")
+    const [codeStatus, setCodeStatus] = useState(status)
     const RunCode = async () => {
         const blacklist = currentQuestion.blacklist
             ?.split(",")
@@ -430,9 +430,6 @@ const AssessmentCodeView = ({ questions, aid, uid, uaid, status }: { questions: 
             document.removeEventListener("contextmenu", preventContextMenu);
         };
     }, [toast]);
-    useEffect(() => {
-        setCodeStatus(status)
-    }, []);
 
     return (
         <main className="flex min-h-[94vh] min-w-screen flex-row">

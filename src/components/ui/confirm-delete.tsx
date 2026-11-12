@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils"
 /** The exact lowercase phrase that enables the delete button. */
 export const CONFIRM_DELETE_PHRASE = "confirm delete"
 
-/** Camel-case display version shown in the label / input placeholder. */
-export const CONFIRM_DELETE_HINT = "Confirm Delete"
+/** Display version shown in the label / input placeholder (lowercase, same as the phrase). */
+export const CONFIRM_DELETE_HINT = "confirm delete"
 
 /**
  * Sanitizes typed confirmation text:
@@ -40,8 +40,8 @@ interface ConfirmDeleteInputProps {
 /**
  * Typed-confirmation field for destructive (delete) dialogs.
  *
- * Shows the camel-case phrase ("Confirm Delete") as the label and inside the
- * input placeholder, but only accepts lowercase letters: whatever the user
+ * Shows the lowercase phrase ("confirm delete") as the label and inside the
+ * input placeholder, and only accepts lowercase letters: whatever the user
  * types is folded to lowercase and stripped of invalid characters, so the
  * effective confirmation is always `confirm delete`.
  *
@@ -84,7 +84,7 @@ export function ConfirmDeleteInput({
         autoCorrect="off"
         spellCheck={false}
         autoFocus={autoFocus}
-        aria-label={`Type ${CONFIRM_DELETE_HINT} in lowercase letters to confirm deletion`}
+        aria-label={`Type ${CONFIRM_DELETE_HINT} to confirm deletion`}
         placeholder={CONFIRM_DELETE_HINT}
         value={value}
         onChange={(event) => onValueChange(normalizeConfirmText(event.target.value))}
@@ -102,11 +102,6 @@ export function ConfirmDeleteInput({
             "border-emerald-500/60 focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500",
         )}
       />
-      {dirty && (
-        <p className="text-destructive text-xs">
-          Must match &quot;{CONFIRM_DELETE_PHRASE}&quot; exactly (small letters only).
-        </p>
-      )}
     </div>
   )
 }

@@ -69,7 +69,7 @@ const OpenIDE = () => {
     const [running, setRunning] = useState(false)
     const [runtimeError, setRuntimeError] = useState('')
     const [lastRun, setLastRun] = useState<SingleRunOutcome | null>(null)
-    const [languageExtension, setLanguageExtension] = useState<{
+    const [codeMirrorExtension, setCodeMirrorExtension] = useState<{
         extension: unknown;
         completion: ReturnType<typeof getCustomCompletionSource>;
     } | null>(null)
@@ -78,22 +78,32 @@ const OpenIDE = () => {
         ? getProfileById(versionProfileId)
         : getProfilesForLanguage(lang)[0];
 
-    // Load the CodeMirror extension whenever the language changes.
+    // Non-CodeMirror languages (e.g. SQL) never get an extension. Reproduce
+    // the old effect's synchronous reset during render (conditional update —
+    // safe, and it keeps any stale extension from leaking into the UI).
+    if (!isCodeMirrorLanguage(lang) && codeMirrorExtension !== null) {
+        setCodeMirrorExtension(null);
+    }
+
+    // Load the CodeMirror extension whenever the language changes. The only
+    // state updates happen asynchronously in the load callback, after the
+    // dynamic import resolves — never synchronously within the effect body.
     useEffect(() => {
         let cancelled = false;
         if (!isCodeMirrorLanguage(lang)) {
-            setLanguageExtension(null);
             return;
         }
         loadLanguageExtension(lang).then((extension) => {
             if (cancelled) return;
-            setLanguageExtension({
+            setCodeMirrorExtension({
                 extension,
                 completion: getCustomCompletionSource(lang as CodeLanguage),
             });
         });
         return () => { cancelled = true; };
     }, [lang]);
+
+    const languageExtension = isCodeMirrorLanguage(lang) ? codeMirrorExtension : null;
 
     const applyLanguage = useCallback((nextLang: LanguageId) => {
         setLang(nextLang);

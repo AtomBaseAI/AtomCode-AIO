@@ -30,6 +30,8 @@ import { DeleteStudentSchema } from '@/schemas/student-schema'
 import { deletestudent } from '@/actions/student'
 import { toast } from 'sonner'
 import { ConfirmDeleteInput, isConfirmDeleteText } from '@/components/ui/confirm-delete'
+import SmartDeleteCleanup from '@/components/ui/smart-delete-cleanup'
+
 const DeleteStudent = ({ uid }: { uid: string }) => {
     const form = useForm<z.infer<typeof DeleteStudentSchema>>({
         resolver: zodResolver(DeleteStudentSchema),
@@ -43,6 +45,7 @@ const DeleteStudent = ({ uid }: { uid: string }) => {
     const [error, setError] = useState<string | undefined>("")
     const [success, setSuccess] = useState<string | undefined>("")
     const [confirmText, setConfirmText] = useState("")
+
     const handleSubmit = (values: z.infer<typeof DeleteStudentSchema>) => {
         setError("")
         setSuccess("")
@@ -59,11 +62,14 @@ const DeleteStudent = ({ uid }: { uid: string }) => {
                         form.reset()
                         setOpen(false)
                         toast.success(data.success);
+                    } else if (data.error) {
+                        setError(data.error)
                     }
                 })
                 .catch(() => toast.error("Something went wrong!"));
         })
     }
+
     return (
         <>
 
@@ -73,7 +79,7 @@ const DeleteStudent = ({ uid }: { uid: string }) => {
                         <Trash className="size-5 bg-transparent text-destructive" />
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[480px]">
                     <DialogHeader>
                         <DialogTitle>Delete Student</DialogTitle>
                     </DialogHeader>
@@ -81,6 +87,9 @@ const DeleteStudent = ({ uid }: { uid: string }) => {
                         This action is irreversable, Are you sure want to delete ?
                     </DialogDescription>
                     <div className="grid gap-6">
+                        {/* Cleanup sections — run before the final delete */}
+                        <SmartDeleteCleanup entity="student" id={uid} />
+
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
                                 <div className="grid gap-2">
@@ -106,6 +115,9 @@ const DeleteStudent = ({ uid }: { uid: string }) => {
                                     <FormError message={error} />
                                     <FormSuccess message={success} />
                                     <ConfirmDeleteInput value={confirmText} onValueChange={setConfirmText} />
+                                    <p className="text-muted-foreground text-xs">
+                                        Tip: the delete button below also clears any records left behind automatically.
+                                    </p>
                                     <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
                                             <Button className='w-full'>

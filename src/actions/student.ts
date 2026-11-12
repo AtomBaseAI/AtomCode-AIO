@@ -1,5 +1,6 @@
 "use server"
 import { db } from "@/lib/db"
+import type { Prisma } from "@prisma/client"
 // import bcrypt from 'bcryptjs'
 import * as z from 'zod'
 import { revalidatePath } from "next/cache"
@@ -42,15 +43,50 @@ export const addstudent = async (values: z.infer<typeof AddStudentSchema>) => {
 
 }
 
+/**
+ * Wipes every row that belongs to the given students (practice records,
+ * assessment records, course assignments) inside one transaction.
+ * Must be called BEFORE deleting the User rows — none of the relations
+ * cascade in the schema, so a bare user.delete would hit FK constraints.
+ */
+async function deleteStudentRelatedData(tx: Prisma.TransactionClient, ids: string[]) {
+    const [moduleData, mcqData, codeQuestionData, assessmentData, assessmentMcqData, assessmentCodeData, userCourses] =
+        await Promise.all([
+            tx.userModuleData.deleteMany({ where: { userId: { in: ids } } }),
+            tx.userMCQData.deleteMany({ where: { userId: { in: ids } } }),
+            tx.userCodeQuestionData.deleteMany({ where: { userId: { in: ids } } }),
+            tx.userAssessmentData.deleteMany({ where: { userId: { in: ids } } }),
+            tx.userAssessmentMCQData.deleteMany({ where: { userId: { in: ids } } }),
+            tx.userAssessmentCodeData.deleteMany({ where: { userId: { in: ids } } }),
+            tx.userCourse.deleteMany({ where: { userId: { in: ids } } }),
+        ]);
+    return {
+        moduleData: moduleData.count,
+        mcqData: mcqData.count,
+        codeQuestionData: codeQuestionData.count,
+        assessmentData: assessmentData.count,
+        assessmentMcqData: assessmentMcqData.count,
+        assessmentCodeData: assessmentCodeData.count,
+        userCourses: userCourses.count,
+    };
+}
+
 export const deletestudent = async (
     values: z.infer<typeof DeleteStudentSchema>
 ) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can delete students." };
+
     const uid = values.id;
-    await db.user.delete({
-        where: {
-            id: uid
-        }
-    })
+    const student = await db.user.findUnique({ where: { id: uid }, select: { id: true } });
+    if (!student) return { error: "Student not found." };
+
+    await db.$transaction(async (tx) => {
+        // Remove every related record first (course & assessment data +
+        // course assignments), then the account itself.
+        await deleteStudentRelatedData(tx, [uid]);
+        await tx.user.delete({ where: { id: uid } });
+    });
     revalidatePath("/admin/students")
     return { success: "Student Deleted !" }
 }
@@ -113,9 +149,18 @@ export const deletestudentsbulk = async (ids: string[]) => {
     );
     if (validIds.length === 0) return { error: "No students selected." };
 
-    const result = await db.user.deleteMany({
+    // Only delete accounts that actually exist so counts stay honest.
+    const existing = await db.user.findMany({
         where: { id: { in: validIds } },
+        select: { id: true },
+    });
+    if (existing.length === 0) return { error: "No students selected." };
+    const existingIds = existing.map((s) => s.id);
+
+    await db.$transaction(async (tx) => {
+        await deleteStudentRelatedData(tx, existingIds);
+        await tx.user.deleteMany({ where: { id: { in: existingIds } } });
     });
     revalidatePath("/admin/students");
-    return { success: `${result.count} student(s) deleted.` };
+    return { success: `${existingIds.length} student(s) deleted.` };
 }

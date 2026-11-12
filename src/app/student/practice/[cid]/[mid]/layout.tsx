@@ -50,7 +50,10 @@ const PracticeLayout = ({ children }: { children: React.ReactNode }) => {
     // };
 
     useEffect(() => {
-        checkAndEnableFullscreen();
+        // Defer the mount-time fullscreen check to a microtask: it still runs
+        // before the first paint, but the dialog state update no longer happens
+        // synchronously inside the effect body (react-hooks/set-state-in-effect).
+        queueMicrotask(checkAndEnableFullscreen);
         document.addEventListener("fullscreenchange", handleFullscreenChange);
         // window.history.pushState(null, "", window.location.href);
         // window.addEventListener("popstate", handlePopState);

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Check, ArrowRight, LoaderIcon, Loader, Puzzle } from 'lucide-react';
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from "sonner";
 import { mcqdataUpdateAssessment } from "@/actions/assessment";
@@ -37,15 +37,16 @@ interface UserMCQRecord {
 }
 
 const AssessmentMCQView = ({ data, uaid, status }: { data: MCQ[], uaid: string, status: string }) => {
-    const [mcqdata, setMcqData] = useState<MCQ[]>([]);
-    const [mcqcount, setMcqCount] = useState(0);
-    const [mcqstatus, setMcqStatus] = useState("");
+    // Initialized directly from props (previously copied into state in a mount effect).
+    const mcqdata = data;
+    const mcqcount = data.length;
+    const [mcqstatus, setMcqStatus] = useState(status);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState<string>("");
     const [userMcqRecord, setUserMcqRecord] = useState<UserMCQRecord[]>([]);
     const [isLoading, startTransition] = useTransition()
     const [testDuration, setTestDuration] = useState<number>(0);
-    const [testStartTime, setTestStartTime] = useState<number | null>(null);
+    const [testStartTime] = useState<number | null>(() => Date.now());
     const [score, setScore] = useState<number>(0);
     const [SubmitTestModel, setSubmitTestModel] = useState(false)
     const [routeBtnLoading, setRouteBtnLoading] = useState(false)
@@ -144,13 +145,6 @@ const AssessmentMCQView = ({ data, uaid, status }: { data: MCQ[], uaid: string, 
                 })
         })
     }
-    useEffect(() => {
-
-        setMcqStatus(status);
-        setMcqData(data);
-        setMcqCount(data.length);
-        setTestStartTime(Date.now());
-    }, []);
     // console.log(status)
     return (
         <main className="flex min-h-[94vh] min-w-screen flex-row overflow-hidden">

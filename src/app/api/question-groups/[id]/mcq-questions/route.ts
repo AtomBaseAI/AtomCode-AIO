@@ -60,9 +60,13 @@ export async function PUT(req: Request, ctx: RouteContext) {
 
 /**
  * DELETE /api/question-groups/[id]/mcq-questions?mcqId=… — permanently delete
- * one MCQ that belongs to this group (MCQs are managed exclusively inside
+ * one MCQ shown under this group (MCQs are managed exclusively inside
  * question groups; there is no global bank to detach back to).
  * Bulk mode: { mcqIds: string[] } JSON body.
+ *
+ * Deleted by id (NOT scoped to the group): the smart-delete cleanup lets the
+ * admin detach the MCQ from the group before the final delete, and the final
+ * delete must still succeed for anything left behind.
  */
 export async function DELETE(req: Request, ctx: RouteContext) {
     const guard = await requireAdminApi();
@@ -101,14 +105,13 @@ export async function DELETE(req: Request, ctx: RouteContext) {
     }
 
     if (bulkIds.length > 0) {
-        // Scoped by questionGroupId — only MCQs that actually belong to this
-        // group are deleted, in one atomic statement.
+        // By id only — see docblock. One atomic statement.
         const result = await db.mCQQuestion.deleteMany({
-            where: { id: { in: bulkIds }, questionGroupId: id },
+            where: { id: { in: bulkIds } },
         });
         if (result.count === 0) {
             return NextResponse.json(
-                { error: "None of the selected questions belong to this group." },
+                { error: "None of the selected questions exist." },
                 { status: 404 }
             );
         }
@@ -122,11 +125,11 @@ export async function DELETE(req: Request, ctx: RouteContext) {
     }
 
     const result = await db.mCQQuestion.deleteMany({
-        where: { id: mcqId!, questionGroupId: id },
+        where: { id: mcqId! },
     });
     if (result.count === 0) {
         return NextResponse.json(
-            { error: "This MCQ does not belong to the group." },
+            { error: "MCQ not found." },
             { status: 404 }
         );
     }

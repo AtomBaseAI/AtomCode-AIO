@@ -24,26 +24,59 @@ export const addcoursestudents = async (
     }
 }
 
+/**
+ * Removes a student from a course and wipes their progress for that course
+ * inside one transaction: module progress, practice submissions and
+ * assessment attempts (which hang off the course's modules and assessments).
+ * None of those relations cascade, so a bare userCourse.delete would leave
+ * orphaned progress data behind.
+ */
 export const deletecoursestudent = async (
     uid: string,
     cid: string
 ) => {
+    const session = await requireAdminOrCourseStaff(cid);
+    if (!session) {
+        return { error: "You are not allowed to manage students of this course." };
+    }
+
     try {
-        const existingRecord = await db.userCourse.findFirst({
-            where: {
-                courseId: cid,
-                userId: uid
-            }
-        });
+        await db.$transaction(async (tx) => {
+            // The student's data references the course's modules and
+            // assessments — resolve their ids first, wipe the data, then
+            // remove the enrollment row itself.
+            const mids = (
+                await tx.module.findMany({ where: { courseId: cid }, select: { id: true } })
+            ).map((m) => m.id);
+            const aids = (
+                await tx.assessments.findMany({ where: { courseId: cid }, select: { id: true } })
+            ).map((a) => a.id);
 
-        if (!existingRecord) {
-            throw new Error("Record to delete does not exist.");
-        }
+            await Promise.all([
+                tx.userModuleData.deleteMany({ where: { userId: uid, courseId: cid } }),
+                tx.userMCQData.deleteMany({ where: { userId: uid, moduleId: { in: mids } } }),
+                tx.userCodeQuestionData.deleteMany({ where: { userId: uid, moduleId: { in: mids } } }),
+                tx.userAssessmentData.deleteMany({ where: { userId: uid, courseId: cid } }),
+                tx.userAssessmentMCQData.deleteMany({ where: { userId: uid, assessmentId: { in: aids } } }),
+                tx.userAssessmentCodeData.deleteMany({ where: { userId: uid, assessmentId: { in: aids } } }),
+            ]);
 
-        await db.userCourse.delete({
-            where: {
-                id: existingRecord.id
+            const existingRecord = await tx.userCourse.findFirst({
+                where: {
+                    courseId: cid,
+                    userId: uid
+                }
+            });
+
+            if (!existingRecord) {
+                throw new Error("Record to delete does not exist.");
             }
+
+            await tx.userCourse.delete({
+                where: {
+                    id: existingRecord.id
+                }
+            });
         });
 
         revalidatePath(`/admin/courses`);
@@ -90,8 +123,29 @@ export const deletecoursestudentsbulk = async (
     );
     if (validIds.length === 0) return { error: "No students selected." };
 
-    const result = await db.userCourse.deleteMany({
-        where: { courseId: cid, userId: { in: validIds } },
+    const result = await db.$transaction(async (tx) => {
+        // Wipe each student's progress for this course first (module
+        // progress, practice submissions, assessment attempts — none of
+        // them cascade), then remove the enrollment rows themselves.
+        const mids = (
+            await tx.module.findMany({ where: { courseId: cid }, select: { id: true } })
+        ).map((m) => m.id);
+        const aids = (
+            await tx.assessments.findMany({ where: { courseId: cid }, select: { id: true } })
+        ).map((a) => a.id);
+
+        await Promise.all([
+            tx.userModuleData.deleteMany({ where: { courseId: cid, userId: { in: validIds } } }),
+            tx.userMCQData.deleteMany({ where: { userId: { in: validIds }, moduleId: { in: mids } } }),
+            tx.userCodeQuestionData.deleteMany({ where: { userId: { in: validIds }, moduleId: { in: mids } } }),
+            tx.userAssessmentData.deleteMany({ where: { courseId: cid, userId: { in: validIds } } }),
+            tx.userAssessmentMCQData.deleteMany({ where: { userId: { in: validIds }, assessmentId: { in: aids } } }),
+            tx.userAssessmentCodeData.deleteMany({ where: { userId: { in: validIds }, assessmentId: { in: aids } } }),
+        ]);
+
+        return tx.userCourse.deleteMany({
+            where: { courseId: cid, userId: { in: validIds } },
+        });
     });
 
     revalidatePath("/admin/courses");

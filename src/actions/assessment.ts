@@ -52,8 +52,8 @@ export const mcqdataUpdateAssessment = async (data: z.infer<typeof upateUserAsse
       mcqstatus: data.mcqstatus,
       usermcqscore: data.usermcqscore,
     }
-  }),
-    revalidatePath('/student/assessment');
+  });
+  revalidatePath('/student/assessment');
   return { success: "MCQ's Submitted" };
 }
 
@@ -174,8 +174,8 @@ export const submitassessmentallquestions = async (data: z.infer<typeof upateUse
       errors: totalerrors,
       compiles: totalcompiles,
     }
-  }),
-    revalidatePath('/student/assessment');
+  });
+  revalidatePath('/student/assessment');
   return { success: "Code Submitted" };
 }
 
@@ -192,13 +192,32 @@ export const addassessment = async (values: z.infer<typeof AddAssessmentSchema>)
   return { success: "Assessment Added!" }
 }
 
-// Delete Assessment
+/**
+ * Deletes an assessment along with every student attempt on it
+ * (UserAssessmentData / MCQ / Code answers) in one transaction —
+ * none of those relations cascade in the schema, so a bare
+ * assessments.delete would hit FK constraints once any student has
+ * attempted it. Question attachments are nullable FKs / implicit joins
+ * and auto-detach, so they are left untouched.
+ */
 export const deleteassessment = async (values: z.infer<typeof DeleteAssessmentSchema>) => {
+  const session = await requireAdmin();
+  if (!session) return { error: "Only admins can delete assessments." };
+
   const aid = values.id
-  await db.assessments.delete({
-    where: {
-      id: aid,
-    },
+  const assessment = await db.assessments.findUnique({ where: { id: aid }, select: { id: true } });
+  if (!assessment) return { error: "Assessment not found." };
+
+  await db.$transaction(async (tx) => {
+    // Remove student attempts first, then the assessment itself.
+    await tx.userAssessmentData.deleteMany({ where: { assessmentId: aid } });
+    await tx.userAssessmentMCQData.deleteMany({ where: { assessmentId: aid } });
+    await tx.userAssessmentCodeData.deleteMany({ where: { assessmentId: aid } });
+    await tx.assessments.delete({
+      where: {
+        id: aid,
+      },
+    })
   })
 
   revalidatePath("/admin/courses")
@@ -264,18 +283,16 @@ export const deleteassessmentsbulk = async (ids: string[]) => {
   );
   if (validIds.length === 0) return { error: "No assessments selected." };
 
-  // Assessments referenced by student attempts cannot be deleted (FK
-  // restrict) — delete what we can and report the rest as skipped.
-  let deleted = 0;
-  let skipped = 0;
-  for (const id of validIds) {
-    try {
-      await db.assessments.delete({ where: { id } });
-      deleted++;
-    } catch {
-      skipped++;
-    }
-  }
+  // Wipe every student attempt on the selected assessments first (the
+  // attempts do not cascade), then remove the assessments themselves.
+  const result = await db.$transaction(async (tx) => {
+    await tx.userAssessmentData.deleteMany({ where: { assessmentId: { in: validIds } } });
+    await tx.userAssessmentMCQData.deleteMany({ where: { assessmentId: { in: validIds } } });
+    await tx.userAssessmentCodeData.deleteMany({ where: { assessmentId: { in: validIds } } });
+    return tx.assessments.deleteMany({ where: { id: { in: validIds } } });
+  });
+  const deleted = result.count;
+  const skipped = validIds.length - deleted;
 
   revalidatePath("/admin/courses");
   revalidatePath("/student/assessments");

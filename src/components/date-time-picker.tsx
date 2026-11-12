@@ -17,10 +17,17 @@ interface DateTimePickerProps {
 export function DateTimePicker({ value, onChange, disabled, placeholder = "Select date & time" }: DateTimePickerProps) {
   const [open, setOpen] = React.useState(false)
   const [time, setTime] = React.useState<string>("10:30:00")
+  // The `value` that `time` was last synced from, so we can tell when a new
+  // value (initial mount or a parent-driven change) needs re-extraction.
+  const [lastSyncedValue, setLastSyncedValue] = React.useState<Date | undefined>(undefined)
 
-  // Extract time from existing date value — read as app-timezone (IST)
-  // wall clock, NOT the browser's local system timezone.
-  React.useEffect(() => {
+  // Extract time from an existing date value — read as app-timezone (IST)
+  // wall clock, NOT the browser's local system timezone. This runs during
+  // render whenever `value` changes (React's "adjusting state when a prop
+  // changes" pattern), replacing the previous setState-in-effect sync with
+  // identical semantics.
+  if (!Object.is(value, lastSyncedValue)) {
+    setLastSyncedValue(value)
     if (value) {
       const parts = getISTParts(value)
       if (parts) {
@@ -28,7 +35,7 @@ export function DateTimePicker({ value, onChange, disabled, placeholder = "Selec
         setTime(`${pad(parts.hour)}:${pad(parts.minute)}:${pad(parts.second)}`)
       }
     }
-  }, [value])
+  }
 
   // Combine the picked LOCAL calendar day (what the admin clicked in the
   // calendar) with the typed time, interpreted as Asia/Kolkata wall clock —

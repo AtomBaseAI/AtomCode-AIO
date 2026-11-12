@@ -16,14 +16,43 @@ export const addmodule = async (values: z.infer<typeof AddModuleSchema>) => {
     revalidatePath(`/admin/courses`)
     return { success: "Module Added !" }
 }
+/**
+ * Intelligent module delete — mirrors the cleanup API's full module wipe
+ * (removeModuleSection with every section at once, then the module row).
+ * Cascade order inside one transaction:
+ *   1. student practice data — module progress, MCQ attempts and code
+ *      submissions (they reference the module and its questions)
+ *   2. module content — code/MCQ questions and study references
+ *   3. the module row itself
+ * None of the relations cascade in the schema, so a bare module.delete
+ * would hit FK constraints whenever any of these rows exist.
+ */
 export const deletemodule = async (
     values: z.infer<typeof DeleteModuleSchema>
 ) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can delete modules." };
+
     const mid = values.id;
-    await db.module.delete({
-        where: {
-            id: mid
-        }
+    const module_ = await db.module.findUnique({ where: { id: mid }, select: { id: true } });
+    if (!module_) return { error: "Module not found." };
+
+    await db.$transaction(async (tx) => {
+        // Student practice data always goes first — it references the
+        // module and its questions.
+        await Promise.all([
+            tx.userModuleData.deleteMany({ where: { moduleId: mid } }),
+            tx.userMCQData.deleteMany({ where: { moduleId: mid } }),
+            tx.userCodeQuestionData.deleteMany({ where: { moduleId: mid } }),
+        ])
+        // Questions always go together with their references.
+        await Promise.all([
+            tx.codeQuestion.deleteMany({ where: { moduleId: mid } }),
+            tx.mCQQuestion.deleteMany({ where: { moduleId: mid } }),
+            tx.moduleReferences.deleteMany({ where: { moduleId: mid } }),
+        ])
+        // The module row itself.
+        await tx.module.delete({ where: { id: mid } })
     })
     revalidatePath("/admin/courses")
     return { success: "Module Deleted !" }
@@ -99,6 +128,11 @@ export const removemodulequestion = async (
     return { success: "Question removed from module. It is still available in the question bank!" };
 }
 
+/**
+ * Bulk intelligent module delete — runs the same full cascade as
+ * `deletemodule` for every selected module inside ONE transaction, so FK
+ * constraints can no longer fail. Modules that don't exist are ignored.
+ */
 export const deletemodulesbulk = async (ids: string[]) => {
     const session = await requireAdmin();
     if (!session) return { error: "Only admins can delete modules." };
@@ -108,29 +142,36 @@ export const deletemodulesbulk = async (ids: string[]) => {
     );
     if (validIds.length === 0) return { error: "No modules selected." };
 
-    // Modules referenced by questions/attempts cannot be deleted (FK
-    // restrict) — delete what we can and report the rest as skipped.
-    let deleted = 0;
-    let skipped = 0;
-    for (const id of validIds) {
-        try {
-            await db.module.delete({ where: { id } });
-            deleted++;
-        } catch {
-            skipped++;
-        }
-    }
+    // Only delete modules that actually exist so counts stay honest.
+    const existing = await db.module.findMany({
+        where: { id: { in: validIds } },
+        select: { id: true },
+    });
+    if (existing.length === 0) return { error: "No modules selected." };
+    const existingIds = existing.map((m) => m.id);
+
+    await db.$transaction(async (tx) => {
+        // Student practice data always goes first — it references the
+        // modules and their questions.
+        await Promise.all([
+            tx.userModuleData.deleteMany({ where: { moduleId: { in: existingIds } } }),
+            tx.userMCQData.deleteMany({ where: { moduleId: { in: existingIds } } }),
+            tx.userCodeQuestionData.deleteMany({ where: { moduleId: { in: existingIds } } }),
+        ]);
+        // Questions always go together with their references.
+        await Promise.all([
+            tx.codeQuestion.deleteMany({ where: { moduleId: { in: existingIds } } }),
+            tx.mCQQuestion.deleteMany({ where: { moduleId: { in: existingIds } } }),
+            tx.moduleReferences.deleteMany({ where: { moduleId: { in: existingIds } } }),
+        ]);
+        // The module rows themselves.
+        await tx.module.deleteMany({ where: { id: { in: existingIds } } });
+    });
 
     revalidatePath("/admin/courses");
     revalidatePath("/staff/courses");
 
-    if (deleted === 0) {
-        return {
-            error:
-                "None of the selected modules could be deleted — they still contain questions or student attempts.",
-        };
-    }
-    return { success: `${deleted} module(s) deleted.`, skipped: skipped > 0 ? skipped : undefined };
+    return { success: `${existingIds.length} module(s) deleted.` };
 }
 
 /**

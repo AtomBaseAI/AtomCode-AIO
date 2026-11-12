@@ -4,7 +4,7 @@ import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggle
 import { cn } from "@/lib/utils"
 import { Moon } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 
 /**
  * App-wide theme switcher — Magic UI AnimatedThemeToggler (circular reveal via
@@ -20,11 +20,11 @@ export function ThemeToggle({ className }: { className?: string }) {
   // default -> Moon) but may resolve to "dark" on the client (Sun) — a
   // hydration mismatch. Render a placeholder that exactly matches the SSR
   // output until after mount, then swap in the real toggler.
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  //
+  // useSyncExternalStore gives a hydration-safe "mounted" flag without any
+  // setState-in-effect: the server snapshot is false (matches SSR output),
+  // and React swaps to the client snapshot (true) right after hydration.
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   const classes = cn(
     "inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent text-black shadow-none transition-colors hover:bg-transparent hover:text-primary dark:text-white",

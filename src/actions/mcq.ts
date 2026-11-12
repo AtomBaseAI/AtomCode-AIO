@@ -62,6 +62,9 @@ export const addMCQ = async (
 export const deleteMCQ = async (
     values: z.infer<typeof DeleteMCQSchema>
 ) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can delete MCQs." };
+
     const mcqId = values.id;
     await db.mCQQuestion.delete({
         where: {
@@ -70,6 +73,7 @@ export const deleteMCQ = async (
     });
 
     revalidatePath("/admin/courses");
+    revalidatePath("/admin/questions-groups", "layout");
     return { success: "MCQ Deleted!" };
 }
 

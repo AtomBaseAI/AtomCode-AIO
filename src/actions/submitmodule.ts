@@ -57,8 +57,8 @@ export const mcqdataUpdateModule = async (data: z.infer<typeof upateUserModelSch
       mcqstatus: data.mcqstatus,
       usermcqscore: data.usermcqscore,
     }
-  }),
-    revalidatePath('/student/practice');
+  });
+  revalidatePath('/student/practice');
   return { success: "MCQ's Submitted" };
 }
 
@@ -100,8 +100,8 @@ export const codedataUpdateModule = async (data: z.infer<typeof upateUserModelSc
       errors: totalerrors,
       compiles: totalcompiles,
     }
-  }),
-    revalidatePath('/student/practice');
+  });
+  revalidatePath('/student/practice');
   return { success: "Code Submitted" };
 }
 
@@ -123,9 +123,9 @@ export const endModule = async (umid: string) => {
     data: {
       modulestatus: 'submitted'
     }
-  }),
+  });
 
-    revalidatePath('/student/courses');
+  revalidatePath('/student/courses');
   return { success: "Module Submitted" };
 }
 

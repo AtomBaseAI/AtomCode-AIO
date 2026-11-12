@@ -29,6 +29,7 @@ import { FormSuccess } from '@/components/auth/form-success'
 import { DeleteQuestionSchema } from '@/schemas/question-schema'
 import { deletequestion } from '@/actions/question'
 import { ConfirmDeleteInput, isConfirmDeleteText } from '@/components/ui/confirm-delete'
+import SmartDeleteCleanup from '@/components/ui/smart-delete-cleanup'
 const DeleteQuestion = ({ qid }: { qid: string }) => {
     const form = useForm<z.infer<typeof DeleteQuestionSchema>>({
         resolver: zodResolver(DeleteQuestionSchema),
@@ -69,7 +70,13 @@ const DeleteQuestion = ({ qid }: { qid: string }) => {
 
             <Dialog open={open} onOpenChange={(o) => { setConfirmText(""); setOpen(o) }} >
                 <DialogTrigger asChild>
-                    <Button variant='outline' size='icon' className="border-destructive bg-transparent hover:bg-red-400/20">
+                    <Button
+                        variant='outline'
+                        size='icon'
+                        aria-label='Delete question'
+                        title='Delete question'
+                        className="border-destructive bg-transparent hover:bg-red-400/20"
+                    >
                         <Trash className="size-5 bg-transparent text-destructive" />
                     </Button>
                 </DialogTrigger>
@@ -78,9 +85,13 @@ const DeleteQuestion = ({ qid }: { qid: string }) => {
                         <DialogTitle>Delete Question</DialogTitle>
                     </DialogHeader>
                     <DialogDescription>
-                        This action is irreversable, Are you sure want to delete ?
+                        This permanently deletes the question along with any
+                        student submissions left on it. This action cannot be
+                        undone.
                     </DialogDescription>
                     <div className="grid gap-6">
+                        {/* Cleanup sections — run before the final delete */}
+                        <SmartDeleteCleanup entity="code-question" id={qid} />
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
                                 <div className="grid gap-2">

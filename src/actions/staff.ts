@@ -41,15 +41,31 @@ export const addstaff = async (values: z.infer<typeof AddStaffSchema>) => {
 
 }
 
+/**
+ * Deletes a staff member and every course assignment that references them
+ * inside one transaction. StaffCourse rows do not cascade in the schema,
+ * so a bare staff.delete would fail while the staff member is still
+ * assigned to any course.
+ */
 export const deletestaff = async (
     values: z.infer<typeof DeleteStaffSchema>
 ) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can delete staff members." };
+
     const uid = values.id;
-    await db.staff.delete({
-        where: {
-            id: uid
-        }
-    })
+    const staff = await db.staff.findUnique({ where: { id: uid }, select: { id: true } });
+    if (!staff) return { error: "Staff not found." };
+
+    await db.$transaction(async (tx) => {
+        // Remove course assignments first, then the account itself.
+        await tx.staffCourse.deleteMany({ where: { staffId: uid } });
+        await tx.staff.delete({
+            where: {
+                id: uid
+            }
+        })
+    });
     revalidatePath("/admin/staffs")
     return { success: "Staff Deleted !" }
 }
@@ -154,8 +170,12 @@ export const deletestaffsbulk = async (ids: string[]) => {
     );
     if (validIds.length === 0) return { error: "No staff members selected." };
 
-    const result = await db.staff.deleteMany({
-        where: { id: { in: validIds } },
+    const result = await db.$transaction(async (tx) => {
+        // Remove course assignments first, then the accounts themselves.
+        await tx.staffCourse.deleteMany({ where: { staffId: { in: validIds } } });
+        return tx.staff.deleteMany({
+            where: { id: { in: validIds } },
+        });
     });
     revalidatePath("/admin/staffs");
     return { success: `${result.count} staff member(s) deleted.` };

@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/tooltip"
 import { deleteassessment } from '@/actions/assessment'
 import { ConfirmDeleteInput, isConfirmDeleteText } from '@/components/ui/confirm-delete'
+import SmartDeleteCleanup from '@/components/ui/smart-delete-cleanup'
 
 const DeleteAssessment = ({ aid }: { aid: string }) => {
     const form = useForm<z.infer<typeof DeleteModuleSchema>>({
@@ -86,6 +87,9 @@ const DeleteAssessment = ({ aid }: { aid: string }) => {
                         This action is irreversable, Are you sure want to delete ?
                     </DialogDescription>
                     <div className="grid gap-6">
+                        {/* Cleanup sections — run before the final delete */}
+                        <SmartDeleteCleanup entity="assessment" id={aid} />
+
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
                                 <div className="grid gap-2">
@@ -109,6 +113,9 @@ const DeleteAssessment = ({ aid }: { aid: string }) => {
                                     <FormError message={error} />
                                     <FormSuccess message={success} />
                                     <ConfirmDeleteInput value={confirmText} onValueChange={setConfirmText} />
+                                    <p className="text-muted-foreground text-xs">
+                                        Tip: the delete button below also clears any records left behind automatically.
+                                    </p>
                                     <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
                                             <Button className='w-full'>

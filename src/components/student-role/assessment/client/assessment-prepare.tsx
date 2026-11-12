@@ -31,7 +31,6 @@ const PrepareAssessment = ({ data, aid, cid, uid }: PrepareAssessmentProps) => {
     const [submitloading, setSubmitloading] = useState(false)
     const [showPermissionModal, setShowPermissionModal] = useState(false)
     const [permissionsStatus, setPermissionsStatus] = useState({ clipboard: false, camera: false })
-    const [isAllowedToStart, setIsAllowedToStart] = useState(false)
     const [isLoading, startTransition] = useTransition()
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -44,20 +43,14 @@ const PrepareAssessment = ({ data, aid, cid, uid }: PrepareAssessmentProps) => {
     useEffect(() => {
         if (!data || !data.starttime || !data.maxtime || !data.status) {
             console.warn("data incomplete or not loaded yet", data)
-            return
-        }
-
-
-        if (data.status === "start") {
-            setIsAllowedToStart(true)
-        } else if (data.status === "retake") {
-            setIsAllowedToStart(true)
-        } else if (data.status === "resume") {
-            setIsAllowedToStart(true)
-        } else {
-            setIsAllowedToStart(false)
         }
     }, [data])
+
+    // Derived during render from the assessment data (replaces state that was
+    // previously set in an effect); stays in sync with `data` automatically.
+    const isAllowedToStart =
+        Boolean(data?.starttime && data?.maxtime) &&
+        (data?.status === "start" || data?.status === "retake" || data?.status === "resume")
 
     async function StartTest(values: z.infer<typeof FormSchema>) {
         setSubmitloading(true)

@@ -31,6 +31,23 @@ import { ResultTableModuleType } from '@/schemas/result-matrix-schema';
 import { formatDate } from '@/lib/utils';
 
 
+const CustomXAxisTick = (props: any) => {
+    const { x, y, payload } = props;
+    const text = payload.value;
+
+    // Split the text by colon
+    const [firstLine, secondLine] = text.split(":");
+
+    return (
+        <g transform={`translate(${x},${y})`}>
+            <text x={0} y={0} dy={16} textAnchor="middle" fill="#666">
+                <tspan x="0" dy="1.2em">{firstLine}</tspan>
+                {secondLine && <tspan x="0" dy="1.2em">{secondLine}</tspan>}
+            </text>
+        </g>
+    );
+};
+
 const RCViewHelper = ({ mdata, name, rollnumber }: { mdata: ResultTableModuleType[] , name: string, rollnumber: string }) => {
 
     const formattedDate = formatDate(new Date(), "-"); // DD-MM-YYYY in app timezone (Asia/Kolkata)
@@ -73,22 +90,6 @@ const RCViewHelper = ({ mdata, name, rollnumber }: { mdata: ResultTableModuleTyp
             color: "hsl(187, 78%, 55%)",
         },
     } satisfies ChartConfig;
-    const CustomXAxisTick = (props: any) => {
-        const { x, y, payload } = props;
-        const text = payload.value;
-
-        // Split the text by colon
-        const [firstLine, secondLine] = text.split(":");
-
-        return (
-            <g transform={`translate(${x},${y})`}>
-                <text x={0} y={0} dy={16} textAnchor="middle" fill="#666">
-                    <tspan x="0" dy="1.2em">{firstLine}</tspan>
-                    {secondLine && <tspan x="0" dy="1.2em">{secondLine}</tspan>}
-                </text>
-            </g>
-        );
-    };
     return (
         <>
             <Dialog>

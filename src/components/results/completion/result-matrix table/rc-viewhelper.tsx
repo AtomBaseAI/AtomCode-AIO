@@ -27,6 +27,90 @@ type ResultTableModuleType = {
     time: number
 }
 
+// Function to format minutes into HH:MM
+const formatMinutesToHHMM = (minutes: number) => {
+    const hours = Math.floor(minutes / 60)
+    const remainingMinutes = Math.round(minutes % 60) // Round minutes to avoid floating point issues
+    return `${String(hours).padStart(2, "0")}:${String(remainingMinutes).padStart(2, "0")}`
+}
+
+// Function to format hours (decimal) into HH:MM
+const formatHoursToHHMM = (hours: number) => {
+    const totalMinutes = hours * 60
+    return formatMinutesToHHMM(totalMinutes)
+}
+
+const CustomXAxisTick = (props: any) => {
+    const { x, y, payload } = props
+
+    // Add safety checks
+    if (!payload || !payload.value) {
+        return null
+    }
+
+    const text = payload.value.toString()
+    const words = text.split(/[\s:]+/).filter((word: any) => word.length > 0)
+
+    return (
+        <g transform={`translate(${x},${y})`}>
+            <text x={0} y={0} dy={16} textAnchor="middle" fill="#666" fontSize="12">
+                {words.map((word: string, index: number) => (
+                    <tspan key={index} x="0" dy={index === 0 ? "1.2em" : "1.2em"}>
+                        {word}
+                    </tspan>
+                ))}
+            </text>
+        </g>
+    )
+}
+
+const CustomTimeTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        const timeValue = payload[0].value // This value is now in hours (decimal)
+        const timeFormatted = formatHoursToHHMM(timeValue) // Format hours (decimal) to HH:MM
+        return (
+            <div className="bg-background border rounded-lg shadow-lg p-3">
+                <p className="font-medium">{label}</p>
+                <p className="text-sm">
+                    <span
+                        className="inline-block w-3 h-3 rounded-full mr-2"
+                        style={{ backgroundColor: payload[0].color }}
+                    ></span>
+                    Time: {timeFormatted}
+                </p>
+            </div>
+        )
+    }
+    return null
+}
+
+const CustomOverallTooltip = ({ active, payload, label, config }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-background border rounded-lg shadow-lg p-3">
+                <p className="font-medium">{label}</p>
+                {payload.map((entry: any, index: number) => {
+                    const { dataKey, value, color } = entry
+                    const itemConfig = config[dataKey]
+                    let displayValue = value
+
+                    if (dataKey === "time") {
+                        displayValue = formatHoursToHHMM(value) // Now value is in hours, so format from hours
+                    }
+
+                    return (
+                        <p key={`item-${index}`} className="text-sm">
+                            <span className="inline-block w-3 h-3 rounded-full mr-2" style={{ backgroundColor: color }}></span>
+                            {itemConfig?.label || dataKey}: {displayValue}
+                        </p>
+                    )
+                })}
+            </div>
+        )
+    }
+    return null
+}
+
 const RCViewHelper = ({
     mdata,
     name,
@@ -150,96 +234,12 @@ const RCViewHelper = ({
         },
     } satisfies ChartConfig
 
-    const CustomXAxisTick = (props: any) => {
-        const { x, y, payload } = props
-
-        // Add safety checks
-        if (!payload || !payload.value) {
-            return null
-        }
-
-        const text = payload.value.toString()
-        const words = text.split(/[\s:]+/).filter((word: any) => word.length > 0)
-
-        return (
-            <g transform={`translate(${x},${y})`}>
-                <text x={0} y={0} dy={16} textAnchor="middle" fill="#666" fontSize="12">
-                    {words.map((word: string, index: number) => (
-                        <tspan key={index} x="0" dy={index === 0 ? "1.2em" : "1.2em"}>
-                            {word}
-                        </tspan>
-                    ))}
-                </text>
-            </g>
-        )
-    }
-
-    // Function to format minutes into HH:MM
-    const formatMinutesToHHMM = (minutes: number) => {
-        const hours = Math.floor(minutes / 60)
-        const remainingMinutes = Math.round(minutes % 60) // Round minutes to avoid floating point issues
-        return `${String(hours).padStart(2, "0")}:${String(remainingMinutes).padStart(2, "0")}`
-    }
-
-    // Function to format hours (decimal) into HH:MM
-    const formatHoursToHHMM = (hours: number) => {
-        const totalMinutes = hours * 60
-        return formatMinutesToHHMM(totalMinutes)
-    }
-
     // Calculate summary statistics
     const totalModules = mdata.length
     const averageScore = mdata.reduce((sum, item) => sum + (item.totalscore / item.maxscore) * 100, 0) / totalModules
     const totalErrors = mdata.reduce((sum, item) => sum + item.errors, 0)
     const totalTimeMinutes = mdata.reduce((sum, item) => sum + item.time, 0) // Sum of original minutes
     const totalTimeFormatted = formatMinutesToHHMM(totalTimeMinutes) // Format total minutes to HH:MM
-
-    const CustomTimeTooltip = ({ active, payload, label }: any) => {
-        if (active && payload && payload.length) {
-            const timeValue = payload[0].value // This value is now in hours (decimal)
-            const timeFormatted = formatHoursToHHMM(timeValue) // Format hours (decimal) to HH:MM
-            return (
-                <div className="bg-background border rounded-lg shadow-lg p-3">
-                    <p className="font-medium">{label}</p>
-                    <p className="text-sm">
-                        <span
-                            className="inline-block w-3 h-3 rounded-full mr-2"
-                            style={{ backgroundColor: payload[0].color }}
-                        ></span>
-                        Time: {timeFormatted}
-                    </p>
-                </div>
-            )
-        }
-        return null
-    }
-
-    const CustomOverallTooltip = ({ active, payload, label, config }: any) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className="bg-background border rounded-lg shadow-lg p-3">
-                    <p className="font-medium">{label}</p>
-                    {payload.map((entry: any, index: number) => {
-                        const { dataKey, value, color } = entry
-                        const itemConfig = config[dataKey]
-                        let displayValue = value
-
-                        if (dataKey === "time") {
-                            displayValue = formatHoursToHHMM(value) // Now value is in hours, so format from hours
-                        }
-
-                        return (
-                            <p key={`item-${index}`} className="text-sm">
-                                <span className="inline-block w-3 h-3 rounded-full mr-2" style={{ backgroundColor: color }}></span>
-                                {itemConfig?.label || dataKey}: {displayValue}
-                            </p>
-                        )
-                    })}
-                </div>
-            )
-        }
-        return null
-    }
 
     return (
         <>

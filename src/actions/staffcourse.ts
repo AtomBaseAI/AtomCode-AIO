@@ -23,33 +23,46 @@ export const addcoursestaffs = async (
     }
 }
 
+/**
+ * Removes one staff member from a course (admin only). StaffCourse has no
+ * child rows, so the find + delete just run in one transaction for
+ * consistency with the other delete actions. Callers only check
+ * `.success`, so failures are returned as `{ error }` instead of thrown.
+ */
 export const deletecoursestaff = async (
     uid: string,
     cid: string
 ) => {
+    const session = await requireAdmin();
+    if (!session) {
+        return { error: "Only admins can manage course staff assignments." };
+    }
+
     try {
-        const existingRecord = await db.staffCourse.findFirst({
-            where: {
-                courseId: cid,
-                staffId: uid
-            }
-        });
+        await db.$transaction(async (tx) => {
+            const existingRecord = await tx.staffCourse.findFirst({
+                where: {
+                    courseId: cid,
+                    staffId: uid
+                }
+            });
 
-        if (!existingRecord) {
-            throw new Error("Record to delete does not exist.");
-        }
-
-        await db.staffCourse.delete({
-            where: {
-                id: existingRecord.id
+            if (!existingRecord) {
+                throw new Error("Record to delete does not exist.");
             }
+
+            await tx.staffCourse.delete({
+                where: {
+                    id: existingRecord.id
+                }
+            });
         });
 
         revalidatePath(`/admin/courses`);
         return { success: "Staff deleted from course successfully!" };
     } catch (error) {
         console.error("Error deleting Staff from course:", error);
-        throw error;
+        return { error: error instanceof Error ? error.message : "Failed to delete staff from course." };
     }
 }
 

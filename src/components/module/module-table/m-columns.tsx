@@ -145,8 +145,6 @@ export const columns: ColumnDef<ModuleTableType>[] = [
         mid: mid,
         cid: cid
       }
-      const qn: number = row.getValue("questionscount")
-      const mcqn: number = row.getValue("mcqcount")
 
       if (!mid) {
         return null
@@ -159,7 +157,9 @@ export const columns: ColumnDef<ModuleTableType>[] = [
             <MMCQView mdata={mdata} />
             <MReferences mdata={mdata} />
             <MEdit module={row.original} />
-            {qn <= 0 && mcqn <= 0 && <DeleteModule mid={mid} />}
+            {/* Delete is always available — the server action cascades
+                questions, references and student progress in one transaction. */}
+            <DeleteModule mid={mid} />
           </span>
         </div>
       )

@@ -29,6 +29,7 @@ import { FormSuccess } from '@/components/auth/form-success';
 import { DeleteMCQSchema } from '@/schemas/mcq-schema';
 import { deleteMCQ } from '@/actions/mcq';
 import { ConfirmDeleteInput, isConfirmDeleteText } from '@/components/ui/confirm-delete';
+import SmartDeleteCleanup from '@/components/ui/smart-delete-cleanup';
 
 const DeleteMCQ = ({ mcqId }: { mcqId: string }) => {
     const form = useForm<z.infer<typeof DeleteMCQSchema>>({
@@ -71,7 +72,13 @@ const DeleteMCQ = ({ mcqId }: { mcqId: string }) => {
         <>
             <Dialog open={open} onOpenChange={(o) => { setConfirmText(""); setOpen(o) }} >
                 <DialogTrigger asChild>
-                    <Button variant='outline' size='icon' className="border-destructive bg-transparent hover:bg-red-400/20">
+                    <Button
+                        variant='outline'
+                        size='icon'
+                        aria-label='Delete MCQ'
+                        title='Delete MCQ'
+                        className="border-destructive bg-transparent hover:bg-red-400/20"
+                    >
                         <Trash className="size-5 bg-transparent text-destructive" />
                     </Button>
                 </DialogTrigger>
@@ -80,9 +87,13 @@ const DeleteMCQ = ({ mcqId }: { mcqId: string }) => {
                         <DialogTitle>Delete MCQ</DialogTitle>
                     </DialogHeader>
                     <DialogDescription>
-                        This action is irreversible. Are you sure you want to delete?
+                        This permanently deletes the MCQ and detaches it from
+                        any module, assessment or question group. This action
+                        cannot be undone.
                     </DialogDescription>
                     <div className="grid gap-6">
+                        {/* Cleanup sections — run before the final delete */}
+                        <SmartDeleteCleanup entity="mcq-question" id={mcqId} />
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
                                 <div className="grid gap-2">

@@ -18,11 +18,13 @@ import {
     ConfirmDeleteInput,
     isConfirmDeleteText,
 } from "@/components/ui/confirm-delete"
+import SmartDeleteCleanup from "@/components/ui/smart-delete-cleanup"
 
 interface GroupDeleteDialogProps {
     groupId: string
     groupTitle: string
-    questionCount: number
+    /** Kept for call-site compatibility — live counts now come from the cleanup API. */
+    questionCount?: number
     /** When set, navigate here after the group is deleted (used on detail page). */
     redirectTo?: string
     /** "icon" renders a compact trash button (table rows), "button" a labelled one. */
@@ -30,13 +32,14 @@ interface GroupDeleteDialogProps {
 }
 
 /**
- * Typed-confirmation delete dialog for a question group.
- * Questions inside the group are NOT deleted — they become ungrouped.
+ * Typed-confirmation delete dialog for a question group, with the shared
+ * smart-delete cleanup list: topics go with the group automatically, while
+ * attached questions are only deleted when explicitly removed above —
+ * otherwise they become ungrouped.
  */
 export function GroupDeleteDialog({
     groupId,
     groupTitle,
-    questionCount,
     redirectTo,
     variant = "icon",
 }: GroupDeleteDialogProps) {
@@ -101,22 +104,18 @@ export function GroupDeleteDialog({
                 <DialogHeader>
                     <DialogTitle>Delete &quot;{groupTitle}&quot;?</DialogTitle>
                     <DialogDescription className="text-left text-muted-foreground">
-                        This deletes the question group only.{" "}
-                        {questionCount > 0 ? (
-                            <>
-                                The{" "}
-                                <span className="font-semibold text-foreground">
-                                    {questionCount} question
-                                    {questionCount === 1 ? "" : "s"}
-                                </span>{" "}
-                                inside will be kept and become ungrouped.
-                            </>
-                        ) : (
-                            "There are no questions inside this group."
-                        )}
+                        This deletes the group and its topic tree. Questions can
+                        be removed permanently below — any you skip are kept
+                        and simply become ungrouped. This action cannot be
+                        undone.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4">
+                    {/* Cleanup sections — run before the final delete */}
+                    <SmartDeleteCleanup
+                        entity="question-group"
+                        id={groupId}
+                    />
                     <ConfirmDeleteInput
                         value={confirmText}
                         onValueChange={setConfirmText}

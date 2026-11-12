@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { Check, Code, Lock, Play, Star } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import ModuleAction from "./module-action";
@@ -110,16 +110,15 @@ const determineFeedbackStatus = (feedbackDate: Date): { status: string, statusCl
 
 
 const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, lockStates, uid, cid }: { ModulesData: ModuleDataType[] | null, CourseFeedbackData: CourseFeedback[] | null, ModulesResults: ModuleResultType[] | null, lockStates: Record<string, ModuleLockState>, uid: string, cid: string }) => {
-    const [mergedModules, setMergedModules] = useState<MergedModuleType[]>([]);
+    // Merged view is derived from props on every render (previously copied
+    // into state in a mount effect).
+    const mergedModules = useMemo(
+        () => mergeData(ModulesData, ModulesResults),
+        [ModulesData, ModulesResults]
+    );
     const [selectedModule, setSelectedModule] = useState<MergedModuleType | null>(null);
-
-    useEffect(() => {
-        const mergedData = mergeData(ModulesData, ModulesResults);
-        setMergedModules(mergedData);
-        if (mergedData.length > 0) {
-            setSelectedModule(mergedData[0]);
-        }
-    }, [ModulesData, ModulesResults]);
+    // Effective selection falls back to the first module until the user picks one.
+    const effectiveSelectedModule = selectedModule ?? mergedModules[0] ?? null;
     return (
         <div className="py-10 sm:py-8 mx-8 border-2 rounded-md">
             <div className="mx-6 w-full h-[42rem] flex flex-row gap-x-8 overflow-hidden flex-grow">
@@ -194,7 +193,7 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, lockState
                         }
                         {mergedModules.map((module, index) => {
                             const isCompleted = module.modulestatus === 'submitted';
-                            const isCurrent = selectedModule?.id === module.id;
+                            const isCurrent = effectiveSelectedModule?.id === module.id;
                             const lockState = lockStates[module.id];
                             const isLocked = lockState?.locked ?? false;
                             const cardStateClass = isCompleted
@@ -230,13 +229,13 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, lockState
                                 <AccordionContent className="pt-0 pb-4 px-4">
                                     <div className='flex flex-col gap-3 w-full'>
                                         <div
-                                            className={`w-full flex flex-row items-center p-1 gap-2 border-2 h-10 cursor-pointer rounded-md ${selectedModule?.id === module.id ? 'border-primary' : ''} hover:border-primary hover:transition-colors duration-1000 ease-in-out`}
+                                            className={`w-full flex flex-row items-center p-1 gap-2 border-2 h-10 cursor-pointer rounded-md ${effectiveSelectedModule?.id === module.id ? 'border-primary' : ''} hover:border-primary hover:transition-colors duration-1000 ease-in-out`}
                                             onClick={() => setSelectedModule(module)} >
                                             {
                                                 module.modulestatus === 'submitted' ? (
-                                                    <Check className={`p-1 my-2 rounded-md ${selectedModule?.id === module.id ? 'bg-green-500 text-white' : ''}`} />
+                                                    <Check className={`p-1 my-2 rounded-md ${effectiveSelectedModule?.id === module.id ? 'bg-green-500 text-white' : ''}`} />
                                                 ) : (
-                                                    <Code className={`p-1 my-2 rounded-md ${selectedModule?.id === module.id ? 'bg-primary text-white' : ''}`} />
+                                                    <Code className={`p-1 my-2 rounded-md ${effectiveSelectedModule?.id === module.id ? 'bg-primary text-white' : ''}`} />
                                                 )
                                             }
                                             Code Space
@@ -252,10 +251,10 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, lockState
                     </Accordion>
                 </div>
                 <ModuleAction
-                    Module={selectedModule}
+                    Module={effectiveSelectedModule}
                     cid={cid}
                     uid={uid}
-                    lockState={selectedModule ? lockStates[selectedModule.id] : undefined}
+                    lockState={effectiveSelectedModule ? lockStates[effectiveSelectedModule.id] : undefined}
                     completionOrder={ModulesData?.[0]?.completionOrder}
                 />
             </div>

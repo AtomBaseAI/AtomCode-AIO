@@ -30,6 +30,7 @@ import { DeleteCourseStudentSchema } from '@/schemas/student-schema'
 import { deletecoursestudent } from '@/actions/usercourse'
 import { toast } from 'sonner'
 import { ConfirmDeleteInput, isConfirmDeleteText } from '@/components/ui/confirm-delete'
+import SmartDeleteCleanup from '@/components/ui/smart-delete-cleanup'
 // import { deletecoursestudent } from '@/actions/usercourse'
 
 const DeleteCourseStudent = ({ cid, uid }: { cid: string, uid: string }) => {
@@ -84,6 +85,9 @@ const DeleteCourseStudent = ({ cid, uid }: { cid: string, uid: string }) => {
                         This action is irreversable, Are you sure want to delete ?
                     </DialogDescription>
                     <div className="grid gap-6">
+                        {/* Cleanup sections — run before the final delete */}
+                        <SmartDeleteCleanup entity="course-student" id={uid} cid={cid} />
+
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
                                 <div className="grid gap-2">
@@ -109,6 +113,9 @@ const DeleteCourseStudent = ({ cid, uid }: { cid: string, uid: string }) => {
                                     <FormError message={error} />
                                     <FormSuccess message={success} />
                                     <ConfirmDeleteInput value={confirmText} onValueChange={setConfirmText} />
+                                    <p className="text-muted-foreground text-xs">
+                                        Tip: the delete button below also clears any records left behind automatically.
+                                    </p>
                                     <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
                                             <Button className='w-full'>
