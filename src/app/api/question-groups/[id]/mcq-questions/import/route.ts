@@ -43,6 +43,17 @@ function normalizeImportItem(item: unknown): unknown {
         obj.CorrectOption = Number(obj.CorrectOption);
     }
 
+    // difficulty: tolerate "Easy"/"HARD" casing; unknown → omit (DB default "easy").
+    if (typeof obj.difficulty === "string") {
+        const value = obj.difficulty.trim().toLowerCase();
+        obj.difficulty =
+            value === "medium" || value === "hard" || value === "easy"
+                ? value
+                : undefined;
+    } else if (obj.difficulty === null) {
+        obj.difficulty = undefined;
+    }
+
     // Empty strings for optional fields → null.
     for (const field of [
         "snippetLang",

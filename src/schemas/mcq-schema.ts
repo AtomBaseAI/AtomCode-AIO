@@ -6,6 +6,7 @@ export const AddMCQSchema = z.object({
     title: z.string().min(1, {
         message: "Title is required"
     }),
+    difficulty: z.string().optional(),
     description: z.string().min(1, {
         message: "Description is required"
     }),
@@ -42,6 +43,7 @@ export const MCQTableSchema = z.object({
     moduleId: z.string().optional().nullable(),
     assessmentId: z.string().optional().nullable(),
     title: z.string(),
+    difficulty: z.string().optional().nullable(),
     description: z.string(),
     Option1: z.string(),
     Option2: z.string(),
@@ -62,6 +64,7 @@ export const MCQUpdateSchema = z.object({
     title: z.string().min(1, {
         message: "Title is required"
     }),
+    difficulty: z.string().optional(),
     description: z.string().min(1, {
         message: "Description is required"
     }),
@@ -90,6 +93,7 @@ export const ImportMCQSchema = z.object({
     moduleId: z.string().optional().nullable(),
     assessmentId: z.string().optional().nullable(),
     title: z.string().min(1, { message: "Title is required" }),
+    difficulty: z.string().optional().nullable(),
     description: z.string().min(1, { message: "Description is required" }),
     Option1: z.string().min(1, { message: "Option 1 is required" }),
     Option2: z.string().min(1, { message: "Option 2 is required" }),

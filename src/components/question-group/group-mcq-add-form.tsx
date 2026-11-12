@@ -42,7 +42,10 @@ import {
     QuestionFormSection,
 } from "@/components/question/question-form-layout"
 import CodeEditorField from "@/components/code/code-editor-field"
-import { languages } from "@/components/question/question-table/q-config-data"
+import {
+    difficulties,
+    languages,
+} from "@/components/question/question-table/q-config-data"
 import { GroupMcqSchema } from "@/schemas/group-mcq-schema"
 import {
     TopicCombobox,
@@ -72,6 +75,7 @@ export const GroupMcqAddForm = ({
         defaultValues: {
             title: "",
             description: "",
+            difficulty: "easy",
             Option1: "",
             Option2: "",
             Option3: "",
@@ -432,6 +436,37 @@ export const GroupMcqAddForm = ({
                                                         <SelectItem value="2">Option 2</SelectItem>
                                                         <SelectItem value="3">Option 3</SelectItem>
                                                         <SelectItem value="4">Option 4</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="difficulty"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Difficulty</FormLabel>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    value={field.value ?? "easy"}
+                                                    disabled={isLoading}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select Difficulty" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {difficulties.map((difficulty) => (
+                                                            <SelectItem
+                                                                key={difficulty.value}
+                                                                value={difficulty.value}
+                                                            >
+                                                                {difficulty.label}
+                                                            </SelectItem>
+                                                        ))}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />

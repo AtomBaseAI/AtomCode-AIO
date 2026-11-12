@@ -310,6 +310,8 @@ model MCQQuestion {
   codesnippet     String?        @db.Text
   snippetLang     String?
   iscodesnippet   Boolean
+  /** "easy" | "medium" | "hard" — mirrors CodeQuestion.difficulty. */
+  difficulty      String         @default("easy")
   module          Module?        @relation(fields: [moduleId], references: [id])
   Assessments     Assessments?   @relation(fields: [assessmentsId], references: [id])
   assessmentsId   String?

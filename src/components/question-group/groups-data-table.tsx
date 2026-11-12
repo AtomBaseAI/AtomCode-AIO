@@ -36,6 +36,7 @@ import { makeSelectColumn } from "@/components/data-tables/select-column"
 import { BulkActionBar } from "@/components/data-tables/bulk-action-bar"
 import { BulkActionButton } from "@/components/data-tables/bulk-action-button"
 import { GroupFormDialog } from "@/components/question-group/group-form-dialog"
+import { GroupExportDialog } from "@/components/question-group/group-export-dialog"
 import { GroupDeleteDialog } from "@/components/question-group/group-delete-dialog"
 import type { QuestionGroupRow } from "@/schemas/question-group-schema"
 
@@ -47,12 +48,9 @@ export const groupColumns: ColumnDef<QuestionGroupRow>[] = [
         ),
         cell: ({ row }) => {
             return (
-                <Link
-                    href={`/admin/questions-groups/${row.original.id}/code-questions`}
-                    className="max-w-[280px] truncate font-medium text-primary hover:underline"
-                >
+                <span className="max-w-[280px] truncate font-bold text-foreground">
                     {row.getValue("title")}
-                </Link>
+                </span>
             )
         },
     },
@@ -187,6 +185,16 @@ export const groupColumns: ColumnDef<QuestionGroupRow>[] = [
                                 <ListTree className="size-5 text-primary" />
                             </Link>
                         </Button>
+                        <GroupExportDialog
+                            group={{
+                                id: group.id,
+                                title: group.title,
+                                createdAt: group.createdAt,
+                                questionCount: group.questionCount,
+                                mcqCount: group.mcqCount,
+                                topicCount: group.topicCount,
+                            }}
+                        />
                         <GroupFormDialog
                             mode="edit"
                             group={{

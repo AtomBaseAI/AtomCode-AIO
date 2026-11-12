@@ -12,6 +12,8 @@ export const GroupMcqSchema = z.object({
     title: z.string().min(1, {
         message: "Title is required",
     }),
+    /** "easy" | "medium" | "hard" — same options as code questions. */
+    difficulty: z.string().optional(),
     description: z.string().min(1, {
         message: "Description is required",
     }),
@@ -50,6 +52,7 @@ export type GroupMcqRow = {
     id: string;
     title: string;
     description: string;
+    difficulty: string;
     topic: string | null;
     subtopic: string | null;
     Option1: string;

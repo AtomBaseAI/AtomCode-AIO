@@ -59,6 +59,7 @@ export const getMcqQuestionsForGroup = async (gid: string) => {
                 id: true,
                 title: true,
                 description: true,
+                difficulty: true,
                 topic: true,
                 subtopic: true,
                 Option1: true,

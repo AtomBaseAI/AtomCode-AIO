@@ -15,6 +15,7 @@ import { slugifyFilename } from "@/lib/question-transfer";
 export const MCQ_TRANSFER_FIELDS = [
     "title",
     "description",
+    "difficulty",
     "topic",
     "subtopic",
     "Option1",
@@ -54,6 +55,7 @@ export function buildMcqExportFilename(
 const MCQ_CSV_HEADERS: Record<McqTransferField, string> = {
     title: "Title",
     description: "Description",
+    difficulty: "Difficulty",
     topic: "Topic",
     subtopic: "Sub Topic",
     Option1: "Option 1",

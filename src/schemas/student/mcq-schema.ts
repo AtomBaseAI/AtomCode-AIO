@@ -2,6 +2,8 @@ export interface MCQ {
     id: string;
     title: string;
     description: string;
+    /** "easy" | "medium" | "hard" — mirrors CodeQuestion.difficulty. */
+    difficulty: string;
     topic: string | null;
     subtopic: string | null;
     Option1: string;

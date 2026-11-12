@@ -121,6 +121,18 @@ const MCPreview = ({ question }: { question: any }) => {
 
                     <div className="flex flex-col h-20 w-full justify-center flex-1 col-span-1">
                         <div className="text-primary font-bold">
+                            Difficulty
+                        </div>
+
+                        <div className="bg-gray-600/20 h-full flex items-center px-2 rounded-md line-clamp-1 overflow-y-auto py-1">
+                            <pre className="capitalize">
+                                {question.difficulty ?? "easy"}
+                            </pre>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col h-20 w-full justify-center flex-1 col-span-1">
+                        <div className="text-primary font-bold">
                             Topic
                         </div>
 

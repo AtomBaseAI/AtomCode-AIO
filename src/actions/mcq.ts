@@ -7,6 +7,12 @@ import { revalidatePath } from "next/cache";
 import { AddMCQSchema, BulkImportMCQSchema, DeleteMCQSchema, MCQUpdateSchema } from "@/schemas/mcq-schema";
 import { requireAdmin } from "@/lib/action-guards";
 
+/** "Easy"/"HARD"/unknown → "easy" | "medium" | "hard" (default "easy"). */
+function normalizeDifficulty(raw: unknown): string {
+    const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+    return value === "medium" || value === "hard" ? value : "easy";
+}
+
 export const addMCQ = async (
     values: z.infer<typeof AddMCQSchema>,
     mcqtype: string
@@ -14,6 +20,7 @@ export const addMCQ = async (
     const parsedData = {
         title: values.title,
         description: values.description,
+        difficulty: normalizeDifficulty(values.difficulty),
         Option1: values.Option1,
         Option2: values.Option2,
         Option3: values.Option3,
@@ -76,6 +83,11 @@ export const updateMCQ = async (
         },
         data: {
             ...values,
+            // undefined stays undefined (prisma ignores it) — only a
+            // provided value is normalized into easy/medium/hard.
+            difficulty: values.difficulty
+                ? normalizeDifficulty(values.difficulty)
+                : undefined,
         }
     });
 
@@ -136,6 +148,7 @@ export const importmcqs = async (csvData: string, mid: string, aid: string, mcqt
     const mcqdata = rawData.map((row: any) => ({
         title: row.title?.trim(),
         description: row.description?.trim(),
+        difficulty: normalizeDifficulty(row.difficulty),
         Option1: row.Option1?.trim(),
         Option2: row.Option2?.trim(),
         Option3: row.Option3?.trim(),
@@ -164,6 +177,7 @@ export const importmcqs = async (csvData: string, mid: string, aid: string, mcqt
             const data: any = {
                 title: mcq.title,
                 description: mcq.description,
+                difficulty: mcq.difficulty,
                 Option1: mcq.Option1,
                 Option2: mcq.Option2,
                 Option3: mcq.Option3,

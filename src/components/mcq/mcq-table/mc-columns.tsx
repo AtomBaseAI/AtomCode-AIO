@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "@/components/data-tables/data-table-column-header"
+import { textFilterFn } from "@/components/data-tables/topic-subtopic-filters"
 import { MCQTableType } from "@/schemas/mcq-schema"
 import DeleteMCQ from "@/components/mcq/mcq-table/mc-delete"
 import EditMCQForm from "@/components/mcq/mcq-edit-form"
@@ -40,6 +41,40 @@ export const columns: ColumnDef<MCQTableType>[] = [
         </div>
       )
     },
+  },
+  {
+    accessorKey: "topic",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} name="Topic" />
+    ),
+    cell: ({ row }) => {
+      const topic: string | null = row.getValue("topic")
+      return (
+        <div className="flex space-x-2">
+          <span className="max-w-[200px] truncate font-medium ">
+            {topic ? topic : "Not Available"}
+          </span>
+        </div>
+      )
+    },
+    filterFn: textFilterFn,
+  },
+  {
+    accessorKey: "subtopic",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} name="Sub Topic" />
+    ),
+    cell: ({ row }) => {
+      const subtopic: string | null = row.getValue("subtopic")
+      return (
+        <div className="flex space-x-2">
+          <span className="max-w-[200px] truncate font-medium ">
+            {subtopic ? subtopic : "Not Available"}
+          </span>
+        </div>
+      )
+    },
+    filterFn: textFilterFn,
   },
   {
     accessorKey: "id",

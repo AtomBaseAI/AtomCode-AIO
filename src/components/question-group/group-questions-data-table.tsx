@@ -32,6 +32,10 @@ import { DataTableColumnHeader } from "@/components/data-tables/data-table-colum
 import { DataTablePagination } from "@/components/data-tables/data-table-pagination"
 import { DataTableViewOptions } from "@/components/data-tables/data-table-view-options"
 import { DataTableFacetedFilter } from "@/components/data-tables/data-table-faceted-filter"
+import {
+    TopicSubtopicFilters,
+    textFilterFn,
+} from "@/components/data-tables/topic-subtopic-filters"
 import { makeSelectColumn } from "@/components/data-tables/select-column"
 import { BulkActionBar } from "@/components/data-tables/bulk-action-bar"
 import { BulkActionButton } from "@/components/data-tables/bulk-action-button"
@@ -100,6 +104,7 @@ export const getGroupQuestionColumns = (): ColumnDef<GroupQuestionRow>[] => [
                 </div>
             )
         },
+        filterFn: textFilterFn,
     },
     {
         accessorKey: "subtopic",
@@ -116,6 +121,7 @@ export const getGroupQuestionColumns = (): ColumnDef<GroupQuestionRow>[] => [
                 </div>
             )
         },
+        filterFn: textFilterFn,
     },
     {
         accessorKey: "difficulty",
@@ -247,6 +253,7 @@ export function GroupQuestionsDataTable({
                             options={languages}
                         />
                     )}
+                    <TopicSubtopicFilters table={table} />
                     {table.getColumn("difficulty") && (
                         <DataTableFacetedFilter
                             column={table.getColumn("difficulty")}

@@ -49,10 +49,15 @@ import { DataTableColumnHeader } from "@/components/data-tables/data-table-colum
 import { DataTablePagination } from "@/components/data-tables/data-table-pagination"
 import { DataTableViewOptions } from "@/components/data-tables/data-table-view-options"
 import { DataTableFacetedFilter } from "@/components/data-tables/data-table-faceted-filter"
+import {
+    TopicSubtopicFilters,
+    textFilterFn,
+} from "@/components/data-tables/topic-subtopic-filters"
 import { makeSelectColumn } from "@/components/data-tables/select-column"
 import { BulkActionBar } from "@/components/data-tables/bulk-action-bar"
 import { BulkActionButton } from "@/components/data-tables/bulk-action-button"
 import { languages } from "@/components/question/question-table/q-config-data"
+import { difficulties } from "@/components/question/question-table/q-config-data"
 import { GroupMcqEditForm } from "@/components/question-group/group-mcq-edit-form"
 import type { GroupMcqRow } from "@/schemas/group-mcq-schema"
 
@@ -60,6 +65,11 @@ const SNIPPET_FILTER_OPTIONS = [
     { label: "Yes", value: "yes" },
     { label: "No", value: "no" },
 ]
+
+const DIFFICULTY_FILTER_OPTIONS = difficulties.map((d) => ({
+    label: d.label,
+    value: d.value,
+}))
 
 /** Permanent-delete action with phrase confirmation, styled like the shared table actions. */
 const DeleteMcqButton = ({
@@ -170,6 +180,33 @@ export const getGroupMcqColumns = (
         },
     },
     {
+        accessorKey: "difficulty",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} name="Difficulty" />
+        ),
+        cell: ({ row }) => {
+            const difficulty = difficulties.find(
+                (difficulty) => difficulty.value === row.getValue("difficulty")
+            )
+
+            if (!difficulty) {
+                return <span className="text-muted-foreground">—</span>
+            }
+
+            return (
+                <div className="flex w-[130px] items-center">
+                    {difficulty.icon && (
+                        <difficulty.icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span>{difficulty.label}</span>
+                </div>
+            )
+        },
+        filterFn: (row, id, value) => {
+            return value.includes(row.getValue(id))
+        },
+    },
+    {
         id: "iscodesnippet",
         accessorFn: (row) => (row.iscodesnippet ? "yes" : "no"),
         header: ({ column }) => (
@@ -208,6 +245,7 @@ export const getGroupMcqColumns = (
                 </div>
             )
         },
+        filterFn: textFilterFn,
     },
     {
         accessorKey: "subtopic",
@@ -224,6 +262,7 @@ export const getGroupMcqColumns = (
                 </div>
             )
         },
+        filterFn: textFilterFn,
     },
     {
         accessorKey: "id",
@@ -329,6 +368,14 @@ export function GroupMcqDataTable({ groupId, data }: GroupMcqDataTableProps) {
                             column={table.getColumn("iscodesnippet")}
                             title="Snippet"
                             options={SNIPPET_FILTER_OPTIONS}
+                        />
+                    )}
+                    <TopicSubtopicFilters table={table} />
+                    {table.getColumn("difficulty") && (
+                        <DataTableFacetedFilter
+                            column={table.getColumn("difficulty")}
+                            title="Difficulty"
+                            options={DIFFICULTY_FILTER_OPTIONS}
                         />
                     )}
                     {isFiltered && (

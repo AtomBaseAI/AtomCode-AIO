@@ -11,7 +11,9 @@ import {
   Clock,
   CheckCircle2,
   CircleDotDashed,
-  MinusCircle
+  MinusCircle,
+  ListOrdered,
+  Workflow
 } from "lucide-react"
 
 export const departments = [
@@ -152,6 +154,26 @@ export const modulefilters = [
     label: "Not Started",
     icon: MinusCircle,
     bg: "bg-red-500/60",
+  },
+]
+
+// Course completion-order filter options — labels match the badge text used
+// in the courses table (daywise=violet · queue=emerald · openflow=orange).
+export const completionOrders = [
+  {
+    value: "daywise",
+    label: "Daywise",
+    icon: CalendarClock,
+  },
+  {
+    value: "queue",
+    label: "Queue",
+    icon: ListOrdered,
+  },
+  {
+    value: "openflow",
+    label: "Open Flow",
+    icon: Workflow,
   },
 ]
 

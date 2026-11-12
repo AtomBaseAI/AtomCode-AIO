@@ -43,6 +43,7 @@ const GroupMcqQuestionsPage = async ({
         id: string
         title: string
         description: string
+        difficulty: string
         topic: string | null
         subtopic: string | null
         Option1: string
@@ -59,6 +60,7 @@ const GroupMcqQuestionsPage = async ({
         id: q.id,
         title: q.title,
         description: q.description,
+        difficulty: q.difficulty,
         topic: q.topic,
         subtopic: q.subtopic,
         Option1: q.Option1,

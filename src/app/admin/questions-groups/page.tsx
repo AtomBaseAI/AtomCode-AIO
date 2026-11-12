@@ -1,6 +1,7 @@
 import { getAllQuestionGroups } from "@/data/question-groups"
 import { GroupsDataTable } from "@/components/question-group/groups-data-table"
 import { GroupFormDialog } from "@/components/question-group/group-form-dialog"
+import { GroupImportDialog } from "@/components/question-group/group-import-dialog"
 import { TopbarTitle } from "@/components/topbar-title"
 
 export default async function QuestionGroupsPage() {
@@ -24,6 +25,7 @@ export default async function QuestionGroupsPage() {
                     </p>
                 </div>
                 <div className="flex justify-center items-center gap-x-4">
+                    <GroupImportDialog />
                     <GroupFormDialog mode="create" />
                 </div>
             </div>

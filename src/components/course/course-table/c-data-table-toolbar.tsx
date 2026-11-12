@@ -6,8 +6,11 @@ import { Table } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableViewOptions } from "@/components/data-tables/data-table-view-options"
-// import { DataTableFacetedFilter } from "@/components/data-tables/data-table-faceted-filter"
-import { languages } from "@/components/data-tables/data-table-config-data"
+import { DataTableFacetedFilter } from "@/components/data-tables/data-table-faceted-filter"
+import {
+  completionOrders,
+  languages,
+} from "@/components/data-tables/data-table-config-data"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -29,13 +32,22 @@ export function CDataTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {/* {table.getColumn("language") && (
+        {/* Language multi-select faceted filter */}
+        {table.getColumn("language") && (
           <DataTableFacetedFilter
             column={table.getColumn("language")}
-            title="Languages"
+            title="Language"
             options={languages}
           />
-        )} */}
+        )}
+        {/* Completion Order multi-select faceted filter */}
+        {table.getColumn("completionOrder") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("completionOrder")}
+            title="Completion Order"
+            options={completionOrders}
+          />
+        )}
         {isFiltered && (
           <Button
             variant="ghost"

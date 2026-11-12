@@ -5,6 +5,7 @@ import { Table } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableViewOptions } from "@/components/data-tables/data-table-view-options"
+import { TopicSubtopicFilters } from "@/components/data-tables/topic-subtopic-filters"
 import { addmodulequestions } from "@/actions/module"
 import { useState } from "react"
 import { LoaderIcon } from "lucide-react"
@@ -66,6 +67,7 @@ export function MQADataTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
+        <TopicSubtopicFilters table={table} />
         {isFiltered && (
           <Button
             variant="ghost"

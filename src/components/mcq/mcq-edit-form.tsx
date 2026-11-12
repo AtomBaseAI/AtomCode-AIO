@@ -33,6 +33,7 @@ import { FormSuccess } from "@/components/auth/form-success";
 import { Textarea } from "@/components/ui/textarea";
 import { updateMCQ } from "@/actions/mcq";
 import { MCQUpdateSchema } from "@/schemas/mcq-schema";
+import { difficulties } from "@/components/question/question-table/q-config-data";
 import { toast } from "sonner";
 
 const EditMCQForm = ({ mcq }: { mcq: z.infer<typeof MCQUpdateSchema> }) => {
@@ -42,6 +43,7 @@ const EditMCQForm = ({ mcq }: { mcq: z.infer<typeof MCQUpdateSchema> }) => {
             id: mcq.id,
             title: mcq.title,
             description: mcq.description,
+            difficulty: mcq.difficulty || "easy",
             Option1: mcq.Option1,
             Option2: mcq.Option2,
             Option3: mcq.Option3,
@@ -327,6 +329,40 @@ const EditMCQForm = ({ mcq }: { mcq: z.infer<typeof MCQUpdateSchema> }) => {
                                                                 <SelectItem value="4">
                                                                     Option 4
                                                                 </SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="grid gap-1 row-span-2 col-span-1 h-full">
+                                        <FormField
+                                            control={form.control}
+                                            name="difficulty"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Difficulty</FormLabel>
+                                                    <FormControl>
+                                                        <Select
+                                                            onValueChange={field.onChange}
+                                                            value={field.value ?? "easy"}
+                                                            disabled={isLoading}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select Difficulty" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {difficulties.map((difficulty) => (
+                                                                    <SelectItem
+                                                                        key={difficulty.value}
+                                                                        value={difficulty.value}
+                                                                    >
+                                                                        {difficulty.label}
+                                                                    </SelectItem>
+                                                                ))}
                                                             </SelectContent>
                                                         </Select>
                                                     </FormControl>
