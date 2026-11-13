@@ -1,0 +1,1030 @@
+/**
+ * AtomCode — Ruby Programming — Day 1 builder.
+ * Topic: Introduction to Ruby.
+ *
+ * Subtopics covered:
+ *  - History and Features of Ruby
+ *  - Applications of Ruby
+ *  - Ruby versus Other Languages
+ *  - Installing and Running Ruby
+ *  - Interactive Ruby (IRB)
+ *  - Running Ruby Scripts
+ *
+ * Day 1 = basic Ruby scripts. Students are learning puts/gets/IRB. Solutions
+ * are intentionally plain (no arrays-of-objects, no metaprogramming). Medium
+ * and hard questions still use only gets/puts/while/if — but constrain the
+ * construct set via blacklist/whitelist.
+ */
+
+import { writeFileSync } from "node:fs";
+
+const DAY = 1;
+const TOPIC = "Introduction to Ruby";
+const SUBTOPICS = [
+  "History and Features of Ruby",
+  "Applications of Ruby",
+  "Ruby versus Other Languages",
+  "Installing and Running Ruby",
+  "Interactive Ruby (IRB)",
+  "Running Ruby Scripts",
+];
+
+interface CodeQuestion {
+  title: string;
+  description: string;
+  difficulty: "easy" | "medium" | "hard";
+  variant: "basic" | "scenario";
+  maxscore: number;
+  lang: "ruby";
+  topic: string;
+  subtopic: string;
+  sampleinput1: string;
+  sampleoutput1: string;
+  sampleinput2: string;
+  sampleoutput2: string;
+  input1: string;
+  output1: string;
+  input2: string;
+  output2: string;
+  input3: string;
+  output3: string;
+  inputconstrains: string;
+  blacklist: string;
+  whitelist: string;
+  sourcecode: string;
+}
+
+interface MCQ {
+  title: string;
+  description: string;
+  difficulty: "easy" | "medium" | "hard";
+  topic: string;
+  subtopic: string;
+  Option1: string;
+  Option2: string;
+  Option3: string;
+  Option4: string;
+  CorrectOption: 1 | 2 | 3 | 4;
+  iscodesnippet: boolean;
+  codesnippet: string | null;
+  snippetLang: string | null;
+}
+
+/* ───────────────────────── DAY 1 CODE QUESTIONS ───────────────────────── */
+
+const questions: CodeQuestion[] = [
+  /* ───── EASY · BASIC (6) ───── */
+  {
+    title: "First Greeting Printer",
+    description:
+      "A brand-new Ruby learner wants their first program: read a name from stdin and print a friendly greeting.\n\nInput Format:\nA single line containing a person's name.\n\nOutput Format:\nA single line: Hello, <name>!\n\nConstraints:\nName is 1 to 30 characters, contains only letters and spaces.",
+    difficulty: "easy",
+    variant: "basic",
+    maxscore: 10,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "Ruby",
+    sampleoutput1: "Hello, Ruby!",
+    sampleinput2: "Ada",
+    sampleoutput2: "Hello, Ada!",
+    input1: "Linus",
+    output1: "Hello, Linus!",
+    input2: "Grace",
+    output2: "Hello, Grace!",
+    input3: "Matz",
+    output3: "Hello, Matz!",
+    inputconstrains: "1 <= name length <= 30",
+    blacklist: "",
+    whitelist: "",
+    sourcecode: `name = gets.chomp
+puts "Hello, #{name}!"\n`,
+  },
+  {
+    title: "Two Number Sum",
+    description:
+      "Practice running a Ruby script: read two integers and print their sum.\n\nInput Format:\nA single line with two space-separated integers.\n\nOutput Format:\nA single line with the integer sum.\n\nConstraints:\n-1000 <= a, b <= 1000.",
+    difficulty: "easy",
+    variant: "basic",
+    maxscore: 10,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Installing and Running Ruby",
+    sampleinput1: "3 5",
+    sampleoutput1: "8",
+    sampleinput2: "-2 9",
+    sampleoutput2: "7",
+    input1: "10 20",
+    output1: "30",
+    input2: "0 0",
+    output2: "0",
+    input3: "100 -50",
+    output3: "50",
+    inputconstrains: "-1000 <= a, b <= 1000",
+    blacklist: "",
+    whitelist: "",
+    sourcecode: `a, b = gets.split.map(&:to_i)
+puts a + b\n`,
+  },
+  {
+    title: "Double the Number",
+    description:
+      "A drill for the Ruby interpreter: read one integer and print double its value.\n\nInput Format:\nA single integer on one line.\n\nOutput Format:\nA single integer: 2 * n.\n\nConstraints:\n-500 <= n <= 500.",
+    difficulty: "easy",
+    variant: "basic",
+    maxscore: 10,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "7",
+    sampleoutput1: "14",
+    sampleinput2: "-3",
+    sampleoutput2: "-6",
+    input1: "0",
+    output1: "0",
+    input2: "100",
+    output2: "200",
+    input3: "42",
+    output3: "84",
+    inputconstrains: "-500 <= n <= 500",
+    blacklist: "",
+    whitelist: "",
+    sourcecode: `n = gets.to_i
+puts n * 2\n`,
+  },
+  {
+    title: "String Length Reporter",
+    description:
+      "Pretend you are inside IRB exploring Ruby. Read a word and report its character count.\n\nInput Format:\nA single line containing a word (no spaces).\n\nOutput Format:\nA single integer: the number of characters.\n\nConstraints:\n1 <= word length <= 100.",
+    difficulty: "easy",
+    variant: "basic",
+    maxscore: 10,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Interactive Ruby (IRB)",
+    sampleinput1: "helloworld",
+    sampleoutput1: "10",
+    sampleinput2: "Ruby",
+    sampleoutput2: "4",
+    input1: "rails",
+    output1: "5",
+    input2: "Matz",
+    output2: "4",
+    input3: "irb",
+    output3: "3",
+    inputconstrains: "1 <= word length <= 100",
+    blacklist: "",
+    whitelist: "",
+    sourcecode: `word = gets.chomp
+puts word.length\n`,
+  },
+  {
+    title: "Cube Calculator",
+    description:
+      "A starter Ruby script: read an integer and print its cube (n * n * n).\n\nInput Format:\nA single integer on one line.\n\nOutput Format:\nA single integer: n^3.\n\nConstraints:\n-20 <= n <= 20.",
+    difficulty: "easy",
+    variant: "basic",
+    maxscore: 10,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "4",
+    sampleoutput1: "64",
+    sampleinput2: "3",
+    sampleoutput2: "27",
+    input1: "2",
+    output1: "8",
+    input2: "-2",
+    output2: "-8",
+    input3: "5",
+    output3: "125",
+    inputconstrains: "-20 <= n <= 20",
+    blacklist: "",
+    whitelist: "",
+    sourcecode: `n = gets.to_i
+puts n * n * n\n`,
+  },
+  {
+    title: "Echo Three Times",
+    description:
+      "Read a short message and print it on three separate lines, exactly as IRB drills repetition.\n\nInput Format:\nA single line with a short message.\n\nOutput Format:\nThree lines, each containing the message.\n\nConstraints:\n1 <= message length <= 50.",
+    difficulty: "easy",
+    variant: "basic",
+    maxscore: 10,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Interactive Ruby (IRB)",
+    sampleinput1: "Hi",
+    sampleoutput1: "Hi\nHi\nHi",
+    sampleinput2: "Ruby",
+    sampleoutput2: "Ruby\nRuby\nRuby",
+    input1: "ok",
+    output1: "ok\nok\nok",
+    input2: "Loop",
+    output2: "Loop\nLoop\nLoop",
+    input3: "Run",
+    output3: "Run\nRun\nRun",
+    inputconstrains: "1 <= message length <= 50",
+    blacklist: "",
+    whitelist: "",
+    sourcecode: `msg = gets.chomp
+3.times { puts msg }\n`,
+  },
+
+  /* ───── EASY · SCENARIO (4) ───── */
+  {
+    title: "Bookstore Receipt Printer",
+    description:
+      "A neighborhood bookstore uses a tiny Ruby script for receipts. Given a book title, quantity and unit price (integers), print one summary line.\n\nInput Format:\nThree lines: title, quantity (integer), unit price (integer rupees).\n\nOutput Format:\nOne line: Total for <qty> copies of <title>: <total>\n\nConstraints:\n1 <= qty <= 100, 1 <= price <= 10000, title length 1 to 40.",
+    difficulty: "easy",
+    variant: "scenario",
+    maxscore: 10,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Applications of Ruby",
+    sampleinput1: "Ruby Programming\n3\n499",
+    sampleoutput1: "Total for 3 copies of Ruby Programming: 1497",
+    sampleinput2: "Pickaxe\n2\n750",
+    sampleoutput2: "Total for 2 copies of Pickaxe: 1500",
+    input1: "Rails Way\n5\n300",
+    output1: "Total for 5 copies of Rails Way: 1500",
+    input2: "Eloquent\n1\n699",
+    output2: "Total for 1 copies of Eloquent: 699",
+    input3: "Matz Book\n10\n150",
+    output3: "Total for 10 copies of Matz Book: 1500",
+    inputconstrains: "1 <= qty <= 100, 1 <= price <= 10000",
+    blacklist: "",
+    whitelist: "",
+    sourcecode: `title = gets.chomp
+qty = gets.to_i
+price = gets.to_i
+total = qty * price
+puts "Total for #{qty} copies of #{title}: #{total}"\n`,
+  },
+  {
+    title: "Coffee Shop Table Assigner",
+    description:
+      "A cafe manager runs a Ruby script at the entrance. Read a customer's name and a free table number; print a welcome line.\n\nInput Format:\nTwo lines: name and table number (integer).\n\nOutput Format:\nOne line: Welcome, <name>! Your table is <table>.\n\nConstraints:\n1 <= name length <= 30, 1 <= table <= 99.",
+    difficulty: "easy",
+    variant: "scenario",
+    maxscore: 10,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Applications of Ruby",
+    sampleinput1: "Alice\n7",
+    sampleoutput1: "Welcome, Alice! Your table is 7.",
+    sampleinput2: "Bob\n12",
+    sampleoutput2: "Welcome, Bob! Your table is 12.",
+    input1: "Cara\n1",
+    output1: "Welcome, Cara! Your table is 1.",
+    input2: "Dan\n99",
+    output2: "Welcome, Dan! Your table is 99.",
+    input3: "Eve\n25",
+    output3: "Welcome, Eve! Your table is 25.",
+    inputconstrains: "1 <= name length <= 30, 1 <= table <= 99",
+    blacklist: "",
+    whitelist: "",
+    sourcecode: `name = gets.chomp
+table = gets.to_i
+puts "Welcome, #{name}! Your table is #{table}."\n`,
+  },
+  {
+    title: "Garden Row Calculator",
+    description:
+      "A gardener is writing a Ruby script to plan planting. Read total plants and plants-per-row (both integers, per_row divides total evenly); print how many rows are needed.\n\nInput Format:\nTwo lines: total plants and plants per row.\n\nOutput Format:\nOne line: You need <rows> rows.\n\nConstraints:\n1 <= per_row <= 50, total is a multiple of per_row, 1 <= total <= 5000.",
+    difficulty: "easy",
+    variant: "scenario",
+    maxscore: 10,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "60\n5",
+    sampleoutput1: "You need 12 rows.",
+    sampleinput2: "100\n10",
+    sampleoutput2: "You need 10 rows.",
+    input1: "48\n8",
+    output1: "You need 6 rows.",
+    input2: "144\n12",
+    output2: "You need 12 rows.",
+    input3: "30\n6",
+    output3: "You need 5 rows.",
+    inputconstrains: "1 <= per_row <= 50, total divisible by per_row",
+    blacklist: "",
+    whitelist: "",
+    sourcecode: `total = gets.to_i
+per_row = gets.to_i
+rows = total / per_row
+puts "You need #{rows} rows."\n`,
+  },
+  {
+    title: "Marathon Pace Banner",
+    description:
+      "A marathon organizer prints a pace banner. Read the race distance in km and the runner's time in hours (both integers, distance divides hours evenly). Print km-per-hour as an integer.\n\nInput Format:\nTwo lines: distance_km and time_hours.\n\nOutput Format:\nOne line: Pace banner: <pace> km per hour.\n\nConstraints:\n1 <= distance, time <= 1000, distance divisible by time.",
+    difficulty: "easy",
+    variant: "scenario",
+    maxscore: 10,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Applications of Ruby",
+    sampleinput1: "42\n7",
+    sampleoutput1: "Pace banner: 6 km per hour.",
+    sampleinput2: "100\n4",
+    sampleoutput2: "Pace banner: 25 km per hour.",
+    input1: "21\n3",
+    output1: "Pace banner: 7 km per hour.",
+    input2: "10\n2",
+    output2: "Pace banner: 5 km per hour.",
+    input3: "50\n5",
+    output3: "Pace banner: 10 km per hour.",
+    inputconstrains: "1 <= distance, time <= 1000, distance divisible by time",
+    blacklist: "",
+    whitelist: "",
+    sourcecode: `distance = gets.to_i
+time = gets.to_i
+pace = distance / time
+puts "Pace banner: #{pace} km per hour."\n`,
+  },
+
+  /* ───── MEDIUM · SCENARIO (6) — blacklist+whitelist, maxscore 20 ───── */
+  {
+    title: "Countdown Launcher",
+    description:
+      "A rocket-launch simulator counts down from n to 1, then announces liftoff. You must use a while loop (the countdown iterator helpers are disabled).\n\nInput Format:\nA single integer n.\n\nOutput Format:\nOne line: space-separated numbers from n down to 1, followed by Liftoff!\nExample for n=5: 5 4 3 2 1 Liftoff!\n\nConstraints:\n1 <= n <= 1000.",
+    difficulty: "medium",
+    variant: "scenario",
+    maxscore: 20,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "5",
+    sampleoutput1: "5 4 3 2 1 Liftoff!",
+    sampleinput2: "3",
+    sampleoutput2: "3 2 1 Liftoff!",
+    input1: "1",
+    output1: "1 Liftoff!",
+    input2: "8",
+    output2: "8 7 6 5 4 3 2 1 Liftoff!",
+    input3: "10",
+    output3: "10 9 8 7 6 5 4 3 2 1 Liftoff!",
+    inputconstrains: "1 <= n <= 1000",
+    blacklist: "times, downto, upto, each",
+    whitelist: "while ",
+    sourcecode: `n = gets.to_i
+out = []
+i = n
+while i >= 1
+  out << i
+  i -= 1
+end
+puts out.join(" ") + " Liftoff!"\n`,
+  },
+  {
+    title: "Staircase Builder",
+    description:
+      "An ASCII-art staircase has n steps. Line i contains i asterisk characters. Use a while loop to build each line character-by-character.\n\nInput Format:\nA single integer n.\n\nOutput Format:\nExactly n lines. Line i (1-indexed) has i asterisks, no trailing spaces.\n\nConstraints:\n1 <= n <= 50.",
+    difficulty: "medium",
+    variant: "scenario",
+    maxscore: 20,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "3",
+    sampleoutput1: "*\n**\n***",
+    sampleinput2: "4",
+    sampleoutput2: "*\n**\n***\n****",
+    input1: "1",
+    output1: "*",
+    input2: "5",
+    output2: "*\n**\n***\n****\n*****",
+    input3: "2",
+    output3: "*\n**",
+    inputconstrains: "1 <= n <= 50",
+    blacklist: "times, upto, each",
+    whitelist: "while ",
+    sourcecode: `n = gets.to_i
+i = 1
+while i <= n
+  line = ""
+  j = 1
+  while j <= i
+    line += "*"
+    j += 1
+  end
+  puts line
+  i += 1
+end\n`,
+  },
+  {
+    title: "Digit Sum Loop",
+    description:
+      "A checksum utility computes the sum of decimal digits of a non-negative integer using a while loop (the digits helper is disabled).\n\nInput Format:\nA single non-negative integer.\n\nOutput Format:\nA single integer: the sum of digits.\n\nConstraints:\n0 <= n <= 10^9.",
+    difficulty: "medium",
+    variant: "scenario",
+    maxscore: 20,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "12345",
+    sampleoutput1: "15",
+    sampleinput2: "7",
+    sampleoutput2: "7",
+    input1: "0",
+    output1: "0",
+    input2: "99",
+    output2: "18",
+    input3: "1000000001",
+    output3: "2",
+    inputconstrains: "0 <= n <= 10^9",
+    blacklist: "digits, sum, inject, reduce, each",
+    whitelist: "while ",
+    sourcecode: `n = gets.to_i
+total = 0
+while n > 0
+  total += n % 10
+  n /= 10
+end
+puts total\n`,
+  },
+  {
+    title: "Repeated Word Banner",
+    description:
+      "A banner printer concatenates a word n times without using the multiplication operator or the times iterator.\n\nInput Format:\nTwo lines: the word, then the integer count n.\n\nOutput Format:\nA single line: the word repeated n times.\n\nConstraints:\n1 <= word length <= 20, 1 <= n <= 100.",
+    difficulty: "medium",
+    variant: "scenario",
+    maxscore: 20,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "ha\n3",
+    sampleoutput1: "hahaha",
+    sampleinput2: "Ruby\n2",
+    sampleoutput2: "RubyRuby",
+    input1: "ab\n4",
+    output1: "abababab",
+    input2: "x\n5",
+    output2: "xxxxx",
+    input3: "ok\n1",
+    output3: "ok",
+    inputconstrains: "1 <= word length <= 20, 1 <= n <= 100",
+    blacklist: "*, times, each",
+    whitelist: "while ",
+    sourcecode: `word = gets.chomp
+n = gets.to_i
+out = ""
+i = 0
+while i < n
+  out += word
+  i += 1
+end
+puts out\n`,
+  },
+  {
+    title: "Power Loop Calculator",
+    description:
+      "A math utility computes b raised to e (b^e) for non-negative exponents using a while loop. The exponent operator and the times iterator are disabled.\n\nInput Format:\nTwo lines: base b and exponent e (non-negative integers).\n\nOutput Format:\nA single integer: b^e.\n\nConstraints:\n0 <= b <= 100, 0 <= e <= 15, b^e fits in 64-bit integer.",
+    difficulty: "medium",
+    variant: "scenario",
+    maxscore: 20,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "2\n10",
+    sampleoutput1: "1024",
+    sampleinput2: "5\n0",
+    sampleoutput2: "1",
+    input1: "3\n4",
+    output1: "81",
+    input2: "10\n3",
+    output2: "1000",
+    input3: "1\n100",
+    output3: "1",
+    inputconstrains: "0 <= b <= 100, 0 <= e <= 15",
+    blacklist: "**, times, pow, each",
+    whitelist: "while ",
+    sourcecode: `b = gets.to_i
+e = gets.to_i
+result = 1
+i = 0
+while i < e
+  result = result * b
+  i += 1
+end
+puts result\n`,
+  },
+  {
+    title: "Multiplication Table Row",
+    description:
+      "A teacher prints the nth row of the multiplication table (n x 1 .. n x 10) using a while loop. The times, upto, each iterators are disabled.\n\nInput Format:\nA single integer n.\n\nOutput Format:\nOne line with ten space-separated products: n*1 n*2 ... n*10.\n\nConstraints:\n1 <= n <= 100.",
+    difficulty: "medium",
+    variant: "scenario",
+    maxscore: 20,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "5",
+    sampleoutput1: "5 10 15 20 25 30 35 40 45 50",
+    sampleinput2: "1",
+    sampleoutput2: "1 2 3 4 5 6 7 8 9 10",
+    input1: "2",
+    output1: "2 4 6 8 10 12 14 16 18 20",
+    input2: "9",
+    output2: "9 18 27 36 45 54 63 72 81 90",
+    input3: "10",
+    output3: "10 20 30 40 50 60 70 80 90 100",
+    inputconstrains: "1 <= n <= 100",
+    blacklist: "times, upto, each",
+    whitelist: "while ",
+    sourcecode: `n = gets.to_i
+results = []
+i = 1
+while i <= 10
+  results << (n * i)
+  i += 1
+end
+puts results.join(" ")\n`,
+  },
+
+  /* ───── HARD · SCENARIO (4) — blacklist+whitelist, maxscore 30 ───── */
+  {
+    title: "Primality Trial Loop",
+    description:
+      "A number-theory demo classifies a non-negative integer as prime or composite using trial division with a while loop. The Prime library and higher-order iterators are disabled.\n\nInput Format:\nA single integer n.\n\nOutput Format:\nA single word: prime or composite.\nNote: 0 and 1 are composite; 2 and 3 are prime.\n\nConstraints:\n0 <= n <= 10^6.",
+    difficulty: "hard",
+    variant: "scenario",
+    maxscore: 30,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "7",
+    sampleoutput1: "prime",
+    sampleinput2: "8",
+    sampleoutput2: "composite",
+    input1: "1",
+    output1: "composite",
+    input2: "2",
+    output2: "prime",
+    input3: "97",
+    output3: "prime",
+    inputconstrains: "0 <= n <= 10^6",
+    blacklist: "Prime, require, each, times",
+    whitelist: "while ",
+    sourcecode: `n = gets.to_i
+if n < 2
+  puts "composite"
+else
+  is_p = true
+  i = 2
+  while i * i <= n
+    if n % i == 0
+      is_p = false
+      break
+    end
+    i += 1
+  end
+  puts is_p ? "prime" : "composite"
+end\n`,
+  },
+  {
+    title: "Collatz Sequence Printer",
+    description:
+      "Print the Collatz (3n+1) sequence starting from a positive integer n, ending at 1. Use a while loop. Higher-order iterators are disabled.\n\nRule: if n is even, next = n/2; else next = 3*n + 1. Stop when n == 1.\n\nInput Format:\nA single integer n.\n\nOutput Format:\nOne line: space-separated sequence from n down to 1.\n\nConstraints:\n1 <= n <= 100000.",
+    difficulty: "hard",
+    variant: "scenario",
+    maxscore: 30,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "6",
+    sampleoutput1: "6 3 10 5 16 8 4 2 1",
+    sampleinput2: "1",
+    sampleoutput2: "1",
+    input1: "2",
+    output1: "2 1",
+    input2: "3",
+    output2: "3 10 5 16 8 4 2 1",
+    input3: "7",
+    output3: "7 22 11 34 17 52 26 13 40 20 10 5 16 8 4 2 1",
+    inputconstrains: "1 <= n <= 100000",
+    blacklist: "each, times, inject, reduce",
+    whitelist: "while ",
+    sourcecode: `n = gets.to_i
+seq = [n]
+while n != 1
+  if n % 2 == 0
+    n = n / 2
+  else
+    n = 3 * n + 1
+  end
+  seq << n
+end
+puts seq.join(" ")\n`,
+  },
+  {
+    title: "Binary Representation Builder",
+    description:
+      "Convert a non-negative integer to its binary representation (as a string of 0/1, most-significant bit first) using a while loop. The built-in to_s with base argument is disabled.\n\nInput Format:\nA single non-negative integer.\n\nOutput Format:\nA single line containing the binary representation (no leading zeros, except for input 0 which prints \"0\").\n\nConstraints:\n0 <= n <= 10^9.",
+    difficulty: "hard",
+    variant: "scenario",
+    maxscore: 30,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "10",
+    sampleoutput1: "1010",
+    sampleinput2: "0",
+    sampleoutput2: "0",
+    input1: "1",
+    output1: "1",
+    input2: "255",
+    output2: "11111111",
+    input3: "1024",
+    output3: "10000000000",
+    inputconstrains: "0 <= n <= 10^9",
+    blacklist: "to_s, each, times, inject",
+    whitelist: "while ",
+    sourcecode: `n = gets.to_i
+if n == 0
+  puts "0"
+else
+  bits = []
+  m = n
+  while m > 0
+    bits << (m % 2)
+    m = m / 2
+  end
+  out = ""
+  i = bits.length - 1
+  while i >= 0
+    out += "#{bits[i]}"
+    i -= 1
+  end
+  puts out
+end\n`,
+  },
+  {
+    title: "Euclidean GCD Loop",
+    description:
+      "Compute the greatest common divisor of two positive integers using Euclid's algorithm with a while loop. The built-in gcd method and higher-order iterators are disabled.\n\nInput Format:\nA single line with two space-separated positive integers a and b.\n\nOutput Format:\nA single integer: gcd(a, b).\n\nConstraints:\n1 <= a, b <= 10^9.",
+    difficulty: "hard",
+    variant: "scenario",
+    maxscore: 30,
+    lang: "ruby",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    sampleinput1: "12 18",
+    sampleoutput1: "6",
+    sampleinput2: "7 13",
+    sampleoutput2: "1",
+    input1: "100 100",
+    output1: "100",
+    input2: "48 36",
+    output2: "12",
+    input3: "1071 462",
+    output3: "21",
+    inputconstrains: "1 <= a, b <= 10^9",
+    blacklist: "gcd, each, times, inject",
+    whitelist: "while ",
+    sourcecode: `a, b = gets.split.map(&:to_i)
+while b != 0
+  temp = b
+  b = a % b
+  a = temp
+end
+puts a\n`,
+  },
+];
+
+/* ───────────────────────── DAY 1 MCQ QUESTIONS ───────────────────────── */
+
+const mcqs: MCQ[] = [
+  /* ───── EASY (10) ───── */
+  {
+    title: "Creator of Ruby",
+    description: "Who created the Ruby programming language?",
+    difficulty: "easy",
+    topic: TOPIC,
+    subtopic: "History and Features of Ruby",
+    Option1: "Yukihiro Matsumoto (Matz)",
+    Option2: "Linus Torvalds",
+    Option3: "Guido van Rossum",
+    Option4: "Brendan Eich",
+    CorrectOption: 1,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+  {
+    title: "Year Ruby First Released",
+    description: "In which year was the first public version of Ruby (0.95) released?",
+    difficulty: "easy",
+    topic: TOPIC,
+    subtopic: "History and Features of Ruby",
+    Option1: "1993",
+    Option2: "1995",
+    Option3: "2000",
+    Option4: "2005",
+    CorrectOption: 2,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+  {
+    title: "IRB Expansion",
+    description: "What does IRB stand for in the Ruby ecosystem?",
+    difficulty: "easy",
+    topic: TOPIC,
+    subtopic: "Interactive Ruby (IRB)",
+    Option1: "Internal Ruby Builder",
+    Option2: "Interactive Ruby Shell",
+    Option3: "Integrated Ruby Binary",
+    Option4: "Indexed Ruby Buffer",
+    CorrectOption: 2,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+  {
+    title: "Run a Ruby Script",
+    description: "Which command runs a Ruby script file named hello.rb from the terminal?",
+    difficulty: "easy",
+    topic: TOPIC,
+    subtopic: "Installing and Running Ruby",
+    Option1: "ruby hello.rb",
+    Option2: "run hello.rb",
+    Option3: "exec hello.rb",
+    Option4: "ruby -e hello.rb",
+    CorrectOption: 1,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+  {
+    title: "Ruby Design Philosophy",
+    description: "Which phrase best summarizes Ruby's design philosophy as stated by its creator?",
+    difficulty: "easy",
+    topic: TOPIC,
+    subtopic: "History and Features of Ruby",
+    Option1: "Maximize machine performance over readability",
+    Option2: "Programmer happiness and principle of least surprise",
+    Option3: "Strict static typing everywhere",
+    Option4: "Manual memory management for control",
+    CorrectOption: 2,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+  {
+    title: "Ruby Source Extension",
+    description: "Which file extension is conventionally used for Ruby source files?",
+    difficulty: "easy",
+    topic: TOPIC,
+    subtopic: "Installing and Running Ruby",
+    Option1: ".rb",
+    Option2: ".ru",
+    Option3: ".ruby",
+    Option4: ".rbs",
+    CorrectOption: 1,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+  {
+    title: "Launch the IRB Shell",
+    description: "Which command launches the interactive Ruby shell from the terminal?",
+    difficulty: "easy",
+    topic: TOPIC,
+    subtopic: "Interactive Ruby (IRB)",
+    Option1: "rubysh",
+    Option2: "irb",
+    Option3: "rbshell",
+    Option4: "ruby -i",
+    CorrectOption: 2,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+  {
+    title: "Ruby vs C Classification",
+    description: "Compared to a compiled, statically-typed language like C, Ruby is best described as:",
+    difficulty: "easy",
+    topic: TOPIC,
+    subtopic: "Ruby versus Other Languages",
+    Option1: "A compiled, statically-typed language",
+    Option2: "An interpreted, dynamically-typed language",
+    Option3: "An assembly language",
+    Option4: "A markup language",
+    CorrectOption: 2,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+  {
+    title: "Typical Ruby Application",
+    description: "Which of the following is a domain where Ruby is most widely used in industry?",
+    difficulty: "easy",
+    topic: TOPIC,
+    subtopic: "Applications of Ruby",
+    Option1: "Embedded device firmware",
+    Option2: "Web application development (e.g. Ruby on Rails)",
+    Option3: "Operating system kernel development",
+    Option4: "Graphics device driver writing",
+    CorrectOption: 2,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+  {
+    title: "Everything Is an Object",
+    description: "Which of the following statements about Ruby is TRUE?",
+    difficulty: "easy",
+    topic: TOPIC,
+    subtopic: "History and Features of Ruby",
+    Option1: "Numbers like 5 cannot have methods called on them",
+    Option2: "Almost everything in Ruby is an object, including integers",
+    Option3: "Strings in Ruby are primitive scalars without methods",
+    Option4: "Booleans cannot be returned from expressions",
+    CorrectOption: 2,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+
+  /* ───── MEDIUM (6) — at least some snippets ───── */
+  {
+    title: "String Concatenation Output",
+    description: "What does the following Ruby snippet print?",
+    difficulty: "medium",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    Option1: "Hello World",
+    Option2: "Hello+World",
+    Option3: "HelloWorld",
+    Option4: "Hello, World",
+    CorrectOption: 1,
+    iscodesnippet: true,
+    codesnippet: `puts "Hello" + " " + "World"`,
+    snippetLang: "ruby",
+  },
+  {
+    title: "Floor Division Output",
+    description: "What does the following Ruby snippet print?",
+    difficulty: "medium",
+    topic: TOPIC,
+    subtopic: "Ruby versus Other Languages",
+    Option1: "2.5",
+    Option2: "2",
+    Option3: "2.0",
+    Option4: "3",
+    CorrectOption: 2,
+    iscodesnippet: true,
+    codesnippet: `puts 5 / 2`,
+    snippetLang: "ruby",
+  },
+  {
+    title: "String Length Method",
+    description: "What does the following Ruby snippet print?",
+    difficulty: "medium",
+    topic: TOPIC,
+    subtopic: "Interactive Ruby (IRB)",
+    Option1: "3",
+    Option2: "4",
+    Option3: "5",
+    Option4: "Ruby",
+    CorrectOption: 2,
+    iscodesnippet: true,
+    codesnippet: `puts "Ruby".length`,
+    snippetLang: "ruby",
+  },
+  {
+    title: "Modulo Operator Output",
+    description: "What does the following Ruby snippet print?",
+    difficulty: "medium",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    Option1: "1",
+    Option2: "3",
+    Option3: "3.33",
+    Option4: "0",
+    CorrectOption: 1,
+    iscodesnippet: true,
+    codesnippet: `x = 10
+y = 3
+puts x % y`,
+    snippetLang: "ruby",
+  },
+  {
+    title: "Ruby Interpreter Role",
+    description: "When you run `ruby script.rb` from the terminal, what actually executes your Ruby code?",
+    difficulty: "medium",
+    topic: TOPIC,
+    subtopic: "Installing and Running Ruby",
+    Option1: "A static compiler that produces a native binary first",
+    Option2: "The Ruby interpreter (such as MRI / YARV)",
+    Option3: "The operating system kernel directly",
+    Option4: "A web browser rendering engine",
+    CorrectOption: 2,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+  {
+    title: "String Interpolation Output",
+    description: "Given input \"Ruby\", what does the following Ruby snippet print?",
+    difficulty: "medium",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    Option1: "Hi, Ruby!",
+    Option2: "Hi, name!",
+    Option3: "Hi, #{name}!",
+    Option4: "Hi, !",
+    CorrectOption: 1,
+    iscodesnippet: true,
+    codesnippet: `name = gets.chomp
+puts "Hi, #{name}!"`,
+    snippetLang: "ruby",
+  },
+
+  /* ───── HARD (4) — snippets ───── */
+  {
+    title: "Mixed Division Output",
+    description: "What does the following Ruby snippet print? (Two lines of output.)",
+    difficulty: "hard",
+    topic: TOPIC,
+    subtopic: "Ruby versus Other Languages",
+    Option1: "3 then 3.5",
+    Option2: "3.5 then 3.5",
+    Option3: "3 then 3",
+    Option4: "3.5 then 3",
+    CorrectOption: 1,
+    iscodesnippet: true,
+    codesnippet: `puts 7 / 2
+puts 7.0 / 2`,
+    snippetLang: "ruby",
+  },
+  {
+    title: "Explicit to_s Concatenation",
+    description: "What does the following Ruby snippet print?",
+    difficulty: "hard",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    Option1: "10",
+    Option2: "55",
+    Option3: "5,5",
+    Option4: "Raises an error",
+    CorrectOption: 2,
+    iscodesnippet: true,
+    codesnippet: `x = "5"
+y = 5
+puts x + y.to_s`,
+    snippetLang: "ruby",
+  },
+  {
+    title: "Interpolated Arithmetic Output",
+    description: "What does the following Ruby snippet print?",
+    difficulty: "hard",
+    topic: TOPIC,
+    subtopic: "Running Ruby Scripts",
+    Option1: "10 divided by 3 is 3 remainder 1",
+    Option2: "10 divided by 3 is 3.33 remainder 1",
+    Option3: "10 divided by 3 is 3 remainder 0",
+    Option4: "Raises an error",
+    CorrectOption: 1,
+    iscodesnippet: true,
+    codesnippet: `a = 10
+b = 3
+puts "#{a} divided by #{b} is #{a / b} remainder #{a % b}"`,
+    snippetLang: "ruby",
+  },
+  {
+    title: "Variable Initialization Behavior",
+    description: "Which of the following is TRUE about Ruby variables?",
+    difficulty: "hard",
+    topic: TOPIC,
+    subtopic: "Installing and Running Ruby",
+    Option1: "Variables must be declared with a type before assignment",
+    Option2: "Using a variable before assigning it raises a NameError",
+    Option3: "Variables need the var keyword like JavaScript",
+    Option4: "All variables are constants by default",
+    CorrectOption: 2,
+    iscodesnippet: false,
+    codesnippet: null,
+    snippetLang: null,
+  },
+];
+
+/* ───────────────────────── EMIT JSON ───────────────────────── */
+
+const d = String(DAY).padStart(2, "0");
+writeFileSync(
+  `scripts/ruby-programming/data/day-${d}.code.json`,
+  JSON.stringify(
+    { day: DAY, topics: [{ name: TOPIC, subtopics: SUBTOPICS }], questions },
+    null,
+    2,
+  ),
+);
+writeFileSync(
+  `scripts/ruby-programming/data/day-${d}.mcq.json`,
+  JSON.stringify({ day: DAY, questions: mcqs }, null, 2),
+);
+console.log("wrote day", DAY);

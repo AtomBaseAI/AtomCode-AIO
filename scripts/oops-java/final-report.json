@@ -1,0 +1,365 @@
+{
+  "problems": [],
+  "filesSummary": [
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-01.code.json",
+      "day": 1,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-07.code.json",
+      "day": 7,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-03.mcq.json",
+      "day": 3,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-01.mcq.json",
+      "day": 1,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-12.mcq.json",
+      "day": 12,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-09.mcq.json",
+      "day": 9,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-05.mcq.json",
+      "day": 5,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-02.mcq.json",
+      "day": 2,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-19.mcq.json",
+      "day": 19,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-03.code.json",
+      "day": 3,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-04.code.json",
+      "day": 4,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-08.mcq.json",
+      "day": 8,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-10.code.json",
+      "day": 10,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-19.code.json",
+      "day": 19,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-05.code.json",
+      "day": 5,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-04.mcq.json",
+      "day": 4,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-14.mcq.json",
+      "day": 14,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-15.mcq.json",
+      "day": 15,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-20.code.json",
+      "day": 20,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-13.code.json",
+      "day": 13,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-02.code.json",
+      "day": 2,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-16.code.json",
+      "day": 16,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-10.mcq.json",
+      "day": 10,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-17.code.json",
+      "day": 17,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-18.mcq.json",
+      "day": 18,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-17.mcq.json",
+      "day": 17,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-13.mcq.json",
+      "day": 13,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-14.code.json",
+      "day": 14,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-18.code.json",
+      "day": 18,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-08.code.json",
+      "day": 8,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-06.mcq.json",
+      "day": 6,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-11.code.json",
+      "day": 11,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-11.mcq.json",
+      "day": 11,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-16.mcq.json",
+      "day": 16,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-20.mcq.json",
+      "day": 20,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-06.code.json",
+      "day": 6,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-15.code.json",
+      "day": 15,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-09.code.json",
+      "day": 9,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-12.code.json",
+      "day": 12,
+      "kind": "code",
+      "questions": 20,
+      "passCount": 20,
+      "failCount": 0,
+      "structureProblems": []
+    },
+    {
+      "file": "/home/z/my-project/scripts/oops-java/data/day-07.mcq.json",
+      "day": 7,
+      "kind": "mcq",
+      "questions": 20,
+      "passCount": 0,
+      "failCount": 0,
+      "structureProblems": []
+    }
+  ]
+}
