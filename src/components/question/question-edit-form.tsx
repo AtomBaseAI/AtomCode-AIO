@@ -42,6 +42,9 @@ import {
     TestCaseCard,
 } from "@/components/question/question-form-layout"
 import { toast } from "sonner"
+import { BadgeCheck } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 
 interface EditQuestionFormProps {
     question: z.infer<typeof QuestionUpdateSchema>
@@ -152,6 +155,10 @@ const EditQuestionForm = ({
         }
     };
 
+    // "Mark as tested" edit-panel override — declared here so the reset
+    // effect below can clear it whenever the question prop changes.
+    const [markTested, setMarkTested] = useState(false);
+
     // Update form values when `question` prop changes
     useEffect(() => {
         reset({
@@ -180,6 +187,7 @@ const EditQuestionForm = ({
             whitelist: question.whitelist,
             questionGroupId: question.questionGroupId || 'none'
         });
+        setMarkTested(false);
     }, [question, reset]);
     const [internalOpen, setInternalOpen] = useState(false)
     const isControlled = controlledOpen !== undefined
@@ -205,6 +213,7 @@ const EditQuestionForm = ({
                 values.questionGroupId && values.questionGroupId !== 'none'
                     ? values.questionGroupId
                     : null,
+            markTested,
         }
         startTransition(() => {
             updatequestion(payload)
@@ -214,7 +223,12 @@ const EditQuestionForm = ({
                     if (data.success) {
                         form.reset()
                         setOpen(false)
-                        toast.success(data.success);
+                        setMarkTested(false)
+                        toast.success(
+                            markTested
+                                ? "Question updated — marked as tested."
+                                : "Question updated — testcase status reset (run tests or mark as tested)."
+                        )
                     }
                 })
                 .catch(() => toast.error("Something went wrong!"));
@@ -291,6 +305,21 @@ const EditQuestionForm = ({
                                 <FormSuccess message={success} />
                             </div>
                             <div className="flex flex-wrap items-center justify-end gap-2">
+                                <div className="flex items-center gap-2 rounded-lg border border-dashed px-3 py-1.5">
+                                    <BadgeCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+                                    <Label
+                                        htmlFor="mark-tested-toggle"
+                                        className="cursor-pointer text-xs font-medium text-muted-foreground"
+                                    >
+                                        Mark as tested
+                                    </Label>
+                                    <Switch
+                                        id="mark-tested-toggle"
+                                        checked={markTested}
+                                        onCheckedChange={setMarkTested}
+                                        aria-label="Mark as tested"
+                                    />
+                                </div>
                                 <Button type="button" disabled={isLoading} onClick={form.handleSubmit(handleSubmit)}>
                                     {isLoading && (
                                         <LoaderIcon className="mr-2 size-4 animate-spin" />

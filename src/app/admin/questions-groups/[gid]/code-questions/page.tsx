@@ -44,6 +44,9 @@ const GroupQuestionsPage = async ({
         topic: q.topic,
         subtopic: q.subtopic,
         groupTitle: group.title,
+        testStatus: q.testStatus,
+        testResults: q.testResults,
+        testedAt: q.testedAt ? q.testedAt.toISOString() : null,
     }))
 
     return (

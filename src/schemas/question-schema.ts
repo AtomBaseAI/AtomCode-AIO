@@ -105,7 +105,12 @@ export const QuestionUpdateSchema = z.object({
     inputconstrains: z.string().optional(),
     blacklist: z.string().optional(),
     whitelist: z.string().optional(),
-    questionGroupId: z.string().nullable().optional()
+    questionGroupId: z.string().nullable().optional(),
+    /**
+     * Edit-panel override — when true the update re-marks the question as
+     * fully tested (all 5 dots green) instead of resetting the verdict.
+     */
+    markTested: z.boolean().optional()
 })
 
 

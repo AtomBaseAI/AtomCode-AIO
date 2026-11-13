@@ -42,4 +42,9 @@ export type GroupQuestionRow = {
     topic: string | null;
     subtopic: string | null;
     groupTitle: string | null;
+    /** Overall judge verdict: "passed" | "failed" | null (never tested). */
+    testStatus: string | null;
+    /** Per-case JSON: [sample1, sample2, hidden1, hidden2, hidden3] booleans. */
+    testResults: string | null;
+    testedAt: string | null;
 };

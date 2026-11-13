@@ -60,6 +60,7 @@ import { BulkActionButton } from "@/components/data-tables/bulk-action-button"
 import { languages } from "@/components/question/question-table/q-config-data"
 import { difficulties } from "@/components/question/question-table/q-config-data"
 import { GroupMcqEditForm } from "@/components/question-group/group-mcq-edit-form"
+import GroupMcqPreview from "@/components/question-group/group-mcq-preview"
 import type { GroupMcqRow } from "@/schemas/group-mcq-schema"
 
 const SNIPPET_FILTER_OPTIONS = [
@@ -282,6 +283,7 @@ export const getGroupMcqColumns = (
             return (
                 <div className="flex items-center">
                     <span className="flex gap-2">
+                        <GroupMcqPreview mcq={mcq} />
                         <GroupMcqEditForm groupId={groupId} mcq={mcq} />
                         <DeleteMcqButton
                             groupId={groupId}

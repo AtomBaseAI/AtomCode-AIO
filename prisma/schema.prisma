@@ -230,6 +230,14 @@ model CodeQuestion {
   questionGroupId        String?
   questionGroup          QuestionGroup?           @relation(fields: [questionGroupId], references: [id], onDelete: SetNull)
 
+  // ── Testcase verification (admin table dots) ─────────────────────────
+  // Overall verdict of the last Lambda judge run over all 5 test cases
+  // (2 sample + 3 hidden). null = never tested (imported questions).
+  testStatus             String?
+  // Per-case results JSON: [sample1, sample2, hidden1, hidden2, hidden3] booleans.
+  testResults            String?                  @db.Text
+  testedAt               DateTime?
+
   @@index([moduleId])
   @@index([assessmentsId])
   @@index([questionGroupId])

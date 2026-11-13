@@ -17,6 +17,13 @@ function revalidateQuestionGroups() {
     revalidatePath("/admin/questions-groups", "layout")
 }
 
+/**
+ * Per-case results for a freshly created question. The create dialog
+ * blocks submit until all 5 test cases (2 sample + 3 hidden) have been
+ * run through the judge and passed, so a new question is born tested.
+ */
+const CREATED_ALL_GREEN = JSON.stringify([true, true, true, true, true]);
+
 export const addquestion = async (
     values: z.infer<typeof AddQuestionSchema>
 ) => {
@@ -26,6 +33,10 @@ export const addquestion = async (
     await db.codeQuestion.create({
         data: {
             ...values,
+            // Created in-app ⇒ already verified by the create-dialog judge run.
+            testStatus: "passed",
+            testResults: CREATED_ALL_GREEN,
+            testedAt: new Date(),
         }
     })
 
@@ -55,13 +66,29 @@ export const updatequestion = async (
     const session = await requireAdmin();
     if (!session) return { error: "Only admins can update questions." };
 
-    const qid = values.id;
+    const { markTested, ...rest } = values;
+    const qid = rest.id;
     await db.codeQuestion.update({
         where: {
             id: qid
         },
         data: {
-            ...values,
+            ...rest,
+            // An update invalidates the previous judge verdict (code or
+            // test cases may have changed). The edit panel offers an
+            // explicit "Mark as tested" override for the rare cases where
+            // the change cannot affect execution (title, score, ...).
+            ...(markTested
+                ? {
+                      testStatus: "passed",
+                      testResults: CREATED_ALL_GREEN,
+                      testedAt: new Date(),
+                  }
+                : {
+                      testStatus: null,
+                      testResults: null,
+                      testedAt: null,
+                  }),
         }
     })
     revalidateQuestionGroups()

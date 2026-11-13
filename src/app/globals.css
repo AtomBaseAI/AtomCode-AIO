@@ -285,3 +285,38 @@ html[data-magicui-theme-vt="active"]::view-transition-group(root) {
 [data-slot="tooltip-content"] > span:last-child {
   background-color: inherit;
 }
+
+/* ── Testcase verification dots (admin code-questions table) ──────────
+   5 dots: 2 sample (green/red) + 3 hidden. While a Lambda judge run is
+   in flight the dots blink red → purple in a staggered sequence, then
+   settle green (pass) or stay red (fail). */
+.tc-dot {
+  display: inline-block;
+  height: 10px;
+  width: 10px;
+  border-radius: 9999px;
+  transition: background-color 200ms ease;
+}
+.tc-dot-pass {
+  background-color: rgb(34 197 94); /* green-500 */
+  box-shadow: 0 0 4px rgb(34 197 94 / 0.45);
+}
+.tc-dot-fail {
+  background-color: rgb(239 68 68); /* red-500 */
+  box-shadow: 0 0 4px rgb(239 68 68 / 0.35);
+}
+@keyframes tc-blink-purple {
+  0%,
+  100% {
+    background-color: rgb(239 68 68); /* red-500 */
+    box-shadow: 0 0 4px rgb(239 68 68 / 0.35);
+  }
+  50% {
+    background-color: rgb(168 85 247); /* purple-500 */
+    box-shadow: 0 0 8px rgb(168 85 247 / 0.75);
+    transform: scale(1.25);
+  }
+}
+.tc-dot-running {
+  animation: tc-blink-purple 900ms ease-in-out infinite;
+}
