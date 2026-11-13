@@ -30,8 +30,11 @@ function AccordionTrigger({
   children,
   ...props
 }: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
+  // w-full + min-w-0 lets the header fill (and shrink within) flex
+  // parents — without it a card header can neither grow to the full
+  // row width nor truncate long nowrap titles.
   return (
-    <AccordionPrimitive.Header className="flex">
+    <AccordionPrimitive.Header className="flex w-full min-w-0">
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(

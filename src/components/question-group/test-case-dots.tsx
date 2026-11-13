@@ -36,7 +36,7 @@ export function TestCaseDots({ state }: { state: TestCaseDotsState }) {
 
     return (
         <div
-            className="flex items-center"
+            className="flex items-center gap-1"
             role="status"
             aria-label={`Testcases ${
                 running
@@ -67,7 +67,7 @@ export function TestCaseDots({ state }: { state: TestCaseDotsState }) {
                         className={cn(
                             "tc-dot",
                             // Visual gap between the 2 sample dots and the
-                            // 3 hidden dots.
+                            // 3 hidden dots (on top of the base dot gap).
                             index === 2 && "ml-2",
                             running
                                 ? "tc-dot-running"

@@ -99,4 +99,28 @@ export const getTopicsForGroup = async (gid: string) => {
     }
 }
 
+/**
+ * Topic / sub topic usage rows for every question in a group (code
+ * questions AND mcq questions — both store topic & subtopic by name).
+ * The topics page aggregates these into per-topic / per-subtopic counts.
+ */
+export const getTopicQuestionCounts = async (gid: string) => {
+    try {
+        const [codeQuestions, mcqQuestions] = await Promise.all([
+            db.codeQuestion.findMany({
+                where: { questionGroupId: gid },
+                select: { topic: true, subtopic: true },
+            }),
+            db.mCQQuestion.findMany({
+                where: { questionGroupId: gid },
+                select: { topic: true, subtopic: true },
+            }),
+        ])
+        return [...codeQuestions, ...mcqQuestions]
+    }
+    catch {
+        return null
+    }
+}
+
 

@@ -73,7 +73,7 @@ const GroupMcqPreview = ({ mcq }: { mcq: GroupMcqRow }) => {
             </DialogTrigger>
             <DialogContent
                 aria-describedby={undefined}
-                className="flex h-screen max-h-screen w-screen max-w-none sm:max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 p-0"
+                className="flex h-[85vh] max-h-[85vh] w-[80vw] max-w-[80vw] sm:max-w-[80vw] flex-col gap-0 overflow-hidden rounded-xl p-0"
             >
                 {/* Sticky header */}
                 <DialogHeader className="shrink-0 border-b bg-gradient-to-r from-primary/15 via-primary/5 to-transparent px-6 py-4 pr-16 text-left">

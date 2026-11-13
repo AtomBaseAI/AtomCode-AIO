@@ -11,11 +11,12 @@
  * - Import / Export / Download CSV via TopicsImportExportMenu.
  */
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
     ChevronDown,
+    FileText,
     FolderTree,
     LoaderIcon,
     ListTree,
@@ -54,12 +55,16 @@ export interface SubTopicViewData {
     id: string
     name: string
     isDefault: boolean
+    /** Questions in this group tagged with this sub topic. */
+    questionCount: number
 }
 
 export interface TopicViewData {
     id: string
     name: string
     isDefault: boolean
+    /** Questions in this group tagged with this topic. */
+    questionCount: number
     subtopics: SubTopicViewData[]
 }
 
@@ -135,6 +140,28 @@ function PhraseConfirmDialog({
             </DialogContent>
         </Dialog>
     )
+}
+
+/**
+ * Topic cards flow into independent columns (1 on mobile, 2 on md, 3 on
+ * xl). Expanding a card only grows its own column and pushes the cards
+ * below it down — sibling cards in the same row are never affected.
+ */
+function useColumnCount() {
+    const [count, setCount] = useState(1)
+    useEffect(() => {
+        const xl = window.matchMedia("(min-width: 1280px)")
+        const md = window.matchMedia("(min-width: 768px)")
+        const update = () => setCount(xl.matches ? 3 : md.matches ? 2 : 1)
+        update()
+        xl.addEventListener("change", update)
+        md.addEventListener("change", update)
+        return () => {
+            xl.removeEventListener("change", update)
+            md.removeEventListener("change", update)
+        }
+    }, [])
+    return count
 }
 
 export function TopicsView({ groupId, groupTitle, topics }: TopicsViewProps) {
@@ -373,6 +400,19 @@ export function TopicsView({ groupId, groupTitle, topics }: TopicsViewProps) {
         })
     }, [topics, search])
 
+    // ── Independent card columns (masonry-style) ────────────────────────
+    const columnCount = useColumnCount()
+    const columns = useMemo(() => {
+        const buckets: TopicViewData[][] = Array.from(
+            { length: columnCount },
+            () => []
+        )
+        filteredTopics.forEach((topic, index) => {
+            buckets[index % columnCount]?.push(topic)
+        })
+        return buckets
+    }, [filteredTopics, columnCount])
+
     return (
         <>
             {/* Toolbar — search + create actions on one row */}
@@ -421,7 +461,9 @@ export function TopicsView({ groupId, groupTitle, topics }: TopicsViewProps) {
                 </div>
             </div>
 
-            {/* Topic cards — accordion reveals the sub topics */}
+            {/* Topic cards — independent columns; opening a card's accordion
+                reveals its sub topics and only pushes cards below it in the
+                same column down. */}
             {filteredTopics.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-10 text-center">
                     {search ? (
@@ -436,146 +478,204 @@ export function TopicsView({ groupId, groupTitle, topics }: TopicsViewProps) {
                     </p>
                 </div>
             ) : (
-                <Accordion
-                    type="multiple"
-                    className="grid items-start gap-4 xl:grid-cols-2"
-                >
-                    {filteredTopics.map((topic) => (
-                        <AccordionItem
-                            key={topic.id}
-                            value={topic.id}
-                            className="group/item overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm last:border-b"
-                        >
-                            <div className="flex w-full items-center">
-                                <div className="flex min-w-0 flex-1">
-                                    <AccordionTrigger className="w-full min-w-0 items-center px-4 py-3.5 hover:no-underline [&>svg]:hidden">
-                                        <span className="flex min-w-0 items-center gap-2.5 text-left">
-                                            <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]/item:rotate-180" />
-                                            <FolderTree className="size-4 shrink-0 text-primary" />
-                                            <span className="truncate font-semibold">
-                                                {topic.name}
-                                            </span>
-                                            {topic.isDefault && (
-                                                <Badge
-                                                    variant="outline"
-                                                    className="shrink-0"
-                                                >
-                                                    default
-                                                </Badge>
-                                            )}
-                                        </span>
-                                        <span className="ml-3 shrink-0 text-xs font-medium tabular-nums text-muted-foreground">
-                                            {topic.subtopics.length}{" "}
-                                            sub
-                                            {topic.subtopics.length === 1
-                                                ? ""
-                                                : "s"}
-                                        </span>
-                                    </AccordionTrigger>
-                                </div>
-                                <span className="flex shrink-0 items-center gap-1 pr-3">
-                                    {!topic.isDefault && (
-                                        <>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="size-8 hover:bg-purple-700/10"
-                                                aria-label={`Rename topic ${topic.name}`}
-                                                onClick={() => {
-                                                    setRenameTopic(topic)
-                                                    setRenameTopicName(topic.name)
-                                                    setRenameTopicError("")
-                                                }}
-                                            >
-                                                <Pencil className="size-4 text-primary" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="size-8 text-destructive hover:bg-red-400/20"
-                                                aria-label={`Delete topic ${topic.name}`}
-                                                onClick={() =>
-                                                    setDeleteTopic(topic)
-                                                }
-                                            >
-                                                <Trash className="size-4" />
-                                            </Button>
-                                        </>
-                                    )}
-                                </span>
-                            </div>
-                            <AccordionContent className="border-t bg-muted/40 px-4 pb-4 pt-3">
-                                {topic.subtopics.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground">
-                                        No sub topics yet — use &ldquo;Create
-                                        Sub Topic&rdquo; to add one.
-                                    </p>
-                                ) : (
-                                    <ul className="grid gap-2">
-                                        {topic.subtopics.map((sub) => (
-                                            <li
-                                                key={sub.id}
-                                                className="flex items-center justify-between gap-2 rounded-lg border bg-background px-3 py-2"
-                                            >
-                                                <span className="flex min-w-0 items-center gap-2">
-                                                    <ListTree className="size-3.5 shrink-0 text-muted-foreground" />
-                                                    <span className="truncate text-sm">
-                                                        {sub.name}
-                                                    </span>
-                                                    {sub.isDefault && (
+                <Accordion type="multiple" className="w-full">
+                    <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        {columns.map((columnTopics, columnIndex) => (
+                            <div
+                                key={columnIndex}
+                                className="flex flex-col gap-4"
+                            >
+                                {columnTopics.map((topic) => (
+                                    <AccordionItem
+                                        key={topic.id}
+                                        value={topic.id}
+                                        className="group/item overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm"
+                                    >
+                                        <div className="flex w-full items-center">
+                                            <div className="flex min-w-0 flex-1">
+                                                <AccordionTrigger className="w-full min-w-0 items-center px-4 py-3.5 hover:no-underline [&>svg]:hidden">
+                                                    <span className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
+                                                        <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]/item:rotate-180" />
+                                                        <FolderTree className="size-4 shrink-0 text-primary" />
+                                                        {/* w-0 + flex-1 keeps the nowrap title's min-content
+                                                            contribution at 0 so the Radix header wrapper
+                                                            can shrink and the name actually truncates. */}
+                                                        <span
+                                                            title={topic.name}
+                                                            className="w-0 min-w-0 flex-1 truncate font-semibold"
+                                                        >
+                                                            {topic.name}
+                                                        </span>
+                                                        {topic.isDefault && (
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="shrink-0"
+                                                            >
+                                                                default
+                                                            </Badge>
+                                                        )}
                                                         <Badge
                                                             variant="outline"
-                                                            className="shrink-0 text-[10px]"
+                                                            aria-label={`${topic.questionCount} question${topic.questionCount === 1 ? "" : "s"} tagged with this topic`}
+                                                            title={`${topic.questionCount} question${topic.questionCount === 1 ? "" : "s"} tagged with this topic`}
+                                                            className="shrink-0 gap-1 border-primary/30 bg-primary/10 text-primary"
                                                         >
-                                                            default
+                                                            <FileText className="size-3" />
+                                                            <span className="tabular-nums">
+                                                                {
+                                                                    topic.questionCount
+                                                                }
+                                                            </span>
                                                         </Badge>
-                                                    )}
-                                                </span>
-                                                {!sub.isDefault && (
-                                                    <span className="flex shrink-0 items-center gap-0.5">
+                                                    </span>
+                                                    <span className="ml-3 shrink-0 text-xs font-medium tabular-nums text-muted-foreground">
+                                                        {
+                                                            topic.subtopics.length
+                                                        }{" "}
+                                                        sub
+                                                        {topic.subtopics.length ===
+                                                        1
+                                                            ? ""
+                                                            : "s"}
+                                                    </span>
+                                                </AccordionTrigger>
+                                            </div>
+                                            <span className="flex shrink-0 items-center gap-1 pr-3">
+                                                {!topic.isDefault && (
+                                                    <>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="size-7 hover:bg-purple-700/10"
-                                                            aria-label={`Rename sub topic ${sub.name}`}
+                                                            className="size-8 hover:bg-purple-700/10"
+                                                            aria-label={`Rename topic ${topic.name}`}
                                                             onClick={() => {
-                                                                setRenameSub({
-                                                                    topic,
-                                                                    sub,
-                                                                })
-                                                                setRenameSubName(
-                                                                    sub.name
+                                                                setRenameTopic(
+                                                                    topic
                                                                 )
-                                                                setRenameSubError(
+                                                                setRenameTopicName(
+                                                                    topic.name
+                                                                )
+                                                                setRenameTopicError(
                                                                     ""
                                                                 )
                                                             }}
                                                         >
-                                                            <Pencil className="size-3.5 text-primary" />
+                                                            <Pencil className="size-4 text-primary" />
                                                         </Button>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="size-7 text-destructive hover:bg-red-400/20"
-                                                            aria-label={`Delete sub topic ${sub.name}`}
+                                                            className="size-8 text-destructive hover:bg-red-400/20"
+                                                            aria-label={`Delete topic ${topic.name}`}
                                                             onClick={() =>
-                                                                setDeleteSub({
-                                                                    topic,
-                                                                    sub,
-                                                                })
+                                                                setDeleteTopic(
+                                                                    topic
+                                                                )
                                                             }
                                                         >
-                                                            <Trash className="size-3.5" />
+                                                            <Trash className="size-4" />
                                                         </Button>
-                                                    </span>
+                                                    </>
                                                 )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
+                                            </span>
+                                        </div>
+                                        <AccordionContent className="border-t bg-muted/40 px-4 pb-4 pt-3">
+                                            {topic.subtopics.length === 0 ? (
+                                                <p className="text-sm text-muted-foreground">
+                                                    No sub topics yet — use
+                                                    &ldquo;Create Sub
+                                                    Topic&rdquo; to add one.
+                                                </p>
+                                            ) : (
+                                                <ul className="grid gap-2">
+                                                    {topic.subtopics.map(
+                                                        (sub) => (
+                                                            <li
+                                                                key={sub.id}
+                                                                className="flex min-w-0 items-center justify-between gap-2 rounded-lg border bg-background px-3 py-2"
+                                                            >
+                                                                <span className="flex min-w-0 items-center gap-2">
+                                                                    <ListTree className="size-3.5 shrink-0 text-muted-foreground" />
+                                                                    <span className="truncate text-sm">
+                                                                        {
+                                                                            sub.name
+                                                                        }
+                                                                    </span>
+                                                                    {sub.isDefault && (
+                                                                        <Badge
+                                                                            variant="outline"
+                                                                            className="shrink-0 text-[10px]"
+                                                                        >
+                                                                            default
+                                                                        </Badge>
+                                                                    )}
+                                                                </span>
+                                                                <span
+                                                                    className="ml-auto shrink-0 text-xs font-medium tabular-nums text-muted-foreground"
+                                                                    title={`${sub.questionCount} question${sub.questionCount === 1 ? "" : "s"} tagged with this sub topic`}
+                                                                >
+                                                                    {
+                                                                        sub.questionCount
+                                                                    }{" "}
+                                                                    question
+                                                                    {sub.questionCount ===
+                                                                    1
+                                                                        ? ""
+                                                                        : "s"}
+                                                                </span>
+                                                                {!sub.isDefault && (
+                                                                    <span className="flex shrink-0 items-center gap-0.5">
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="size-7 hover:bg-purple-700/10"
+                                                                            aria-label={`Rename sub topic ${sub.name}`}
+                                                                            onClick={() => {
+                                                                                setRenameSub(
+                                                                                    {
+                                                                                        topic,
+                                                                                        sub,
+                                                                                    }
+                                                                                )
+                                                                                setRenameSubName(
+                                                                                    sub.name
+                                                                                )
+                                                                                setRenameSubError(
+                                                                                    ""
+                                                                                )
+                                                                            }}
+                                                                        >
+                                                                            <Pencil className="size-3.5 text-primary" />
+                                                                        </Button>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="size-7 text-destructive hover:bg-red-400/20"
+                                                                            aria-label={`Delete sub topic ${sub.name}`}
+                                                                            onClick={() =>
+                                                                                setDeleteSub(
+                                                                                    {
+                                                                                        topic,
+                                                                                        sub,
+                                                                                    }
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <Trash className="size-3.5" />
+                                                                        </Button>
+                                                                    </span>
+                                                                )}
+                                                            </li>
+                                                        )
+                                                    )}
+                                                </ul>
+                                            )}
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
                 </Accordion>
             )}
 

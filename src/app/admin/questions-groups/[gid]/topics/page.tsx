@@ -2,7 +2,7 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { getQuestionGroupById, getTopicsForGroup } from "@/data/question-groups"
+import { getQuestionGroupById, getTopicsForGroup, getTopicQuestionCounts } from "@/data/question-groups"
 import { TopicsView, type TopicViewData } from "@/components/question-group/topics-view"
 import { TopicsImportExportMenu } from "@/components/question-group/topics-import-export-menu"
 import BackBtn from "@/components/backbtn"
@@ -37,6 +37,21 @@ const GroupTopicsPage = async ({
 
     const rawTopics = (await getTopicsForGroup(gid)) ?? []
 
+    // Question usage counts per topic and per (topic, sub topic). Questions
+    // store topic / subtopic names, so counts are keyed by lowercase names.
+    const countRows = (await getTopicQuestionCounts(gid)) ?? []
+    const topicCounts = new Map<string, number>()
+    const subCounts = new Map<string, number>()
+    for (const row of countRows) {
+        const t = (row.topic ?? "").trim().toLowerCase()
+        if (!t) continue
+        topicCounts.set(t, (topicCounts.get(t) ?? 0) + 1)
+        const s = (row.subtopic ?? "").trim().toLowerCase()
+        if (!s) continue
+        const key = `${t}|${s}`
+        subCounts.set(key, (subCounts.get(key) ?? 0) + 1)
+    }
+
     // Default "general" topic first, then alphabetical (API order is
     // alphabetical — promote the default here).
     const sorted = [...rawTopics].sort((a, b) => {
@@ -49,6 +64,7 @@ const GroupTopicsPage = async ({
         id: t.id,
         name: t.name,
         isDefault: t.name.toLowerCase() === DEFAULT_TOPIC_NAME,
+        questionCount: topicCounts.get(t.name.toLowerCase()) ?? 0,
         subtopics: [...t.subtopics]
             .sort((a, b) => {
                 if (a.name.toLowerCase() === DEFAULT_TOPIC_NAME) return -1
@@ -59,6 +75,10 @@ const GroupTopicsPage = async ({
                 id: s.id,
                 name: s.name,
                 isDefault: s.name.toLowerCase() === DEFAULT_TOPIC_NAME,
+                questionCount:
+                    subCounts.get(
+                        `${t.name.toLowerCase()}|${s.name.toLowerCase()}`
+                    ) ?? 0,
             })),
     }))
 

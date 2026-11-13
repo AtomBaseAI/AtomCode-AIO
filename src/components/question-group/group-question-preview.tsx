@@ -200,7 +200,7 @@ const GroupQuestionPreview = ({ qid }: { qid: string }) => {
             <DialogContent
                 aria-describedby={undefined}
                 showCloseButton={!loading}
-                className="flex h-screen max-h-screen w-screen max-w-none sm:max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 p-0"
+                className="flex h-[85vh] max-h-[85vh] w-[80vw] max-w-[80vw] sm:max-w-[80vw] flex-col gap-0 overflow-hidden rounded-xl p-0"
             >
                 {loading && (
                     <div className="flex h-full w-full flex-col items-center justify-center gap-4">
