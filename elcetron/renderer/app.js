@@ -103,6 +103,8 @@ function toast(msg, kind = "success") {
 function dialog(html, { wide = false } = {}) {
   $("#modal-box").className = `modal ${wide ? "wide" : ""}`;
   $("#modal-box").innerHTML = html;
+  // CSP-safe: bind close buttons declared as data-close (no inline onclick).
+  $$("#modal-box [data-close]").forEach((b) => (b.onclick = closeDialog));
   $("#modal-backdrop").classList.remove("hidden");
 }
 function closeDialog() {
@@ -1111,14 +1113,14 @@ function openCodePractice(d) {
           <h2 class="dialog-title">Sample Testcase ${icon("check", "ic")}</h2>
           <p class="dialog-desc" style="color:hsl(142 71% 35%); font-weight:600;">Passed</p>
           <pre class="out-pre">${esc(r.output ?? "")}</pre>
-          <div class="dialog-footer single"><button class="btn btn-primary" onclick="document.querySelector('#modal-backdrop').classList.add('hidden')">Close</button></div>`);
+          <div class="dialog-footer single"><button class="btn btn-primary" data-close>Close</button></div>`);
       } else {
         s.errors += 1;
         dialog(`
           <h2 class="dialog-title">Sample Testcase</h2>
           <p class="dialog-desc" style="color:var(--destructive); font-weight:600;">${esc(r.compileMessage || "Failed")}</p>
           <pre class="out-pre">${esc(r.output ?? "")}</pre>
-          <div class="dialog-footer single"><button class="btn btn-primary" onclick="document.querySelector('#modal-backdrop').classList.add('hidden')">Close</button></div>`);
+          <div class="dialog-footer single"><button class="btn btn-primary" data-close>Close</button></div>`);
       }
     } catch (e) { closeDialog(); toast(e.message, "error"); }
   };
@@ -1140,7 +1142,7 @@ function openCodePractice(d) {
         <h2 class="dialog-title">Test cases</h2>
         ${row(1, r.testcase1status)}${row(2, r.testcase2status)}${row(3, r.testcase3status)}
         <p class="dialog-desc">${r.passedCount}/3 passed · earns ${1 + r.passedCount * 3} / 10 marks (incl. sample bonus)</p>
-        <div class="dialog-footer single"><button class="btn btn-primary" onclick="document.querySelector('#modal-backdrop').classList.add('hidden')">Close</button></div>`);
+        <div class="dialog-footer single"><button class="btn btn-primary" data-close>Close</button></div>`);
     } catch (e) { closeDialog(); toast(e.message, "error"); }
   };
 

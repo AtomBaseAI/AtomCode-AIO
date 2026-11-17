@@ -121,10 +121,14 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       spellcheck: false,
+      devTools: false, // hard-disable DevTools (no F12 / shortcuts / inspect)
     },
   });
 
   mainWindow.once("ready-to-show", () => mainWindow.show());
+
+  // Disable pinch/visual zoom — no browser-like zooming.
+  mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
 
   // Optional: ATOMCODE_URL=http://localhost:3000/desktop-preview loads a live
   // page instead of the bundled renderer (handy while developing).
@@ -134,20 +138,75 @@ function createWindow() {
     mainWindow.loadURL("atomcode://renderer/index.html");
   }
 
+  // Keep the window anchored to the app — never navigate like a browser.
+  const appOrigin = process.env.ATOMCODE_URL || "atomcode://renderer";
+  mainWindow.webContents.on("will-navigate", (e, url) => {
+    if (!String(url).startsWith(appOrigin)) e.preventDefault();
+  });
+
   // Open target=_blank / window.open links in the system browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:\/\//i.test(url)) shell.openExternal(url);
     return { action: "deny" };
   });
 
-  mainWindow.webContents.on("before-input-event", (_e, input) => {
-    // F12 / Ctrl+Shift+I toggles devtools
+  /*
+   * Lockdown: no DevTools, no browser shortcuts.
+   *
+   * Blocked at the earliest possible point (before the page sees the key):
+   *   - DevTools: F12, Ctrl/Cmd+Shift+I/J/C, Cmd+Opt+I/J/C
+   *   - Reload / hard reload: F5, Ctrl/Cmd+R, Ctrl/Cmd+Shift+R
+   *   - Zoom: Ctrl/Cmd +/ -/ 0, pinch (setVisualZoomLevelLimits above)
+   *   - Fullscreen: F11, and every other function key
+   *   - New window/tab: Ctrl/Cmd+N/T/Shift+N/Shift+T
+   *   - Print, save page, view source, history, downloads, bookmarks,
+   *     find bar, address bar — everything Ctrl/Cmd based that is not
+   *     plain text editing.
+   *   - Alt+arrow history navigation.
+   *
+   * Kept working (text editing, required by the code editor & forms):
+   *   - Ctrl/Cmd+C/X/V/A/Z/Y (incl. Ctrl+Shift+V paste-plain)
+   *   - AltGr character input (Ctrl+Alt+<char> on international keyboards)
+   */
+  mainWindow.webContents.on("before-input-event", (event, input) => {
+    if (input.type !== "keyDown" || !input.key) return;
+    const key = input.key.toLowerCase();
+    const ctrl = input.control || input.meta; // Cmd counts as Ctrl on macOS
+
+    // DevTools — every known combination, always blocked.
     if (
-      input.type === "keyDown" &&
-      (input.key === "F12" ||
-        (input.control && input.shift && input.key.toLowerCase() === "i"))
+      key === "f12" ||
+      (ctrl && input.shift && (key === "i" || key === "j" || key === "c")) ||
+      (input.meta && input.alt && (key === "i" || key === "j" || key === "c"))
     ) {
-      mainWindow.webContents.toggleDevTools();
+      event.preventDefault();
+      return;
+    }
+
+    // AltGr character production (Ctrl+Alt+<char>) is typing, not a shortcut.
+    if (input.control && input.alt && !input.meta && key.length === 1) return;
+
+    // Clipboard / undo / redo / select-all stay functional.
+    if (ctrl && !input.alt && ["c", "v", "x", "a", "z", "y"].includes(key)) return;
+
+    // Every other Ctrl/Cmd accelerator is a browser shortcut — block it.
+    if (ctrl) {
+      event.preventDefault();
+      return;
+    }
+
+    // Function keys: F5 reload, F11 fullscreen, F12 devtools, etc.
+    if (/^f([1-9]|1[0-2])$/.test(key)) {
+      event.preventDefault();
+      return;
+    }
+
+    // Alt+arrow history navigation (Alt+Left/Right).
+    if (
+      input.alt &&
+      ["arrowleft", "arrowright", "arrowup", "arrowdown", "home"].includes(key)
+    ) {
+      event.preventDefault();
     }
   });
 
@@ -230,7 +289,33 @@ ipcMain.handle("app:info", () => ({
 /* ------------------------------------------------------------------ */
 
 app.whenReady().then(() => {
-  Menu.setApplicationMenu(null);
+  if (process.platform === "darwin") {
+    // macOS routes clipboard/undo through the application menu — without
+    // Edit roles Cmd+C/V/X/Z/A stop working. Keep ONLY these OS-standard
+    // text-editing items; no browser items (reload, devtools, window mgmt).
+    Menu.setApplicationMenu(
+      Menu.buildFromTemplate([
+        {
+          label: app.name,
+          submenu: [{ role: "about" }, { type: "separator" }, { role: "quit" }],
+        },
+        {
+          label: "Edit",
+          submenu: [
+            { role: "undo" },
+            { role: "redo" },
+            { type: "separator" },
+            { role: "cut" },
+            { role: "copy" },
+            { role: "paste" },
+            { role: "selectAll" },
+          ],
+        },
+      ])
+    );
+  } else {
+    Menu.setApplicationMenu(null); // Windows/Linux: no menu at all
+  }
   protocol.handle("atomcode", serveRenderer);
   createWindow();
 
