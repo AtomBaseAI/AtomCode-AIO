@@ -8,6 +8,7 @@ import {
     FileWarning,
     Hash,
     LoaderIcon,
+    Maximize2,
     ShieldAlert,
     ShieldCheck,
     Sparkles,
@@ -200,7 +201,7 @@ const GroupQuestionPreview = ({ qid }: { qid: string }) => {
             <DialogContent
                 aria-describedby={undefined}
                 showCloseButton={!loading}
-                className="flex h-[85vh] max-h-[85vh] w-[80vw] max-w-[80vw] sm:max-w-[80vw] flex-col gap-0 overflow-hidden rounded-xl p-0"
+                className="fixed inset-0 h-full w-full max-w-none translate-x-0 translate-y-0 sm:max-w-none flex flex-col gap-0 overflow-hidden rounded-none border-0 p-0"
             >
                 {loading && (
                     <div className="flex h-full w-full flex-col items-center justify-center gap-4">
@@ -232,6 +233,14 @@ const GroupQuestionPreview = ({ qid }: { qid: string }) => {
                                 <DialogTitle className="text-xl font-bold leading-snug">
                                     {question.title}
                                 </DialogTitle>
+                                <Badge
+                                    variant="outline"
+                                    className="gap-1.5 border-primary/30 bg-primary/10 text-primary"
+                                    title="This preview opens edge-to-edge, filling the full width and height of the screen"
+                                >
+                                    <Maximize2 className="size-3.5" />
+                                    Fullscreen preview
+                                </Badge>
                                 {difficulty && (
                                     <Badge
                                         variant="outline"
@@ -292,12 +301,12 @@ const GroupQuestionPreview = ({ qid }: { qid: string }) => {
 
                         {/* Scrollable body */}
                         <div className="flex-1 overflow-y-auto">
-                            <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6">
+                            <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-8 px-6 py-6 lg:px-10">
                                 {/* Top: description + starter code */}
                                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                                     <div className="flex flex-col gap-4">
                                         <InfoCard label="Description">
-                                            <div className="max-h-64 overflow-y-auto">
+                                            <div className="max-h-[40vh] overflow-y-auto pr-1">
                                                 {notAvailable(
                                                     question.description
                                                 )}
@@ -339,9 +348,9 @@ const GroupQuestionPreview = ({ qid }: { qid: string }) => {
 
                                     <InfoCard
                                         label="Starter Code"
-                                        className="flex min-h-[320px] flex-col"
+                                        className="flex min-h-[420px] flex-col"
                                     >
-                                        <div className="flex h-full min-h-[280px] flex-col">
+                                        <div className="flex h-full min-h-[380px] flex-col">
                                             {question.sourcecode &&
                                             question.sourcecode.trim() !==
                                                 "" ? (

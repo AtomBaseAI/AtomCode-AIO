@@ -1,7 +1,7 @@
 {
   "name": "atomcode-student-desktop",
   "productName": "AtomCode Student",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Electron desktop client for the AtomCode student portal (courses, practice, assessments, results).",
   "main": "main.js",
   "homepage": "https://github.com/AtomBaseAI/AtomCode-Repatch",
@@ -65,7 +65,8 @@
           "arch": ["x64"]
         }
       ],
-      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}",
+      "requestedExecutionLevel": "asInvoker"
     },
     "nsis": {
       "oneClick": false,
@@ -78,11 +79,19 @@
     "mac": {
       "icon": "renderer/assets/icon.png",
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
       ],
       "category": "public.app-category.education",
-      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+      "identity": null,
+      "darkModeSupport": true
     }
   }
 }

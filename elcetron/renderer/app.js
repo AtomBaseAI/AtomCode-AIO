@@ -243,9 +243,9 @@ function showLogin(notice = null) {
 function showShell() {
   $("#view-login").classList.add("hidden");
   $("#view-shell").classList.remove("hidden");
-  $("#tb-name").textContent = state.user?.name || "Student";
-  $("#tb-email").textContent = state.user?.email || "";
-  $("#tb-avatar").textContent = initials(state.user?.name);
+  ["#tb-name", "#um-name"].forEach((s) => { const el = $(s); if (el) el.textContent = state.user?.name || "Student"; });
+  ["#tb-email", "#um-email"].forEach((s) => { const el = $(s); if (el) el.textContent = state.user?.email || ""; });
+  ["#tb-avatar", "#um-avatar"].forEach((s) => { const el = $(s); if (el) el.textContent = initials(state.user?.name); });
   navigate("dashboard");
 }
 
@@ -295,6 +295,13 @@ async function doLogin() {
     localStorage.setItem(LS.user, JSON.stringify(state.user));
     toast(`Welcome back, ${state.user.name || state.user.email}!`);
     showShell();
+    api("/config", { silent401: true }).then((r) => r.ok ? r.data : null).then((cfg) => {
+      if (cfg?.clientName) {
+        const el = $("#brand-foot");
+        if (el) el.textContent = cfg.clientName;
+        document.title = `${cfg.clientName} — AtomCode Student`;
+      }
+    }).catch(() => {});
   } catch (e) {
     errEl.textContent = e.message || "Cannot reach the server";
     errEl.classList.remove("hidden");
@@ -304,7 +311,11 @@ async function doLogin() {
   }
 }
 
-$("#logout-btn").addEventListener("click", () => {
+$("#logout-btn")?.addEventListener("click", confirmLogout);
+$("#um-logout").addEventListener("click", () => { closeUserMenu(); confirmLogout(); });
+$("#um-profile").addEventListener("click", () => { closeUserMenu(); navigate("settings"); });
+
+function confirmLogout() {
   dialog(`
     <h2 class="dialog-title">Logout</h2>
     <p class="dialog-desc">Are you sure you want to logout from AtomCode Student?</p>
@@ -319,11 +330,31 @@ $("#logout-btn").addEventListener("click", () => {
     closeDialog();
     showLogin();
   };
+}
+
+/* user dropdown menu (web-style popover) */
+function closeUserMenu() {
+  $("#user-menu")?.classList.add("hidden");
+}
+
+$("#user-btn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  $("#user-menu").classList.toggle("hidden");
+});
+document.addEventListener("click", (e) => {
+  const menu = $("#user-menu");
+  if (!menu || menu.classList.contains("hidden")) return;
+  if (!menu.contains(e.target) && !$("#user-btn").contains(e.target)) closeUserMenu();
 });
 
 /* ============================== router ============================== */
 
-const VIEW_TITLES = { dashboard: "Dashboard", courses: "My Courses", lab: "Labs", assessments: "Assessments", settings: "Settings", modules: "Modules" };
+const VIEW_TITLES = { dashboard: "Dashboard", courses: "My Courses", lab: "Labs", assessments: "Assessments", results: "Results", settings: "Settings", modules: "Modules", practice: "Practice" };
+
+function setPageTitle(view) {
+  const el = $("#page-title");
+  if (el) el.textContent = VIEW_TITLES[view] || "Dashboard";
+}
 
 $$(".side-link[data-view]").forEach((btn) =>
   btn.addEventListener("click", () => navigate(btn.dataset.view))
@@ -338,6 +369,8 @@ function setActiveNav(view) {
 async function navigate(view, opts = {}) {
   closePractice();
   setActiveNav(view);
+  setPageTitle(view);
+  closeUserMenu();
   const v = $("#view");
   v.innerHTML = `<div class="loading-state">${icon("loader", "ic spin")} Loading…</div>`;
 
@@ -348,6 +381,7 @@ async function navigate(view, opts = {}) {
     practice: renderPracticeHome,
     lab: renderLab,
     assessments: renderAssessments,
+    results: renderResults,
     settings: renderSettings,
   };
   try {
@@ -778,7 +812,7 @@ async function renderPracticeHome(v) {
             <div style="border-top:2px solid var(--border); padding:0.75rem; text-align:center;"><h2>Marks</h2><h4 style="font-size:1.5rem;font-weight:700;">${p?.totalmcqscore ?? d.mcqs.length}</h4></div>
           </div>
           ${p?.mcqstatus === "submitted"
-            ? `<div style="height:2.25rem; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb, var(--primary) 50%, transparent); color:white; border-radius:var(--radius);">${icon("puzzle", "ic")} MCQ Submitted</div>`
+            ? `<div class="submitted-band">${icon("puzzle", "ic")} MCQ Submitted${d.mcqSubmitted ? ` — scored ${d.mcqSubmitted.score}/${p?.totalmcqscore ?? d.mcqs.length}${d.mcqSubmitted.errors ? ` (${d.mcqSubmitted.errors} wrong)` : ""}` : ""}</div>`
             : `<button class="btn btn-green btn-block mt1" id="go-mcq">${icon("puzzle", "ic")} Start MCQ</button>`}
         </div>` : ""}
         <div style="width:15rem; display:flex; flex-direction:column;">
@@ -787,7 +821,7 @@ async function renderPracticeHome(v) {
             <div style="border-top:2px solid var(--border); padding:0.75rem; text-align:center;"><h2>Marks</h2><h4 style="font-size:1.5rem;font-weight:700;">${p?.totalquestionscore ?? d.codeQuestions.length * 10}</h4></div>
           </div>
           ${p?.questionstatus === "submitted"
-            ? `<div style="height:2.25rem; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb, var(--primary) 50%, transparent); color:white; border-radius:var(--radius);">${icon("code", "ic")} Code Submitted</div>`
+            ? `<div class="submitted-band">${icon("code", "ic")} Code Submitted</div>`
             : `<button class="btn btn-green btn-block mt1" id="go-code" ${d.codeQuestions.length === 0 ? "disabled" : ""}>${icon("code", "ic")} Start Code</button>`}
         </div>
       </div>
@@ -795,9 +829,24 @@ async function renderPracticeHome(v) {
         <button class="btn btn-primary" id="ph-back">${icon("chevL", "ic")} Back</button>
         ${p?.mcqstatus === "submitted" && p?.questionstatus === "submitted" ? `<button class="btn btn-green" id="ph-submit">Submit Module</button>` : ""}
       </div>
+      ${(d.references?.length > 0) ? `
+      <div class="practice-refs">
+        <h3 class="refs-title">${icon("bookIcon", "ic sm")} References</h3>
+        <div class="refs-row">
+          ${d.references.map((r) => `
+            <button class="ref-chip" data-ref="${esc(r.link)}" title="${esc(r.link)}">
+              ${r.type === "video" ? icon("fileVideo", "ic sm") : icon("fileText", "ic sm")}
+              <span class="ref-name">${esc(r.title)}</span>
+              <span class="ref-type">${esc(r.type || "link")}</span>
+            </button>`).join("")}
+        </div>
+      </div>` : ""}
     </div>`;
 
   $("#ph-back").onclick = () => navigate("modules");
+  $$(".ref-chip", v).forEach((el) =>
+    (el.onclick = () => app.openExternal(el.dataset.ref))
+  );
   const goMcq = $("#go-mcq");
   if (goMcq) goMcq.onclick = () => openMcqPractice(d);
   const goCode = $("#go-code");
@@ -863,6 +912,7 @@ function openMcqPractice(d) {
     $("#q-num").textContent = idx + 1;
     $("#q-body").innerHTML = `
       <div class="q-title">${esc(q.title)}</div>
+      ${(q.topic || q.subtopic) ? `<div class="chip-row">${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}</div>` : ""}
       <div class="q-desc">${esc(q.description)}</div>
       ${q.referenceimg ? `<img src="${esc(q.referenceimg)}" alt="${esc(q.title)}" style="max-height:300px; object-fit:fill; border-radius:var(--radius); border:1px solid var(--border);" />` : ""}
       ${q.iscodesnippet && q.codesnippet ? `<pre class="codesnippet">${esc(q.codesnippet)}</pre>` : ""}
@@ -999,6 +1049,13 @@ function openCodePractice(d) {
     $("#cq-marks").textContent = q.maxscore ?? 10;
     $("#cq-body").innerHTML = `
       <div class="q-title">${esc(q.title)}</div>
+      <div class="chip-row">
+        <span class="chip chip-lang">${langIcon(q.lang)} <b>${esc((q.lang || "").toUpperCase())}</b></span>
+        ${q.difficulty ? `<span class="chip chip-${esc(q.difficulty)}">${esc(q.difficulty)}</span>` : ""}
+        ${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}
+        ${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}
+        <span class="chip chip-soft">Max score: ${q.maxscore ?? 10}</span>
+      </div>
       <div class="q-desc">${esc(q.description)}</div>
       ${q.inputconstrains ? `<div class="q-desc"><b>Constraints:</b> ${esc(q.inputconstrains)}</div>` : ""}
       ${q.sampleinput1 ? `<div style="width:100%"><b class="small">Sample Input 1</b><pre class="codesnippet">${esc(q.sampleinput1)}</pre><b class="small">Sample Output 1</b><pre class="codesnippet">${esc(q.sampleoutput1)}</pre></div>` : ""}
@@ -1007,7 +1064,9 @@ function openCodePractice(d) {
     `;
     $("#ed-wrap").innerHTML = `
       <div class="editor-wrap ${document.body.classList.contains("dark") ? "" : "light"}" style="height:100%;">
-        <div class="editor-head">${langIcon(q.lang)} <b>${esc((q.lang || "").toUpperCase())}</b> · ${esc(q.difficulty || "")} ${q.submissionstatus ? '<span class="badge badge-green" style="margin-left:auto;">submitted</span>' : ""}</div>
+        <div class="editor-head">${langIcon(q.lang)} <b>${esc((q.lang || "").toUpperCase())}</b>
+          ${(q.testcaseStatuses || []).some(Boolean) ? `<span class="editor-tests">${(q.testcaseStatuses || []).map((st, i) => `<span class="badge ${st === "pass" ? "badge-green" : st === "error" ? "badge-red" : "badge-orange"}" title="Saved run — test ${i + 1}">T${i + 1}: ${st || "—"}</span>`).join("")}</span>` : ""}
+          ${q.submissionstatus ? '<span class="badge badge-green" style="margin-left:auto;">submitted</span>' : ""}</div>
         <textarea class="editor-area" id="code-editor" spellcheck="false">${esc(s.code)}</textarea>
       </div>`;
     const ed = $("#code-editor");
@@ -1367,6 +1426,7 @@ async function loadAttempt() {
       $("#am-num").textContent = mi + 1;
       $("#am-qbody").innerHTML = `
         <div class="q-title">${esc(q.title)}</div>
+        ${(q.topic || q.subtopic) ? `<div class="chip-row">${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}</div>` : ""}
         <div class="q-desc">${esc(q.description)}</div>
         ${q.iscodesnippet && q.codesnippet ? `<pre class="codesnippet">${esc(q.codesnippet)}</pre>` : ""}`;
       $("#am-abody").innerHTML = q.options.map((o, i) => `
@@ -1401,6 +1461,12 @@ async function loadAttempt() {
           <div class="p-head">Question : ${qi + 1}&nbsp;/&nbsp;${d.code.length}</div>
           <div class="p-body">
             <div class="q-title">${esc(q.title)}</div>
+            <div class="chip-row">
+              <span class="chip chip-lang">${langIcon(q.lang)} <b>${esc((q.lang || "").toUpperCase())}</b></span>
+              ${q.difficulty ? `<span class="chip chip-${esc(q.difficulty)}">${esc(q.difficulty)}</span>` : ""}
+              ${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}
+              ${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}
+            </div>
             <div class="q-desc">${esc(q.description)}</div>
             ${q.sampleinput1 ? `<div style="width:100%"><b class="small">Sample Input</b><pre class="codesnippet">${esc(q.sampleinput1)}</pre><b class="small">Sample Output</b><pre class="codesnippet">${esc(q.sampleoutput1)}</pre></div>` : ""}
           </div>
@@ -1563,12 +1629,115 @@ async function finalizeAttempt(auto) {
         <div class="card card-pad" style="text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:var(--primary)">${r.scores.overall.earned}/${r.scores.overall.total}</div><div class="muted small">Overall</div></div>
       </div>
       <div class="dialog-footer single"><button class="btn btn-primary" id="fr-ok">View Results</button></div>`, { wide: true });
-    $("#fr-ok").onclick = () => { closeDialog(); state.assessment = null; navigate("assessments"); };
+    $("#fr-ok").onclick = () => { closeDialog(); state.assessment = null; navigate("results"); };
     state.assessment = null;
     toast("Assessment submitted successfully");
   } catch (e) {
     toast(e.message, "error");
   }
+}
+
+/* ============================== results ============================== */
+
+/**
+ * Results — module results + assessment results, mirroring the data the
+ * web app surfaces (module Result tab + assessment outcome cards) in one
+ * place. Powered by GET /api/desktop/student/results.
+ */
+async function renderResults(v) {
+  const d = await apiOrThrow("/student/results");
+  const mods = d.moduleResults || [];
+  const asms = d.assessmentResults || [];
+
+  if (mods.length === 0 && asms.length === 0) {
+    v.innerHTML = `<div class="empty-state">
+      <div class="empty-card"><div class="inner">
+        ${icon("trophy", "ic xl")} <span style="color:hsl(38 92% 50%)">No Results Yet !</span>
+        <span class="muted small">Complete a module practice or an assessment to see your scores here.</span>
+      </div></div></div>`;
+    return;
+  }
+
+  const scorePct = (earned, total) =>
+    total > 0 ? Math.round((earned / total) * 100) : 0;
+
+  const statusBadge = (status) => {
+    const s = String(status || "").toLowerCase();
+    if (s === "submitted") return `<span class="badge badge-green">Completed</span>`;
+    if (s === "started") return `<span class="badge badge-orange">In Progress</span>`;
+    if (s === "retake") return `<span class="badge badge-orange">Retake</span>`;
+    if (s === "expired") return `<span class="badge badge-red">Expired</span>`;
+    return `<span class="badge">Upcoming</span>`;
+  };
+
+  const scoreCell = (part) => {
+    const pct = scorePct(part.earned, part.total);
+    const cls = pct >= 60 ? "badge-green" : pct >= 30 ? "badge-orange" : part.total === 0 ? "badge" : "badge-red";
+    return `<td><span class="badge ${cls}">${part.earned} / ${part.total}</span></td>`;
+  };
+
+  const moduleRows = mods.map((r) => {
+    const pct = scorePct(
+      (r.mcq?.earned ?? 0) + (r.code?.earned ?? 0),
+      (r.mcq?.total ?? 0) + (r.code?.total ?? 0)
+    );
+    return `<tr>
+      <td><div class="cell-main">${esc(r.moduleName)}</div><div class="cell-sub">${esc(r.courseName)}</div></td>
+      <td>${langIcon(r.language)}</td>
+      ${scoreCell(r.mcq || { earned: 0, total: 0 })}
+      ${scoreCell(r.code || { earned: 0, total: 0 })}
+      <td class="right"><b>${pct}%</b></td>
+      <td>${statusBadge(r.status)}</td>
+    </tr>`;
+  }).join("");
+
+  const asmRows = asms.map((r) => {
+    const pct = scorePct(
+      (r.mcq?.earned ?? 0) + (r.code?.earned ?? 0),
+      r.maxScore || 0
+    );
+    return `<tr>
+      <td><div class="cell-main">${esc(r.assessmentName)}</div><div class="cell-sub">${esc(r.courseName)}</div></td>
+      ${scoreCell(r.mcq || { earned: 0, total: 0 })}
+      ${scoreCell(r.code || { earned: 0, total: 0 })}
+      <td class="right"><b>${pct}%</b></td>
+      <td>${statusBadge(r.status)}</td>
+    </tr>`;
+  }).join("");
+
+  v.innerHTML = `
+    <div class="results-wrap">
+      ${mods.length > 0 ? `
+      <section class="card card-pad">
+        <div class="results-head">
+          <h3>${icon("bookIcon", "ic")} Module Results</h3>
+          <span class="muted small">${mods.length} module${mods.length === 1 ? "" : "s"}</span>
+        </div>
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr>
+              <th>Module</th><th>Language</th><th>MCQ Score</th><th>Code Score</th><th class="right">Overall</th><th>Status</th>
+            </tr></thead>
+            <tbody>${moduleRows}</tbody>
+          </table>
+        </div>
+      </section>` : ""}
+      ${asms.length > 0 ? `
+      <section class="card card-pad">
+        <div class="results-head">
+          <h3>${icon("flask", "ic")} Assessment Results</h3>
+          <span class="muted small">${asms.length} assessment${asms.length === 1 ? "" : "s"}</span>
+        </div>
+        <div class="tbl-scroll">
+          <table class="tbl">
+            <thead><tr>
+              <th>Assessment</th><th>MCQ Score</th><th>Code Score</th><th class="right">Overall</th><th>Status</th>
+            </tr></thead>
+            <tbody>${asmRows}</tbody>
+          </table>
+        </div>
+      </section>` : ""}
+    </div>`;
 }
 
 /* ============================== settings ============================== */
@@ -1711,12 +1880,12 @@ async function renderSettings(v) {
 
   const info = await app.info();
   $("#st-about").innerHTML =
-    `AtomCode Student Desktop v2.0<br/>Electron ${info.electron} · Chromium ${info.chrome} · Node ${info.node}<br/>Platform: ${info.platform}`;
+    `AtomCode Student Desktop v${info.appVersion}<br/>Electron ${info.electron} · Chromium ${info.chrome} · Node ${info.node}<br/>Platform: ${info.platform}`;
 }
 
 /* ============================== boot ============================== */
 
-/* inject static icons into shell chrome */
-$$("[data-icon]").forEach((el) => (el.innerHTML = icon(el.dataset.icon)));
+/* inject static icons into shell chrome (prepend keeps existing labels) */
+$$("[data-icon]").forEach((el) => el.insertAdjacentHTML("afterbegin", icon(el.dataset.icon)));
 
 window.addEventListener("DOMContentLoaded", boot);

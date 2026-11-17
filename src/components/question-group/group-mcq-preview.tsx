@@ -7,6 +7,7 @@ import {
     Code2,
     Eye,
     Hash,
+    Maximize2,
     Sparkles,
     XCircle,
 } from "lucide-react"
@@ -73,7 +74,7 @@ const GroupMcqPreview = ({ mcq }: { mcq: GroupMcqRow }) => {
             </DialogTrigger>
             <DialogContent
                 aria-describedby={undefined}
-                className="flex h-[85vh] max-h-[85vh] w-[80vw] max-w-[80vw] sm:max-w-[80vw] flex-col gap-0 overflow-hidden rounded-xl p-0"
+                className="fixed inset-0 h-full w-full max-w-none translate-x-0 translate-y-0 sm:max-w-none flex flex-col gap-0 overflow-hidden rounded-none border-0 p-0"
             >
                 {/* Sticky header */}
                 <DialogHeader className="shrink-0 border-b bg-gradient-to-r from-primary/15 via-primary/5 to-transparent px-6 py-4 pr-16 text-left">
@@ -81,6 +82,14 @@ const GroupMcqPreview = ({ mcq }: { mcq: GroupMcqRow }) => {
                         <DialogTitle className="text-xl font-bold leading-snug">
                             {mcq.title}
                         </DialogTitle>
+                        <Badge
+                            variant="outline"
+                            className="gap-1.5 border-primary/30 bg-primary/10 text-primary"
+                            title="This preview opens edge-to-edge, filling the full width and height of the screen"
+                        >
+                            <Maximize2 className="size-3.5" />
+                            Fullscreen preview
+                        </Badge>
                         {difficulty && (
                             <Badge
                                 variant="outline"
@@ -139,13 +148,13 @@ const GroupMcqPreview = ({ mcq }: { mcq: GroupMcqRow }) => {
 
                 {/* Scrollable body */}
                 <div className="flex-1 overflow-y-auto">
-                    <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6">
+                    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-8 px-6 py-6 lg:px-10">
                         {/* Description */}
                         <section className="rounded-xl border bg-card shadow-sm">
                             <div className="border-b bg-muted/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                                 Question Description
                             </div>
-                            <div className="max-h-52 overflow-y-auto px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap break-words">
+                            <div className="max-h-[40vh] overflow-y-auto px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap break-words">
                                 {notAvailable(mcq.description)}
                             </div>
                         </section>
@@ -157,7 +166,7 @@ const GroupMcqPreview = ({ mcq }: { mcq: GroupMcqRow }) => {
                                     <Code2 className="size-4 text-primary" />
                                     Code Snippet
                                 </h3>
-                                <div className="h-[280px] overflow-hidden rounded-xl border shadow-sm">
+                                <div className="h-[360px] overflow-hidden rounded-xl border shadow-sm">
                                     <CodeEditor
                                         Code={mcq.codesnippet}
                                         readonly={true}

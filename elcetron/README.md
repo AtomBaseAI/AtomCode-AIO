@@ -6,15 +6,18 @@ through a dedicated token-authenticated API at `/api/desktop/*`.
 
 > Note: the folder is intentionally named `elcetron` (as requested).
 
-## Features
+## Features (v2.0.0)
 
-- 🔐 **Student-only login** — staff/admin credentials are rejected with a clear message
+- 🔐 **Student-only login** — staff/admin credentials are rejected with a clear message, brand-panel login screen mirroring the web app
 - 📊 **Dashboard** — enrolled courses, module progress, average score, assessment readiness
 - 📚 **My Courses** — progress bars per course → active modules with MCQ/code status
-- 🧠 **MCQ practice** — options A–D, server-side grading (correct answers never sent to the client)
-- 💻 **Code practice** — editor with tab support, *Run sample* / *Run hidden tests* executed with the **built-in compilers** (same engine as the web app: bundled runtimes run locally in the client; C/C++/Java compile & run on the server's built-in toolchains — no external judge API)
+- 🧠 **MCQ practice** — options A–D, topic/subtopic chips, server-side grading (correct answers never sent to the client)
+- 💻 **Code practice** — editor with tab support, language/difficulty/topic chips, saved testcase verdicts, *Run sample* / *Run hidden tests* executed with the **built-in compilers** (same engine as the web app: bundled runtimes run locally in the client; C/C++/Java compile & run on the server's built-in toolchains — no external judge API)
+- 🗑️ **References** — module reference material (PPT/PDF/video links) surfaced on the practice home, same as the web module page
 - ⏱ **Assessments** — access-key entry, countdown timer, MCQ + coding sections, final submit
-- 🏆 **Results** — module and assessment score tables
+- 🏆 **Results** — dedicated view with module + assessment score tables (`GET /student/results`), colour-coded score badges and status chips
+- 👤 **User menu** — web-style topbar popover (profile / logout) plus breadcrumb-style page titles
+- 🌜 **Light/dark theme** — violet shadcn theme, persisted across sessions
 - ⚙️ **Settings** — profile editing, password change, server address, service status
 
 ## Run it
@@ -144,14 +147,25 @@ npm run export:mac   # .dmg + .zip
 npm run export:all   # tries all three platforms at once
 ```
 
+Build matrix (config validated with electron-builder 25.1.8):
+
+| Host OS | Command | Produces |
+|---|---|---|
+| any | `npm run build` | Unpacked dir for the current OS (`dist/<os>-unpacked/`) — used to validate config + smoke-test |
+| Windows | `npm run export:win` | NSIS installer + portable `.exe` (x64, icon + version resources edited natively) |
+| macOS | `npm run export:mac` | `.dmg` + `.zip` for **x64 and arm64**; `identity: null` → no signing cert required, builds succeed unsigned |
+| Linux | `npm run export:linux` | AppImage + `.deb` |
+
 Notes:
 - `npm run build` is a fast sanity check (no installer); run the produced
   binary from `dist/linux-unpacked/` etc. to smoke-test.
 - From **Linux**, `export:win` additionally requires **wine**
   (`sudo apt install wine64`) because Windows exe resources must be edited;
   `export:mac` must be run on **macOS**.
+- On a CI Linux box without wine you can still validate the Windows payload:
+  `npx electron-builder --win --dir --config.win.signAndEditExecutable=false`.
 - Installer names follow `${productName}-${version}-${os}-${arch}.${ext}`,
-  e.g. `AtomCode Student-1.0.0-linux-x86_64.AppImage`.
+  e.g. `AtomCode Student-2.0.0-mac-arm64.dmg`.
 - Windows NSIS installer is user-level (not one-click), lets the user pick the
   install folder and creates desktop/start-menu shortcuts ("AtomCode Student").
 - `dist/` is git-ignored.
