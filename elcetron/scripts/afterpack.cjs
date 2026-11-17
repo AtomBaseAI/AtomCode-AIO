@@ -27,10 +27,27 @@
  *     runtime spawns the Electron binary in node mode
  *     (ELECTRON_RUN_AS_NODE=1) twice: main → runner.js →
  *     doppio-wrapper.js. Disabling it would break Java.
+ *
+ *  3. macOS signature restoration (CRITICAL — fixes SIGKILL at launch)
+ *     Flipping fuses rewrites bytes inside the code-signed "Electron
+ *     Framework". If nothing re-signs the bundle afterwards, Apple
+ *     Silicon kernels kill the app on first launch with
+ *     "SIGKILL (Code Signature Invalid)" / "Invalid Page" (crash frame:
+ *     electron::fuses::IsRunAsNodeEnabled()) because the page hash no
+ *     longer matches the signature. electron-builder with
+ *     mac.identity: null SKIPS code signing entirely (no ad-hoc
+ *     fallback), so the flip would ship an app that crashes instantly.
+ *
+ *     Fix: resetAdHocDarwinSignature: true → @electron/fuses re-signs
+ *     the whole .app ad-hoc right after writing the fuse wire
+ *     (codesign --force --deep --sign - --preserve-metadata=…).
+ *     The hook then verifies BOTH the fuse wire and the code signature
+ *     and FAILS THE BUILD loudly if either is wrong.
  * ================================================================ */
 
 "use strict";
 
+const { execFileSync } = require("node:child_process");
 const { createHash } = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -141,11 +158,42 @@ exports.default = async function afterPack(context) {
       `${(totalBytes / 1048576).toFixed(1)} MB hashed → ${path.basename(manifestPath)}`
   );
 
-  /* ---- 2. security fuses --------------------------------------- */
-  const { flipFuses, FuseVersion, FuseV1Options } = require("@electron/fuses");
+  /* ---- 1b. fail the build if critical components did not land ---- */
+  // Guards against e.g. extraResources copy failures (a packaged app
+  // without the Java runtime or a 3-file manifest must never ship).
+  for (const rel of [
+    "app.asar",
+    "integrity-manifest.json",
+    "java-runtime/runner.js",
+    "java-runtime/doppio-wrapper.js",
+    "java-runtime/node_modules/doppiojvm/dist/release-cli/console/runner.js",
+    "java-runtime/node_modules/doppiojvm/vendor/java_home/lib/rt.jar",
+    "java-runtime/node_modules/doppiojvm/vendor/java_home/lib/tools.jar",
+    "java-runtime/node_modules/browserfs/dist/browserfs.min.js",
+  ]) {
+    if (!fs.existsSync(path.join(resourcesDir, rel))) {
+      throw new Error(
+        `[afterpack] required bundled component missing from resources/: ${rel} — ` +
+          "run `node scripts/sync-engine-assets.mjs` (auto-installs java-runtime) and rebuild"
+      );
+    }
+  }
+  console.log("[afterpack] critical bundled components verified (app.asar, Java runtime, JVM jars)");
+
+  /* ---- 2. security fuses (+ darwin ad-hoc re-sign) -------------- */
+  const { flipFuses, getCurrentFuseWire, FuseVersion, FuseV1Options, FuseState } =
+    require("@electron/fuses");
   const exe = findElectronBinary(context);
   await flipFuses(exe, {
     version: FuseVersion.V1,
+    // Rewrites bytes inside the signed Electron Framework → the stock
+    // signature becomes invalid. Without re-signing, Apple Silicon kills
+    // the app at first launch (SIGKILL "Code Signature Invalid" /
+    // "Invalid Page" at electron::fuses::IsRunAsNodeEnabled()).
+    // electron-builder (mac.identity: null) skips signing entirely, so
+    // this option ad-hoc re-signs the whole .app bundle immediately
+    // after the fuse wire is written. macOS-only — ignored elsewhere.
+    resetAdHocDarwinSignature: true,
     // NODE_OPTIONS env var no longer affects the runtime (anti-injection).
     [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
     // --inspect / --inspect-brk CLI debugging disabled.
@@ -156,8 +204,66 @@ exports.default = async function afterPack(context) {
     // RunAsNode intentionally left enabled: required by the bundled
     // local Java runtime (main → runner.js → doppio-wrapper.js chain).
   });
+
+  /* ---- 3. verify fuses stuck (read back from the binary) -------- */
+  const wire = await getCurrentFuseWire(exe);
+  for (const [fuse, expected] of [
+    [FuseV1Options.RunAsNode, FuseState.ENABLE],
+    [FuseV1Options.EnableNodeOptionsEnvironmentVariable, FuseState.DISABLE],
+    [FuseV1Options.EnableNodeCliInspectArguments, FuseState.DISABLE],
+    [FuseV1Options.OnlyLoadAppFromAsar, FuseState.ENABLE],
+  ]) {
+    if (wire[fuse] !== expected) {
+      throw new Error(
+        `[afterpack] fuse verification FAILED: ${FuseV1Options[fuse]} expected ` +
+          `${expected === FuseState.ENABLE ? "ENABLE" : "DISABLE"}, read back ${wire[fuse]}`
+      );
+    }
+  }
+  const state = (fuse) =>
+    wire[fuse] === FuseState.ENABLE ? "on" : wire[fuse] === FuseState.DISABLE ? "off" : `raw:${wire[fuse]}`;
   console.log(
-    `[afterpack] security fuses applied to ${path.basename(exe)}: ` +
-      "NODE_OPTIONS=off, node --inspect=off, only-load-app-from-asar=on (RunAsNode kept for local Java runtime)"
+    `[afterpack] fuses verified (read back from binary): RunAsNode=${state(FuseV1Options.RunAsNode)} ` +
+      `(kept for local Java runtime), NODE_OPTIONS=${state(FuseV1Options.EnableNodeOptionsEnvironmentVariable)}, ` +
+      `node --inspect=${state(FuseV1Options.EnableNodeCliInspectArguments)}, ` +
+      `OnlyLoadAppFromAsar=${state(FuseV1Options.OnlyLoadAppFromAsar)}`
   );
+
+  /* ---- 4. darwin: fail the build if the signature does not verify  */
+  if (electronPlatformName === "darwin") {
+    verifyDarwinSignature(context);
+  }
 };
+
+/**
+ * Verify the macOS bundle signature after the fuse flip + ad-hoc re-sign.
+ * A failed verification means the shipped app would be killed by the
+ * kernel on Apple Silicon — always fail the build loudly instead.
+ */
+function verifyDarwinSignature(context) {
+  const productName =
+    context.packager.appInfo.productFilename || context.packager.appInfo.productName;
+  const appBundle = path.join(context.appOutDir, `${productName}.app`);
+  const codesign = "/usr/bin/codesign";
+  if (!fs.existsSync(appBundle) || !fs.existsSync(codesign)) {
+    console.warn(
+      "[afterpack] WARNING: could not run codesign verification " +
+        `(bundle: ${fs.existsSync(appBundle)}, codesign: ${fs.existsSync(codesign)}) — ` +
+        "re-sign the .app on macOS (codesign --force --deep --sign -) before distributing"
+    );
+    return;
+  }
+  try {
+    execFileSync(codesign, ["--verify", "--deep", "--strict", appBundle], { stdio: "pipe" });
+    console.log(
+      `[afterpack] codesign verification passed for ${path.basename(appBundle)} — ` +
+        "signature now covers the flipped fuses (Apple Silicon safe)"
+    );
+  } catch (err) {
+    throw new Error(
+      "[afterpack] macOS signature verification FAILED after fuse flip — the shipped " +
+        "app would be killed by the kernel on Apple Silicon (SIGKILL Code Signature Invalid). " +
+        `codesign output: ${err.stdout ? err.stdout.toString() : ""}${err.message}`
+    );
+  }
+}

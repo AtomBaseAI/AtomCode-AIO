@@ -21,6 +21,7 @@
  */
 
 import { existsSync, statSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -94,6 +95,26 @@ for (const [rel, minSize] of REQUIRED) {
   }
 }
 
+/* ------------------------------------------------------------------
+ * java-runtime/node_modules is git-ignored (150 MB of jars), so a
+ * fresh clone does not have it. Install it on demand from the committed
+ * java-runtime/package-lock.json, then re-verify. Everything needed
+ * (rt.jar, tools.jar, doppio.jar, browserfs…) ships inside the npm
+ * tarballs, so install scripts are intentionally skipped.
+ * ------------------------------------------------------------------ */
+if (REQUIRED.some(([rel]) => rel.startsWith("java-runtime/")) && missing > 0) {
+  installJavaRuntime();
+  // re-check only the java-runtime entries
+  missing = 0;
+  for (const [rel, minSize] of REQUIRED) {
+    const abs = path.join(electronRoot, rel);
+    if (!existsSync(abs) || statSync(abs).size < minSize) {
+      console.error(`[sync] STILL MISSING after install: ${rel}`);
+      missing += 1;
+    }
+  }
+}
+
 if (missing > 0) {
   console.error(`\n[sync] ${missing} required runtime asset(s) missing — the desktop build would ship broken.`);
   process.exit(1);
@@ -101,3 +122,53 @@ if (missing > 0) {
 
 console.log("[sync] all bundled runtimes verified: python x4, sqlite, ruby, js/ts, clang (C/C++), doppio JVM (java)");
 console.log("[done] desktop engine assets are complete — fully local execution, no Lambda APIs.");
+
+function installJavaRuntime() {
+  const jrDir = path.join(electronRoot, "java-runtime");
+  const nm = path.join(jrDir, "node_modules");
+  console.log(
+    "[sync] java-runtime assets missing — installing bundled JVM dependencies " +
+      "(one-time, ~100 MB from the npm registry + GitHub releases)…"
+  );
+
+  /* 1. JS dependencies (doppiojvm, browserfs, …) — deterministic from the
+   *    committed package-lock.json; install scripts skipped (npm's
+   *    allowScripts gate must not block the build). */
+  if (!existsSync(path.join(nm, "doppiojvm", "package.json"))) {
+    const attempts = [];
+    if (existsSync(path.join(jrDir, "package-lock.json"))) {
+      attempts.push(["npm", ["ci", "--ignore-scripts", "--no-audit", "--no-fund"]]);
+    }
+    attempts.push(["npm", ["install", "--ignore-scripts", "--no-audit", "--no-fund"]]);
+    attempts.push(["bun", ["install", "--ignore-scripts"]]);
+    let installed = false;
+    for (const [cmd, args] of attempts) {
+      try {
+        console.log(`[sync] running: ${cmd} ${args.join(" ")} (cwd=java-runtime)`);
+        execFileSync(cmd, args, { cwd: jrDir, stdio: "inherit" });
+        installed = true;
+        break;
+      } catch (err) {
+        console.warn(`[sync] ${cmd} failed: ${String(err.message).split("\n")[0]} — trying next installer…`);
+      }
+    }
+    if (!installed) {
+      throw new Error(
+        "[sync] could not install java-runtime dependencies (npm/bun unavailable or network blocked). " +
+          "Run `npm install` inside elcetron/java-runtime manually, then rebuild."
+      );
+    }
+  }
+
+  /* 2. JDK 8 vendor tree (rt.jar / tools.jar / doppio.jar) — shipped by
+   *    doppiojvm's own install.js (downloads java_home.tar.gz from the
+   *    official plasma-umass/doppio_jcl GitHub release, one-time ~85 MB).
+   *    Runs explicitly because npm's install-script gating skips it. */
+  if (!existsSync(path.join(nm, "doppiojvm", "vendor", "java_home", "lib", "rt.jar"))) {
+    console.log("[sync] fetching JDK 8 vendor tree via doppiojvm/install.js…");
+    execFileSync(process.execPath, [path.join(nm, "doppiojvm", "install.js")], {
+      cwd: jrDir,
+      stdio: "inherit",
+    });
+  }
+}

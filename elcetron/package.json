@@ -1,7 +1,7 @@
 {
   "name": "atomcode-student-desktop",
   "productName": "AtomCode Student",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Electron desktop client for the AtomCode student portal (courses, practice, assessments, results).",
   "main": "main.js",
   "homepage": "https://github.com/AtomBaseAI/AtomCode-Repatch",
@@ -18,6 +18,10 @@
     "selftest": "node scripts/selftest-node.mjs",
     "prebuild": "node scripts/sync-engine-assets.mjs",
     "preexport": "node scripts/sync-engine-assets.mjs",
+    "preexport:linux": "node scripts/sync-engine-assets.mjs",
+    "preexport:win": "node scripts/sync-engine-assets.mjs",
+    "preexport:mac": "node scripts/sync-engine-assets.mjs",
+    "preexport:all": "node scripts/sync-engine-assets.mjs",
     "build": "electron-builder --dir",
     "export": "electron-builder",
     "export:linux": "electron-builder --linux",
@@ -28,7 +32,7 @@
   "devDependencies": {
     "@electron/fuses": "^2.1.3",
     "electron": "^33.2.0",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^26.18.0"
   },
   "build": {
     "appId": "com.atomcode.student",
@@ -52,18 +56,24 @@
         "to": "java-runtime",
         "filter": [
           "runner.js",
-          "doppio-wrapper.js",
-          "node_modules/doppiojvm/bin/**",
-          "node_modules/doppiojvm/dist/release-cli/**",
-          "node_modules/doppiojvm/package.json",
-          "node_modules/doppiojvm/vendor/**",
-          "node_modules/browserfs/dist/**",
-          "node_modules/browserfs/package.json",
-          "node_modules/async/**",
-          "node_modules/source-map/**",
-          "node_modules/source-map/package.json",
-          "node_modules/source-map-support/**",
-          "node_modules/pako/**"
+          "doppio-wrapper.js"
+        ]
+      },
+      {
+        "from": "java-runtime/node_modules",
+        "to": "java-runtime/node_modules",
+        "filter": [
+          "doppiojvm/bin/**",
+          "doppiojvm/dist/release-cli/**",
+          "doppiojvm/package.json",
+          "doppiojvm/vendor/**",
+          "browserfs/dist/**",
+          "browserfs/package.json",
+          "async/**",
+          "source-map/**",
+          "source-map/package.json",
+          "source-map-support/**",
+          "pako/**"
         ]
       }
     ],

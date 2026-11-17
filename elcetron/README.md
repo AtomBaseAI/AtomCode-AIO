@@ -6,7 +6,7 @@ through a dedicated token-authenticated API at `/api/desktop/*`.
 
 > Note: the folder is intentionally named `elcetron` (as requested).
 
-## Features (v2.0.0)
+## Features (v2.0.1)
 
 - 🔐 **Student-only login** — staff/admin credentials are rejected with a clear message, brand-panel login screen mirroring the web app
 - 📊 **Dashboard** — enrolled courses, module progress, average score, assessment readiness
@@ -154,25 +154,100 @@ npm run export:mac   # .dmg + .zip
 npm run export:all   # tries all three platforms at once
 ```
 
-Build matrix (config validated with electron-builder 25.1.8):
+Build matrix (config validated with electron-builder 26.18.0):
 
 | Host OS | Command | Produces |
 |---|---|---|
 | any | `npm run build` | Unpacked dir for the current OS (`dist/<os>-unpacked/`) — used to validate config + smoke-test |
 | Windows | `npm run export:win` | NSIS installer + portable `.exe` (x64, icon + version resources edited natively) |
-| macOS | `npm run export:mac` | `.dmg` + `.zip` for **x64 and arm64**; `identity: null` → no signing cert required, builds succeed unsigned |
+| macOS | `npm run export:mac` | `.dmg` + `.zip` for **x64 and arm64**; no signing cert required — the afterPack hook **ad-hoc re-signs the bundle** after the security-fuse flip (`resetAdHocDarwinSignature`), then verifies the fuse wire and the code signature, so the app launches cleanly on Apple Silicon |
 | Linux | `npm run export:linux` | AppImage + `.deb` |
 
 Notes:
 - `npm run build` is a fast sanity check (no installer); run the produced
   binary from `dist/linux-unpacked/` etc. to smoke-test.
-- From **Linux**, `export:win` additionally requires **wine**
-  (`sudo apt install wine64`) because Windows exe resources must be edited;
-  `export:mac` must be run on **macOS**.
+- **No Wine / no Rosetta needed on Apple Silicon Macs** (electron-builder ≥ 26):
+  Windows exe resources (icon, version strings) are edited with the pure-JS
+  `resedit`, NSIS 3.12 ships a native `mac/arm64/makensis`, and the NSIS
+  uninstaller is extracted with a pure-JS reader on macOS ≥ 10.15. Building
+  `export:win` on an Apple Silicon Mac works out of the box.
+- From **Linux**, `export:win` still needs **wine** for the NSIS
+  uninstaller-extraction step (`sudo apt install wine64`); every other step
+  (resedit icon/metadata editing, makensis) runs natively.
 - On a CI Linux box without wine you can still validate the Windows payload:
-  `npx electron-builder --win --dir --config.win.signAndEditExecutable=false`.
+  `npx electron-builder --win --dir`.
 - Installer names follow `${productName}-${version}-${os}-${arch}.${ext}`,
-  e.g. `AtomCode Student-2.0.0-mac-arm64.dmg`.
+  e.g. `AtomCode Student-2.0.1-mac-arm64.dmg`.
 - Windows NSIS installer is user-level (not one-click), lets the user pick the
   install folder and creates desktop/start-menu shortcuts ("AtomCode Student").
 - `dist/` is git-ignored.
+
+### Bundled Java runtime (java-runtime/node_modules)
+
+The Doppio JVM + JDK 8 jars (~150 MB) are **git-ignored** — a fresh clone
+ships without them. `scripts/sync-engine-assets.mjs` (wired as a pre-hook on
+`build` and every `export*` script) detects this and installs them on demand
+from the committed `java-runtime/package-lock.json`
+(`npm ci --ignore-scripts` inside `java-runtime/`, one-time ~100 MB download).
+Manual alternative:
+
+```bash
+cd elcetron/java-runtime && npm install --ignore-scripts
+```
+
+The afterPack hook additionally verifies the critical components (app.asar,
+Java runner, rt.jar, tools.jar, browserfs) landed in the packaged `resources/`
+and **fails the build** if anything is missing — an incomplete installer can
+never ship.
+
+### macOS signing notes (IMPORTANT)
+
+The security-fuse flip rewrites bytes inside the code-signed
+`Electron Framework`. If the bundle is **not** re-signed afterwards, Apple
+Silicon kernels kill the app at first launch with
+`SIGKILL (Code Signature Invalid)` / `Invalid Page`
+(crash frame: `electron::fuses::IsRunAsNodeEnabled()`). This was the
+"AtomCode Student quit unexpectedly" crash reported on macOS 27 (v2.0.0
+dmg built with `identity: null`, where electron-builder skips signing
+completely). Since **v2.0.1** the afterPack hook
+(`scripts/afterpack.cjs`):
+
+1. writes the integrity manifest (`Contents/Resources/integrity-manifest.json`),
+2. flips the security fuses with `resetAdHocDarwinSignature: true` —
+   `@electron/fuses` immediately re-signs the whole `.app` ad-hoc
+   (`codesign --force --deep --sign -`),
+3. reads the fuse wire back from the binary and asserts every value,
+4. runs `codesign --verify --deep --strict` and **fails the build** if the
+   signature does not verify.
+
+Distribution options:
+
+- **Self / internal testing**: the ad-hoc signature is fully valid — the app
+  runs on the build machine without any certificate.
+- **Other Macs (no Apple Developer account)**: ad-hoc apps are not
+  Gatekeeper-trusted; students must right-click → *Open* once, or run
+  `xattr -cr "/Applications/AtomCode Student.app"` after copying it.
+- **Clean distribution (recommended)**: set `CSC_LINK` + `CSC_KEY_PASSWORD`
+  (Developer ID Application certificate) and enable notarization —
+  electron-builder then re-signs with your identity *after* the fuse flip,
+  so the pipeline stays correct; the app opens without warnings on any Mac.
+
+### Windows NSIS install flow
+
+`export:win` produces a guided installer (`oneClick: false`) that:
+
+1. lets the user pick the install directory,
+2. installs the app + all bundled WASM runtimes + the Java runtime,
+3. creates the **desktop shortcut** and **Start Menu shortcut**
+   (`createDesktopShortcut: "always"`, `createStartMenuShortcut: true`),
+4. runs the `customInstall` verification page (`build/installer.nsh`)
+   which checks `app.asar`, the Java runtime entry, `rt.jar`, `tools.jar`
+   and the integrity manifest, and reports success/failure,
+5. the app itself re-verifies the manifest (SHA-256 of every shipped file)
+   on every launch and refuses to start if anything was modified — the
+   installed source code and runtimes are tamper-evident.
+
+The Electron fuses (NODE_OPTIONS off, `--inspect` off, only-load-app-from-asar)
+are applied to the packaged exe by the same afterPack hook and verified by
+read-back, so the shipped runtime cannot be hijacked via env vars, debug
+ports, or a dropped `app` folder.
