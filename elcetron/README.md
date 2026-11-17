@@ -12,7 +12,8 @@ through a dedicated token-authenticated API at `/api/desktop/*`.
 - 📊 **Dashboard** — enrolled courses, module progress, average score, assessment readiness
 - 📚 **My Courses** — progress bars per course → active modules with MCQ/code status
 - 🧠 **MCQ practice** — options A–D, topic/subtopic chips, server-side grading (correct answers never sent to the client)
-- 💻 **Code practice** — editor with tab support, language/difficulty/topic chips, saved testcase verdicts, *Run sample* / *Run hidden tests* executed with the **built-in compilers** (same engine as the web app: bundled runtimes run locally in the client; C/C++/Java compile & run on the server's built-in toolchains — no external judge API)
+- 💻 **Code practice** — editor with tab support, language/difficulty/topic chips, saved testcase verdicts, *Run sample* / *Run hidden tests* executed with the **fully local bundled compilers** — every language runs on-device, nothing is sent to the server and no Lambda judge API is involved
+- 📴 **Fully offline code execution** — Python, SQL, Ruby, JavaScript, TypeScript (wasm runtimes), C/C++ (real clang compiled to wasm) and Java (Doppio JVM + JDK 8 + javac) are all bundled inside the app
 - 🗑️ **References** — module reference material (PPT/PDF/video links) surfaced on the practice home, same as the web module page
 - ⏱ **Assessments** — access-key entry, countdown timer, MCQ + coding sections, final submit
 - 🏆 **Results** — dedicated view with module + assessment score tables (`GET /student/results`), colour-coded score badges and status chips
@@ -32,7 +33,7 @@ The app opens a login window:
 
 | Field | Value |
 |---|---|
-| Server address | `http://localhost:3000` (default — change it to your deployed AtomCode URL) |
+| Server address | asked **only on first launch** (validated, then saved in `localStorage` — the prompt never appears again; changeable later in Settings or via “Use a different server”) |
 | Email | any seeded student, e.g. `student@atom.com` |
 | Password | `User@Atom` |
 
@@ -48,27 +49,33 @@ The app opens a login window:
 
 The token, profile and server URL are persisted in `localStorage`.
 
-## Built-in code execution engine
+## Built-in code execution engine — 100% local
 
-The desktop client packages the **same built-in execution engine as the web
-app** — no external judge service is involved anywhere:
+The desktop client bundles a **complete local toolchain for every language**
+the platform teaches. Nothing is sent to the server for grading code, and no
+Lambda judge API is involved anywhere:
 
 | Languages | Where it runs | How |
 |---|---|---|
-| Python (3.11–3.14), SQL (SQLite 3.54), Ruby 3.4, JavaScript, TypeScript 5.9 | **locally in the desktop app** | The web app's worker bundles + runtime builds are packaged under `renderer/workers/` and `renderer/runtimes/` and executed in Web Workers from the privileged `atomcode://renderer` origin. Hidden test cases for these languages are judged client-side (same trust level as the web app). |
-| C, C++, Java 8/11/17 | **on the connected AtomCode server** | `POST /api/desktop/run` drives the server's built-in gcc / g++ / ECJ+JVM toolchains. Expected outputs of hidden test cases never leave the server. |
+| Python (3.11–3.14), SQL (SQLite 3.54), Ruby 3.4, JavaScript, TypeScript 5.9 | **locally, in a sandboxed Web Worker** | Worker bundles + wasm runtimes packaged under `renderer/workers/` and `renderer/runtimes/`, executed from the privileged `atomcode://renderer` origin. Hidden test cases judged client-side (same trust level as the web app). |
+| C, C++ | **locally, compiled by real clang** | `clang` + `wasm-ld` compiled to WebAssembly (binji/wasm-clang) + a bundled wasi sysroot (libc / libc++ / crt1.o) under `renderer/runtimes/clang/`. Student C/C++ is compiled → linked → executed inside a worker with stdin/stdout captured. |
+| Java (JDK 8) | **locally, inside a bundled JVM** | Doppio JVM (a JVM in TypeScript) + the JDK 8 class library (`rt.jar`) + `javac` (`tools.jar`) under `java-runtime/`. Each run: `javac` executes **inside** Doppio to compile the student source, then the class runs inside it — all in a separate Node process managed by the Electron main process (`java:run` IPC). |
+
+Hidden test cases for **every** language are judged client-side against the
+bundled engine — expected outputs never leave the student's machine.
 
 The renderer assets are served from the `atomcode://renderer/…` scheme
 (registered in `main.js`) so Workers, dynamic imports and streaming
 WebAssembly behave exactly like on the web app's origin.
 
 Keep the bundled engine in sync with the web app after changing workers or
-runtime assets:
+runtime assets — the script now *verifies* that every runtime needed to ship
+a dmg/exe is present (and fails the build otherwise):
 
 ```bash
 cd elcetron
-npm run sync:engine   # copies ../public/workers + ../public/runtimes/{pyodide,sqlite-wasm,ruby}
-npm run selftest      # end-to-end engine test in Node (real worker bundles + runtimes, no display needed)
+npm run sync:engine   # verifies clang, doppio JVM, wasm runtimes, workers…
+npm run selftest      # end-to-end engine test in Node (C, C++ and Java included)
 ```
 
 `npm run build` / `npm run export` re-sync automatically (pre-hooks).

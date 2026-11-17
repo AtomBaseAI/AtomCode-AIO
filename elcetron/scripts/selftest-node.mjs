@@ -97,6 +97,40 @@ globalThis.Worker = DOMWorkerShim;
 await import(path.join(RENDERER_ROOT, "engine", "atom-engine.js"));
 const E = globalThis.window.AtomEngine;
 
+/* ---------- Java bridge stub (preload IPC in the real app) ---------- */
+
+import { spawn as nodeSpawn } from "node:child_process";
+const JAVA_RUNNER = path.join(here, "..", "java-runtime", "runner.js");
+
+globalThis.window.atomcode = {
+  javaRun: (req) =>
+    new Promise((resolve, reject) => {
+      const child = nodeSpawn(process.execPath, [JAVA_RUNNER], {
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+      let out = "";
+      let err = "";
+      child.stdout.on("data", (d) => (out += d));
+      child.stderr.on("data", (d) => (err += d));
+      child.stdin.write(
+        JSON.stringify({
+          code: req.code,
+          cases: req.cases && req.cases.length ? req.cases : [{ input: req.input || "" }],
+          timeoutMs: req.timeoutMs,
+        })
+      );
+      child.stdin.end();
+      child.on("error", (e) => reject(e));
+      child.on("close", () => {
+        try {
+          resolve(JSON.parse(out));
+        } catch {
+          reject(new Error(err || "java runner produced no result"));
+        }
+      });
+    }),
+};
+
 /* ---------- assertions ---------- */
 
 let failures = 0;
@@ -196,12 +230,12 @@ try {
   );
 
   // 9 — default profile registry
-  results.defaults = ["python", "sql", "ruby", "javascript", "typescript"].map(
+  results.defaults = ["python", "sql", "ruby", "javascript", "typescript", "c", "cpp", "java"].map(
     (l) => E.getDefaultEngineProfile(l)?.id
   );
   expect(
     results.defaults.join(",") ===
-      "python-3.11,sqlite-3.54,ruby-3.4,javascript-browser,typescript-5.9",
+      "python-3.11,sqlite-3.54,ruby-3.4,javascript-browser,typescript-5.9,c-clang,cpp-clang,java-8",
     `default profiles (→ ${results.defaults.join(",")})`
   );
 
@@ -226,6 +260,68 @@ try {
   expect(
     results.afterTimeout === "still alive",
     "worker pool recovers after timeout"
+  );
+
+  // 12 — C: compile, link, run with stdin (bundled clang)
+  results.c = await E.judgeRunSingle({
+    lang: "c",
+    code: '#include <stdio.h>\n#include <stdlib.h>\nint main(){ char b[64]; if(!fgets(b,64,stdin)) return 1; printf("n*2=%d\\n", atoi(b)*2); return 0; }',
+    input: "21",
+    expectedOutput: "n*2=42",
+  });
+  expect(
+    results.c.compileMessage === "Success" && results.c.output.trim() === "n*2=42",
+    `C compiles & runs locally via clang (→ ${JSON.stringify(results.c.output)})`
+  );
+
+  // 13 — C++: libc++ (vector/sort/string)
+  results.cpp = await E.judgeRunSingle({
+    lang: "cpp",
+    code: '#include <iostream>\n#include <vector>\n#include <algorithm>\nint main(){ std::vector<int> v{3,1,2}; std::sort(v.begin(), v.end()); for (int x : v) std::cout << x; std::cout << std::endl; return 0; }',
+    expectedOutput: "123",
+  });
+  expect(
+    results.cpp.compileMessage === "Success",
+    `C++ compiles & runs locally via clang (→ ${JSON.stringify(results.cpp.output)})`
+  );
+
+  // 14 — C compile error surfaces clang diagnostics as Error
+  results.cErr = await E.judgeRunSingle({
+    lang: "c",
+    code: "int main(){ this is not c }",
+    expectedOutput: "",
+  });
+  expect(
+    results.cErr.compileMessage === "Error" && results.cErr.output.includes("error"),
+    "C compile errors surface clang diagnostics"
+  );
+
+  // 15 — Java: compile (javac inside Doppio) + run with stdin
+  results.java = await E.judgeRunSingle({
+    lang: "java",
+    code: 'public class Main { public static void main(String[] args) throws Exception { java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(System.in)); int n = Integer.parseInt(br.readLine().trim()); System.out.println("n*2=" + (n*2)); } }',
+    input: "8",
+    expectedOutput: "n*2=16",
+  });
+  expect(
+    results.java.compileMessage === "Success" && results.java.output.trim() === "n*2=16",
+    `Java compiles & runs locally via Doppio JVM (→ ${JSON.stringify(results.java.output)})`
+  );
+
+  // 16 — Java multi-test-case contract (placeholder auto-pass preserved)
+  const jcases = await E.judgeRunTestCases({
+    lang: "java",
+    code: 'public class Main { public static void main(String[] args) { System.out.println("v=" + 2); } }',
+    cases: [
+      { input: "", expected: "v=2" },
+      { input: "", expected: "" }, // placeholder → auto-pass
+      { input: "", expected: "v=3" }, // wrong expected → fail
+    ],
+  });
+  results.jcases = jcases.map((c) => c.status);
+  expect(
+    results.jcases.join(",") === "Success,Success,Failed",
+    `Java test-case statuses (→ ${results.jcases.join(",")})`
   );
 } catch (err) {
   failures += 1;

@@ -13,7 +13,9 @@ const LS = { token: "atomcode.token", user: "atomcode.user", server: "atomcode.s
 const state = {
   token: null,
   user: null,
-  serverUrl: localStorage.getItem(LS.server) || "http://localhost:3000",
+  // Server URL is asked ONLY on first launch (or when cleared) and then
+  // persisted in localStorage — never prompted again on every launch.
+  serverUrl: localStorage.getItem(LS.server) || "",
   view: "dashboard",
   course: null,        // { id, title }
   moduleCtx: null,     // { cid, mid, detail, courseName, moduleName }
@@ -161,13 +163,12 @@ async function apiOrThrow(path, opts) {
 const ENGINE_STATUS = { Success: "pass", Failed: "fail", Error: "error" };
 
 /**
- * Executes a question's code with the built-in compilers — the same setup
- * the web app ships:
- * - python/sql/ruby/javascript/typescript run locally in bundled runtimes
- *   (the question's hidden test cases are judged client-side, like the web);
- * - c/cpp/java run on the connected server's built-in toolchains via
- *   POST /api/desktop/run (judged server-side, expected outputs never sent).
- * Both paths return the same response shape, so the calling UI is agnostic.
+ * Executes a question's code with the built-in compilers — everything runs
+ * 100% locally in the desktop app (no server round-trips, no Lambda):
+ * - python/sql/ruby/javascript/typescript run in bundled wasm runtimes
+ * - c/cpp compile with the bundled clang and run in a sandboxed worker
+ * - java compiles & runs inside the bundled Doppio JVM (via the main process)
+ * Hidden test cases are judged client-side, exactly like the web app.
  */
 async function runQuestionCode({ q, code, mode, moduleId, assessmentId }) {
   const lang = String(q.lang || "").toLowerCase();
@@ -211,17 +212,16 @@ async function runQuestionCode({ q, code, mode, moduleId, assessmentId }) {
     };
   }
 
-  // Compiled languages → the server's built-in toolchains.
-  return apiOrThrow("/run", {
-    method: "POST",
-    body: {
-      questionId: q.id,
-      code,
-      mode,
-      ...(moduleId ? { moduleId } : {}),
-      ...(assessmentId ? { assessmentId } : {}),
-    },
-  });
+  // Unknown language — everything the platform teaches is bundled locally.
+  return {
+    mode,
+    compileMessage: "Error",
+    output: `No local runtime is bundled for "${lang}" in this desktop build.`,
+    testcase1status: "error",
+    testcase2status: "error",
+    testcase3status: "error",
+    passedCount: 0,
+  };
 }
 
 /* ============================== session ============================== */
@@ -236,10 +236,65 @@ function clearSession() {
 function showLogin(notice = null) {
   $("#view-shell").classList.add("hidden");
   $("#view-login").classList.remove("hidden");
-  $("#login-server").value = state.serverUrl;
   const err = $("#login-error");
   if (notice) { err.textContent = notice; err.classList.remove("hidden"); }
   else err.classList.add("hidden");
+  // First launch (or cleared config) → ask ONLY for the server address.
+  paintLoginMode(state.serverUrl ? "login" : "gate");
+}
+
+/**
+ * Login card has two modes:
+ *  - "gate"  → first launch / no saved URL: ONLY the server address is asked.
+ *  - "login" → URL already saved: just email + password (URL stays hidden).
+ */
+function paintLoginMode(mode) {
+  const gate = mode === "gate";
+  $("#field-server").classList.toggle("hidden", !gate);
+  $("#login-cred").classList.toggle("hidden", gate);
+  $("#login-btn").classList.toggle("hidden", gate);
+  $("#gate-btn").classList.toggle("hidden", !gate);
+  $("#change-server").classList.toggle("hidden", gate);
+  if (gate) {
+    $("#login-server").value = state.serverUrl || "";
+    setTimeout(() => $("#login-server").focus(), 50);
+  } else {
+    setTimeout(() => $("#login-email").focus(), 50);
+  }
+}
+
+async function connectServer() {
+  const url = $("#login-server").value.trim().replace(/\/+$/, "");
+  const errEl = $("#login-error");
+  errEl.classList.add("hidden");
+  if (!/^https?:\/\//i.test(url)) {
+    errEl.textContent = "Server address must start with http:// or https://";
+    errEl.classList.remove("hidden");
+    return;
+  }
+  const btn = $("#gate-btn");
+  btn.disabled = true;
+  btn.innerHTML = `${icon("loader", "ic spin")} Connecting…`;
+  try {
+    // Any HTTP answer (even 401/404) proves the server is reachable.
+    const res = await app.api({ serverUrl: url, path: "/config", timeout: 15000 });
+    if (res.status === 0) {
+      errEl.textContent = `Cannot reach a server at ${url} — check the address and try again.`;
+      errEl.classList.remove("hidden");
+      return;
+    }
+    // Reachable → persist. From now on the app never asks again.
+    state.serverUrl = url;
+    localStorage.setItem(LS.server, url);
+    toast("Server connected.");
+    paintLoginMode("login");
+  } catch (e) {
+    errEl.textContent = (e && e.message) || `Cannot reach a server at ${url}`;
+    errEl.classList.remove("hidden");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Continue";
+  }
 }
 
 function showShell() {
@@ -267,19 +322,21 @@ async function boot() {
 /* login */
 $("#login-btn").addEventListener("click", doLogin);
 $("#login-password").addEventListener("keydown", (e) => e.key === "Enter" && doLogin());
+$("#gate-btn").addEventListener("click", connectServer);
+$("#login-server").addEventListener("keydown", (e) => e.key === "Enter" && connectServer());
+$("#change-server").addEventListener("click", () => paintLoginMode("gate"));
 
 async function doLogin() {
-  const serverUrl = $("#login-server").value.trim().replace(/\/+$/, "");
+  if (!state.serverUrl) {
+    // No saved URL (first launch) → run the server gate first.
+    paintLoginMode("gate");
+    connectServer();
+    return;
+  }
   const email = $("#login-email").value.trim();
   const password = $("#login-password").value;
   const errEl = $("#login-error");
-  if (!/^https?:\/\//i.test(serverUrl)) {
-    errEl.textContent = "Server address must start with http:// or https://";
-    errEl.classList.remove("hidden");
-    return;
-  }
-  state.serverUrl = serverUrl;
-  localStorage.setItem(LS.server, serverUrl);
+  errEl.classList.add("hidden");
   const btn = $("#login-btn");
   btn.disabled = true;
   btn.innerHTML = `${icon("loader", "ic spin")} Signing in…`;

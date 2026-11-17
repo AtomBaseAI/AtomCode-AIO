@@ -12,6 +12,13 @@ contextBridge.exposeInMainWorld("atomcode", {
    */
   api: (req) => ipcRenderer.invoke("api:fetch", req),
 
+  /**
+   * Local Java execution via the bundled Doppio JVM (main process).
+   * req: { code, input?, cases?: [{ input }], timeoutMs? }
+   * res: { compileError, compileStderr, results: [{ output, stderr, exitCode, durationMs, timedOut? }] } | { fatal }
+   */
+  javaRun: (req) => ipcRenderer.invoke("java:run", req),
+
   openExternal: (url) => ipcRenderer.invoke("app:openExternal", url),
 
   info: () => ipcRenderer.invoke("app:info"),

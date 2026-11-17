@@ -36,21 +36,26 @@
             </div>
           </div>
 
-          <div class="field">
+          <div class="field" id="field-server">
             <label for="login-server">Server address</label>
             <input id="login-server" class="inp" type="text" spellcheck="false" placeholder="http://localhost:3000" />
+            <p class="muted small" id="server-hint" style="margin-top:0.35rem;">Asked only once — saved on this device.</p>
           </div>
-          <div class="field">
-            <label for="login-email">Email</label>
-            <input id="login-email" class="inp" type="email" spellcheck="false" placeholder="student@atom.com" />
-          </div>
-          <div class="field">
-            <label for="login-password">Password</label>
-            <input id="login-password" class="inp" type="password" placeholder="••••••••" />
+          <div id="login-cred">
+            <div class="field">
+              <label for="login-email">Email</label>
+              <input id="login-email" class="inp" type="email" spellcheck="false" placeholder="student@atom.com" />
+            </div>
+            <div class="field">
+              <label for="login-password">Password</label>
+              <input id="login-password" class="inp" type="password" placeholder="••••••••" />
+            </div>
           </div>
 
           <button id="login-btn" class="btn btn-primary btn-block">Sign In</button>
+          <button id="gate-btn" class="btn btn-primary btn-block hidden">Continue</button>
           <div id="login-error" class="alert alert-error hidden"></div>
+          <button id="change-server" class="linklike hidden">Use a different server</button>
         </div>
       </div>
     </div>

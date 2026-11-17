@@ -1,6 +1,12 @@
-const { app, BrowserWindow, ipcMain, shell, Menu, protocol } = require("electron");
+const { app, BrowserWindow, ipcMain, shell, Menu, protocol, dialog, Tray, nativeImage } = require("electron");
+const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs/promises");
+/** Unpatched fs — Electron's regular fs intercepts *.asar paths; the
+ * integrity check must read the RAW archive bytes exactly like the
+ * pack-time hash did (plain node). */
+const fsOriginal = require("original-fs");
+const crypto = require("crypto");
 
 /**
  * AtomCode Student — Electron main process.
@@ -105,6 +111,85 @@ function serveRenderer(request) {
 }
 
 let mainWindow = null;
+let tray = null;
+
+/* ------------------------------------------------------------------ */
+/* Installation integrity verification (tamper protection)             */
+/* ------------------------------------------------------------------ */
+
+/** Streamed SHA-256 of a file (handles the ~180MB asar comfortably). */
+function sha256File(file) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash("sha256");
+    const stream = fsOriginal.createReadStream(file);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("error", reject);
+    stream.on("end", () => resolve(hash.digest("hex")));
+  });
+}
+
+/**
+ * Verify the packaged installation against the manifest generated at
+ * pack time (scripts/afterpack.cjs → resources/integrity-manifest.json).
+ *
+ * Every shipped file is re-hashed on launch: the application code
+ * (app.asar — renderer, WASM engine, workers, all language runtimes)
+ * and the bundled Java runtime. If anything is missing or modified the
+ * user gets a native error dialog and the app refuses to start — the
+ * installed source code and runtimes cannot be silently tampered with.
+ */
+async function verifyInstallation() {
+  const manifestPath = path.join(process.resourcesPath, "integrity-manifest.json");
+
+  let manifest = null;
+  try {
+    manifest = JSON.parse(await fsOriginal.promises.readFile(manifestPath, "utf8"));
+  } catch {
+    dialog.showErrorBox(
+      "AtomCode Student — installation check failed",
+      "The installation integrity manifest is missing or unreadable.\n\n" +
+        "The app cannot verify that its bundled code and runtimes are intact.\n" +
+        "Please reinstall AtomCode Student."
+    );
+    return false;
+  }
+
+  const entries = Object.entries(manifest.files || {});
+  const failures = [];
+  const started = Date.now();
+
+  for (const [rel, meta] of entries) {
+    const abs = path.join(process.resourcesPath, rel);
+    try {
+      const stat = await fsOriginal.promises.stat(abs);
+      if (stat.size !== meta.size) {
+        failures.push(`${rel} (size changed: on disk ${stat.size}, manifest ${meta.size})`);
+        continue;
+      }
+      const digest = await sha256File(abs);
+      if (digest !== meta.sha256) failures.push(`${rel} (content modified)`);
+    } catch {
+      failures.push(`${rel} (missing)`);
+    }
+  }
+
+  console.log(
+    `[integrity] verified ${entries.length} file(s) in ${Date.now() - started}ms — ${failures.length} problem(s)`
+  );
+  for (const failure of failures) console.warn(`[integrity] ✗ ${failure}`);
+
+  if (failures.length > 0) {
+    dialog.showErrorBox(
+      "AtomCode Student — installation check failed",
+      `${failures.length} installed file(s) are missing or modified:\n\n` +
+        failures.slice(0, 6).join("\n") +
+        (failures.length > 6 ? `\n… and ${failures.length - 6} more` : "") +
+        "\n\nTo stay protected the app will not start.\nPlease reinstall AtomCode Student."
+    );
+    return false;
+  }
+  return true;
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -276,6 +361,63 @@ ipcMain.handle("app:openExternal", async (_event, url) => {
   return true;
 });
 
+/* ------------------------------------------------------------------ */
+/* IPC: local Java execution (bundled Doppio JVM — no server, no API)  */
+/* ------------------------------------------------------------------ */
+
+const JAVA_RUNTIME_DIR = app.isPackaged
+  ? path.join(process.resourcesPath, "java-runtime")
+  : path.join(__dirname, "java-runtime");
+const JAVA_RUNNER = path.join(JAVA_RUNTIME_DIR, "runner.js");
+
+ipcMain.handle("java:run", async (_event, req) => {
+  const { code, input, cases, timeoutMs } = req || {};
+  // compile (up to timeoutMs) + one run per case — generous overall cap.
+  const overall = Math.min(Math.max(Number(timeoutMs) || 120000, 5000), 300000) + 60000;
+  const jobCases =
+    Array.isArray(cases) && cases.length > 0
+      ? cases.map((c) => ({ input: (c && c.input) || "" }))
+      : [{ input: input || "" }];
+
+  return await new Promise((resolve) => {
+    let out = "";
+    let errbuf = "";
+    let child;
+    try {
+      child = spawn(process.execPath, [JAVA_RUNNER], {
+        env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" },
+        stdio: ["pipe", "pipe", "pipe"],
+        windowsHide: true,
+      });
+    } catch (err) {
+      resolve({ fatal: (err && err.message) || "Could not start the Java runtime." });
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      try { child.kill("SIGKILL"); } catch { /* already dead */ }
+    }, overall);
+
+    child.stdout.on("data", (d) => (out += d.toString()));
+    child.stderr.on("data", (d) => (errbuf += d.toString()));
+    child.stdin.write(JSON.stringify({ code: String(code || ""), cases: jobCases, timeoutMs }));
+    child.stdin.end();
+
+    child.on("error", (err) => {
+      clearTimeout(timer);
+      resolve({ fatal: (err && err.message) || "Could not start the Java runtime." });
+    });
+    child.on("close", () => {
+      clearTimeout(timer);
+      try {
+        resolve(JSON.parse(out));
+      } catch {
+        resolve({ fatal: (errbuf || "The Java runner exited unexpectedly.").slice(0, 500) });
+      }
+    });
+  });
+});
+
 ipcMain.handle("app:info", () => ({
   electron: process.versions.electron,
   node: process.versions.node,
@@ -285,10 +427,56 @@ ipcMain.handle("app:info", () => ({
 }));
 
 /* ------------------------------------------------------------------ */
+/* Menu-bar / system-tray icon                                         */
+/* ------------------------------------------------------------------ */
+
+function createTray() {
+  try {
+    const source = nativeImage.createFromPath(
+      path.join(__dirname, "renderer", "assets", "icon-256.png")
+    );
+    tray = new Tray(source.resize({ width: 24, height: 24 }));
+    tray.setToolTip("AtomCode Student");
+    tray.setContextMenu(
+      Menu.buildFromTemplate([
+        {
+          label: "Open AtomCode Student",
+          click: () => {
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              mainWindow.show();
+              mainWindow.focus();
+            } else {
+              createWindow();
+            }
+          },
+        },
+        { type: "separator" },
+        { label: "Quit", click: () => app.quit() },
+      ])
+    );
+    console.log("[tray] menu-bar / system-tray icon created");
+  } catch (err) {
+    console.warn("[tray] could not create the tray icon:", err && err.message);
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* App lifecycle                                                       */
 /* ------------------------------------------------------------------ */
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Deep verification of the packaged installation BEFORE anything
+  // loads — a modified/missing file stops the app right here.
+  if (app.isPackaged) {
+    const ok = await verifyInstallation();
+    if (!ok) {
+      app.quit();
+      return;
+    }
+  } else {
+    console.log("[integrity] dev mode — packaged-manifest verification skipped");
+  }
+
   if (process.platform === "darwin") {
     // macOS routes clipboard/undo through the application menu — without
     // Edit roles Cmd+C/V/X/Z/A stop working. Keep ONLY these OS-standard
@@ -318,6 +506,7 @@ app.whenReady().then(() => {
   }
   protocol.handle("atomcode", serveRenderer);
   createWindow();
+  createTray();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

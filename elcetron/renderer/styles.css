@@ -673,3 +673,18 @@ pre.codesnippet {
 
 /* language icons inside tables stay compact */
 .tbl td img { height: 1.75rem; width: 1.75rem; object-fit: contain; display: inline-block; }
+
+/* subtle text-style button (change server link on the login card) */
+.linklike {
+  background: none;
+  border: none;
+  color: var(--muted-foreground, #64748b);
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin: 0 auto;
+  padding: 0.25rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.linklike:hover { color: var(--primary, #7c3aed); }
+.linklike.hidden { display: none; }

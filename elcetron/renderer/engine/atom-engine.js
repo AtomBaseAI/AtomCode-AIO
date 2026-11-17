@@ -13,10 +13,12 @@
  *   renderer/runtimes/pyodide/<ver>/     (CPython)
  *   renderer/runtimes/sqlite-wasm/       (SQLite)
  *   renderer/runtimes/ruby/3.4/          (CRuby)
+ *   renderer/runtimes/clang/             (clang + lld + C/C++ sysroot)
  *
- * Compiled languages (C, C++, Java) are executed by the connected
- * AtomCode server's built-in toolchains via POST /api/desktop/run —
- * exactly like the web app's native-server profiles.
+ * Java runs through the bundled Doppio JVM (java-runtime/, driven by the
+ * main process over IPC) — javac compiles inside the JVM, then the student
+ * class runs inside it. EVERY language executes 100% locally; nothing is
+ * sent to the server, and no Lambda judge APIs are involved.
  * ================================================================ */
 
 (function () {
@@ -129,6 +131,44 @@
       defaultTimeoutMs: 20000,
       order: 1,
     },
+    // ── C (bundled clang, runs in a worker) ────────────────────────
+    {
+      id: "c-clang",
+      language: "c",
+      label: "C (Clang)",
+      workerKind: "clang",
+      verified: true,
+      features: { stdin: true },
+      runtimeBasePath: "/runtimes/clang/",
+      disposeAfterRun: false,
+      defaultTimeoutMs: 60000,
+      order: 1,
+    },
+    // ── C++ (bundled clang, runs in a worker) ──────────────────────
+    {
+      id: "cpp-clang",
+      language: "cpp",
+      label: "C++ (Clang)",
+      workerKind: "clang",
+      verified: true,
+      features: { stdin: true },
+      runtimeBasePath: "/runtimes/clang/",
+      disposeAfterRun: false,
+      defaultTimeoutMs: 60000,
+      order: 1,
+    },
+    // ── Java (bundled Doppio JVM, driven by the main process) ──────
+    {
+      id: "java-8",
+      language: "java",
+      label: "Java 8",
+      workerKind: null,
+      viaMain: true,
+      verified: true,
+      features: { stdin: true },
+      defaultTimeoutMs: 120000,
+      order: 1,
+    },
   ];
 
   /** Languages the desktop client executes locally (bundled runtimes). */
@@ -138,10 +178,16 @@
     "ruby",
     "javascript",
     "typescript",
+    "c",
+    "cpp",
+    "java",
   ];
 
-  /** Compiled languages — executed by the server's built-in toolchains. */
-  const NATIVE_LANGUAGES = ["c", "cpp", "java"];
+  /**
+   * Legacy hook — nothing executes on the server anymore. Kept as an
+   * (empty) export so the UI keeps working unchanged.
+   */
+  const NATIVE_LANGUAGES = [];
 
   function normLang(lang) {
     return String(lang || "").trim().toLowerCase();
@@ -334,6 +380,83 @@
 
   const manager = new DesktopExecutionManager();
 
+  /** Bridge to the main-process Java runtime (Doppio JVM), if present. */
+  function javaBridge() {
+    return typeof window !== "undefined" &&
+      window.atomcode &&
+      typeof window.atomcode.javaRun === "function"
+      ? window.atomcode.javaRun
+      : null;
+  }
+
+  function errorOutcome(message) {
+    return {
+      compileMessage: "Error",
+      output: message,
+      stderr: message,
+      timedOut: false,
+      durationMs: 0,
+    };
+  }
+
+  /** Map a main-process java result onto the judge contract. */
+  function javaOutcome(res, opts) {
+    if (!res || res.fatal) {
+      return errorOutcome(
+        (res && res.fatal) || "The local Java runtime failed to start."
+      );
+    }
+    if (res.compileError) {
+      return {
+        compileMessage: "Error",
+        output: res.compileStderr || "Compilation failed.",
+        stderr: res.compileStderr || "Compilation failed.",
+        timedOut: false,
+        durationMs: 0,
+      };
+    }
+    const r = (res.results && res.results[0]) || {};
+    const output = String(r.output || "");
+    const compileMessage =
+      opts.expectedOutput == null ||
+      normalizeOutput(output) === normalizeOutput(opts.expectedOutput)
+        ? "Success"
+        : "Failed";
+    return {
+      compileMessage,
+      output,
+      stderr: String(r.stderr || ""),
+      timedOut: Boolean(r.timedOut),
+      durationMs: Number(r.durationMs) || 0,
+    };
+  }
+
+  /** Java path — one bridge call handles compile + run. */
+  async function judgeRunSingleViaMain(opts, profile) {
+    const bridge = javaBridge();
+    if (!bridge) {
+      return errorOutcome(
+        "The local Java runtime is not available in this build."
+      );
+    }
+    const timeoutMs = Math.min(
+      Math.max(opts.timeoutMs || profile.defaultTimeoutMs, MIN_TIMEOUT_MS),
+      MAX_TIMEOUT_MS
+    );
+    try {
+      const res = await bridge({
+        code: opts.code,
+        input: opts.input || "",
+        timeoutMs,
+      });
+      return javaOutcome(res, opts);
+    } catch (err) {
+      return errorOutcome(
+        err instanceof Error ? err.message : String(err) || "Java runtime failed."
+      );
+    }
+  }
+
   /**
    * Run one program once against optional expected output.
    * Resolves { compileMessage, output, stderr, timedOut, durationMs } —
@@ -342,13 +465,13 @@
   async function judgeRunSingle(opts) {
     const profile = getDefaultEngineProfile(opts.lang);
     if (!profile) {
-      return {
-        compileMessage: "Error",
-        output: 'No runtime is configured for "' + opts.lang + '".',
-        stderr: 'No runtime is configured for "' + opts.lang + '".',
-        timedOut: false,
-        durationMs: 0,
-      };
+      return errorOutcome(
+        'No runtime is configured for "' + opts.lang + '".'
+      );
+    }
+
+    if (profile.viaMain) {
+      return judgeRunSingleViaMain(opts, profile);
     }
 
     try {
@@ -357,6 +480,17 @@
         stdin: opts.input || "",
         timeoutMs: opts.timeoutMs,
       });
+
+      // Compile/link failures (clang worker) → Error with diagnostics.
+      if (result.compileError) {
+        return {
+          compileMessage: "Error",
+          output: result.stderr || "Compilation failed.",
+          stderr: result.stderr || "Compilation failed.",
+          timedOut: false,
+          durationMs: result.executionTimeMs || 0,
+        };
+      }
 
       const output = renderOutput(result);
       const compileMessage =
@@ -393,8 +527,77 @@
    * expected output are placeholders and auto-pass.
    */
   async function judgeRunTestCases(opts) {
-    const outcomes = [];
+    const profile = getDefaultEngineProfile(opts.lang);
     const cases = opts.cases || [];
+
+    if (profile && profile.viaMain) {
+      // Java: one bridge call compiles once and runs every real case.
+      const bridge = javaBridge();
+      if (!bridge) {
+        return cases.map(() => ({
+          status: "Error",
+          output: "The local Java runtime is not available in this build.",
+        }));
+      }
+      const statuses = new Array(cases.length);
+      const real = [];
+      cases.forEach((testCase, index) => {
+        const input = testCase.input || "";
+        const expected = testCase.expected || "";
+        if (index > 0 && input === "" && expected === "") {
+          statuses[index] = { status: "Success", output: "" };
+        } else {
+          real.push({ index, input, expected });
+        }
+      });
+
+      if (real.length > 0) {
+        const timeoutMs = Math.min(
+          Math.max(opts.timeoutMs || profile.defaultTimeoutMs, MIN_TIMEOUT_MS),
+          MAX_TIMEOUT_MS
+        );
+        let res = null;
+        try {
+          res = await bridge({ code: opts.code, cases: real.map((r) => ({ input: r.input })), timeoutMs });
+        } catch (err) {
+          res = { fatal: err instanceof Error ? err.message : String(err) };
+        }
+        const outcomes = [];
+        if (!res || res.fatal) {
+          const msg = (res && res.fatal) || "The local Java runtime failed to start.";
+          real.forEach(() => outcomes.push({ status: "Error", output: msg }));
+        } else if (res.compileError) {
+          const msg = res.compileStderr || "Compilation failed.";
+          real.forEach(() => outcomes.push({ status: "Error", output: msg }));
+        } else {
+          (res.results || []).forEach((r) => {
+            if (r.timedOut) {
+              outcomes.push({ status: "Error", output: "Execution timed out." });
+            } else {
+              // Comparison happens per-case below; keep raw output here.
+              outcomes.push({ status: null, output: String(r.output || "") });
+            }
+          });
+        }
+        real.forEach((r, j) => {
+          const outcome = outcomes[j] || { status: "Error", output: "" };
+          if (outcome.status === null) {
+            const pass =
+              normalizeOutput(outcome.output) ===
+              normalizeOutput(r.expected);
+            statuses[r.index] = {
+              status: pass ? "Success" : "Failed",
+              output: outcome.output,
+            };
+          } else {
+            statuses[r.index] = outcome;
+          }
+        });
+      }
+      return statuses;
+    }
+
+    const outcomes = [];
 
     for (let index = 0; index < cases.length; index++) {
       const testCase = cases[index];
