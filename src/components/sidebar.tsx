@@ -231,15 +231,7 @@ const Sidebar = ({ role }: { role?: string }) => {
           <TooltipProvider>
             <Tooltip >
               <TooltipTrigger asChild>
-                {/* Super admin gets its own dedicated settings page (security
-                    auth code + admins management); regular admins get the
-                    minimal profile/password settings. */}
-                <span
-                  onClick={() =>
-                    router.push(isSuperAdmin ? '/superadmin/settings' : '/admin/settings')
-                  }
-                  className={`inline-flex items-center justify-center border-l-4 border-transparent py-2 my-1 w-full transition-colors  cursor-pointer ${isActive(isSuperAdmin ? '/superadmin/settings' : '/admin/settings') ? 'text-primary border-primary' : ''}`}
-                >
+                <span onClick={() => router.push('/admin/settings')} className={`inline-flex items-center justify-center border-l-4 border-transparent py-2 my-1 w-full transition-colors  cursor-pointer ${isActive('/admin/settings') ? 'text-primary border-primary' : ''}`}>
                   <span className='h-6 w-6'>
                     <Settings fill='none' />
                   </span>
