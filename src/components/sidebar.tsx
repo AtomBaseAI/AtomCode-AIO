@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Settings, PieChart, Package, Layers, ShieldCheck, Users, ShipWheel, Minimize, Maximize, Code, Code2 } from 'lucide-react'
+import { LayoutDashboard, Settings, PieChart, Package, Layers, ShieldCheck, Users, ShipWheel, Minimize, Maximize, Code, Code2, IndianRupee } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeToggle } from "@/components/theme-toggle"
 import {
@@ -13,9 +13,13 @@ import {
 } from "@/components/ui/tooltip"
 import { enterFullscreen, exitFullscreen, fullscreenCheck } from '@/hooks/fullscreen'
 
-const Sidebar = () => {
+const Sidebar = ({ role }: { role?: string }) => {
   const router = useRouter()
   const pathname = usePathname()
+
+  // Super-admin-only surfaces — the role arrives server-side from the
+  // layouts, so regular admins never even render these buttons.
+  const isSuperAdmin = role === 'superadmin'
 
   const [fullscreen, setFullscreen] = useState(fullscreenCheck())
 
@@ -148,6 +152,40 @@ const Sidebar = () => {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+
+          {isSuperAdmin && (
+            <>
+              <TooltipProvider>
+                <Tooltip >
+                  <TooltipTrigger asChild>
+                    <span onClick={() => router.push("/superadmin/admins")} className={`inline-flex items-center justify-center border-l-4 border-transparent py-3 transition-colors cursor-pointer ${isActive('/superadmin/admins') ? 'text-primary border-primary' : ''}`}>
+                      <span className='h-6 w-6'>
+                        <ShieldCheck fill='none' />
+                      </span>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side='right'>
+                    <p className='z-50'>Admins</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip >
+                  <TooltipTrigger asChild>
+                    <span onClick={() => router.push("/superadmin/revenue")} className={`inline-flex items-center justify-center border-l-4 border-transparent py-3 transition-colors cursor-pointer ${isActive('/superadmin/revenue') ? 'text-primary border-primary' : ''}`}>
+                      <span className='h-6 w-6'>
+                        <IndianRupee fill='none' />
+                      </span>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side='right'>
+                    <p className='z-50'>Revenue</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </>
+          )}
         </nav>
 
 
@@ -193,7 +231,15 @@ const Sidebar = () => {
           <TooltipProvider>
             <Tooltip >
               <TooltipTrigger asChild>
-                <span onClick={() => router.push('/admin/settings')} className={`inline-flex items-center justify-center border-l-4 border-transparent py-2 my-1 w-full transition-colors  cursor-pointer ${isActive('/admin/settings') ? 'text-primary border-primary' : ''}`}>
+                {/* Super admin gets its own dedicated settings page (security
+                    auth code + admins management); regular admins get the
+                    minimal profile/password settings. */}
+                <span
+                  onClick={() =>
+                    router.push(isSuperAdmin ? '/superadmin/settings' : '/admin/settings')
+                  }
+                  className={`inline-flex items-center justify-center border-l-4 border-transparent py-2 my-1 w-full transition-colors  cursor-pointer ${isActive(isSuperAdmin ? '/superadmin/settings' : '/admin/settings') ? 'text-primary border-primary' : ''}`}
+                >
                   <span className='h-6 w-6'>
                     <Settings fill='none' />
                   </span>

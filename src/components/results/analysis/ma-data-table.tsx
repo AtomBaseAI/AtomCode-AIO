@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table"
 
 import { DataTablePagination } from "@/components/data-tables/data-table-pagination"
+import { EmptyState } from "@/components/shared/empty-state"
 import { makeSelectColumn } from "@/components/data-tables/select-column"
 import { BulkActionBar } from "@/components/data-tables/bulk-action-bar"
 import { ExportSelectedCsvButton } from "@/components/data-tables/export-selected-csv"
@@ -125,9 +126,14 @@ export function ModuleAnalysisDataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={table.getVisibleLeafColumns().length}
-                  className="h-24 text-center"
+                  className="px-2 py-6"
                 >
-                  No results.
+                  <EmptyState
+                    compact
+                    title="No results."
+                    imageClassName="h-20"
+                    className="h-auto py-2"
+                  />
                 </TableCell>
               </TableRow>
             )}

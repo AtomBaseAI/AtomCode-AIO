@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
-import { requireAdminApi } from "@/lib/api-admin-guard";
+import { requireSuperAdminApi } from "@/lib/api-admin-guard";
 import { TopicImportItemSchema, type TopicImportItem } from "@/schemas/topic-schema";
 import { createTopicWithGeneral, ensureGeneralTopic } from "@/lib/topics";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-/** Per-batch sanity cap so one import cannot flood the group. */
-const MAX_TOPICS_PER_IMPORT = 200;
+/**
+ * No per-import size cap — admins may import as many topics as they want.
+ * Topics merge by name, so imports stay sequential (race-free) but uncapped.
+ */
 
 interface ImportIssue {
     index: number;
@@ -25,7 +27,7 @@ interface ImportIssue {
  * re-importing an export is always safe.
  */
 export async function POST(req: Request, ctx: RouteContext) {
-    const guard = await requireAdminApi();
+    const guard = await requireSuperAdminApi();
     if (!guard.ok) return guard.response;
 
     const { id } = await ctx.params;
@@ -44,14 +46,6 @@ export async function POST(req: Request, ctx: RouteContext) {
     if (!raw || raw.length === 0) {
         return NextResponse.json(
             { error: "No topics found in the file." },
-            { status: 400 }
-        );
-    }
-    if (raw.length > MAX_TOPICS_PER_IMPORT) {
-        return NextResponse.json(
-            {
-                error: `Too many topics in one import (max ${MAX_TOPICS_PER_IMPORT}). Split the file.`,
-            },
             { status: 400 }
         );
     }

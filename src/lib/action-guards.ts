@@ -7,11 +7,28 @@ import type { Session } from "next-auth";
  * verify the caller's role/ownership server-side.
  */
 
-/** Returns the session when the caller is an authenticated admin, else null. */
+/**
+ * Returns the session when the caller is an authenticated admin, else null.
+ * The super admin inherits every admin panel capability (that is the point
+ * of the role), so "superadmin" passes too — super-admin-only surfaces use
+ * requireSuperAdmin() instead.
+ */
 export async function requireAdmin(): Promise<Session | null> {
     const session = await auth();
     const role = (session?.user as { role?: string } | undefined)?.role;
-    if (!session?.user || role !== "admin") return null;
+    if (!session?.user || (role !== "admin" && role !== "superadmin")) return null;
+    return session;
+}
+
+/**
+ * Returns the session when the caller is the super admin, else null.
+ * Guards the super-admin-only surfaces: admin account management, the
+ * revenue/billing dashboard and the auth-code settings.
+ */
+export async function requireSuperAdmin(): Promise<Session | null> {
+    const session = await auth();
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    if (!session?.user || role !== "superadmin") return null;
     return session;
 }
 

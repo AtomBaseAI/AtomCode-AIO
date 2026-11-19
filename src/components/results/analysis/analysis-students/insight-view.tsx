@@ -13,6 +13,7 @@ import { usePDF } from 'react-to-pdf';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { FileDown } from 'lucide-react';
+import { EmptyState } from '@/components/shared/empty-state';
 const InsightView = ({ analysisdata, cid, mid, uid }: { analysisdata: any, cid: string, mid: string, uid: string }) => {
     function removeTrailingNewlines(userCode: string | null) {
         if (!userCode) return '';
@@ -31,6 +32,16 @@ const InsightView = ({ analysisdata, cid, mid, uid }: { analysisdata: any, cid: 
                 ? "bg-orange-500/30"
                 : "";
     // console.log(codeItem.testcase1status,codeItem.testcase1status,codeItem.testcase1status)
+    if (!analysisdata || analysisdata.name === undefined) {
+        return (
+            <div className="flex h-full flex-1 items-center justify-center p-4 md:p-8 w-full">
+                <EmptyState
+                    title="No Insights Available"
+                    description="No attempt data found for this student in this module yet."
+                />
+            </div>
+        )
+    }
     return (
         <>
             <div className="hidden h-full flex-1 flex-col space-y-2 p-8 md:flex w-full overflow-y-auto" ref={targetRef}>

@@ -28,8 +28,16 @@ export const ROLE_HOME: Record<string, string> = {
   admin: "/admin/dashboard",
   staff: "/staff/dashboard",
   user: "/student/dashboard",
+  superadmin: "/superadmin/dashboard",
 };
 
 export function roleHome(role?: string | null): string {
   return ROLE_HOME[role ?? ""] ?? "/login";
 }
+
+/**
+ * Super-admin-only areas — regular admins, staff and students are bounced
+ * to their own dashboards by the proxy. Admins DO get every /admin/* area
+ * (see proxy ROLE_AREA), but never these.
+ */
+export const superAdminOnlyPrefixes = ["/superadmin"];

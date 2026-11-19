@@ -1,9 +1,10 @@
 import { getAllCourses } from "@/data/courses"
 import { CourseTableSchema } from "@/schemas/course-schema"
-import { Book, DownloadCloud, PieChart, Trophy } from "lucide-react"
+import { DownloadCloud, PieChart, Trophy } from "lucide-react"
 import Link from "next/link"
 import { z } from "zod"
 import { TopbarTitle } from "@/components/topbar-title"
+import { EmptyState } from "@/components/shared/empty-state"
 
 import {
   Tooltip,
@@ -29,13 +30,11 @@ const Results = async () => {
       <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {
           coursesData.length === 0 ? (
-            <div className="col-span-full flex h-[60vh] flex-col items-center justify-center">
-              <div className="shadow-lg rounded-md overflow-hidden w-[20rem] border hover:border-primary" >
-                <div className="py-5 px-6 sm:px-8 flex flex-col justify-center items-center gap-5">
-                  <Book className="h-10 w-10 text-yellow-400" />
-                  No Courses Available !
-                </div>
-              </div>
+            <div className="col-span-full">
+              <EmptyState
+                title="No Courses Available !"
+                description="Create a course and enroll students to see leaderboard, analysis and result matrix here."
+              />
             </div>
           ) : (
             coursesData.map((course) => (

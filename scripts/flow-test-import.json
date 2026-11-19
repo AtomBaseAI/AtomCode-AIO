@@ -1,0 +1,109 @@
+{
+  "atomcodeExport": true,
+  "kind": "question-group",
+  "exportedAt": "2026-11-19T00:00:00.000Z",
+  "group": {
+    "title": "Flow Test Group"
+  },
+  "topics": [
+    {
+      "name": "Arrays",
+      "subtopics": [
+        { "name": "Two Pointers" },
+        { "name": "Sliding Window" }
+      ]
+    },
+    {
+      "name": "Strings",
+      "subtopics": []
+    }
+  ],
+  "questions": [
+    {
+      "title": "Sum of Two Numbers",
+      "description": "Read two integers and print their sum.",
+      "sampleinput1": "1 2",
+      "sampleinput2": "5 7",
+      "sampleoutput1": "3",
+      "sampleoutput2": "12",
+      "input1": "1 2",
+      "input2": "5 7",
+      "input3": "10 20",
+      "output1": "3",
+      "output2": "12",
+      "output3": "30",
+      "sourcecode": "a, b = map(int, input().split())\nprint(a + b)",
+      "referenceimg": null,
+      "topic": null,
+      "subtopic": null,
+      "inputconstrains": null,
+      "blacklist": null,
+      "whitelist": null,
+      "maxscore": "10",
+      "difficulty": "easy",
+      "lang": "python"
+    },
+    {
+      "title": "Reverse a String",
+      "description": "Read a string and print it reversed.",
+      "sampleinput1": "atom",
+      "sampleinput2": "code",
+      "sampleoutput1": "mota",
+      "sampleoutput2": "edoc",
+      "input1": "atom",
+      "input2": "code",
+      "input3": "campus",
+      "output1": "mota",
+      "output2": "edoc",
+      "output3": "supmac",
+      "sourcecode": "print(input()[::-1])",
+      "maxscore": 10,
+      "difficulty": "medium",
+      "lang": "java"
+    },
+    {
+      "title": "Bad Language Question",
+      "description": "This one uses an unsupported language and must be skipped with a clear error.",
+      "sampleinput1": "1",
+      "sampleinput2": "2",
+      "sampleoutput1": "1",
+      "sampleoutput2": "2",
+      "input1": "1",
+      "input2": "2",
+      "input3": "3",
+      "output1": "1",
+      "output2": "2",
+      "output3": "3",
+      "sourcecode": "print(1)",
+      "maxscore": 10,
+      "difficulty": "easy",
+      "lang": "fortran"
+    }
+  ],
+  "mcqQuestions": [
+    {
+      "title": "Python output type",
+      "description": "What does print(type(1/2)) show in Python 3?",
+      "Option1": "<class 'int'>",
+      "Option2": "<class 'float'>",
+      "Option3": "<class 'double'>",
+      "Option4": "<class 'decimal'>",
+      "CorrectOption": "2",
+      "difficulty": "Easy",
+      "iscodesnippet": "false",
+      "snippetLang": null,
+      "codesnippet": null,
+      "referenceimg": null
+    },
+    {
+      "title": "Java entry point",
+      "description": "Which method is the entry point of a Java program?",
+      "Option1": "start()",
+      "Option2": "init()",
+      "Option3": "main()",
+      "Option4": "run()",
+      "CorrectOption": 3,
+      "difficulty": "easy"
+    }
+  ]
+}

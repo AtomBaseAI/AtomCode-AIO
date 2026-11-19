@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
+import { auth } from "@/auth"
 import { Button } from "@/components/ui/button"
 import { getQuestionGroupById } from "@/data/question-groups"
 import { GroupQuestionsDataTable } from "@/components/question-group/group-questions-data-table"
@@ -15,6 +16,12 @@ const GroupQuestionsPage = async ({
     params: Promise<{ gid: string }>
 }) => {
     const { gid } = await params
+
+    // Import / export of questions is super-admin-only now.
+    const session = await auth()
+    const role = (session?.user as { role?: string } | undefined)?.role
+    const isSuperAdmin = role === "superadmin"
+
     const group = await getQuestionGroupById(gid)
 
     if (!group) {
@@ -69,10 +76,12 @@ const GroupQuestionsPage = async ({
                         lockedGroup={{ id: group.id, title: group.title }}
                         triggerLabel="Create Question"
                     />
-                    <QuestionImportExportMenu
-                        groupId={group.id}
-                        groupTitle={group.title}
-                    />
+                    {isSuperAdmin && (
+                        <QuestionImportExportMenu
+                            groupId={group.id}
+                            groupTitle={group.title}
+                        />
+                    )}
                     <BackBtn />
                 </div>
             </div>

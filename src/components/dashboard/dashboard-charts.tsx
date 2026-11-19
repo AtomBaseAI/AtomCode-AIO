@@ -15,8 +15,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Inbox } from "lucide-react";
 
+import { EmptyState } from "@/components/shared/empty-state";
 import {
   Card,
   CardContent,
@@ -77,12 +77,7 @@ const truncate = (s: string, max: number) =>
 
 /** Shared empty state shown when a metric has no rows yet. */
 function ChartEmpty({ text }: { text: string }) {
-  return (
-    <div className="flex h-[240px] flex-col items-center justify-center gap-2 text-muted-foreground">
-      <Inbox className="h-8 w-8 opacity-50" aria-hidden />
-      <span className="text-sm">{text}</span>
-    </div>
-  );
+  return <EmptyState compact title={text} />;
 }
 
 /* ------------------------------------------------------------------ */

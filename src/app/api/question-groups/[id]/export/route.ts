@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
-import { requireAdminApi } from "@/lib/api-admin-guard";
+import { requireSuperAdminApi } from "@/lib/api-admin-guard";
 import { slugifyFilename, toTransferRow } from "@/lib/question-transfer";
 import { toMcqTransferRow } from "@/lib/mcq-transfer";
 
@@ -21,7 +21,7 @@ type RouteContext = { params: Promise<{ id: string }> };
  * group can be exported here and restored on this or another instance.
  */
 export async function GET(_req: Request, ctx: RouteContext) {
-    const guard = await requireAdminApi();
+    const guard = await requireSuperAdminApi();
     if (!guard.ok) return guard.response;
 
     const { id } = await ctx.params;

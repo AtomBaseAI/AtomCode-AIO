@@ -10,7 +10,8 @@ import { revalidatePath } from "next/cache";
 async function guard() {
   const session = await auth();
   const role = (session?.user as { role?: string } | undefined)?.role;
-  return session?.user && role === "admin";
+  // Super admin has every admin capability (settings incl. lookups).
+  return Boolean(session?.user && (role === "admin" || role === "superadmin"));
 }
 
 const isType = (v: unknown): v is LookupType =>

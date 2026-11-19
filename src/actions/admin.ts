@@ -17,13 +17,20 @@ export const resetpasswordadmin = async (
 ) => {
     const session = await auth();
     const role = (session?.user as { role?: string } | undefined)?.role;
-    if (!session?.user || role !== "admin") {
+    if (!session?.user || (role !== "admin" && role !== "superadmin")) {
         return { error: "Unauthorized" };
     }
 
-    const admin = await db.admin.findUnique({
-        where: { id: session.user.id }
-    });
+    // Self-service: resolve the caller's own row in the table matching the
+    // session role (admins live in Admin, super admins in SuperAdmin).
+    const admin =
+        role === "superadmin"
+            ? await db.superAdmin.findUnique({
+                  where: { id: session.user.id },
+              })
+            : await db.admin.findUnique({
+                  where: { id: session.user.id },
+              });
     if (!admin?.password) {
         return { error: "Account not found" };
     }
@@ -35,13 +42,16 @@ export const resetpasswordadmin = async (
     const salt = genSaltSync(10);
     const hashedPassword = hashSync(values.password, salt);
 
-    await db.admin.update({
-        where: {
-            id: admin.id
-        },
-        data: {
-            password: hashedPassword
-        }
-    })
+    if (role === "superadmin") {
+        await db.superAdmin.update({
+            where: { id: admin.id },
+            data: { password: hashedPassword },
+        });
+    } else {
+        await db.admin.update({
+            where: { id: admin.id },
+            data: { password: hashedPassword },
+        });
+    }
     return { success: "Password Updated !" }
 }

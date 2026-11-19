@@ -6,6 +6,7 @@ import { getCourseModuleTitlesByModuleId } from "@/data/modules"
 import { ResultAnalysisStudentSchema } from "@/schemas/result-analysis-schema"
 import { z } from "zod"
 import { TopbarBreadcrumb } from "@/components/topbar-title"
+import { EmptyState } from "@/components/shared/empty-state"
 
 async function fetchResultAnalysisStudents(cid: string, mid: string) {
     const resultdata = await getStudentsDataByCourseIdByModule(cid, mid)
@@ -39,7 +40,14 @@ const ResultAnalysisStudents = async ({ params }: { params: Promise<{ cid: strin
                         <BackBtn />
                     </div>
                 </div>
-                <ResultAnalysisStudentsDataTable data={ResultAnalysisStudentsData} columns={columns} />
+                {ResultAnalysisStudentsData.length === 0 ? (
+                    <EmptyState
+                        title="No Student Results Yet"
+                        description="No student attempts recorded for this module. Once students complete the module, their results will appear here."
+                    />
+                ) : (
+                    <ResultAnalysisStudentsDataTable data={ResultAnalysisStudentsData} columns={columns} />
+                )}
             </div>
         </>
     )

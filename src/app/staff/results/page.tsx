@@ -1,5 +1,5 @@
 import { CourseTableSchema } from "@/schemas/course-schema"
-import { Book, DownloadCloud, PieChart, Trophy } from "lucide-react"
+import { DownloadCloud, PieChart, Trophy } from "lucide-react"
 import Link from "next/link"
 import React from "react"
 import { z } from "zod"
@@ -13,6 +13,7 @@ import {
 import { getAllStaffCourses } from "@/data/staff/courses"
 import { auth } from "@/auth"
 import { TopbarTitle } from "@/components/topbar-title"
+import { EmptyState } from "@/components/shared/empty-state"
 
 const getSession = async () => {
   const session = await auth();
@@ -34,14 +35,12 @@ const Results = async () => {
   const coursesData = await fetchCourses(staffID)
   if (coursesData.length === 0) {
     return (
-      <div className="w-full h-[75vh] flex flex-col gap-2 justify-center items-center">
+      <div className="w-full flex flex-col gap-2 mx-8 px-8">
         <TopbarTitle>Analysis</TopbarTitle>
-        <div className=" shadow-lg rounded-md overflow-hidden w-[20rem] order-first lg:order-none border hover:border-primary" >
-          <div className="py-5 px-6 sm:px-8 flex flex-col justify-center items-center gap-5">
-            <Book className="h-10 w-10 text-yellow-400" />
-            No Courses Enrolled !
-          </div>
-        </div>
+        <EmptyState
+          title="No Courses Enrolled !"
+          description="Courses assigned to you will appear here with their leaderboard, analysis and result matrix."
+        />
       </div>
     )
   }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
-import { requireAdminApi } from "@/lib/api-admin-guard";
+import { requireSuperAdminApi } from "@/lib/api-admin-guard";
 import {
     buildMcqCsv,
     buildMcqExportFilename,
@@ -19,7 +19,7 @@ type RouteContext = { params: Promise<{ id: string }> };
  *   - csv  : flat spreadsheet, one row per MCQ (download only)
  */
 export async function GET(req: Request, ctx: RouteContext) {
-    const guard = await requireAdminApi();
+    const guard = await requireSuperAdminApi();
     if (!guard.ok) return guard.response;
 
     const { id } = await ctx.params;

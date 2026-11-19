@@ -12,7 +12,13 @@ import CStudents from "@/components/course/course-table/c-students"
 import CFeedbacks from "@/components/course/course-table/c-feedbacks";
 import CStaffs from "@/components/course/course-table/c-staffs";
 import CAssessments from "@/components/course/course-table/c-assessments";
-export const columns: ColumnDef<CourseTableType>[] = [
+
+/**
+ * Course table columns factory. `canExport` is false for regular admins —
+ * course import / export is super-admin-only, so the per-row export
+ * button only renders for the super admin role.
+ */
+export const getCourseColumns = (canExport: boolean): ColumnDef<CourseTableType>[] => [
 
   {
     accessorKey: "title",
@@ -151,7 +157,7 @@ export const columns: ColumnDef<CourseTableType>[] = [
             <CStudents cid={cid} count={row.original.studentscount} />
             <CStaffs cid={cid} count={row.original.staffscount} />
             <CFeedbacks cid={cid} count={row.original.feedbackscount} />
-            <CourseExportDialog course={row.original} />
+            {canExport && <CourseExportDialog course={row.original} />}
             <CEdit course={row.original} />
             <DeleteCourse cid={cid} />
           </span>

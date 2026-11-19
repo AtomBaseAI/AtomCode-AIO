@@ -1,0 +1,1 @@
+import { PrismaClient } from "./node_modules/.prisma/client/default.js";

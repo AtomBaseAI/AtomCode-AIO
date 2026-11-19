@@ -6,6 +6,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { leaderboardData } from "@/data/results"
 import LeaderboardExportButton from "@/export/result-export/leaderboard-export-button"
 import { TopbarBreadcrumb } from "@/components/topbar-title"
+import { EmptyState } from "@/components/shared/empty-state"
 
 const CourseLeaderboard = async ({ params }: { params: Promise<{ cid: string}> }) => {
     const { cid } = await params
@@ -17,7 +18,19 @@ const CourseLeaderboard = async ({ params }: { params: Promise<{ cid: string}> }
     if (!LeaderboardDatax || LeaderboardDatax.length === 0) {
         return (
             <>
-                No Data Available!
+                <TopbarBreadcrumb
+                    items={[
+                        { label: "Analysis", href: "/admin/results" },
+                        { label: course?.title ?? "Course" },
+                        { label: "Leaderboard" },
+                    ]}
+                />
+                <div className="flex h-full flex-1 flex-col p-4 md:p-8 w-full">
+                    <EmptyState
+                        title="No Leaderboard Data"
+                        description="No student has completed this course yet. The leaderboard will appear once completions are recorded."
+                    />
+                </div>
             </>
         );
     }

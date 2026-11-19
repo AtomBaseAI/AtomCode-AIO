@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import * as z from "zod";
 
 import { db } from "@/lib/db";
-import { requireAdminApi } from "@/lib/api-admin-guard";
+import { requireSuperAdminApi } from "@/lib/api-admin-guard";
 import { completionOrderSchema } from "@/schemas/course-schema";
 
 /** Per-batch sanity caps so one import cannot flood the database. */
@@ -118,7 +118,7 @@ function normalizeModule(item: unknown): unknown {
  * Invalid modules are skipped and reported.
  */
 export async function POST(req: Request) {
-    const guard = await requireAdminApi("courses");
+    const guard = await requireSuperAdminApi("courses");
     if (!guard.ok) return guard.response;
 
     const body = await req.json().catch(() => null);

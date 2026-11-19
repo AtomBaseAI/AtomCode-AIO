@@ -5,6 +5,7 @@ import { getmoduleresults } from "@/data/analysis"
 import { ModuleAnalysisSchema } from "@/schemas/result-analysis-schema"
 import { getCourseById } from "@/data/courses"
 import { TopbarBreadcrumb } from "@/components/topbar-title"
+import { EmptyState } from "@/components/shared/empty-state"
 import { ModuleAnalysisDataTable } from "@/components/results/analysis/ma-data-table"
 import { columns } from "@/components/staff/results/analysis/ma-columns"
 
@@ -41,7 +42,14 @@ const CourseAnalysis = async ({ params }: { params: Promise<{ cid }> }) => {
             <BackBtn />
           </div>
         </div>
-        <ModuleAnalysisDataTable data={modules} columns={columns} />
+        {modules.length === 0 ? (
+          <EmptyState
+            title="No Modules Yet"
+            description="This course has no modules with results to analyze. Add modules and student attempts to see the analysis."
+          />
+        ) : (
+          <ModuleAnalysisDataTable data={modules} columns={columns} />
+        )}
       </div>
     </>
   )

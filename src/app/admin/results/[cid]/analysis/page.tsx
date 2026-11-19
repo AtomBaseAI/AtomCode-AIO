@@ -7,6 +7,7 @@ import { getCourseById } from "@/data/courses"
 import { ModuleAnalysisDataTable } from "@/components/results/analysis/ma-data-table"
 import { columns } from "@/components/results/analysis/ma-columns"
 import { TopbarBreadcrumb } from "@/components/topbar-title"
+import { EmptyState } from "@/components/shared/empty-state"
 
 async function fetchModulesdata(cid: string) {
   const modules = await getmoduleresults(cid)
@@ -41,7 +42,14 @@ const CourseAnalysis = async ({ params }: { params: Promise<{ cid: string}> }) =
             <BackBtn />
           </div>
         </div>
-        <ModuleAnalysisDataTable data={modules} columns={columns} />
+        {modules.length === 0 ? (
+          <EmptyState
+            title="No Modules Yet"
+            description="This course has no modules with results to analyze. Add modules and student attempts to see the analysis."
+          />
+        ) : (
+          <ModuleAnalysisDataTable data={modules} columns={columns} />
+        )}
       </div>
     </>
   )

@@ -5,6 +5,7 @@ import { courseCompletionData } from '@/data/results';
 import { ResultTableStudentType } from '@/schemas/result-matrix-schema';
 import React from 'react'
 import { TopbarBreadcrumb } from '@/components/topbar-title'
+import { EmptyState } from '@/components/shared/empty-state'
 import CompletionExportButton from '@/export/result-export/completion-export-button';
 
 const CourseCompletion = async ({ params }: { params: Promise<{ cid }> }) => {
@@ -21,7 +22,12 @@ const CourseCompletion = async ({ params }: { params: Promise<{ cid }> }) => {
             { label: "Completion" },
           ]}
         />
-        No Data Available !
+        <div className="flex h-full flex-1 flex-col p-4 md:p-8 w-full">
+          <EmptyState
+            title="No Data Available !"
+            description="No completion data found for this course. Students must be enrolled and complete modules first."
+          />
+        </div>
       </>
     )
   }

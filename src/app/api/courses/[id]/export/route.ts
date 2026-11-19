@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
-import { requireAdminApi } from "@/lib/api-admin-guard";
+import { requireSuperAdminApi } from "@/lib/api-admin-guard";
 import { slugifyFilename } from "@/lib/question-transfer";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -22,7 +22,7 @@ type RouteContext = { params: Promise<{ id: string }> };
  * and restored on this or another instance.
  */
 export async function GET(_req: Request, ctx: RouteContext) {
-    const guard = await requireAdminApi("courses");
+    const guard = await requireSuperAdminApi("courses");
     if (!guard.ok) return guard.response;
 
     const { id } = await ctx.params;

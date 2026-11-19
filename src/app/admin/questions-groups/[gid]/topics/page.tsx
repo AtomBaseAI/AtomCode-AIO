@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
+import { auth } from "@/auth"
 import { Button } from "@/components/ui/button"
 import { getQuestionGroupById, getTopicsForGroup, getTopicQuestionCounts } from "@/data/question-groups"
 import { TopicsView, type TopicViewData } from "@/components/question-group/topics-view"
@@ -15,6 +16,12 @@ const GroupTopicsPage = async ({
     params: Promise<{ gid: string }>
 }) => {
     const { gid } = await params
+
+    // Import / export of topics is super-admin-only now.
+    const session = await auth()
+    const role = (session?.user as { role?: string } | undefined)?.role
+    const isSuperAdmin = role === "superadmin"
+
     const group = await getQuestionGroupById(gid)
 
     if (!group) {
@@ -105,10 +112,12 @@ const GroupTopicsPage = async ({
                     </p>
                 </div>
                 <div className="flex justify-center items-center gap-x-4">
-                    <TopicsImportExportMenu
-                        groupId={group.id}
-                        groupTitle={group.title}
-                    />
+                    {isSuperAdmin && (
+                        <TopicsImportExportMenu
+                            groupId={group.id}
+                            groupTitle={group.title}
+                        />
+                    )}
                     <BackBtn />
                 </div>
             </div>

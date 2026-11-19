@@ -4,6 +4,7 @@ import { ResultAnalysisStudentsDataTable } from "@/components/results/analysis/a
 import { getStudentsDataByCourseIdByModule } from "@/data/analysis"
 import { getCourseModuleTitlesByModuleId } from "@/data/modules"
 import { TopbarBreadcrumb } from "@/components/topbar-title"
+import { EmptyState } from "@/components/shared/empty-state"
 import { ResultAnalysisStudentSchema } from "@/schemas/result-analysis-schema"
 import { z } from "zod"
 
@@ -39,7 +40,14 @@ const ResultAnalysisStudents = async ({ params }: { params: Promise<{ cid, mid }
                         <BackBtn />
                     </div>
                 </div>
-                <ResultAnalysisStudentsDataTable data={ResultAnalysisStudentsData} columns={columns} />
+                {ResultAnalysisStudentsData.length === 0 ? (
+                    <EmptyState
+                        title="No Student Results Yet"
+                        description="No student attempts recorded for this module. Once students complete the module, their results will appear here."
+                    />
+                ) : (
+                    <ResultAnalysisStudentsDataTable data={ResultAnalysisStudentsData} columns={columns} />
+                )}
             </div>
         </>
     )

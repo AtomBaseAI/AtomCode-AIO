@@ -2,17 +2,18 @@ import { NextResponse } from "next/server";
 import * as z from "zod";
 
 import { db } from "@/lib/db";
-import { requireAdminApi } from "@/lib/api-admin-guard";
+import { requireSuperAdminApi } from "@/lib/api-admin-guard";
 import { AddQuestionSchema } from "@/schemas/question-schema";
 import { GroupMcqSchema } from "@/schemas/group-mcq-schema";
 import { TopicImportItemSchema, type TopicImportItem } from "@/schemas/topic-schema";
 import { TRANSFER_LANG_IDS } from "@/lib/question-transfer";
 import { createTopicWithGeneral, ensureGeneralTopic } from "@/lib/topics";
 
-/** Per-batch sanity caps so one import cannot flood the database. */
-const MAX_TOPICS_PER_IMPORT = 200;
-const MAX_QUESTIONS_PER_IMPORT = 200;
-const MAX_MCQS_PER_IMPORT = 200;
+/**
+ * No per-import size cap — admins may import as many items as they want.
+ * Rows are inserted in concurrent chunks so huge files stay fast.
+ */
+const INSERT_CHUNK_SIZE = 20;
 
 /** Extended language check — AddQuestionSchema only requires a non-empty string. */
 const ImportQuestionSchema = AddQuestionSchema.superRefine((value, ctx) => {
@@ -63,7 +64,22 @@ async function uniqueGroupTitle(rawTitle: string) {
     return `${base} (imported ${Date.now()})`;
 }
 
-/** Tolerate hand-edited files: numeric strings for maxscore are accepted. */
+/**
+ * Tolerate hand-edited and DB-shaped files: numeric strings for maxscore are
+ * accepted, and optional string fields that JSON exports emit as `null`
+ * (toTransferRow maps missing DB values to null) are turned back into
+ * `undefined` so the schema's `.optional()` accepts them — otherwise every
+ * question with a null referenceimg/topic/… fails validation.
+ */
+const OPTIONAL_STRING_FIELDS = [
+    "topic",
+    "subtopic",
+    "inputconstrains",
+    "blacklist",
+    "whitelist",
+    "referenceimg",
+] as const;
+
 function normalizeCodeQuestion(item: unknown): unknown {
     if (!item || typeof item !== "object") return item;
     const obj = { ...(item as Record<string, unknown>) };
@@ -73,6 +89,9 @@ function normalizeCodeQuestion(item: unknown): unknown {
         !Number.isNaN(Number(obj.maxscore))
     ) {
         obj.maxscore = Number(obj.maxscore);
+    }
+    for (const field of OPTIONAL_STRING_FIELDS) {
+        if (obj[field] === null) obj[field] = undefined;
     }
     return obj;
 }
@@ -88,11 +107,20 @@ function normalizeMcq(item: unknown): unknown {
 
     if (typeof obj.iscodesnippet === "string") {
         const flag = obj.iscodesnippet.trim().toLowerCase();
-        if (flag === "true" || flag === "1") obj.iscodesnippet = true;
-        else if (flag === "false" || flag === "0") obj.iscodesnippet = false;
+        if (flag === "true" || flag === "1" || flag === "yes") obj.iscodesnippet = true;
+        else if (flag === "false" || flag === "0" || flag === "no") obj.iscodesnippet = false;
     } else if (typeof obj.iscodesnippet === "number") {
         if (obj.iscodesnippet === 1) obj.iscodesnippet = true;
         else if (obj.iscodesnippet === 0) obj.iscodesnippet = false;
+    }
+    // Hand-edited files often drop the flag entirely — treat a missing
+    // iscodesnippet as "no snippet" instead of failing the whole MCQ.
+    if (obj.iscodesnippet === undefined || obj.iscodesnippet === null) {
+        obj.iscodesnippet = false;
+        if (obj.codesnippet) {
+            obj.iscodesnippet = true;
+            obj.snippetLang ??= "text";
+        }
     }
 
     if (
@@ -170,7 +198,7 @@ async function importTopic(groupId: string, item: TopicImportItem) {
  * at least one item imports.
  */
 export async function POST(req: Request) {
-    const guard = await requireAdminApi();
+    const guard = await requireSuperAdminApi();
     if (!guard.ok) return guard.response;
 
     const body = await req.json().catch(() => null);
@@ -221,19 +249,6 @@ export async function POST(req: Request) {
             { status: 400 }
         );
     }
-    if (
-        rawTopics.length > MAX_TOPICS_PER_IMPORT ||
-        rawQuestions.length > MAX_QUESTIONS_PER_IMPORT ||
-        rawMcqs.length > MAX_MCQS_PER_IMPORT
-    ) {
-        return NextResponse.json(
-            {
-                error: `Too many items in one import (max ${MAX_TOPICS_PER_IMPORT} topics / ${MAX_QUESTIONS_PER_IMPORT} code questions / ${MAX_MCQS_PER_IMPORT} MCQs). Split the file.`,
-            },
-            { status: 400 }
-        );
-    }
-
     // ── Resolve the new group title ─────────────────────────────────────────
     const exportedTitle =
         typeof (envelope.group as { title?: unknown })?.title === "string"
@@ -289,6 +304,13 @@ export async function POST(req: Request) {
     }
 
     // ── Code questions ──────────────────────────────────────────────────────
+    // Code questions — validate every item first (pure CPU), then insert
+    // in parallel chunks so large uncapped imports stay fast.
+    const validQuestions: {
+        index: number;
+        title: string;
+        data: z.infer<typeof ImportQuestionSchema>;
+    }[] = [];
     for (let i = 0; i < rawQuestions.length; i++) {
         const item = normalizeCodeQuestion(rawQuestions[i]);
         const qTitle =
@@ -306,27 +328,44 @@ export async function POST(req: Request) {
             });
             continue;
         }
+        validQuestions.push({ index: i + 1, title: qTitle, data: parsed.data });
+    }
 
-        try {
-            // zod strips unknown keys (id, moduleId, assessmentsId, …), so
-            // only portable content fields reach the create call.
-            await db.codeQuestion.create({
-                data: { ...parsed.data, questionGroupId: group.id },
-            });
-            createdQuestions++;
-        } catch (err) {
-            errors.push({
-                index: i + 1,
-                name: qTitle,
-                error:
-                    err instanceof Error
-                        ? err.message
-                        : "Database error while creating the code question",
-            });
-        }
+    // zod strips unknown keys (id, moduleId, assessmentsId, …), so only
+    // portable content fields reach the create call.
+    for (let c = 0; c < validQuestions.length; c += INSERT_CHUNK_SIZE) {
+        const chunk = validQuestions.slice(c, c + INSERT_CHUNK_SIZE);
+        const results = await Promise.allSettled(
+            chunk.map((q) =>
+                db.codeQuestion.create({
+                    data: { ...q.data, questionGroupId: group.id },
+                })
+            )
+        );
+        results.forEach((r, j) => {
+            const q = chunk[j];
+            if (r.status === "fulfilled") {
+                createdQuestions++;
+            } else {
+                errors.push({
+                    index: q.index,
+                    name: q.title,
+                    error:
+                        r.reason instanceof Error
+                            ? r.reason.message
+                            : "Database error while creating the code question",
+                });
+            }
+        });
     }
 
     // ── MCQ questions ───────────────────────────────────────────────────────
+    // MCQ questions — same validate-then-chunked-insert pattern.
+    const validMcqs: {
+        index: number;
+        title: string;
+        data: z.infer<typeof GroupMcqSchema>;
+    }[] = [];
     for (let i = 0; i < rawMcqs.length; i++) {
         const item = normalizeMcq(rawMcqs[i]);
         const mTitle =
@@ -344,22 +383,33 @@ export async function POST(req: Request) {
             });
             continue;
         }
+        validMcqs.push({ index: i + 1, title: mTitle, data: parsed.data });
+    }
 
-        try {
-            await db.mCQQuestion.create({
-                data: { ...parsed.data, questionGroupId: group.id },
-            });
-            createdMcqs++;
-        } catch (err) {
-            errors.push({
-                index: i + 1,
-                name: mTitle,
-                error:
-                    err instanceof Error
-                        ? err.message
-                        : "Database error while creating the MCQ",
-            });
-        }
+    for (let c = 0; c < validMcqs.length; c += INSERT_CHUNK_SIZE) {
+        const chunk = validMcqs.slice(c, c + INSERT_CHUNK_SIZE);
+        const results = await Promise.allSettled(
+            chunk.map((m) =>
+                db.mCQQuestion.create({
+                    data: { ...m.data, questionGroupId: group.id },
+                })
+            )
+        );
+        results.forEach((r, j) => {
+            const m = chunk[j];
+            if (r.status === "fulfilled") {
+                createdMcqs++;
+            } else {
+                errors.push({
+                    index: m.index,
+                    name: m.title,
+                    error:
+                        r.reason instanceof Error
+                            ? r.reason.message
+                            : "Database error while creating the MCQ",
+                });
+            }
+        });
     }
 
     const totalCreated =

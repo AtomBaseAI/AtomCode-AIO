@@ -2,14 +2,17 @@ import { NextResponse } from "next/server";
 import * as z from "zod";
 
 import { db } from "@/lib/db";
-import { requireAdminApi } from "@/lib/api-admin-guard";
+import { requireSuperAdminApi } from "@/lib/api-admin-guard";
 import { AddQuestionSchema } from "@/schemas/question-schema";
 import { TRANSFER_LANG_IDS } from "@/lib/question-transfer";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-/** Per-batch sanity cap so one import cannot flood the question bank. */
-const MAX_QUESTIONS_PER_IMPORT = 200;
+/**
+ * No per-import size cap — admins may import as many questions as they
+ * want. Rows are inserted in concurrent chunks so huge files stay fast.
+ */
+const INSERT_CHUNK_SIZE = 20;
 
 /** Extended language check — AddQuestionSchema only requires a non-empty string. */
 const ImportQuestionSchema = AddQuestionSchema.superRefine((value, ctx) => {
@@ -29,9 +32,20 @@ interface ImportIssue {
 }
 
 /**
- * Tolerate hand-edited files: numeric strings for maxscore are accepted
- * (the Create Question form always produces a number, exports too).
+ * Tolerate hand-edited and DB-shaped files: numeric strings for maxscore are
+ * accepted (the Create Question form always produces a number, exports too),
+ * and optional string fields that JSON exports emit as `null` are turned
+ * back into `undefined` so the schema's `.optional()` accepts them.
  */
+const OPTIONAL_STRING_FIELDS = [
+    "topic",
+    "subtopic",
+    "inputconstrains",
+    "blacklist",
+    "whitelist",
+    "referenceimg",
+] as const;
+
 function normalizeImportItem(item: unknown): unknown {
     if (!item || typeof item !== "object") return item;
     const obj = { ...(item as Record<string, unknown>) };
@@ -41,6 +55,9 @@ function normalizeImportItem(item: unknown): unknown {
         !Number.isNaN(Number(obj.maxscore))
     ) {
         obj.maxscore = Number(obj.maxscore);
+    }
+    for (const field of OPTIONAL_STRING_FIELDS) {
+        if (obj[field] === null) obj[field] = undefined;
     }
     return obj;
 }
@@ -53,7 +70,7 @@ function normalizeImportItem(item: unknown): unknown {
  * NEW copy inside this group; invalid ones are skipped and reported.
  */
 export async function POST(req: Request, ctx: RouteContext) {
-    const guard = await requireAdminApi();
+    const guard = await requireSuperAdminApi();
     if (!guard.ok) return guard.response;
 
     const { id } = await ctx.params;
@@ -75,18 +92,16 @@ export async function POST(req: Request, ctx: RouteContext) {
             { status: 400 }
         );
     }
-    if (raw.length > MAX_QUESTIONS_PER_IMPORT) {
-        return NextResponse.json(
-            {
-                error: `Too many questions in one import (max ${MAX_QUESTIONS_PER_IMPORT}). Split the file.`,
-            },
-            { status: 400 }
-        );
-    }
 
     const errors: ImportIssue[] = [];
     let created = 0;
 
+    // Validate every item first (pure CPU), then insert in parallel chunks.
+    const validItems: {
+        index: number;
+        title: string;
+        data: z.infer<typeof ImportQuestionSchema>;
+    }[] = [];
     for (let i = 0; i < raw.length; i++) {
         const item = normalizeImportItem(raw[i]);
         const title =
@@ -104,24 +119,35 @@ export async function POST(req: Request, ctx: RouteContext) {
             });
             continue;
         }
+        validItems.push({ index: i + 1, title, data: parsed.data });
+    }
 
-        try {
-            // zod strips unknown keys (id, moduleId, assessmentsId, …), so
-            // only portable content fields reach the create call.
-            await db.codeQuestion.create({
-                data: { ...parsed.data, questionGroupId: id },
-            });
-            created++;
-        } catch (err) {
-            errors.push({
-                index: i + 1,
-                title,
-                error:
-                    err instanceof Error
-                        ? err.message
-                        : "Database error while creating the question",
-            });
-        }
+    // zod strips unknown keys (id, moduleId, assessmentsId, …), so only
+    // portable content fields reach the create call.
+    for (let c = 0; c < validItems.length; c += INSERT_CHUNK_SIZE) {
+        const chunk = validItems.slice(c, c + INSERT_CHUNK_SIZE);
+        const results = await Promise.allSettled(
+            chunk.map((q) =>
+                db.codeQuestion.create({
+                    data: { ...q.data, questionGroupId: id },
+                })
+            )
+        );
+        results.forEach((r, j) => {
+            const q = chunk[j];
+            if (r.status === "fulfilled") {
+                created++;
+            } else {
+                errors.push({
+                    index: q.index,
+                    title: q.title,
+                    error:
+                        r.reason instanceof Error
+                            ? r.reason.message
+                            : "Database error while creating the question",
+                });
+            }
+        });
     }
 
     if (created === 0) {

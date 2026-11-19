@@ -1,3 +1,4 @@
+import { auth } from "@/auth"
 import { getAllQuestionGroups } from "@/data/question-groups"
 import { GroupsDataTable } from "@/components/question-group/groups-data-table"
 import { GroupFormDialog } from "@/components/question-group/group-form-dialog"
@@ -5,6 +6,12 @@ import { GroupImportDialog } from "@/components/question-group/group-import-dial
 import { TopbarTitle } from "@/components/topbar-title"
 
 export default async function QuestionGroupsPage() {
+    // Import / export is super-admin-only now — regular admins get a panel
+    // without it, the super admin keeps the exact same tooling as before.
+    const session = await auth()
+    const role = (session?.user as { role?: string } | undefined)?.role
+    const isSuperAdmin = role === "superadmin"
+
     const groups = await getAllQuestionGroups()
     const rows = (groups ?? []).map((g) => ({
         id: g.id,
@@ -25,11 +32,11 @@ export default async function QuestionGroupsPage() {
                     </p>
                 </div>
                 <div className="flex justify-center items-center gap-x-4">
-                    <GroupImportDialog />
+                    {isSuperAdmin && <GroupImportDialog />}
                     <GroupFormDialog mode="create" />
                 </div>
             </div>
-            <GroupsDataTable data={rows} />
+            <GroupsDataTable data={rows} canExport={isSuperAdmin} />
         </div>
     )
 }

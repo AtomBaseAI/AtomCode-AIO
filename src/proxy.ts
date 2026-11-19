@@ -37,9 +37,12 @@ import {
  */
 
 const ROLE_AREA: Record<string, string[]> = {
-  "/admin": ["admin"],
+  // Super admin inherits every admin panel area (sidebar shows the same
+  // options) — but only "superadmin" can enter /superadmin/* below.
+  "/admin": ["admin", "superadmin"],
   "/staff": ["staff"],
   "/student": ["user"],
+  "/superadmin": ["superadmin"],
 };
 
 const { auth } = NextAuth(authConfig);

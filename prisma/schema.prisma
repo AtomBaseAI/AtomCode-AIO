@@ -38,6 +38,48 @@ model Admin {
 }
 
 /**
+ * Super Admin — platform owner, one level above Admin.
+ * - Created by seed / managed from the super admin panel only.
+ * - Signs in with email + password, then a static 4-digit auth code
+ *   (stored in the Setting KV under "superadmin.authcode").
+ * - Everything an Admin can do, plus: manage Admin accounts, the
+ *   revenue/billing dashboard and the auth code itself.
+ */
+model SuperAdmin {
+  id       String  @id @default(cuid())
+  name     String?
+  email    String  @unique
+  image    String?
+  password String
+}
+
+/**
+ * One annual collection record per batch per year — the billing ledger.
+ * status: PENDING (expected) | COLLECTED (cash received from institution).
+ * Kept as String like every controlled-value column in this schema.
+ */
+model BatchBilling {
+  id               String    @id @default(cuid())
+  batchValue       String
+  batch            Batch     @relation(fields: [batchValue], references: [value])
+  year             Int
+  plan             String    @default("PREMIUM") // FREE | PREMIUM
+  amountPerStudent Float
+  studentCount     Int       @default(0)
+  totalAmount      Float
+  status           String    @default("PENDING")
+  method           String? // cash
+  collectedAt      DateTime?
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([batchValue, year])
+  @@index([year])
+  @@index([status])
+}
+
+/**
  * Platform settings — simple key-value store edited from the admin
  * settings page (maintenance mode, self-registration toggles, ...).
  * Values are strings ("true"/"false" for flags) so new keys never need
@@ -56,10 +98,22 @@ model Setting {
  * - Batch.value is the display string (e.g. "2025-2029") stored on User.batch.
  * - Department.value is the stored token on User.department/Staff.department
  *   (kept short, e.g. "cse"), label is the display name (e.g. "CSE").
+ *
+ * Annual billing (super-admin-only revenue surface): batch wise, NOT per
+ * user. Only two plans — FREE (no billing) and PREMIUM. The super admin
+ * enables billing per batch and sets a per-student annual amount in INR;
+ * the institution collects the cash, so there is NO per-student bill and
+ * no billing status on individual students — only one collection record
+ * per batch per year (BatchBilling).
  */
 model Batch {
-  id    String @id @default(cuid())
-  value String @unique
+  id             String         @id @default(cuid())
+  value          String         @unique
+  // Billing config (super admin only):
+  billingEnabled Boolean        @default(false)
+  plan           String         @default("FREE") // FREE | PREMIUM
+  annualAmount   Float?                          // INR per student / year (premium only)
+  billings       BatchBilling[]
 }
 
 model Department {

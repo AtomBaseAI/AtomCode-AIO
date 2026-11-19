@@ -5,6 +5,7 @@ import { compare } from "bcrypt-ts";
 import { LoginSchema } from "@/schemas/auth-schema";
 import { db } from "@/lib/db";
 import { authConfig } from "@/auth.config";
+import { getSuperAdminAuthCode } from "@/lib/superadmin-settings";
 import {
   gateAttempt,
   registerFailure,
@@ -42,37 +43,44 @@ class RateLimitedError extends CredentialsSignin {
   code = "rate-limited";
 }
 
+/** Super admin signed in with valid credentials but a wrong/missing auth code. */
+class InvalidAuthCodeError extends CredentialsSignin {
+  code = "invalid-auth-code";
+}
+
 export const LOGIN_ERRORS: Record<string, string> = {
   "invalid-credentials": "Invalid Credentials",
   "account-disabled": "This account has been disabled. Contact your administrator.",
   "rate-limited": `Too many failed attempts. Try again in ${LOGIN_LOCKOUT_MINUTES} minutes.`,
+  "invalid-auth-code": "Invalid auth code",
 };
 
 export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
-      credentials: { email: {}, password: {} },
+      credentials: { email: {}, password: {}, code: {} },
       async authorize(credentials) {
         const parsed = LoginSchema.safeParse(credentials);
         if (!parsed.success) throw new InvalidCredentialsError();
-        const { email, password } = parsed.data;
+        const { email, password, code } = parsed.data;
 
         // 1. Lockout gate — rejected attempts never touch the DB or bcrypt.
         const gate = gateAttempt(email);
         if (!gate.allowed) throw new RateLimitedError();
 
-        // 2. One parallel round-trip instead of three sequential lookups
-        //    (admin → staff → student). Precedence decides which account
-        //    the email refers to when it exists in more than one table.
-        const [admin, staff, user] = await Promise.all([
+        // 2. One parallel round-trip instead of four sequential lookups
+        //    (admin → superadmin → staff → student). Precedence decides which
+        //    account the email refers to when it exists in more than one table.
+        const [admin, superAdmin, staff, user] = await Promise.all([
           db.admin.findUnique({ where: { email } }),
+          db.superAdmin.findUnique({ where: { email } }),
           db.staff.findUnique({ where: { email } }),
           db.user.findUnique({ where: { email } }),
         ]);
 
         const candidate =
-          admin ?? staff ?? user ?? null;
+          admin ?? superAdmin ?? staff ?? user ?? null;
 
         if (!candidate) {
           registerFailure(email);
@@ -86,16 +94,33 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
           throw new InvalidCredentialsError();
         }
 
-        // 4. Student activation policy (Admin/Staff have no isActive flag).
+        // 4. Super admin second factor — the static 4-digit auth code.
+        //    Checked HERE (not just in the login action) so direct POSTs to
+        //    /api/auth/callback can never bypass the code step.
+        if (superAdmin) {
+          const expected = await getSuperAdminAuthCode();
+          if (!code || code !== expected) {
+            registerFailure(email);
+            throw new InvalidAuthCodeError();
+          }
+        }
+
+        // 5. Student activation policy (Admin/Staff have no isActive flag).
         if ("isActive" in candidate && candidate.isActive === false) {
           registerFailure(email);
           throw new AccountDisabledError();
         }
 
-        // 5. Success — clear the failure budget and issue the session.
+        // 6. Success — clear the failure budget and issue the session.
         clearFailures(email);
 
-        const role = admin ? "admin" : staff ? "staff" : "user";
+        const role = admin
+          ? "admin"
+          : superAdmin
+            ? "superadmin"
+            : staff
+              ? "staff"
+              : "user";
         return {
           id: candidate.id,
           name: candidate.name,

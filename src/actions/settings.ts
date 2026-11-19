@@ -41,15 +41,31 @@ export const updateAdminProfile = async (
 
   const normalizedEmail = email.toLowerCase().trim();
   try {
-    const clash = await db.admin.findFirst({
-      where: { email: normalizedEmail, NOT: { id } },
-    });
+    // The super admin's profile lives in the SuperAdmin table — same
+    // self-service contract, own row.
+    const role = (session.user as { role?: string }).role;
+
+    const clash =
+      role === "superadmin"
+        ? await db.superAdmin.findFirst({
+            where: { email: normalizedEmail, NOT: { id } },
+          })
+        : await db.admin.findFirst({
+            where: { email: normalizedEmail, NOT: { id } },
+          });
     if (clash) return { error: "Email already in use by another admin" };
 
-    await db.admin.update({
-      where: { id },
-      data: { name: name.trim(), email: normalizedEmail },
-    });
+    if (role === "superadmin") {
+      await db.superAdmin.update({
+        where: { id },
+        data: { name: name.trim(), email: normalizedEmail },
+      });
+    } else {
+      await db.admin.update({
+        where: { id },
+        data: { name: name.trim(), email: normalizedEmail },
+      });
+    }
     // Re-sign the JWT with the fresh profile so every server component
     // reading auth() (topbar, this page) shows the new values immediately.
     await unstable_update({ user: { name: name.trim(), email: normalizedEmail } });

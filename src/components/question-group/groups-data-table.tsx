@@ -40,7 +40,12 @@ import { GroupExportDialog } from "@/components/question-group/group-export-dial
 import { GroupDeleteDialog } from "@/components/question-group/group-delete-dialog"
 import type { QuestionGroupRow } from "@/schemas/question-group-schema"
 
-export const groupColumns: ColumnDef<QuestionGroupRow>[] = [
+/**
+ * Row actions column factory. `canExport` is false for regular admins —
+ * question-group import / export is super-admin-only, so the per-row
+ * export button only renders for the super admin role.
+ */
+export const getGroupColumns = (canExport: boolean): ColumnDef<QuestionGroupRow>[] => [
     {
         accessorKey: "title",
         header: ({ column }) => (
@@ -185,16 +190,18 @@ export const groupColumns: ColumnDef<QuestionGroupRow>[] = [
                                 <ListTree className="size-5 text-primary" />
                             </Link>
                         </Button>
-                        <GroupExportDialog
-                            group={{
-                                id: group.id,
-                                title: group.title,
-                                createdAt: group.createdAt,
-                                questionCount: group.questionCount,
-                                mcqCount: group.mcqCount,
-                                topicCount: group.topicCount,
-                            }}
-                        />
+                        {canExport && (
+                            <GroupExportDialog
+                                group={{
+                                    id: group.id,
+                                    title: group.title,
+                                    createdAt: group.createdAt,
+                                    questionCount: group.questionCount,
+                                    mcqCount: group.mcqCount,
+                                    topicCount: group.topicCount,
+                                }}
+                            />
+                        )}
                         <GroupFormDialog
                             mode="edit"
                             group={{
@@ -217,6 +224,8 @@ export const groupColumns: ColumnDef<QuestionGroupRow>[] = [
 
 interface GroupsDataTableProps {
     data: QuestionGroupRow[]
+    /** Super-admin-only: shows the per-row export dialog when true. */
+    canExport?: boolean
 }
 
 /**
@@ -224,7 +233,7 @@ interface GroupsDataTableProps {
  * Follows the shared data-table pattern used across the admin app
  * (search toolbar, view options, sortable headers, pagination).
  */
-export function GroupsDataTable({ data }: GroupsDataTableProps) {
+export function GroupsDataTable({ data, canExport = false }: GroupsDataTableProps) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
@@ -233,8 +242,8 @@ export function GroupsDataTable({ data }: GroupsDataTableProps) {
     const [rowSelection, setRowSelection] = React.useState({})
 
     const allColumns = React.useMemo<ColumnDef<QuestionGroupRow>[]>(
-        () => [makeSelectColumn<QuestionGroupRow>(), ...groupColumns],
-        []
+        () => [makeSelectColumn<QuestionGroupRow>(), ...getGroupColumns(canExport)],
+        [canExport]
     )
 
     const table = useReactTable({

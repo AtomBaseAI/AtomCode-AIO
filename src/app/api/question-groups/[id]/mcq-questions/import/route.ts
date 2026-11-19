@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
+import * as z from "zod";
 
 import { db } from "@/lib/db";
-import { requireAdminApi } from "@/lib/api-admin-guard";
+import { requireSuperAdminApi } from "@/lib/api-admin-guard";
 import { GroupMcqSchema } from "@/schemas/group-mcq-schema";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-/** Per-batch sanity cap so one import cannot flood the question bank. */
-const MAX_MCQS_PER_IMPORT = 200;
+/**
+ * No per-import size cap — admins may import as many MCQs as they want.
+ * Rows are inserted in concurrent chunks so huge files stay fast.
+ */
+const INSERT_CHUNK_SIZE = 20;
 
 interface ImportIssue {
     index: number;
@@ -76,7 +80,7 @@ function normalizeImportItem(item: unknown): unknown {
  * inside this group; invalid ones are skipped and reported.
  */
 export async function POST(req: Request, ctx: RouteContext) {
-    const guard = await requireAdminApi();
+    const guard = await requireSuperAdminApi();
     if (!guard.ok) return guard.response;
 
     const { id } = await ctx.params;
@@ -98,18 +102,16 @@ export async function POST(req: Request, ctx: RouteContext) {
             { status: 400 }
         );
     }
-    if (raw.length > MAX_MCQS_PER_IMPORT) {
-        return NextResponse.json(
-            {
-                error: `Too many MCQs in one import (max ${MAX_MCQS_PER_IMPORT}). Split the file.`,
-            },
-            { status: 400 }
-        );
-    }
 
     const errors: ImportIssue[] = [];
     let created = 0;
 
+    // Validate every item first (pure CPU), then insert in parallel chunks.
+    const validItems: {
+        index: number;
+        title: string;
+        data: z.infer<typeof GroupMcqSchema>;
+    }[] = [];
     for (let i = 0; i < raw.length; i++) {
         const item = normalizeImportItem(raw[i]);
         const title =
@@ -127,24 +129,35 @@ export async function POST(req: Request, ctx: RouteContext) {
             });
             continue;
         }
+        validItems.push({ index: i + 1, title, data: parsed.data });
+    }
 
-        try {
-            // zod strips unknown keys (id, moduleId, assessmentsId, …), so
-            // only portable content fields reach the create call.
-            await db.mCQQuestion.create({
-                data: { ...parsed.data, questionGroupId: id },
-            });
-            created++;
-        } catch (err) {
-            errors.push({
-                index: i + 1,
-                title,
-                error:
-                    err instanceof Error
-                        ? err.message
-                        : "Database error while creating the MCQ",
-            });
-        }
+    // zod strips unknown keys (id, moduleId, assessmentsId, …), so only
+    // portable content fields reach the create call.
+    for (let c = 0; c < validItems.length; c += INSERT_CHUNK_SIZE) {
+        const chunk = validItems.slice(c, c + INSERT_CHUNK_SIZE);
+        const results = await Promise.allSettled(
+            chunk.map((m) =>
+                db.mCQQuestion.create({
+                    data: { ...m.data, questionGroupId: id },
+                })
+            )
+        );
+        results.forEach((r, j) => {
+            const m = chunk[j];
+            if (r.status === "fulfilled") {
+                created++;
+            } else {
+                errors.push({
+                    index: m.index,
+                    title: m.title,
+                    error:
+                        r.reason instanceof Error
+                            ? r.reason.message
+                            : "Database error while creating the MCQ",
+                });
+            }
+        });
     }
 
     if (created === 0) {

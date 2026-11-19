@@ -18,7 +18,7 @@ import { resolveAuthSecret } from "@/lib/auth-secret";
  * the cookie IS the session, verified by signature alone.
  */
 
-export type AtomRole = "admin" | "staff" | "user";
+export type AtomRole = "admin" | "staff" | "user" | "superadmin";
 
 export const authConfig = {
   secret: resolveAuthSecret(),

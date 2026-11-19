@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/chart"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { EmptyState } from "@/components/shared/empty-state"
 import { formatDate } from '@/lib/utils';
 
 // Mock type for demonstration - replace with your actual type
@@ -142,9 +143,7 @@ const RCViewHelper = ({
                     <BarChart2 />
                 </DialogTrigger>
                 <DialogContent aria-describedby={undefined} className="sm:max-w-md">
-                    <div className="p-6 text-center">
-                        <p>No data available to display charts.</p>
-                    </div>
+                    <EmptyState compact title="No data available to display charts." />
                 </DialogContent>
             </Dialog>
         )
