@@ -6,7 +6,7 @@ through a dedicated token-authenticated API at `/api/desktop/*`.
 
 > Note: the folder is intentionally named `elcetron` (as requested).
 
-## Features (v2.0.1)
+## Features (v2.0.2)
 
 - 🔐 **Student-only login** — staff/admin credentials are rejected with a clear message, brand-panel login screen mirroring the web app
 - 📊 **Dashboard** — enrolled courses, module progress, average score, assessment readiness
@@ -166,11 +166,20 @@ Build matrix (config validated with electron-builder 26.18.0):
 Notes:
 - `npm run build` is a fast sanity check (no installer); run the produced
   binary from `dist/linux-unpacked/` etc. to smoke-test.
-- **No Wine / no Rosetta needed on Apple Silicon Macs** (electron-builder ≥ 26):
-  Windows exe resources (icon, version strings) are edited with the pure-JS
-  `resedit`, NSIS 3.12 ships a native `mac/arm64/makensis`, and the NSIS
-  uninstaller is extracted with a pure-JS reader on macOS ≥ 10.15. Building
-  `export:win` on an Apple Silicon Mac works out of the box.
+- **Apple Silicon Macs (arm64):** Windows exe resources (icon, version
+  strings) are edited with the pure-JS `resedit`, so **no Wine** is needed.
+  The bundled NSIS toolchain, however, ships an **Intel-only
+  `mac/makensis`** — on a Mac without Rosetta 2 the NSIS target aborts
+  mid-build with `Cannot spawn …/mac/makensis: Error: spawn Unknown system
+  error -86` (-86 = EBADARCH, "Bad CPU type in executable").
+  `export:win` therefore runs `scripts/fix-nsis-arch.mjs` first: it reads
+  the Mach-O headers of every cached makensis, keeps x86_64 binaries when
+  Rosetta 2 is present, otherwise swaps in a native arm64 makensis (the
+  cache's own `mac/arm64/makensis` if present, else Homebrew's
+  `brew install nsis`), and fails fast with the one-line fix when neither
+  is available:
+  `softwareupdate --install-rosetta --agree-to-license`.
+  The original Intel binary is preserved as `makensis.x86_64.bak`.
 - From **Linux**, `export:win` still needs **wine** for the NSIS
   uninstaller-extraction step (`sudo apt install wine64`); every other step
   (resedit icon/metadata editing, makensis) runs natively.
@@ -209,16 +218,37 @@ Silicon kernels kill the app at first launch with
 (crash frame: `electron::fuses::IsRunAsNodeEnabled()`). This was the
 "AtomCode Student quit unexpectedly" crash reported on macOS 27 (v2.0.0
 dmg built with `identity: null`, where electron-builder skips signing
-completely). Since **v2.0.1** the afterPack hook
-(`scripts/afterpack.cjs`):
+completely). Since **v2.0.2** the afterPack hook
+(`scripts/afterpack.cjs`) hardens the bundle in this order:
 
-1. writes the integrity manifest (`Contents/Resources/integrity-manifest.json`),
-2. flips the security fuses with `resetAdHocDarwinSignature: true` —
+1. **sanitizes bundle symlinks** — npm-installed packages (doppiojvm) create
+   *absolute* symlinks that point at the build machine; electron-builder
+   copies them verbatim, so the shipped bundle contained a symlink to e.g.
+   `/Users/<you>/Work/…/doppiojvm/vendor`, which makes
+   `codesign --verify --deep --strict` fail with
+   `invalid destination for symbolic link in bundle` (exactly the error the
+   v2.0.1 gate caught during `export:mac`). The hook re-points every
+   escaping symlink at the equivalent path *inside* the bundle (relative —
+   doppio's `require("../vendor/java_home/jdk.json")` keeps working) and
+   removes links that could never resolve,
+2. *(win32 only)* **dereferences remaining symlinks into real files** —
+   Windows installers have no symlink semantics, so doppio's
+   `dist/release-cli/vendor` link ships as a real copy of the vendored JDK
+   tree and Java works in the installed app,
+3. **clears extended attributes** on the whole bundle (`xattr -cr`) —
+   Finder metadata / quarantine flags would otherwise fail strict
+   verification (`resource fork … not allowed`),
+4. writes the integrity manifest (`Contents/Resources/integrity-manifest.json`),
+5. flips the security fuses with `resetAdHocDarwinSignature: true` —
    `@electron/fuses` immediately re-signs the whole `.app` ad-hoc
    (`codesign --force --deep --sign -`),
-3. reads the fuse wire back from the binary and asserts every value,
-4. runs `codesign --verify --deep --strict` and **fails the build** if the
-   signature does not verify.
+6. reads the fuse wire back from the binary and asserts every value,
+7. runs `codesign --verify --deep --strict` and **fails the build** if the
+   signature does not verify (listing any offending symlinks).
+
+The source tree is also fixed at the root: `scripts/sync-engine-assets.mjs`
+(prebuild) normalizes doppio's `dist/<variant>/vendor` links to portable
+relative paths, so machine-specific links never even reach packaging.
 
 Distribution options:
 
@@ -240,7 +270,7 @@ Distribution options:
 2. installs the app + all bundled WASM runtimes + the Java runtime,
 3. creates the **desktop shortcut** and **Start Menu shortcut**
    (`createDesktopShortcut: "always"`, `createStartMenuShortcut: true`),
-4. runs the `customInstall` verification page (`build/installer.nsh`)
+4. runs the `customInstall` verification page (`scripts/installer.nsh`)
    which checks `app.asar`, the Java runtime entry, `rt.jar`, `tools.jar`
    and the integrity manifest, and reports success/failure,
 5. the app itself re-verifies the manifest (SHA-256 of every shipped file)
@@ -251,3 +281,16 @@ The Electron fuses (NODE_OPTIONS off, `--inspect` off, only-load-app-from-asar)
 are applied to the packaged exe by the same afterPack hook and verified by
 read-back, so the shipped runtime cannot be hijacked via env vars, debug
 ports, or a dropped `app` folder.
+
+> **`scripts/installer.nsh` + `scripts/license.txt` are required** — they are
+> wired into the build config (`nsis.include` / `nsis.license`) and
+> `export:win` aborts with `cannot find specified resource …` when they are
+> missing from the checkout. They originally lived in `elcetron/build/`,
+> which the root `.gitignore`'s global `build/` rule silently excluded from
+> every commit — that exact bug made `export:win` fail with
+> `cannot find specified resource "build/installer.nsh"` even though the
+> files existed in the working tree. Since v2.0.3 they live in the tracked
+> `scripts/` directory (and `elcetron/build/` is un-ignored for future
+> build resources like icons). v2.0.2+ also dereferences symlinks for
+> Windows so the packaged Java runtime needs no link support at install
+> time.

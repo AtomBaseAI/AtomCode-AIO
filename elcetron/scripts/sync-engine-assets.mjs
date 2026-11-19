@@ -20,7 +20,16 @@
  * Run from elcetron/:  node scripts/sync-engine-assets.mjs
  */
 
-import { existsSync, statSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  readlinkSync,
+  readdirSync,
+  renameSync,
+  statSync,
+  symlinkSync,
+  unlinkSync,
+} from "node:fs";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -114,6 +123,53 @@ if (REQUIRED.some(([rel]) => rel.startsWith("java-runtime/")) && missing > 0) {
     }
   }
 }
+
+/* ------------------------------------------------------------------
+ * doppiojvm ships machine-specific ABSOLUTE symlinks
+ *   java-runtime/node_modules/doppiojvm/dist/<variant>/vendor
+ *     → <project>/java-runtime/node_modules/doppiojvm/vendor
+ * Absolute links cannot survive packaging: macOS `codesign --verify
+ * --deep --strict` rejects them ("invalid destination for symbolic link
+ * in bundle") and Windows installers cannot restore them. Re-point every
+ * one at the portable relative target ../../vendor (idempotent).
+ * ------------------------------------------------------------------ */
+function normalizeDoppioVendorSymlinks() {
+  const distRoot = path.join(electronRoot, "java-runtime", "node_modules", "doppiojvm", "dist");
+  if (!existsSync(distRoot)) return;
+  let normalized = 0;
+  for (const entry of readdirSync(distRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const variantDir = path.join(distRoot, entry.name);
+    const linkAbs = path.join(variantDir, "vendor");
+    let target;
+    try {
+      if (!lstatSync(linkAbs).isSymbolicLink()) continue;
+      target = readlinkSync(linkAbs);
+    } catch {
+      continue;
+    }
+    const canonical = path.join("..", "..", "vendor");
+    const current = path.resolve(variantDir, target);
+    const wanted = path.resolve(variantDir, canonical);
+    if (current === wanted && !path.isAbsolute(target)) continue; // already portable
+    const tmp = linkAbs + ".atomcode-portable";
+    try {
+      unlinkSync(tmp);
+    } catch {
+      /* absent */
+    }
+    symlinkSync(canonical, tmp); // relative target → survives packaging
+    unlinkSync(linkAbs);
+    renameSync(tmp, linkAbs);
+    normalized++;
+    console.log(`[sync] normalized doppio vendor symlink: dist/${entry.name}/vendor -> ${canonical} (was: ${target})`);
+  }
+  if (normalized > 0) {
+    console.log(`[sync] ${normalized} doppio vendor symlink(s) re-pointed to portable relative paths`);
+  }
+}
+
+normalizeDoppioVendorSymlinks();
 
 if (missing > 0) {
   console.error(`\n[sync] ${missing} required runtime asset(s) missing — the desktop build would ship broken.`);

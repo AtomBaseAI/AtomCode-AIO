@@ -43,6 +43,26 @@
  *     (codesign --force --deep --sign - --preserve-metadata=…).
  *     The hook then verifies BOTH the fuse wire and the code signature
  *     and FAILS THE BUILD loudly if either is wrong.
+ *
+ *  4. Bundled symlink sanitization (all platforms)
+ *     npm-installed packages can contain ABSOLUTE symlinks (doppiojvm
+ *     links dist/<variant>/vendor → <project>/…/doppiojvm/vendor with a
+ *     machine-specific absolute path). electron-builder copies those
+ *     links verbatim, so the shipped bundle would contain a symlink
+ *     pointing back at the BUILD MACHINE. On macOS this makes
+ *     `codesign --verify --deep --strict` fail with "invalid destination
+ *     for symbolic link in bundle" and Gatekeeper treats the bundle as
+ *     damaged on Apple Silicon; on Windows the link can never resolve
+ *     after installation. The hook re-points every escaping symlink at
+ *     the equivalent path INSIDE the bundle (relative link) and removes
+ *     links that could never resolve.
+ *
+ *  5. Windows symlink dereferencing (win32 only)
+ *     Windows installers have no symbolic-link semantics — 7z/NSIS
+ *     either errors on symlink entries or extracts them into broken
+ *     files. For win32 builds every remaining symlink under resources/
+ *     is replaced with a real copy of its in-bundle target, so the
+ *     installed tree never depends on link support.
  * ================================================================ */
 
 "use strict";
@@ -128,10 +148,236 @@ function findResourcesDir(context) {
   return path.join(appOutDir, "resources");
 }
 
+/* ================================================================
+ * Bundle hygiene helpers
+ * ================================================================ */
+
+/** True if p is inside root (or IS root). */
+function isInside(root, p) {
+  const rel = path.relative(root, p);
+  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+}
+
+/** Recursively collect symlinks under dir; does not follow links. */
+function collectSymlinks(dir, root) {
+  const out = [];
+  let entries;
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  for (const entry of entries) {
+    const abs = path.join(dir, entry.name);
+    if (entry.isSymbolicLink()) {
+      let target = "";
+      try {
+        target = fs.readlinkSync(abs);
+      } catch {
+        continue;
+      }
+      out.push({ abs, rel: path.relative(root, abs), target });
+    } else if (entry.isDirectory()) {
+      out.push(...collectSymlinks(abs, root));
+    }
+  }
+  return out;
+}
+
+/**
+ * Find the longest suffix of an absolute link target that exists inside
+ * the bundle. npm installs create links into the project root, e.g.
+ *   /build-host/…/elcetron/java-runtime/node_modules/doppiojvm/vendor
+ *     → <resourcesDir>/java-runtime/node_modules/doppiojvm/vendor
+ * Returns the in-bundle path or null. Requires ≥2 path segments so a
+ * generic name like "vendor" alone can never produce a false match.
+ */
+function findInBundleSuffix(bases, absTarget) {
+  const parts = absTarget.split(path.sep).filter(Boolean);
+  for (let i = 0; i <= parts.length - 2; i++) {
+    const suffix = parts.slice(i).join(path.sep);
+    for (const base of bases) {
+      const candidate = path.join(base, suffix);
+      if (fs.existsSync(candidate)) return candidate;
+    }
+  }
+  return null;
+}
+
+/**
+ * Replace the symlink at linkAbs with a portable relative link.
+ * Falls back from symlink → junction (Windows build hosts) → a real
+ * copy of the in-bundle target, so this never leaves the link missing.
+ */
+function createPortableLink(linkAbs, relativeTarget, inBundlePath) {
+  const tmp = linkAbs + ".atomcode-fix";
+  try {
+    fs.unlinkSync(tmp);
+  } catch {
+    /* not present */
+  }
+  // Windows symlink flavour derived from the destination; the type
+  // argument is ignored on POSIX where a plain symlink is created.
+  let winType = "file";
+  try {
+    if (fs.statSync(path.resolve(path.dirname(linkAbs), relativeTarget)).isDirectory()) {
+      winType = "dir";
+    }
+  } catch {
+    /* keep "file" */
+  }
+  for (const type of [winType, "junction"]) {
+    try {
+      fs.symlinkSync(relativeTarget, tmp, type);
+      fs.unlinkSync(linkAbs);
+      fs.renameSync(tmp, linkAbs);
+      return "symlink";
+    } catch {
+      /* try the next strategy */
+    }
+  }
+  if (inBundlePath) {
+    try {
+      const stat = fs.statSync(inBundlePath);
+      fs.rmSync(linkAbs, { recursive: true, force: true });
+      if (stat.isDirectory()) fs.cpSync(inBundlePath, linkAbs, { recursive: true });
+      else fs.cpSync(inBundlePath, linkAbs);
+      return "copy";
+    } catch {
+      /* fall through */
+    }
+  }
+  return null;
+}
+
+/**
+ * Re-point or drop every symlink under resources/ that would escape the
+ * packaged app. An escaping link can never resolve after installation
+ * and makes macOS `codesign --verify --deep --strict` fail with
+ * "invalid destination for symbolic link in bundle".
+ */
+function sanitizePackagedSymlinks(context, resourcesDir) {
+  const { appOutDir, electronPlatformName, packager } = context;
+  const productName =
+    packager.appInfo.productFilename || packager.appInfo.productName;
+  const bundleRoot =
+    electronPlatformName === "darwin"
+      ? path.join(appOutDir, `${productName}.app`)
+      : appOutDir;
+  if (!fs.existsSync(resourcesDir)) return;
+
+  const links = collectSymlinks(resourcesDir, resourcesDir);
+  const fixed = [];
+  const dropped = [];
+
+  for (const { abs, rel, target } of links) {
+    const dest = path.resolve(path.dirname(abs), target);
+    if (!path.isAbsolute(target) && isInside(bundleRoot, dest)) continue; // healthy
+
+    // Absolute or escaping link — it cannot resolve in the shipped app.
+    // Re-point it at the equivalent in-bundle path when one exists,
+    // otherwise the link is useless in a portable bundle and is removed.
+    const inBundle = path.isAbsolute(target)
+      ? findInBundleSuffix([resourcesDir, bundleRoot], target)
+      : null;
+    if (inBundle) {
+      const relativeTarget = path.relative(path.dirname(abs), inBundle);
+      const how = createPortableLink(abs, relativeTarget, inBundle);
+      if (how) {
+        fixed.push(`${rel}  ->  ${relativeTarget} (${how}; was ${target})`);
+        continue;
+      }
+    }
+    try {
+      fs.unlinkSync(abs);
+      dropped.push(`${rel}  ->  ${target}`);
+    } catch {
+      console.warn(`[afterpack] WARNING: could not remove escaping symlink ${rel}`);
+    }
+  }
+
+  if (fixed.length) {
+    console.log(`[afterpack] re-pointed ${fixed.length} bundle symlink(s) to portable in-bundle paths:`);
+    fixed.forEach((line) => console.log(`  [fixed]   ${line}`));
+  }
+  if (dropped.length) {
+    console.warn(`[afterpack] removed ${dropped.length} bundle symlink(s) that pointed outside the app:`);
+    dropped.forEach((line) => console.warn(`  [removed] ${line}`));
+  }
+  if (fixed.length || dropped.length) {
+    console.log(
+      "[afterpack] bundle symlinks sanitized — no symlink inside the packaged app points at the build machine"
+    );
+  }
+}
+
+/**
+ * Windows installers have no symbolic-link semantics — 7z/NSIS either
+ * errors on symlink entries or extracts them into broken files. Replace
+ * every remaining symlink under resources/ with a real copy of its
+ * in-bundle target (e.g. doppio's dist/release-cli/vendor link → the
+ * vendored JDK tree). win32 builds only; runs before the manifest so
+ * the integrity file covers the real files that ship.
+ */
+function dereferenceWinSymlinks(resourcesDir) {
+  if (!fs.existsSync(resourcesDir)) return;
+  const links = collectSymlinks(resourcesDir, resourcesDir);
+  for (const { abs, rel, target } of links) {
+    const dest = path.resolve(path.dirname(abs), target);
+    if (!fs.existsSync(dest)) {
+      console.warn(`[afterpack] WARNING: dropping broken symlink ${rel} -> ${target}`);
+      try {
+        fs.unlinkSync(abs);
+      } catch {
+        /* ignore */
+      }
+      continue;
+    }
+    const stat = fs.statSync(dest);
+    fs.rmSync(abs, { recursive: true, force: true });
+    if (stat.isDirectory()) fs.cpSync(dest, abs, { recursive: true });
+    else fs.cpSync(dest, abs);
+    console.log(
+      `[afterpack] dereferenced symlink for Windows: ${rel} -> real ` +
+        `${path.relative(resourcesDir, dest)} (${stat.isDirectory() ? "directory" : "file"})`
+    );
+  }
+}
+
+/**
+ * Clear macOS extended attributes (Finder metadata, quarantine flags,
+ * resource forks) from the whole bundle — `codesign --verify --strict`
+ * fails with "resource fork, Finder information, or similar detritus not
+ * allowed" when files carry them. Best effort: the strict verification
+ * below still guards the build if this warns.
+ */
+function stripDarwinExtendedAttributes(context) {
+  const productName =
+    context.packager.appInfo.productFilename || context.packager.appInfo.productName;
+  const appBundle = path.join(context.appOutDir, `${productName}.app`);
+  const xattr = "/usr/bin/xattr";
+  if (!fs.existsSync(appBundle) || !fs.existsSync(xattr)) return;
+  try {
+    execFileSync(xattr, ["-cr", appBundle], { stdio: "pipe" });
+    console.log(`[afterpack] cleared extended attributes on ${path.basename(appBundle)}`);
+  } catch (err) {
+    console.warn(`[afterpack] WARNING: xattr cleanup failed: ${err.message || err}`);
+  }
+}
+
 exports.default = async function afterPack(context) {
   const { electronPlatformName } = context;
   const resourcesDir = findResourcesDir(context);
   const manifestPath = path.join(resourcesDir, "integrity-manifest.json");
+
+  /* ---- 0. bundle hygiene (before manifest/signing) -------------- */
+  sanitizePackagedSymlinks(context, resourcesDir);
+  if (electronPlatformName === "win32") {
+    dereferenceWinSymlinks(resourcesDir);
+  }
+  if (electronPlatformName === "darwin") {
+    stripDarwinExtendedAttributes(context);
+  }
 
   /* ---- 1. integrity manifest ----------------------------------- */
   const files = {};
@@ -260,10 +506,25 @@ function verifyDarwinSignature(context) {
         "signature now covers the flipped fuses (Apple Silicon safe)"
     );
   } catch (err) {
+    // codesign names only the bundle, not the offending entry — list any
+    // symlinks that still escape the bundle so the failure is actionable.
+    const resources = path.join(appBundle, "Contents", "Resources");
+    const offenders = collectSymlinks(resources, resources)
+      .filter(({ abs, target }) => {
+        const dest = path.resolve(path.dirname(abs), target);
+        return path.isAbsolute(target) || !isInside(appBundle, dest);
+      })
+      .map(({ rel, target }) => `${rel}  ->  ${target}`);
     throw new Error(
       "[afterpack] macOS signature verification FAILED after fuse flip — the shipped " +
         "app would be killed by the kernel on Apple Silicon (SIGKILL Code Signature Invalid). " +
-        `codesign output: ${err.stdout ? err.stdout.toString() : ""}${err.message}`
+        `codesign output: ${err.stdout ? err.stdout.toString() : ""}${err.message}` +
+        (offenders.length
+          ? "\n[afterpack] escaping bundle symlinks still present:\n  " + offenders.join("\n  ")
+          : "")
     );
   }
 }
+
+// Exposed for offline verification scripts (not part of the public API).
+exports.__testables = { isInside, collectSymlinks, sanitizePackagedSymlinks };
