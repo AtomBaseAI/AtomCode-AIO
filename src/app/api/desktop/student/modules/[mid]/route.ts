@@ -62,6 +62,12 @@ export async function GET(
         language: mod.language,
         maxscore: mod.maxscore,
         concepturl: mod.concepturl,
+        // Course type flags for the desktop renderer (parity with the web
+        // practice page): "mcq-only" hides the code section; anyLanguage
+        // shows the language selector in the code practice view.
+        courseType: mod.course?.courseType ?? "code-mcq",
+        anyLanguage: mod.course?.anyLanguage ?? false,
+        courseLanguage: mod.course?.language ?? null,
       },
       references: await db.moduleReferences.findMany({
         where: { moduleId: mid },

@@ -137,6 +137,53 @@ export const submitassessmentquestion = async (values: z.infer<typeof UserQuesti
 
 
 
+/**
+ * Finalizes an assessment attempt: aggregates the submitted MCQ + code rows
+ * and marks the attempt "submitted". This is what the student's overall
+ * "Submit Test" button (and the auto-submit on tab-limit / time-up) calls —
+ * the per-section submissions (MCQ / per-question code) only record their
+ * own parts and leave the attempt "started".
+ */
+export const finalizeassessment = async (data: z.infer<typeof upateUserAllAssessmentSchemaCode>) => {
+  const attempt = await db.userAssessmentData.findUnique({
+    where: { id: data.id },
+  });
+  if (!attempt) return { error: "Invalid Submission" };
+  if (attempt.userId !== data.userId) return { error: "Invalid Submission" };
+  if (attempt.assessmentId !== data.assessmentId) return { error: "Invalid Submission" };
+  if (attempt.status === "submitted") return { success: "Assessment already submitted" };
+
+  const mcqRow = await db.userAssessmentMCQData.findFirst({
+    where: { userId: data.userId, assessmentId: data.assessmentId },
+  });
+  const codeRows = await db.userAssessmentCodeData.findMany({
+    where: { userId: data.userId, assessmentId: data.assessmentId },
+  });
+
+  const usermcqscore = mcqRow?.score ?? attempt.usermcqscore ?? 0;
+  const userquestionscore = codeRows.reduce((t, r) => t + r.score, 0);
+  const questiontime = codeRows.reduce((t, r) => t + parseInt(r?.duration || '0'), 0);
+
+  await db.userAssessmentData.update({
+    where: { id: data.id },
+    data: {
+      mcqstatus: mcqRow ? "submitted" : attempt.mcqstatus,
+      questionstatus: codeRows.length > 0 ? "submitted" : attempt.questionstatus,
+      usermcqscore,
+      userquestionscore,
+      questiontime,
+      errors: (mcqRow?.errors ?? 0) + codeRows.reduce((t, r) => t + r.errors, 0),
+      compiles: codeRows.reduce((t, r) => t + r.compiles, 0),
+      status: "submitted",
+    },
+  });
+
+  revalidatePath('/student/assessments');
+  revalidatePath('/student/assessment');
+  return { success: "Assessment Submitted!" };
+}
+
+
 export const submitassessmentallquestions = async (data: z.infer<typeof upateUserAllAssessmentSchemaCode>) => {
   const existingrecords = await db.userAssessmentCodeData.findMany({
     where: {

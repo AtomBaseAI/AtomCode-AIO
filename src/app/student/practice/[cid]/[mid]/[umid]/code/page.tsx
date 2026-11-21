@@ -47,7 +47,15 @@ const CodeMain = async ({ params }: { params: Promise<{ mid: string, cid: string
                     { label: "Code" },
                 ]}
             />
-            <CodeView questions={ModuleQuestions} mid={mid} uid={uid} cid={cid} umid={umid} />
+            <CodeView
+                questions={ModuleQuestions}
+                mid={mid}
+                uid={uid}
+                cid={cid}
+                umid={umid}
+                anyLanguage={courseModule?.anyLanguage ?? false}
+                defaultLanguage={courseModule?.courseLanguage}
+            />
         </>
     )
 }

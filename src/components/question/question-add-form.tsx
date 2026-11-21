@@ -94,7 +94,13 @@ const AddQuestion = ({ groups = [], lockedGroup, triggerLabel = "Add Question" }
             inputconstrains: '',
             blacklist: '',
             whitelist: '',
-            questionGroupId: lockedGroup?.id ?? 'none'
+            questionGroupId: lockedGroup?.id ?? '',
+            questionType: 'practice',
+            company: '',
+            frequency: '',
+            acceptanceRate: undefined,
+            headerCode: '',
+            tags: ''
         }
     })
     const [testCaseStatus, setTestCaseStatus] = useState({
@@ -112,6 +118,10 @@ const AddQuestion = ({ groups = [], lockedGroup, triggerLabel = "Add Question" }
     const [testProcess, setTestProcess] = useState(false)
     const [runVersionProfileId, setRunVersionProfileId] = useState<string | undefined>(undefined)
     const selectedLang = form.watch("lang")
+    const questionType = form.watch("questionType")
+    // SQL header code panel — collapsed by default, toggled by the author
+    // (show/hide per the spec).
+    const [showHeaderCode, setShowHeaderCode] = useState(false)
 
     // Topic / sub topic options come from the group's topic registry
     // (default "general" is always offered).
@@ -156,15 +166,12 @@ const AddQuestion = ({ groups = [], lockedGroup, triggerLabel = "Add Question" }
     const handleSubmit = (values: z.infer<typeof AddQuestionSchema>) => {
         setError("")
         setSuccess("")
-        // The Select uses the "none" sentinel for ungrouped — map it to null.
-        // Inside a group page the group is locked and always sent.
+        // The group is REQUIRED (every question lives in a group bank):
+        // locked pages always send their own group; the standalone dialog
+        // sends the selected one (validation blocks empty).
         const payload = {
             ...values,
-            questionGroupId: lockedGroup
-                ? lockedGroup.id
-                : values.questionGroupId && values.questionGroupId !== 'none'
-                    ? values.questionGroupId
-                    : null,
+            questionGroupId: lockedGroup ? lockedGroup.id : values.questionGroupId,
         }
         startTransition(() => {
             addquestion(payload)
@@ -221,6 +228,8 @@ const AddQuestion = ({ groups = [], lockedGroup, triggerLabel = "Add Question" }
                 lang,
                 versionProfileId: runVersionProfileId,
                 code: form.getValues("sourcecode") ?? "",
+                // SQL setup (header) code runs before the solution on every case.
+                headerCode: lang === "sql" ? form.getValues("headerCode") : undefined,
                 cases: testCases.map(({ input, expectedOutput }) => ({ input, expectedOutput })),
             });
 
@@ -429,6 +438,34 @@ const AddQuestion = ({ groups = [], lockedGroup, triggerLabel = "Add Question" }
                                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                         <FormField
                                             control={form.control}
+                                            name="questionType"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Question Type</FormLabel>
+                                                    <Select
+                                                        onValueChange={(v) => {
+                                                            field.onChange(v);
+                                                            if (v === "lab") setShowHeaderCode(false);
+                                                        }}
+                                                        value={field.value ?? "practice"}
+                                                        disabled={isLoading}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger className="w-full">
+                                                                <SelectValue placeholder="Select type" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="practice">Practice Question</SelectItem>
+                                                            <SelectItem value="lab">Lab Question</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
                                             name="difficulty"
                                             render={({ field }) => (
                                                 <FormItem>
@@ -495,7 +532,99 @@ const AddQuestion = ({ groups = [], lockedGroup, triggerLabel = "Add Question" }
                                                 </FormItem>
                                             )}
                                         />
+                                        <FormField
+                                            control={form.control}
+                                            name="tags"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Tags</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            disabled={isLoading}
+                                                            placeholder="e.g. sql, joins (comma separated)"
+                                                            type="text"
+                                                            autoComplete='false'
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
                                     </div>
+                                    {/* Lab-question metadata — only for questionType "lab" */}
+                                    {questionType === "lab" && (
+                                        <div className="grid gap-4 rounded-lg border border-dashed border-purple-400/50 bg-purple-500/5 p-4 sm:grid-cols-3">
+                                            <FormField
+                                                control={form.control}
+                                                name="company"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Company Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                {...field}
+                                                                disabled={isLoading}
+                                                                placeholder="e.g. Amazon"
+                                                                type="text"
+                                                                autoComplete='false'
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="frequency"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Frequency</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                {...field}
+                                                                disabled={isLoading}
+                                                                placeholder="e.g. Asked often / 3x this year"
+                                                                type="text"
+                                                                autoComplete='false'
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="acceptanceRate"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Acceptance Rate (%)</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                value={field.value ?? ""}
+                                                                onChange={(e) => {
+                                                                    const raw = e.target.value;
+                                                                    form.setValue(
+                                                                        "acceptanceRate",
+                                                                        raw === "" ? undefined : Number(raw),
+                                                                        { shouldValidate: true }
+                                                                    );
+                                                                }}
+                                                                disabled={isLoading}
+                                                                placeholder="e.g. 42"
+                                                                type="number"
+                                                                min={0}
+                                                                max={100}
+                                                                step="0.1"
+                                                                autoComplete='false'
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </QuestionFormSection>
 
@@ -506,39 +635,91 @@ const AddQuestion = ({ groups = [], lockedGroup, triggerLabel = "Add Question" }
                                 description="Server code runs against every test case and sample."
                             >
                                 <div className="grid items-stretch gap-4 lg:grid-cols-2">
-                                    <FormField
-                                        control={form.control}
-                                        name="sourcecode"
-                                        render={({ field }) => (
-                                            <FormItem className="flex h-full flex-col">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <FormLabel>Server Code</FormLabel>
-                                                    {selectedLang ? (
-                                                        <span className="rounded-full border bg-muted px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                                                            {LANG_LABELS[selectedLang] ?? selectedLang}
+                                    <div className="flex h-full flex-col gap-3">
+                                        {/* SQL header code — optional setup statements
+                                            (CREATE TABLE …) executed BEFORE the student's
+                                            query: header first, user code next. */}
+                                        {selectedLang === "sql" && (
+                                            <div className="rounded-lg border border-dashed border-sky-500/50">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowHeaderCode((s) => !s)}
+                                                    className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm font-medium"
+                                                    aria-expanded={showHeaderCode}
+                                                >
+                                                    <span className="flex items-center gap-2">
+                                                        Header Code (SQL)
+                                                        <span className="rounded-full border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                                            optional — runs before user code
                                                         </span>
-                                                    ) : (
-                                                        <span className="text-[11px] text-muted-foreground">
-                                                            pick a language to enable highlighting
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <FormControl>
-                                                    <CodeEditorField
-                                                        value={field.value ?? ""}
-                                                        onChange={field.onChange}
-                                                        lang={selectedLang}
-                                                        disabled={isLoading}
-                                                        placeholder={selectedLang
-                                                            ? `< ${selectedLang} server code >`
-                                                            : "< Code > — select a Language above for syntax highlighting"}
-                                                        className="min-h-[520px] flex-1"
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {showHeaderCode ? "Hide" : "Show"}
+                                                    </span>
+                                                </button>
+                                                {showHeaderCode && (
+                                                    <div className="px-3 pb-3">
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="headerCode"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormControl>
+                                                                        <CodeEditorField
+                                                                            value={field.value ?? ""}
+                                                                            onChange={field.onChange}
+                                                                            lang="sql"
+                                                                            disabled={isLoading}
+                                                                            placeholder="< e.g. CREATE TABLE employee (id INT, name TEXT); >"
+                                                                            className="min-h-[140px]"
+                                                                        />
+                                                                    </FormControl>
+                                                                    <p className="pt-1 text-[11px] text-muted-foreground">
+                                                                        Setup SQL sent with the user&apos;s code at judge time —
+                                                                        executed first, then the user code.
+                                                                    </p>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
                                         )}
-                                    />
+                                        <FormField
+                                            control={form.control}
+                                            name="sourcecode"
+                                            render={({ field }) => (
+                                                <FormItem className="flex h-full flex-col">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <FormLabel>Server Code</FormLabel>
+                                                        {selectedLang ? (
+                                                            <span className="rounded-full border bg-muted px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                                                                {LANG_LABELS[selectedLang] ?? selectedLang}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-[11px] text-muted-foreground">
+                                                                pick a language to enable highlighting
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <FormControl>
+                                                        <CodeEditorField
+                                                            value={field.value ?? ""}
+                                                            onChange={field.onChange}
+                                                            lang={selectedLang}
+                                                            disabled={isLoading}
+                                                            placeholder={selectedLang
+                                                                ? `< ${selectedLang} server code >`
+                                                                : "< Code > — select a Language above for syntax highlighting"}
+                                                            className="min-h-[420px] flex-1"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
                                     <div className="space-y-3">
                                         {testCaseRow("input1", "output1", "input1", "Test Case 1")}
                                         {testCaseRow("input2", "output2", "input2", "Test Case 2")}
@@ -572,12 +753,12 @@ const AddQuestion = ({ groups = [], lockedGroup, triggerLabel = "Add Question" }
                                                 <FormLabel>Question Group</FormLabel>
                                                 <Select
                                                     onValueChange={field.onChange}
-                                                    value={lockedGroup ? lockedGroup.id : (field.value ?? 'none')}
+                                                    value={lockedGroup ? lockedGroup.id : (field.value ?? '')}
                                                     disabled={isLoading || !!lockedGroup || (!lockedGroup && groups.length === 0)}
                                                 >
                                                     <FormControl>
                                                         <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder={lockedGroup ? lockedGroup.title : groups.length ? "Select a group (optional)" : "No groups created yet"} />
+                                                            <SelectValue placeholder={lockedGroup ? lockedGroup.title : groups.length ? "Select a group (required)" : "No groups created yet"} />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
@@ -586,22 +767,19 @@ const AddQuestion = ({ groups = [], lockedGroup, triggerLabel = "Add Question" }
                                                                 {lockedGroup.title}
                                                             </SelectItem>
                                                         ) : (
-                                                            <>
-                                                                <SelectItem value="none">No group</SelectItem>
-                                                                {groups.map((g) => (
-                                                                    <SelectItem key={g.id} value={g.id}>
-                                                                        {g.title}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </>
+                                                            groups.map((g) => (
+                                                                <SelectItem key={g.id} value={g.id}>
+                                                                    {g.title}
+                                                                </SelectItem>
+                                                            ))
                                                         )}
                                                     </SelectContent>
                                                 </Select>
-                                                {lockedGroup && (
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Questions are created inside this group.
-                                                    </p>
-                                                )}
+                                                <p className="text-xs text-muted-foreground">
+                                                    {lockedGroup
+                                                        ? "Questions are created inside this group."
+                                                        : "Every question must belong to a group bank — deleting a group deletes its questions."}
+                                                </p>
                                                 <FormMessage />
                                             </FormItem>
                                         )}

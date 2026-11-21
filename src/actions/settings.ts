@@ -4,6 +4,7 @@
 // profile updates are additionally scoped to the caller's own Admin row.
 
 import * as z from "zod";
+import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/action-guards";
 import {
@@ -87,17 +88,31 @@ export const updatePlatformSetting = async (
 
   const { key, value } = validated.data;
 
-  // Registration switches are gated by an access code:
-  // - enabling requires an active code (generated from this page)
-  // - disabling deletes the code; already-registered users are untouched.
-  if (value && (key === "platform.allowStudentRegister" || key === "platform.allowStaffRegister")) {
+  // Registration switches are gated by an access code: disabling deletes the
+  // code (already-registered users are untouched); enabling AUTO-GENERATES a
+  // code when none is active — previously this returned an error, which the
+  // optimistic Switch snapped back from, reading as a "glitchy" toggle.
+  let generatedCode: string | null = null;
+  if (
+    value &&
+    (key === "platform.allowStudentRegister" || key === "platform.allowStaffRegister")
+  ) {
     const role: RegisterRole =
       key === "platform.allowStudentRegister" ? "student" : "staff";
     const code = await getRegistrationCode(role);
     if (!code) {
-      return {
-        error: `Generate an access code first — ${role}s can only register with it`,
-      };
+      // Codes double as role identifiers on the register page, so a code must
+      // never be active for both roles — regenerate until it is unique.
+      let next = generateAccessCode();
+      for (let i = 0; i < 5; i++) {
+        const other = await getRegistrationCode(
+          role === "student" ? "staff" : "student"
+        );
+        if (next !== other) break;
+        next = generateAccessCode();
+      }
+      await setRegistrationCode(role, next);
+      generatedCode = next;
     }
   }
 
@@ -112,7 +127,11 @@ export const updatePlatformSetting = async (
         key === "platform.allowStudentRegister" ? "student" : "staff"
       );
     }
-    return { success: "Setting saved!" };
+    // The login/register pages render from these settings — keep their caches
+    // fresh so a toggle is never served stale (prod builds bake them).
+    revalidatePath("/login");
+    revalidatePath("/register");
+    return { success: "Setting saved!", ...(generatedCode ? { code: generatedCode } : {}) };
   } catch {
     return { error: "Something went wrong!" };
   }

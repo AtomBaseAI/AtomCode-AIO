@@ -54,6 +54,8 @@ const EditMCQForm = ({ mcq }: { mcq: z.infer<typeof MCQUpdateSchema> }) => {
             iscodesnippet: mcq.iscodesnippet || false,
             topic: mcq.topic,
             subtopic: mcq.subtopic,
+            questionGroupId: mcq.questionGroupId || "",
+            tags: mcq.tags || "",
             moduleId: mcq.moduleId || null,
             assessmentId: mcq.assessmentId || null
         },
@@ -63,6 +65,19 @@ const EditMCQForm = ({ mcq }: { mcq: z.infer<typeof MCQUpdateSchema> }) => {
     const [isLoading, startTransition] = useTransition();
     const [error, setError] = useState<string | undefined>(undefined);
     const [success, setSuccess] = useState<string | undefined>(undefined);
+    const [groups, setGroups] = useState<{ id: string; title: string }[]>([]);
+
+    const loadGroups = async () => {
+        try {
+            const res = await fetch("/api/question-groups");
+            if (res.ok) {
+                const data = await res.json();
+                setGroups(Array.isArray(data) ? data : data.groups ?? []);
+            }
+        } catch {
+            // Non-fatal — current group stays selected via defaultValues.
+        }
+    };
 
     const handleSubmit = (values: z.infer<typeof MCQUpdateSchema>) => {
         setError(undefined);
@@ -84,7 +99,7 @@ const EditMCQForm = ({ mcq }: { mcq: z.infer<typeof MCQUpdateSchema> }) => {
 
     return (
         <>
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) loadGroups(); }}>
                 <DialogTrigger asChild>
                     <Button variant='outline' size='icon' className="border-primary bg-transparent hover:bg-purple-700/10">
                         <Pencil className="size-5 bg-transparent text-primary" />
@@ -111,6 +126,58 @@ const EditMCQForm = ({ mcq }: { mcq: z.infer<typeof MCQUpdateSchema> }) => {
                                                             {...field}
                                                             disabled={isLoading}
                                                             placeholder="Question"
+                                                            type="text"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="grid gap-1 col-span-1">
+                                        <FormField
+                                            control={form.control}
+                                            name="questionGroupId"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Question Group</FormLabel>
+                                                    <FormControl>
+                                                        <Select
+                                                            onValueChange={field.onChange}
+                                                            value={field.value ?? ""}
+                                                            disabled={isLoading}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select question group" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {groups.map((g) => (
+                                                                    <SelectItem key={g.id} value={g.id}>
+                                                                        {g.title}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="grid gap-1 col-span-3">
+                                        <FormField
+                                            control={form.control}
+                                            name="tags"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Tags</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            disabled={isLoading}
+                                                            placeholder="e.g. oop, collections (comma separated)"
                                                             type="text"
                                                         />
                                                     </FormControl>

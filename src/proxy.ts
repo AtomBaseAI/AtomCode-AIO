@@ -33,13 +33,17 @@ import {
  *   /                 → public; signed-in visitors go to their role home
  *   /admin|/staff|/student → role areas: unauthenticated → /login,
  *                       wrong role → own dashboard
+ *   /admin + superadmin session → canonicalized to /superadmin/* (step 4.5)
  *   everything else   → requires a session
  */
 
 const ROLE_AREA: Record<string, string[]> = {
-  // Super admin inherits every admin panel area (sidebar shows the same
-  // options) — but only "superadmin" can enter /superadmin/* below.
-  "/admin": ["admin", "superadmin"],
+  // URL separation: /admin/* is admins-only. The super admin lives entirely
+  // under /superadmin/* — a superadmin hitting /admin/* is redirected to the
+  // mirrored /superadmin/* path (step 4.5), and pages that exist only under
+  // /admin/* are rendered in place by the next.config fallback rewrite, so
+  // the super admin never browses an /admin URL.
+  "/admin": ["admin"],
   "/staff": ["staff"],
   "/student": ["user"],
   "/superadmin": ["superadmin"],
@@ -80,6 +84,29 @@ export default auth((req) => {
   if (publicRoutes.includes(pathname)) {
     if (session) return NextResponse.redirect(new URL(roleHome(role), req.url));
     return NextResponse.next();
+  }
+
+  // 4.5 Super-admin URL canonicalization — runs BEFORE the role-area loop.
+  // Any /admin/* request from a superadmin session is redirected to the
+  // mirrored /superadmin/* path (same sub-path, same query string). The
+  // underlying admin page is then rendered by the next.config fallback
+  // rewrite, keeping the browser URL in superadmin space. Bare /superadmin
+  // goes to the dedicated super-admin dashboard.
+  if (
+    role === "superadmin" &&
+    (pathname === "/admin" || pathname.startsWith("/admin/"))
+  ) {
+    const mirrored =
+      "/superadmin" + pathname.slice("/admin".length) || "/superadmin/dashboard";
+    const target = new URL(
+      mirrored === "/superadmin" ? "/superadmin/dashboard" : mirrored,
+      req.url
+    );
+    target.search = req.nextUrl.search;
+    return NextResponse.redirect(target);
+  }
+  if (role === "superadmin" && pathname === "/superadmin") {
+    return NextResponse.redirect(new URL("/superadmin/dashboard", req.url));
   }
 
   // 5. Role areas.

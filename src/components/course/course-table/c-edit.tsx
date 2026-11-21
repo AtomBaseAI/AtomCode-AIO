@@ -20,6 +20,8 @@ const CEdit = ({ course }: { course: CourseTableType }) => {
         startdate: course.startdate,
         enddate: course.enddate,
         language: course.language,
+        courseType: course.courseType as "code-mcq" | "mcq-only",
+        anyLanguage: course.anyLanguage,
         completionOrder: (course.completionOrder ?? "openflow") as "daywise" | "queue" | "openflow",
     }
 

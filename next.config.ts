@@ -6,6 +6,22 @@ const nextConfig: NextConfig = {
   // Vercel does not use `output: "standalone"` — it deploys via its own Build
   // Output API, so plain `next build` / `next start` is the default here.
   output: process.env.BUILD_STANDALONE === "true" ? "standalone" : undefined,
+  async rewrites() {
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      // Super-admin URL separation: every /superadmin/* path WITHOUT a real
+      // page of its own renders the corresponding /admin/* page in place —
+      // the browser URL stays in superadmin space. Native superadmin pages
+      // (dashboard, admins, revenue, settings) are real files and always win
+      // over this fallback, so they keep their dedicated implementations.
+      // Paired with the proxy (src/proxy.ts): superadmin sessions hitting
+      // /admin/* are redirected to the mirrored /superadmin/* URL, so the
+      // super admin browses exclusively under /superadmin/* while the admin
+      // panel keeps /admin/* for admins only — zero page duplication.
+      fallback: [{ source: "/superadmin/:path*", destination: "/admin/:path*" }],
+    };
+  },
   // Allow the sandbox preview gateway hosts to fetch dev assets (HMR,
   // static chunks) — Next 16 blocks unknown cross-origin dev requests.
   allowedDevOrigins: ["*.space-z.ai", "*.cn-hongkong-vpc.fcapp.run"],

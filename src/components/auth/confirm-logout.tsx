@@ -37,9 +37,17 @@ const ConfirmLogout = () => {
       // Server action: signOut({ redirect: false }) + redirect("/login").
       // Navigation is performed by the action's redirect itself.
       await logout()
-    } catch {
-      // If the action itself fails (no redirect happened), restore the
-      // dialog so the user can retry.
+    } catch (e) {
+      // Next 16 rejects the action promise with a NEXT_REDIRECT error when
+      // the action ends in redirect() — that IS the success path (session
+      // cleared, router navigating). Only a genuine failure should restore
+      // the dialog so the user can retry.
+      const digest = typeof e === "object" && e !== null && "digest" in e
+        ? (e as { digest: unknown }).digest
+        : undefined
+      if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
+        return
+      }
       setIsLoggingOut(false)
     }
   }

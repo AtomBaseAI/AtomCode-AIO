@@ -5,7 +5,7 @@ import { getCourseById } from '@/data/courses'
 import { ModuleQuestionTableSchema, ModuleTableSchema } from '@/schemas/module-schema'
 import Link from 'next/link'
 import React from 'react'
-import { getAllQuestionsByLang } from "@/data/questions"
+import { getAllQuestionsByLang, getAllQuestions } from "@/data/questions"
 import { QuestionTableSchema } from "@/schemas/question-schema"
 import { MQuestionAddDataTable } from "@/components/module-questions/module-question-add-table/mqa-data-table"
 import { columns } from "@/components/module-questions/module-question-add-table/mqa-columns"
@@ -29,12 +29,20 @@ async function fetchQestoinbyLang(lang: string) {
     const langquestions = await getAllQuestionsByLang(lang)
     return langquestions;
 }
+async function fetchAllQuestions() {
+    const allquestions = await getAllQuestions()
+    return allquestions;
+}
 const AddModuleQuestions = async ({ params }: { params: Promise<{ cid: string; mid: string}> }) => {
     const { cid, mid } = await params
     const modulez = await fetchModule(mid)
     const course = await getCourseById(cid)
     const moduleq = await fetchmodulequestions(mid)
-    const questionsLang = await fetchQestoinbyLang(modulez.language)
+    // Any-language courses pool questions from every language; otherwise the
+    // pool is limited to the module's language.
+    const questionsLang = course?.anyLanguage
+        ? await fetchAllQuestions()
+        : await fetchQestoinbyLang(modulez.language)
 
     if (questionsLang === null) {
         return <p>No questions available for this language.</p>;

@@ -1,10 +1,11 @@
 "use client"
 import * as z from "zod";
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { TopBar } from "@/components/student-role/assessment/top-bar"
 import { TabSwitchAlert } from "@/components/student-role/assessment/tab-switch-alert"
 import { UserAssessmentLiveData } from "@/schemas/student/assessment-schema"
+import { finalizeassessment } from "@/actions/assessment"
 import AssessmentMCQView from "../mcq/assessment-mcq-view";
 import AssessmentCodeView from "../code/assessment-code-view";
 
@@ -21,6 +22,16 @@ export default function UserAssessmentHome({ data, uaid, aid, uid }: Props) {
   const [questionType, setQuestionType] = useState<string>("MCQ")
   const [tabSwitchCount, setTabSwitchCount] = useState(0)
   const [showAlert, setShowAlert] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  // Guards against double-finalizing when the tab-limit and the timer
+  // expiry fire around the same moment.
+  const finalizedRef = useRef(false)
+
+  const clearAttemptLocalStorage = () => {
+    localStorage.removeItem("testInProgress")
+    localStorage.removeItem("tabSwitchCount")
+    localStorage.removeItem("testStartTime")
+  }
 
 
   // console.log(data)
@@ -60,9 +71,21 @@ export default function UserAssessmentHome({ data, uaid, aid, uid }: Props) {
   }
 
   const endTest = (message: string) => {
+    // Auto-submit the attempt (tab-switch limit reached / time expired) —
+    // mirroring the desktop client, which finalizes on both events.
+    if (!finalizedRef.current) {
+      finalizedRef.current = true
+      startTransition(() => {
+        finalizeassessment({ id: uaid, userId: uid, assessmentId: aid })
+          .then(() => {
+            clearAttemptLocalStorage()
+          })
+          .catch(() => { /* the attempt stays open — the student can retry */ })
+      })
+    }
     alert(message)
     localStorage.removeItem("testInProgress")
-    // router.push("/student/assessment/1/1/")
+    router.push("/student/assessments")
   }
 
   const handleTimeExpired = () => {
@@ -84,6 +107,10 @@ export default function UserAssessmentHome({ data, uaid, aid, uid }: Props) {
         initialTime={parseInt(data.remainingtime)}
         onTimeExpired={handleTimeExpired}
         maxTabSwitches={data.maxtabswitches}
+        courseType={data.courseType}
+        uaid={uaid}
+        uid={uid}
+        aid={aid}
       />
       <main className="h-full w-screen">
         {questionType === "MCQ" ? (
@@ -93,8 +120,16 @@ export default function UserAssessmentHome({ data, uaid, aid, uid }: Props) {
             <div>No MCQs available</div>
           )
         ) : questionType === "Code" ? (
-          data.code ? (
-            <AssessmentCodeView questions={data.code} status={data.questionstatus || ""} aid={aid} uaid={uaid} uid={uid} />
+          data.code && data.courseType !== "mcq-only" ? (
+            <AssessmentCodeView
+              questions={data.code}
+              status={data.questionstatus || ""}
+              aid={aid}
+              uaid={uaid}
+              uid={uid}
+              anyLanguage={data.anyLanguage}
+              defaultLanguage={data.courseLanguage}
+            />
           ) : (
             <div>No Coding Questions available</div>
           )

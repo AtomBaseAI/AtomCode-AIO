@@ -92,7 +92,9 @@ export async function POST(
         courseId: assessment.courseId,
         assessmentId: aid,
         totalmcqscore: assessment._count.mcqQuestions,
-        totalquestionscore: assessment._count.codeQuestions,
+        // Each code question is worth 10 marks (1 sample bonus + 3 hidden
+        // tests × 3) — mirrors the web attempt creation.
+        totalquestionscore: assessment._count.codeQuestions * 10,
         assessmentmaxscore: assessment.maxscore,
         assessmentstarttime: now,
         userassessmentstarttime: now,

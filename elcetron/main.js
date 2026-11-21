@@ -229,6 +229,19 @@ function createWindow() {
     if (!String(url).startsWith(appOrigin)) e.preventDefault();
   });
 
+  // Forward fullscreen transitions to the renderer — the assessment view
+  // counts a fullscreen exit as a tab switch (web-parity proctoring).
+  mainWindow.on("enter-full-screen", () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("app:fullscreen", true);
+    }
+  });
+  mainWindow.on("leave-full-screen", () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("app:fullscreen", false);
+    }
+  });
+
   // Open target=_blank / window.open links in the system browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:\/\//i.test(url)) shell.openExternal(url);
@@ -362,6 +375,19 @@ ipcMain.handle("app:openExternal", async (_event, url) => {
 });
 
 /* ------------------------------------------------------------------ */
+/* IPC: fullscreen proctoring (assessment lockdown, mirrors the web    */
+/* fullscreen-enforced assessment layout)                              */
+/* ------------------------------------------------------------------ */
+
+ipcMain.handle("app:setFullscreen", (_event, flag) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.setFullScreen(Boolean(flag));
+    return true;
+  }
+  return false;
+});
+
+/* ------------------------------------------------------------------ */
 /* IPC: local Java execution (bundled Doppio JVM — no server, no API)  */
 /* ------------------------------------------------------------------ */
 
@@ -425,6 +451,103 @@ ipcMain.handle("app:info", () => ({
   appVersion: app.getVersion(),
   platform: process.platform,
 }));
+
+/* ------------------------------------------------------------------ */
+/* Startup preflight — verify bundled runtimes & configs, and          */
+/* auto-install anything missing in the background (e.g. the Java      */
+/* runtime deps that ship git-ignored in dev checkouts).               */
+/* ------------------------------------------------------------------ */
+
+const RENDERER_REQUIRED = [
+  "engine/atom-engine.js",
+  "workers/python.worker.js",
+  "workers/sqlite.worker.js",
+  "workers/javascript.worker.js",
+  "workers/typescript.worker.js",
+  "workers/ruby.worker.js",
+  "workers/clang.worker.js",
+  "runtimes/pyodide/0.26.4/pyodide.js",
+  "runtimes/sqlite-wasm/sqlite3.wasm",
+];
+
+const JAVA_RUNTIME_REQUIRED = [
+  "runner.js",
+  "doppio-wrapper.js",
+  "node_modules/doppiojvm/bin/doppio",
+  "node_modules/doppiojvm/vendor/java_home/lib/rt.jar",
+];
+
+async function fileExists(p) {
+  try { await fsOriginal.promises.access(p); return true; } catch { return false; }
+}
+
+function run(cmd, args, opts, timeoutMs = 600000) {
+  return new Promise((resolve) => {
+    let child;
+    try {
+      child = spawn(cmd, args, { ...opts, stdio: ["ignore", "pipe", "pipe"] });
+    } catch (err) {
+      resolve({ ok: false, error: (err && err.message) || String(err) });
+      return;
+    }
+    let out = "";
+    let errbuf = "";
+    const timer = setTimeout(() => { try { child.kill("SIGKILL"); } catch {} }, timeoutMs);
+    child.stdout.on("data", (d) => (out += d.toString()));
+    child.stderr.on("data", (d) => (errbuf += d.toString()));
+    child.on("error", (err) => { clearTimeout(timer); resolve({ ok: false, error: err.message }); });
+    child.on("close", (code) => { clearTimeout(timer); resolve({ ok: code === 0, code, out, error: errbuf.slice(-500) }); });
+  });
+}
+
+async function runPreflight() {
+  const send = (payload) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("app:preflight", payload);
+    }
+    console.log("[preflight]", JSON.stringify(payload));
+  };
+
+  send({ stage: "start", message: "Checking local runtimes…" });
+
+  // 1. Renderer assets (workers + wasm runtimes)
+  const missingRenderer = [];
+  for (const rel of RENDERER_REQUIRED) {
+    if (!(await fileExists(path.join(RENDERER_ROOT, rel)))) missingRenderer.push(rel);
+  }
+  if (missingRenderer.length > 0) {
+    send({ stage: "renderer", level: "error", message: `Bundled runtime files are missing: ${missingRenderer.join(", ")}` });
+    return { ok: false, missing: missingRenderer };
+  }
+  send({ stage: "renderer", message: "Bundled runtimes verified" });
+
+  // 2. Local Java runtime (Doppio JVM + JDK 8 class library) — auto-install
+  //    when missing (fresh dev checkouts ship it git-ignored).
+  const missingJava = [];
+  for (const rel of JAVA_RUNTIME_REQUIRED) {
+    if (!(await fileExists(path.join(JAVA_RUNTIME_DIR, rel)))) missingJava.push(rel);
+  }
+  if (missingJava.length > 0 && !app.isPackaged) {
+    send({ stage: "java", message: "Installing local Java runtime (one-time setup)…" });
+    const install1 = await run("npm", ["install", "--ignore-scripts", "--no-audit", "--no-fund"], { cwd: JAVA_RUNTIME_DIR });
+    if (!install1.ok) {
+      send({ stage: "java", level: "error", message: "Java runtime install failed — Java questions will be judged by the server instead." });
+      return { ok: false, missing: missingJava };
+    }
+    const doppioDir = path.join(JAVA_RUNTIME_DIR, "node_modules", "doppiojvm");
+    if (await fileExists(path.join(doppioDir, "install.js"))) {
+      send({ stage: "java", message: "Downloading the Java class library (one-time setup)…" });
+      const install2 = await run("node", ["install.js"], { cwd: doppioDir }, 900000);
+      if (!install2.ok) {
+        send({ stage: "java", level: "error", message: "Java class library download failed — Java questions will be judged by the server instead." });
+        return { ok: false, missing: missingJava };
+      }
+    }
+    send({ stage: "java", message: "Local Java runtime installed" });
+  }
+  send({ stage: "done", installed: missingJava.length > 0, message: "All runtimes ready" });
+  return { ok: true };
+}
 
 /* ------------------------------------------------------------------ */
 /* Menu-bar / system-tray icon                                         */
@@ -507,6 +630,10 @@ app.whenReady().then(async () => {
   protocol.handle("atomcode", serveRenderer);
   createWindow();
   createTray();
+
+  // Background pre-flight: verify bundled runtimes & auto-install anything
+  // missing — never blocks startup, reports progress to the renderer.
+  runPreflight().catch((err) => console.warn("[preflight] failed:", err && err.message));
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

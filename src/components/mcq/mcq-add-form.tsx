@@ -36,11 +36,17 @@ import { AddMCQSchema } from "@/schemas/mcq-schema"
 import { addMCQ } from "@/actions/mcq"
 import { difficulties } from "@/components/question/question-table/q-config-data"
 import { toast } from "sonner"
+
+interface QuestionGroupOption { id: string; title: string }
+
 const AddMCQForm = ({ mid, aid, mcqtype }: { mid: string, aid: string, mcqtype: string }) => {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | undefined>(undefined);
     const [success, setSuccess] = useState<string | undefined>(undefined);
+    // Every MCQ must live in a question-group bank — the dialog loads the
+    // group list when opened so the author can pick the owning bank.
+    const [groups, setGroups] = useState<QuestionGroupOption[]>([]);
 
     const form = useForm<z.infer<typeof AddMCQSchema>>({
         resolver: zodResolver(AddMCQSchema),
@@ -58,10 +64,24 @@ const AddMCQForm = ({ mid, aid, mcqtype }: { mid: string, aid: string, mcqtype: 
             iscodesnippet: false,
             topic: "",
             subtopic: "",
+            questionGroupId: "",
+            tags: "",
             moduleId: mid || '',
             assessmentId: aid || '',
         },
     });
+
+    const loadGroups = async () => {
+        try {
+            const res = await fetch("/api/question-groups");
+            if (res.ok) {
+                const data = await res.json();
+                setGroups(Array.isArray(data) ? data : data.groups ?? []);
+            }
+        } catch {
+            // Non-fatal: validation still blocks submit without a group.
+        }
+    };
 
     const handleSubmit = async (values: z.infer<typeof AddMCQSchema>) => {
         setError(undefined);
@@ -97,7 +117,7 @@ const AddMCQForm = ({ mid, aid, mcqtype }: { mid: string, aid: string, mcqtype: 
 
     return (
         <>
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) loadGroups(); }}>
                 <DialogTrigger asChild>
                     <Button variant="outline" className="bg-green-500 text-white">
                         <Puzzle className="mr-2" />
@@ -113,7 +133,57 @@ const AddMCQForm = ({ mid, aid, mcqtype }: { mid: string, aid: string, mcqtype: 
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
                                 <div className="grid grid-cols-3 gap-2 gap-y-3">
-                                    <div className="grid gap-1 col-span-2">
+                                    <div className="grid gap-1 col-span-1">
+                                        <FormField
+                                            control={form.control}
+                                            name="questionGroupId"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Question Group</FormLabel>
+                                                    <FormControl>
+                                                        <Select
+                                                            onValueChange={field.onChange}
+                                                            value={field.value ?? ""}
+                                                            disabled={isLoading}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select question group" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {groups.map((g) => (
+                                                                    <SelectItem key={g.id} value={g.id}>
+                                                                        {g.title}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="grid gap-1 col-span-1">
+                                        <FormField
+                                            control={form.control}
+                                            name="tags"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Tags</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            disabled={isLoading}
+                                                            placeholder="e.g. oop, collections (comma separated)"
+                                                            type="text"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="grid gap-1 col-span-1">
                                         <FormField
                                             control={form.control}
                                             name="title"

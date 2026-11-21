@@ -199,6 +199,12 @@ async function main() {
       },
     });
 
+  // Every question must belong to a question-group bank (required FK,
+  // cascade on group delete) — seed questions live in their own bank.
+  const seedGroup =
+    (await db.questionGroup.findFirst({ where: { title: "Seed Questions" } })) ??
+    (await db.questionGroup.create({ data: { title: "Seed Questions" } }));
+
   if ((await db.mCQQuestion.count({ where: { moduleId: mod1.id } })) === 0) {
     await db.mCQQuestion.createMany({
       data: [
@@ -213,6 +219,7 @@ async function main() {
           Option4: "Java Variable Machine",
           CorrectOption: 1,
           moduleId: mod1.id,
+          questionGroupId: seedGroup.id,
           iscodesnippet: false,
         },
         {
@@ -227,6 +234,7 @@ async function main() {
           Option4: "run()",
           CorrectOption: 3,
           moduleId: mod1.id,
+          questionGroupId: seedGroup.id,
           iscodesnippet: false,
         },
       ],
@@ -241,6 +249,7 @@ async function main() {
           description:
             "Print `Hello, Atom!` to stdout. No trailing spaces.",
           moduleId: mod1.id,
+          questionGroupId: seedGroup.id,
           sampleinput1: "",
           sampleinput2: "",
           sampleoutput1: "Hello, Atom!",
@@ -267,6 +276,7 @@ async function main() {
           description:
             "Read two integers separated by space and print their sum.",
           moduleId: mod1.id,
+          questionGroupId: seedGroup.id,
           sampleinput1: "2 3",
           sampleinput2: "10 20",
           sampleoutput1: "5",
@@ -306,6 +316,7 @@ async function main() {
           Option4: "super",
           CorrectOption: 2,
           moduleId: mod2.id,
+          questionGroupId: seedGroup.id,
           iscodesnippet: false,
         },
       ],
@@ -334,6 +345,7 @@ async function main() {
         title: "Reverse String",
         description: "Read a line and print it reversed.",
         assessmentsId: assessment.id,
+        questionGroupId: seedGroup.id,
         sampleinput1: "atom",
         sampleinput2: "",
         sampleoutput1: "mota",

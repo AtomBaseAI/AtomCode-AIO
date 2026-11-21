@@ -16,6 +16,8 @@ const EditCourse = async ({ params }: { params: Promise<{ cid: string}> }) => {
         startdate: course?.startdate ?? new Date(),
         enddate: course?.enddate ?? new Date(),
         language: course?.language || '',
+        courseType: (course?.courseType ?? 'code-mcq') as 'code-mcq' | 'mcq-only',
+        anyLanguage: course?.anyLanguage ?? false,
         completionOrder: (course?.completionOrder ?? 'openflow') as 'daywise' | 'queue' | 'openflow',
     };
     const formattedDates = {

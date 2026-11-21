@@ -88,6 +88,9 @@ export const AssessmentCodeSchema = z.object({
     sourcecode: z.string().nullable(),
     whitelist: z.string().nullable(),
     blacklist: z.string().nullable(),
+    // Optional SQL setup (header) code — prepended to the student's query
+    // by the judge when the active language is sql.
+    headerCode: z.string().nullable(),
     questionstatus: z.boolean()
 })
 export const AssessmentMCQSchema = z.object({
@@ -120,6 +123,12 @@ export const UserAssessmentLiveData = z.object({
     maxtime: z.string(),
     assessmentstarttime: z.string(),
     remainingtime: z.string(),
+    // Parent-course settings: "code-mcq" | "mcq-only" (mcq-only hides the
+    // code section) and any-language selector toggle; course language is the
+    // default solution language for any-language assessments.
+    courseType: z.string().default("code-mcq"),
+    anyLanguage: z.boolean().default(false),
+    courseLanguage: z.string().optional(),
     mcq: z.array(AssessmentMCQSchema).optional(),
     code: z.array(AssessmentCodeSchema).optional()
 })

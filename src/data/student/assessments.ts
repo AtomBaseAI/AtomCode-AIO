@@ -87,9 +87,14 @@ export async function getAssessmentsByUserId(userId: string) {
                 minute: '2-digit'
             });
 
-            let dynamicStatus: "start" | "retake" | "resume" | "upcoming" | "expired" = "upcoming";
+            let dynamicStatus: "start" | "retake" | "resume" | "upcoming" | "expired" | "completed" = "upcoming";
 
-            if (assessmentDate > todayDate) {
+            if (userStatus === "submitted") {
+                // The student has already completed this assessment — never
+                // offer another attempt (both web and desktop render this as
+                // a completed/non-clickable card).
+                dynamicStatus = "completed";
+            } else if (assessmentDate > todayDate) {
                 dynamicStatus = "upcoming";
             } else if (assessmentDate < todayDate) {
                 dynamicStatus = "expired";
@@ -176,9 +181,13 @@ export async function getAssessmentDataByAssessmentIdUserId(
     const uaid = assessment.UserAssessmentData[0]?.id || null;
     const prestarttime = assessment.UserAssessmentData[0]?.assessmentstarttime || null;
     const pretabswitches = assessment.UserAssessmentData[0]?.usertabswitches || 0;
-    let dynamicStatus: "start" | "retake" | "resume" | "upcoming" | "expired" = "upcoming";
+    let dynamicStatus: "start" | "retake" | "resume" | "upcoming" | "expired" | "completed" = "upcoming";
 
-    if (assessmentDate > todayDate) {
+    if (userStatus === "submitted") {
+        // Already completed — the prepare page renders a disabled
+        // "Test Completed" button for this status.
+        dynamicStatus = "completed";
+    } else if (assessmentDate > todayDate) {
         dynamicStatus = "upcoming";
     } else if (assessmentDate < todayDate) {
         dynamicStatus = "expired";
@@ -230,6 +239,13 @@ export async function getAssessmentDataByUAID(
                 include: {
                     mcqQuestions: true,
                     codeQuestions: true,
+                    course: {
+                        select: {
+                            courseType: true,
+                            anyLanguage: true,
+                            language: true,
+                        },
+                    },
                 },
             },
         },
@@ -308,6 +324,11 @@ export async function getAssessmentDataByUAID(
         maxtime,
         assessmentstarttime,
         remainingtime,
+        // Parent-course settings drive the session UI: mcq-only courses hide
+        // the code section; any-language courses show the language selector.
+        courseType: userAssessment.assessments.course.courseType,
+        anyLanguage: userAssessment.assessments.course.anyLanguage,
+        courseLanguage: userAssessment.assessments.course.language,
         mcq: userAssessment.assessments.mcqQuestions,
         code: processedCodeQuestions
     };

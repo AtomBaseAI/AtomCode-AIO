@@ -32,7 +32,15 @@ export async function GET(
       where: { id: uaid },
       include: {
         assessments: {
-          include: { mcqQuestions: true, codeQuestions: true },
+          include: {
+            mcqQuestions: true,
+            codeQuestions: true,
+            // Course type flags for the desktop renderer: "mcq-only"
+            // courses hide the coding section in the attempt view.
+            course: {
+              select: { courseType: true, anyLanguage: true, language: true },
+            },
+          },
         },
       },
     });
@@ -64,6 +72,11 @@ export async function GET(
         language: assessment.language,
         maxscore: assessment.maxscore,
         maxtime: attempt.maxtime,
+        // Additive course-type flags (mirror the web practice gating):
+        // "mcq-only" hides the coding section; anyLanguage marks courses
+        // where the code panel shows a language selector.
+        courseType: assessment.course?.courseType ?? "code-mcq",
+        anyLanguage: assessment.course?.anyLanguage ?? false,
       },
       attemptState: {
         status: attempt.status,

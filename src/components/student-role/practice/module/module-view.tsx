@@ -161,9 +161,9 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, lockState
                                                                                     </span>
                                                                                 </AlertDialogDescription>
                                                                             </AlertDialogHeader>
-                                                                            <AlertDialogFooter>
-                                                                                <AlertDialogCancel className='bg-red-500 hover:bg-red-400 text-white w-full hover:text-white'>Cancel</AlertDialogCancel>
-                                                                                <AlertDialogAction className='w-full'>
+                                                                            <AlertDialogFooter className="flex flex-row gap-2">
+                                                                                <AlertDialogCancel className='bg-red-500 hover:bg-red-400 text-white flex-1 hover:text-white'>Cancel</AlertDialogCancel>
+                                                                                <AlertDialogAction className='flex-1'>
                                                                                     <a href={feedback.link} target="_blank" rel="noopener noreferrer" className="w-full h-full">
                                                                                         Open
                                                                                     </a>

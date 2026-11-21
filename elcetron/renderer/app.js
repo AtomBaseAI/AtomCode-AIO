@@ -142,8 +142,44 @@ $("#theme-toggle").addEventListener("click", () =>
 
 /* ============================== API ============================== */
 
+/* ============== connectivity (offline detection) ============== */
+
+const isOffline = () => (typeof navigator !== "undefined" && navigator.onLine === false);
+
+function updateNetStatus() {
+  const offline = isOffline();
+  const chip = $("#net-chip");
+  const label = $("#net-label");
+  const banner = $("#offline-banner");
+  if (chip) chip.classList.toggle("offline", offline);
+  if (label) label.textContent = offline ? "Offline" : "Online";
+  if (banner) banner.classList.toggle("hidden", !offline);
+}
+
+window.addEventListener("offline", () => {
+  updateNetStatus();
+  toast("You are offline — waiting for the network…", "error");
+});
+
+window.addEventListener("online", () => {
+  updateNetStatus();
+  toast("Back online", "success");
+  // Refresh whatever the student was looking at (never mid-test — the
+  // practice/attempt overlays manage their own recovery).
+  const pr = $("#practice-root");
+  const inPlainView = state.token && state.user && pr && pr.classList.contains("hidden") && !state.assessment;
+  if (inPlainView) {
+    navigate(state.view || "dashboard").catch(() => {});
+  }
+});
+
 async function api(path, { method = "GET", body, silent401 = false } = {}) {
+  if (isOffline()) {
+    updateNetStatus();
+    return { ok: false, status: 0, data: { error: "You are offline — check your internet connection and try again." } };
+  }
   const res = await app.api({ serverUrl: state.serverUrl, path, method, token: state.token, body });
+  if (res && res.status === 0) updateNetStatus();
   if (res && res.status === 401 && !silent401 && state.token) {
     clearSession();
     showLogin("Session expired — please sign in again");
@@ -162,22 +198,159 @@ async function apiOrThrow(path, opts) {
 
 const ENGINE_STATUS = { Success: "pass", Failed: "fail", Error: "error" };
 
+/* Languages the desktop engine executes locally (mirrors AtomEngine.ENGINE_LANGUAGES). */
+const ENGINE_LANGS = ["python", "sql", "ruby", "javascript", "typescript", "c", "cpp", "java"];
+const ENGINE_LANG_LABELS = {
+  python: "Python", sql: "SQL (SQLite)", ruby: "Ruby", javascript: "JavaScript",
+  typescript: "TypeScript", c: "C", cpp: "C++", java: "Java",
+};
+
 /**
- * Executes a question's code with the built-in compilers — everything runs
- * 100% locally in the desktop app (no server round-trips, no Lambda):
- * - python/sql/ruby/javascript/typescript run in bundled wasm runtimes
- * - c/cpp compile with the bundled clang and run in a sandboxed worker
- * - java compiles & runs inside the bundled Doppio JVM (via the main process)
- * Hidden test cases are judged client-side, exactly like the web app.
+ * Languages whose hidden test cases are shipped to the desktop client
+ * (client-side judging, same trust level as the web app). Compiled
+ * languages (C, C++, Java) stay server-judged via /api/desktop/run —
+ * their hidden test data never leaves the server.
  */
-async function runQuestionCode({ q, code, mode, moduleId, assessmentId }) {
-  const lang = String(q.lang || "").toLowerCase();
+const CLIENT_JUDGE_LANGS = ["python", "sql", "ruby", "javascript", "typescript"];
+
+/**
+ * Mirrors composeUserCode (web src/lib/judge.ts): SQL questions carry an
+ * optional setup (header) code. The engine executes statements in source
+ * order, so prepending the header runs the schema setup before the
+ * student's query.
+ */
+function composeUserCode(lang, headerCode, code) {
+  if (lang !== "sql" || !headerCode || !String(headerCode).trim()) return code;
+  return `${String(headerCode).trim().replace(/\s*$/, "")}\n\n-- ── student query ──\n${code}`;
+}
+
+/** Comma-separated tags → display chips (additive, safe on old payloads). */
+const tagChips = (tags) =>
+  String(tags || "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .map((t) => `<span class="chip chip-soft">#${esc(t)}</span>`)
+    .join("");
+
+/* ============== web-matching workspace renderers ============== */
+
+/** Bordered section label chip — mirrors the web "Question"/"Description"… badges. */
+const qChip = (label) => `<span class="q-chip">${esc(label)}</span>`;
+
+/** One sample testcase block — grey Input/Output boxes side by side (web look). */
+const sampleBlock = (n, input, output) => `
+  <div class="sample-block">
+    <div class="sample-head">Sample Testcase ${n}</div>
+    <div class="sample-pair">
+      <div class="sample-col"><span class="lbl">Sample Input</span><pre class="q-box pre">${esc(input || "")}</pre></div>
+      <div class="sample-col"><span class="lbl">Sample Output</span><pre class="q-box pre">${esc(output || "")}</pre></div>
+    </div>
+  </div>`;
+
+/**
+ * Question body exactly like the web practice/assessment code panel:
+ * Question chip → title → meta chips → Description chip → text →
+ * Input Constrains chip → box → Sample Testcases chip → sample blocks.
+ */
+const questionBodyHtml = (q) => `
+  <div>${qChip("Question")}</div>
+  <div class="q-title">${esc(q.title)}</div>
+  <div class="chip-row">
+    <span class="chip chip-lang">${langIcon(q.lang)} <b>${esc((q.lang || "").toUpperCase())}</b></span>
+    ${q.difficulty ? `<span class="chip chip-${esc(q.difficulty)}">${esc(q.difficulty)}</span>` : ""}
+    ${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}
+    ${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}
+    ${tagChips(q.tags)}
+    ${q.company ? `<span class="chip chip-soft">${esc(q.company)}</span>` : ""}
+    <span class="chip chip-soft">Max score: ${q.maxscore ?? 10}</span>
+  </div>
+  <div>${qChip("Description")}</div>
+  <div class="q-desc">${esc(q.description)}</div>
+  <div>${qChip("Input Constrains")}</div>
+  <div class="q-box">${esc(q.inputconstrains || "None")}</div>
+  <div>${qChip("Sample Testcases")}</div>
+  <div style="width:100%; display:flex; flex-direction:column; gap:1rem;">
+    ${sampleBlock(1, q.sampleinput1, q.sampleoutput1)}
+    ${(q.sampleinput2 || q.sampleoutput2) ? sampleBlock(2, q.sampleinput2, q.sampleoutput2) : ""}
+  </div>`;
+
+/**
+ * Code editor with a synced line-number gutter (CodeMirror-like, web look).
+ */
+const editorWithGutter = (codeId, gutterId, lang, extraHead = "") => `
+  <div class="editor-wrap ${document.body.classList.contains("dark") ? "" : "light"}" style="height:100%;">
+    <div class="editor-head">${langIcon(lang)} <b data-langlabel="${esc(codeId)}">${esc(String(lang).toUpperCase())}</b>${extraHead}</div>
+    <div class="editor-flex">
+      <pre class="editor-gutter" id="${esc(gutterId)}">1</pre>
+      <textarea class="editor-area" id="${esc(codeId)}" data-code="${esc(codeId)}" spellcheck="false"></textarea>
+    </div>
+  </div>`;
+
+/** Keeps a line-number gutter in sync with its textarea (input + scroll). */
+function bindGutter(textarea, gutter) {
+  if (!textarea || !gutter) return;
+  const sync = () => {
+    const lines = textarea.value.split("\n").length;
+    let html = "";
+    for (let i = 1; i <= Math.max(lines, 1); i++) html += i + "\n";
+    gutter.textContent = html;
+    gutter.scrollTop = textarea.scrollTop;
+  };
+  textarea.addEventListener("input", sync);
+  textarea.addEventListener("scroll", () => { gutter.scrollTop = textarea.scrollTop; });
+  sync();
+}
+
+/**
+ * Executes a question's code:
+ * - python/sql/ruby/javascript/typescript run 100% locally in the bundled
+ *   wasm runtimes (hidden test cases judged client-side, same as the web)
+ * - c/cpp/java are judged by the platform server's built-in toolchains via
+ *   /api/desktop/run — their hidden test cases never leave the server
+ */
+async function runQuestionCode({ q, code, lang: langOverride, mode, moduleId, assessmentId }) {
+  // anyLanguage courses pass the selected language here; otherwise the
+  // question's own language is used.
+  const lang = String(langOverride || q.lang || "").toLowerCase();
+  // SQL setup (header) code executes before the student's code.
+  const judgedCode = composeUserCode(lang, q.headerCode, code);
+
+  // Compiled languages (C/C++/Java): the hidden test cases never leave the
+  // server, so judging goes through the platform server's built-in
+  // toolchains (/api/desktop/run) instead of the local engine.
+  if (!CLIENT_JUDGE_LANGS.includes(lang) && (moduleId || assessmentId)) {
+    const res = await apiOrThrow("/run", {
+      method: "POST",
+      body: { questionId: q.id, code: judgedCode, mode, moduleId, assessmentId },
+    });
+    if (mode === "sample") {
+      return {
+        mode,
+        compileMessage: res.compileMessage || (res.passed ? "Success" : "Failed"),
+        output: res.output,
+        passed: Boolean(res.passed),
+      };
+    }
+    const statuses = [res.testcase1status, res.testcase2status, res.testcase3status];
+    return {
+      mode,
+      compileMessage: res.compileMessage || "Success",
+      testcase1status: statuses[0],
+      testcase2status: statuses[1],
+      testcase3status: statuses[2],
+      output1: res.output1,
+      output2: res.output2,
+      output3: res.output3,
+      passedCount: statuses.filter((s) => s === "pass").length,
+    };
+  }
 
   if (window.AtomEngine && window.AtomEngine.isEngineLanguage(lang)) {
     if (mode === "sample") {
       const outcome = await window.AtomEngine.judgeRunSingle({
         lang,
-        code,
+        code: judgedCode,
         input: q.sampleinput1 || "",
         expectedOutput: q.sampleoutput1 == null ? null : q.sampleoutput1,
       });
@@ -191,7 +364,7 @@ async function runQuestionCode({ q, code, mode, moduleId, assessmentId }) {
 
     const results = await window.AtomEngine.judgeRunTestCases({
       lang,
-      code,
+      code: judgedCode,
       cases: [
         { input: q.input1, expected: q.output1 },
         { input: q.input2, expected: q.output2 },
@@ -241,6 +414,39 @@ function showLogin(notice = null) {
   else err.classList.add("hidden");
   // First launch (or cleared config) → ask ONLY for the server address.
   paintLoginMode(state.serverUrl ? "login" : "gate");
+  // Client branding (logo + client name) for the left panel.
+  loadClientBranding();
+}
+
+/** Applies the admin-configured client branding (name / banner / vendor logo). */
+function applyClientBranding(cfg) {
+  if (!cfg) return;
+  const name = cfg.clientName || "AtomCode Student";
+  $("#brand-title").textContent = name;
+  const logoEl = $("#brand-logo");
+  const markEl = $("#brand-mark-fallback");
+  const logoUrl = cfg.clientBanner || cfg.vendorLogo || "";
+  if (logoUrl && logoEl) {
+    logoEl.src = logoUrl;
+    logoEl.classList.remove("hidden");
+    if (markEl) markEl.classList.add("hidden");
+    logoEl.onerror = () => { logoEl.classList.add("hidden"); if (markEl) markEl.classList.remove("hidden"); };
+  } else if (markEl) {
+    markEl.classList.remove("hidden");
+  }
+  const foot = $("#brand-foot");
+  if (foot) foot.textContent = cfg.poweredbyStatus === true && cfg.poweredbyName ? `Powered by ${cfg.poweredbyName}` : "";
+  document.title = `${name} — AtomCode Student`;
+  const footBrand = $("#brand-foot-login");
+  if (footBrand) footBrand.textContent = name;
+}
+
+async function loadClientBranding() {
+  if (!state.serverUrl) return;
+  try {
+    const res = await app.api({ serverUrl: state.serverUrl, path: "/config", timeout: 12000 });
+    if (res && res.ok) applyClientBranding(res.data);
+  } catch { /* branding is cosmetic — ignore */ }
 }
 
 /**
@@ -288,6 +494,7 @@ async function connectServer() {
     localStorage.setItem(LS.server, url);
     toast("Server connected.");
     paintLoginMode("login");
+    loadClientBranding();
   } catch (e) {
     errEl.textContent = (e && e.message) || `Cannot reach a server at ${url}`;
     errEl.classList.remove("hidden");
@@ -308,6 +515,7 @@ function showShell() {
 
 async function boot() {
   applyTheme(localStorage.getItem(LS.theme) || "light");
+  updateNetStatus();
   state.token = localStorage.getItem(LS.token);
   state.user = JSON.parse(localStorage.getItem(LS.user) || "null");
   if (!state.token || !state.user) { showLogin(); return; }
@@ -317,6 +525,55 @@ async function boot() {
   state.user = res.data.user;
   localStorage.setItem(LS.user, JSON.stringify(state.user));
   showShell();
+  installFullscreenProctoring();
+}
+
+/* ============== fullscreen proctoring (assessment lockdown) ============== */
+
+let fullscreenProctoringInstalled = false;
+
+/**
+ * Mirrors the web app's fullscreen-enforced assessment layout: an attempt
+ * runs in fullscreen and leaving fullscreen mid-attempt counts as a tab
+ * switch (finalize at the limit — same rule as a window blur).
+ */
+function installFullscreenProctoring() {
+  if (fullscreenProctoringInstalled || typeof app.onFullscreenChange !== "function") return;
+  fullscreenProctoringInstalled = true;
+  app.onFullscreenChange((fs) => {
+    if (fs) return;
+    const A = state.assessment;
+    const pr = $("#practice-root");
+    const inPractice = pr && !pr.classList.contains("hidden");
+    if (!A && !inPractice) return;
+    if (A) {
+      A.tabCount += 1;
+      const el = $("#tab-count");
+      if (el) el.textContent = A.tabCount;
+      const max = A.detail?.attemptState?.maxtabswitches;
+      if (max && A.tabCount >= max) {
+        toast("Tab switch limit reached — test will be submitted.", "warning");
+        finalizeAttempt(true);
+      } else {
+        toast(`Warning: tab switch ${A.tabCount}/${max}`, "warning");
+      }
+      return;
+    }
+    // Practice environment — web parity: warn and re-lock, no penalty.
+    dialog(`
+      <h2 class="dialog-title" style="text-align:center; color:var(--destructive);">Warning !</h2>
+      <p class="dialog-desc" style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:1rem; margin:1.5rem 0;">
+        ${icon("shieldAlert", "ic xl")} Do not exit Fullscreen mode.
+      </p>
+      <div class="dialog-footer single">
+        <button class="btn btn-primary" id="fs-relock" style="width:100%;">Continue</button>
+      </div>`);
+    const relock = document.getElementById("fs-relock");
+    if (relock) relock.onclick = () => {
+      closeDialog();
+      if (typeof app.setFullscreen === "function") app.setFullscreen(true);
+    };
+  });
 }
 
 /* login */
@@ -355,11 +612,7 @@ async function doLogin() {
     toast(`Welcome back, ${state.user.name || state.user.email}!`);
     showShell();
     api("/config", { silent401: true }).then((r) => r.ok ? r.data : null).then((cfg) => {
-      if (cfg?.clientName) {
-        const el = $("#brand-foot");
-        if (el) el.textContent = cfg.clientName;
-        document.title = `${cfg.clientName} — AtomCode Student`;
-      }
+      applyClientBranding(cfg);
     }).catch(() => {});
   } catch (e) {
     errEl.textContent = e.message || "Cannot reach the server";
@@ -427,6 +680,7 @@ function setActiveNav(view) {
 
 async function navigate(view, opts = {}) {
   closePractice();
+  state.view = view;
   setActiveNav(view);
   setPageTitle(view);
   closeUserMenu();
@@ -848,6 +1102,8 @@ function closePractice() {
     pr.classList.add("hidden");
     pr.innerHTML = "";
   }
+  // Leaving the practice/attempt overlay restores the windowed shell.
+  if (typeof app.setFullscreen === "function" && !state.assessment) app.setFullscreen(false);
   if (state.assessment?.timer) { clearInterval(state.assessment.timer); state.assessment = null; }
 }
 
@@ -857,6 +1113,10 @@ async function renderPracticeHome(v) {
 
   const d = await apiOrThrow(`/student/modules/${ctx.mid}`);
   const p = d.progress;
+  // "mcq-only" courses complete with the MCQ section alone — the Programs
+  // card is hidden and the submit gate no longer waits for questionstatus
+  // (mirrors the web practice home).
+  const isMcqOnly = d.module?.courseType === "mcq-only";
 
   v.innerHTML = `
     <div style="width:100%; height:calc(100vh - 7rem); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2rem;">
@@ -874,6 +1134,7 @@ async function renderPracticeHome(v) {
             ? `<div class="submitted-band">${icon("puzzle", "ic")} MCQ Submitted${d.mcqSubmitted ? ` — scored ${d.mcqSubmitted.score}/${p?.totalmcqscore ?? d.mcqs.length}${d.mcqSubmitted.errors ? ` (${d.mcqSubmitted.errors} wrong)` : ""}` : ""}</div>`
             : `<button class="btn btn-green btn-block mt1" id="go-mcq">${icon("puzzle", "ic")} Start MCQ</button>`}
         </div>` : ""}
+        ${!isMcqOnly ? `
         <div style="width:15rem; display:flex; flex-direction:column;">
           <div style="border:2px solid var(--border); border-radius:var(--radius);">
             <div style="padding:0.75rem; text-align:center;"><h2>Programs</h2><h4 style="font-size:1.5rem;font-weight:700;">${Math.round((p?.totalquestionscore ?? 0) / 10) || d.codeQuestions.length}</h4></div>
@@ -882,11 +1143,11 @@ async function renderPracticeHome(v) {
           ${p?.questionstatus === "submitted"
             ? `<div class="submitted-band">${icon("code", "ic")} Code Submitted</div>`
             : `<button class="btn btn-green btn-block mt1" id="go-code" ${d.codeQuestions.length === 0 ? "disabled" : ""}>${icon("code", "ic")} Start Code</button>`}
-        </div>
+        </div>` : ""}
       </div>
       <div class="row" style="justify-content:center;">
         <button class="btn btn-primary" id="ph-back">${icon("chevL", "ic")} Back</button>
-        ${p?.mcqstatus === "submitted" && p?.questionstatus === "submitted" ? `<button class="btn btn-green" id="ph-submit">Submit Module</button>` : ""}
+        ${p?.mcqstatus === "submitted" && (isMcqOnly || p?.questionstatus === "submitted") ? `<button class="btn btn-green" id="ph-submit">Submit Module</button>` : ""}
       </div>
       ${(d.references?.length > 0) ? `
       <div class="practice-refs">
@@ -938,6 +1199,9 @@ function openMcqPractice(d) {
   if (mcqs.length === 0) return;
   const pr = $("#practice-root");
   pr.classList.remove("hidden");
+  // Web-parity: the practice environment runs fullscreen (exit shows the
+  // web's "Do not exit Fullscreen mode." warning dialog).
+  if (typeof app.setFullscreen === "function") app.setFullscreen(true);
   let idx = 0;
   const answers = {};   // mcqId -> selected 1..4
   const startAt = Date.now();
@@ -971,7 +1235,7 @@ function openMcqPractice(d) {
     $("#q-num").textContent = idx + 1;
     $("#q-body").innerHTML = `
       <div class="q-title">${esc(q.title)}</div>
-      ${(q.topic || q.subtopic) ? `<div class="chip-row">${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}</div>` : ""}
+      ${(q.topic || q.subtopic || q.tags) ? `<div class="chip-row">${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}${tagChips(q.tags)}</div>` : ""}
       <div class="q-desc">${esc(q.description)}</div>
       ${q.referenceimg ? `<img src="${esc(q.referenceimg)}" alt="${esc(q.title)}" style="max-height:300px; object-fit:fill; border-radius:var(--radius); border:1px solid var(--border);" />` : ""}
       ${q.iscodesnippet && q.codesnippet ? `<pre class="codesnippet">${esc(q.codesnippet)}</pre>` : ""}
@@ -1062,9 +1326,16 @@ function openCodePractice(d) {
   if (qs.length === 0) return;
   const pr = $("#practice-root");
   pr.classList.remove("hidden");
+  // Web-parity fullscreen lock (see openMcqPractice).
+  if (typeof app.setFullscreen === "function") app.setFullscreen(true);
   let idx = 0;
   const perQ = {};  // qid -> {code, samplePassed, tests:[], compiles, errors}
   const startAt = Date.now();
+  // anyLanguage courses let the student pick the solution language from a
+  // selector (mirrors the web code view's activeLang); otherwise the
+  // question's own language is fixed.
+  const anyLang = Boolean(d.module?.anyLanguage);
+  let activeLang = String(qs[0]?.lang || d.module?.language || "python").toLowerCase();
 
   const saved = () => {
     const q = qs[idx];
@@ -1082,7 +1353,7 @@ function openCodePractice(d) {
       </div>
     </aside>
     <div class="practice-main">
-      <div class="practice-panels" style="height:80%;">
+      <div class="practice-panels" style="height:86%;">
         <div class="ppanel">
           <div class="p-head">Question : <span id="c-num">1</span>&nbsp;/&nbsp;${qs.length}</div>
           <div class="p-body" id="cq-body"></div>
@@ -1092,10 +1363,11 @@ function openCodePractice(d) {
           <div class="p-head">Write your code</div>
           <div style="height:72%; width:100%; padding:0.75rem 1rem;" id="ed-wrap"></div>
           <div class="p-foot" style="gap:0.5rem;">
-            <button class="btn btn-outline btn-sm" id="run-sample">${icon("play", "ic sm")} Run Sample</button>
-            <button class="btn btn-outline btn-sm" id="run-tests">${icon("clock", "ic sm")} Run Testcases</button>
+            <button class="btn btn-green btn-sm" id="run-sample">${icon("play", "ic sm")} Run</button>
+            <button class="btn btn-green btn-sm" id="run-tests">${icon("clock", "ic sm")} Run Test Cases</button>
+            ${anyLang ? `<select class="inp" id="lang-select" title="Solution language" aria-label="Solution language" style="height:2rem; width:auto; padding:0 0.5rem; font-size:0.8rem;">${ENGINE_LANGS.map((l) => `<option value="${l}" ${l === activeLang ? "selected" : ""}>${ENGINE_LANG_LABELS[l] || l}</option>`).join("")}</select>` : ""}
             <span class="spacer"></span>
-            <button class="btn btn-green btn-sm" id="cp-submit2">Submit</button>
+            <button class="btn btn-green btn-sm" id="cp-submit2">Submit Question</button>
           </div>
         </div>
       </div>
@@ -1104,31 +1376,19 @@ function openCodePractice(d) {
   const paint = () => {
     const q = qs[idx];
     const s = saved();
+    // Fixed-language courses always judge in the question's own language —
+    // keep the active language in sync on every question switch.
+    if (!anyLang) activeLang = String(q.lang || "python").toLowerCase();
     $("#c-num").textContent = idx + 1;
     $("#cq-marks").textContent = q.maxscore ?? 10;
-    $("#cq-body").innerHTML = `
-      <div class="q-title">${esc(q.title)}</div>
-      <div class="chip-row">
-        <span class="chip chip-lang">${langIcon(q.lang)} <b>${esc((q.lang || "").toUpperCase())}</b></span>
-        ${q.difficulty ? `<span class="chip chip-${esc(q.difficulty)}">${esc(q.difficulty)}</span>` : ""}
-        ${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}
-        ${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}
-        <span class="chip chip-soft">Max score: ${q.maxscore ?? 10}</span>
-      </div>
-      <div class="q-desc">${esc(q.description)}</div>
-      ${q.inputconstrains ? `<div class="q-desc"><b>Constraints:</b> ${esc(q.inputconstrains)}</div>` : ""}
-      ${q.sampleinput1 ? `<div style="width:100%"><b class="small">Sample Input 1</b><pre class="codesnippet">${esc(q.sampleinput1)}</pre><b class="small">Sample Output 1</b><pre class="codesnippet">${esc(q.sampleoutput1)}</pre></div>` : ""}
-      ${q.sampleinput2 ? `<div style="width:100%"><b class="small">Sample Input 2</b><pre class="codesnippet">${esc(q.sampleinput2)}</pre><b class="small">Sample Output 2</b><pre class="codesnippet">${esc(q.sampleoutput2)}</pre></div>` : ""}
-      ${q.referenceimg ? `<img src="${esc(q.referenceimg)}" alt="${esc(q.title)}" style="max-height:220px; border-radius:var(--radius); border:1px solid var(--border);" />` : ""}
-    `;
-    $("#ed-wrap").innerHTML = `
-      <div class="editor-wrap ${document.body.classList.contains("dark") ? "" : "light"}" style="height:100%;">
-        <div class="editor-head">${langIcon(q.lang)} <b>${esc((q.lang || "").toUpperCase())}</b>
-          ${(q.testcaseStatuses || []).some(Boolean) ? `<span class="editor-tests">${(q.testcaseStatuses || []).map((st, i) => `<span class="badge ${st === "pass" ? "badge-green" : st === "error" ? "badge-red" : "badge-orange"}" title="Saved run — test ${i + 1}">T${i + 1}: ${st || "—"}</span>`).join("")}</span>` : ""}
-          ${q.submissionstatus ? '<span class="badge badge-green" style="margin-left:auto;">submitted</span>' : ""}</div>
-        <textarea class="editor-area" id="code-editor" spellcheck="false">${esc(s.code)}</textarea>
-      </div>`;
+    $("#cq-body").innerHTML = `${questionBodyHtml(q)}
+      ${q.referenceimg ? `<img src="${esc(q.referenceimg)}" alt="${esc(q.title)}" style="max-height:220px; border-radius:var(--radius); border:1px solid var(--border);" />` : ""}`;
+    $("#ed-wrap").innerHTML = editorWithGutter("code-editor", "ed-gutter", activeLang,
+      `${(q.testcaseStatuses || []).some(Boolean) ? `<span class="editor-tests">${(q.testcaseStatuses || []).map((st, i) => `<span class="badge ${st === "pass" ? "badge-green" : st === "error" ? "badge-red" : "badge-orange"}" title="Saved run — test ${i + 1}">T${i + 1}: ${st || "—"}</span>`).join("")}</span>` : ""}
+      ${q.submissionstatus ? '<span class="badge badge-green" style="margin-left:auto;">submitted</span>' : ""}`);
     const ed = $("#code-editor");
+    ed.value = s.code;
+    bindGutter(ed, $("#ed-gutter"));
     ed.addEventListener("keydown", (e) => {
       if (e.key === "Tab") {
         e.preventDefault();
@@ -1152,6 +1412,8 @@ function openCodePractice(d) {
   };
 
   $$(".rail-btn[data-i]", pr).forEach((b) => (b.onclick = () => { idx = Number(b.dataset.i); paint(); }));
+  const langSel = $("#lang-select");
+  if (langSel) langSel.onchange = () => { activeLang = langSel.value; paint(); };
   $("#cp-exit").onclick = () => { closePractice(); navigate("practice"); };
   $("#cp-theme") && ($("#cp-theme").onclick = () => {});
 
@@ -1162,7 +1424,7 @@ function openCodePractice(d) {
       <h2 class="dialog-title">Running sample…</h2>
       <p class="dialog-desc">${icon("loader", "ic spin")} Executing against sample testcase</p>`);
     try {
-      const r = await runQuestionCode({ q, code: getCode(), mode: "sample", moduleId: state.moduleCtx.mid });
+      const r = await runQuestionCode({ q, code: getCode(), lang: activeLang, mode: "sample", moduleId: state.moduleCtx.mid });
       s.compiles += 1;
       if (r.passed) {
         s.samplePassed = true;
@@ -1189,7 +1451,7 @@ function openCodePractice(d) {
       <h2 class="dialog-title">Running testcases…</h2>
       <p class="dialog-desc">${icon("loader", "ic spin")} Executing hidden test cases</p>`);
     try {
-      const r = await runQuestionCode({ q, code: getCode(), mode: "tests", moduleId: state.moduleCtx.mid });
+      const r = await runQuestionCode({ q, code: getCode(), lang: activeLang, mode: "tests", moduleId: state.moduleCtx.mid });
       s.compiles += 1;
       s.tests = [r.testcase1status, r.testcase2status, r.testcase3status];
       if (s.tests.includes("error")) s.errors += 1;
@@ -1306,9 +1568,9 @@ async function renderAssessments(v) {
 
   v.innerHTML = `<div class="asm-grid">${d.assessments.map((a) => {
     const clickable = ["start", "resume", "retake"].includes(a.status);
-    const bcls = { start: "b-green", resume: "b-green", retake: "b-orange", expired: "b-red" }[a.status] || "b-purple";
-    const band = { expired: "badge-red", retake: "badge-orange", start: "badge-green", resume: "badge-green" }[a.status] || "badge-purple";
-    const label = { start: "Start", resume: "Continue", retake: "Retake", expired: "Expired" }[a.status] || "Upcoming";
+    const bcls = { start: "b-green", resume: "b-green", retake: "b-orange", expired: "b-red", completed: "b-green" }[a.status] || "b-purple";
+    const band = { expired: "badge-red", retake: "badge-orange", start: "badge-green", resume: "badge-green", completed: "badge-green" }[a.status] || "badge-purple";
+    const label = { start: "Start", resume: "Continue", retake: "Retake", expired: "Expired", completed: "Completed" }[a.status] || "Upcoming";
     return `<div class="asm-card ${bcls} ${clickable ? "clickable" : ""}" data-aid="${esc(a.assessmentid)}" data-title="${esc(a.title)}">
       <div style="padding:1.25rem 2rem;">
         <div class="head">
@@ -1405,6 +1667,9 @@ async function openAsmPrepare(aid, title) {
 function openAsmAttempt(aid, uaid, remainingtime) {
   closeDialog();
   state.assessment = { aid, uaid, detail: null, timer: null, remaining: remainingtime ?? 0, tabCount: 0 };
+  // Lockdown: run the attempt in fullscreen like the web app's
+  // fullscreen-enforced assessment layout (exit = tab switch).
+  if (typeof app.setFullscreen === "function") app.setFullscreen(true);
   loadAttempt();
 }
 
@@ -1424,6 +1689,20 @@ async function loadAttempt() {
   const d = A.detail;
   A.answers = A.answers || {};   // mcqId -> selected (1..4)
   A.codeRuns = A.codeRuns || {}; // qid -> {statuses, passed, code, saved}
+  A.samplePassed = A.samplePassed || {}; // qid -> sample testcase passed
+  A.langChoice = A.langChoice || {};     // qid -> chosen language (anyLanguage)
+  // anyLanguage assessments let the student pick the solution language per
+  // question (mirrors the web code view's activeLang).
+  const langFor = (q) => String(A.langChoice[q.id] || q.lang || "").toLowerCase();
+  // Blacklist/whitelist guard — the web assessment code view applies the
+  // same checks before every run.
+  const guardKeywordsAsm = (q, code) => {
+    const blacklist = (q.blacklist || "").split(",").map((s) => s.trim()).filter(Boolean);
+    const whitelist = (q.whitelist || "").split(",").map((s) => s.trim()).filter(Boolean);
+    if (blacklist.some((k) => code.includes(k))) { toast("Blacklist keyword(s) found in the code!", "error"); return false; }
+    if (whitelist.some((k) => !code.includes(k))) { toast("Whitelist keyword(s) missing in the code!", "error"); return false; }
+    return true;
+  };
 
   paintAttemptShell();
 
@@ -1454,7 +1733,9 @@ async function loadAttempt() {
     };
 
     paintMcq();
-    paintCode();
+    // "mcq-only" courses: no coding section — the assessment completes with
+    // the MCQ part alone (mirrors the web mcq-only gating).
+    if (d.assessment.courseType !== "mcq-only") paintCode();
     startTimer();
     trackTabSwitches();
   }
@@ -1485,7 +1766,7 @@ async function loadAttempt() {
       $("#am-num").textContent = mi + 1;
       $("#am-qbody").innerHTML = `
         <div class="q-title">${esc(q.title)}</div>
-        ${(q.topic || q.subtopic) ? `<div class="chip-row">${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}</div>` : ""}
+        ${(q.topic || q.subtopic || q.tags) ? `<div class="chip-row">${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}${tagChips(q.tags)}</div>` : ""}
         <div class="q-desc">${esc(q.description)}</div>
         ${q.iscodesnippet && q.codesnippet ? `<pre class="codesnippet">${esc(q.codesnippet)}</pre>` : ""}`;
       $("#am-abody").innerHTML = q.options.map((o, i) => `
@@ -1518,45 +1799,79 @@ async function loadAttempt() {
       card.innerHTML = `
         <div class="ppanel">
           <div class="p-head">Question : ${qi + 1}&nbsp;/&nbsp;${d.code.length}</div>
-          <div class="p-body">
-            <div class="q-title">${esc(q.title)}</div>
-            <div class="chip-row">
-              <span class="chip chip-lang">${langIcon(q.lang)} <b>${esc((q.lang || "").toUpperCase())}</b></span>
-              ${q.difficulty ? `<span class="chip chip-${esc(q.difficulty)}">${esc(q.difficulty)}</span>` : ""}
-              ${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}
-              ${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}
-            </div>
-            <div class="q-desc">${esc(q.description)}</div>
-            ${q.sampleinput1 ? `<div style="width:100%"><b class="small">Sample Input</b><pre class="codesnippet">${esc(q.sampleinput1)}</pre><b class="small">Sample Output</b><pre class="codesnippet">${esc(q.sampleoutput1)}</pre></div>` : ""}
-          </div>
+          <div class="p-body">${questionBodyHtml(q)}</div>
           <div class="p-foot left">Max Score : ${q.maxscore ?? 10}</div>
         </div>
         <div class="ppanel">
           <div class="p-head">Write your code ${q.questionstatus ? '<span class="badge badge-green" style="margin-left:auto;">submitted</span>' : ""}</div>
           <div style="height:70%; width:100%; padding:0.75rem 1rem;">
-            <div class="editor-wrap ${document.body.classList.contains("dark") ? "" : "light"}" style="height:100%;">
-              <div class="editor-head">${langIcon(q.lang)} <b>${esc((q.lang || "").toUpperCase())}</b></div>
-              <textarea class="editor-area" data-code="${esc(q.id)}" spellcheck="false">${esc(q.lastcode || "// code here ! \n\n")}</textarea>
-            </div>
+            ${editorWithGutter(q.id, `gut-${esc(q.id)}`, langFor(q))}
           </div>
           <div class="p-foot" style="gap:0.5rem;">
             <button class="btn btn-outline btn-sm" data-airun="${esc(q.id)}">${icon("sparkles", "ic sm")} AI</button>
+            <button class="btn btn-outline btn-sm" data-sample="${esc(q.id)}">${icon("play", "ic sm")} Run Sample</button>
             <button class="btn btn-outline btn-sm" data-run="${esc(q.id)}">${icon("clock", "ic sm")} Run Testcases</button>
+            ${d.assessment.anyLanguage ? `<select class="inp" data-langsel="${esc(q.id)}" title="Solution language" aria-label="Solution language" style="height:2rem; width:auto; padding:0 0.5rem; font-size:0.8rem;">${ENGINE_LANGS.map((l) => `<option value="${l}" ${langFor(q) === l ? "selected" : ""}>${ENGINE_LANG_LABELS[l] || l}</option>`).join("")}</select>` : ""}
             <span class="spacer"></span>
             <button class="btn btn-green btn-sm" data-save="${esc(q.id)}">Save</button>
           </div>
         </div>`;
       body.appendChild(card);
 
+      // Hydrate the editor value + line-number gutter (web CodeMirror look).
+      {
+        const ta = $(`[data-code="${q.id}"]`, card);
+        if (ta) {
+          ta.value = q.lastcode || "// code here ! \n\n";
+          bindGutter(ta, $(`#gut-${CSS.escape ? CSS.escape(q.id) : q.id}`, card));
+        }
+      }
+
+      // anyLanguage assessments: switching the language re-labels the editor
+      // (the chosen language is used by both sample and testcase runs).
+      const langSel = $(`[data-langsel="${q.id}"]`, card);
+      if (langSel) langSel.onchange = () => {
+        A.langChoice[q.id] = langSel.value;
+        const label = $(`[data-langlabel="${q.id}"]`, card);
+        if (label) label.textContent = String(langSel.value || "").toUpperCase();
+        const headIcon = langSel.parentElement && langSel.parentElement.querySelector("img");
+        if (headIcon) headIcon.outerHTML = langIcon(langSel.value);
+      };
+
+      // Run Sample — executes against sampleinput1/sampleoutput1 (web parity:
+      // a passed sample earns a 1-mark bonus that is added on Save).
+      const sampleBtn = $(`[data-sample="${q.id}"]`, card);
+      sampleBtn.onclick = async () => {
+        const code = $(`[data-code="${q.id}"]`, card).value;
+        if (!guardKeywordsAsm(q, code)) return;
+        sampleBtn.disabled = true;
+        dialog(`
+          <h2 class="dialog-title">Running sample…</h2>
+          <p class="dialog-desc">${icon("loader", "ic spin")} Executing against sample testcase</p>`);
+        try {
+          const r = await runQuestionCode({ q, code, lang: d.assessment.anyLanguage ? langFor(q) : undefined, mode: "sample", assessmentId: A.aid });
+          A.samplePassed[q.id] = Boolean(r.passed);
+          dialog(`
+            <h2 class="dialog-title">Sample Testcase ${r.passed ? icon("check", "ic") : ""}</h2>
+            <p class="dialog-desc" style="font-weight:600; color:${r.passed ? "hsl(142 71% 35%)" : "var(--destructive)"};">${r.passed ? "Passed" : esc(r.compileMessage || "Failed")}</p>
+            <pre class="out-pre">${esc(r.output ?? "")}</pre>
+            <div class="dialog-footer single"><button class="btn btn-primary" data-close>Close</button></div>`);
+        } catch (e) { closeDialog(); toast(e.message, "error"); }
+        sampleBtn.disabled = false;
+      };
+
       const runBtn = $(`[data-run="${q.id}"]`, card);
       runBtn.onclick = async () => {
         const code = $(`[data-code="${q.id}"]`, card).value;
+        if (!guardKeywordsAsm(q, code)) return;
         runBtn.disabled = true;
         try {
-          const r = await runQuestionCode({ q, code, mode: "tests", assessmentId: A.aid });
+          const r = await runQuestionCode({ q, code, lang: d.assessment.anyLanguage ? langFor(q) : undefined, mode: "tests", assessmentId: A.aid });
           A.codeRuns[q.id] = { statuses: [r.testcase1status, r.testcase2status, r.testcase3status], passed: r.passedCount, code, saved: false };
           const band = (n, st) => `<span class="badge ${st === "pass" ? "badge-green" : st === "error" ? "badge-red" : "badge-orange"}">T${n}: ${st || "—"}</span>`;
           toast(`${r.passedCount}/3 test cases passed — ${r.passedCount * 3} marks earned (of 9) + 1 sample bonus on save`);
+          const prevRes = card.querySelector(`[data-res="${q.id}"]`);
+          if (prevRes) prevRes.remove();
           runBtn.insertAdjacentHTML("beforebegin", `<span class="row" data-res="${q.id}" style="gap:0.25rem;">${band(1, r.testcase1status)}${band(2, r.testcase2status)}${band(3, r.testcase3status)}</span>`);
         } catch (e) { toast(e.message, "error"); }
         runBtn.disabled = false;
@@ -1575,7 +1890,7 @@ async function loadAttempt() {
               uaid: A.uaid, finalize: false,
               code: [{
                 questionId: q.id, usercode: code,
-                score: run.passed * 3,
+                score: (A.samplePassed[q.id] ? 1 : 0) + run.passed * 3,
                 compiles: 1, errors: run.statuses.filter((s) => s === "error").length,
                 testcase1status: run.statuses[0], testcase2status: run.statuses[1], testcase3status: run.statuses[2],
                 duration: 0,
@@ -1664,7 +1979,7 @@ async function finalizeAttempt(auto) {
     const codePayload = Object.entries(A.codeRuns || {}).map(([questionId, run]) => ({
       questionId,
       usercode: run.code,
-      score: run.passed * 3,
+      score: (A.samplePassed?.[questionId] ? 1 : 0) + run.passed * 3,
       compiles: 1,
       errors: run.statuses.filter((s) => s === "error").length,
       testcase1status: run.statuses[0],
@@ -1678,6 +1993,8 @@ async function finalizeAttempt(auto) {
       body: { uaid: A.uaid, mcq: { answers: mcqAnswers }, code: codePayload, finalize: true },
     });
 
+    // Exit fullscreen lockdown — the attempt is over.
+    if (typeof app.setFullscreen === "function") app.setFullscreen(false);
     if (A.timer) clearInterval(A.timer);
     closePractice();
     dialog(`
@@ -1802,12 +2119,10 @@ async function renderResults(v) {
 /* ============================== settings ============================== */
 
 async function renderSettings(v) {
-  const [profileRes, configRes] = await Promise.all([
+  const [profileRes] = await Promise.all([
     api("/student/profile"),
-    api("/config", { silent401: true }),
   ]);
   const p = profileRes.ok ? profileRes.data.user : state.user;
-  const cfg = configRes.ok ? configRes.data : {};
 
   v.innerHTML = `
     <div class="settings-grid">
@@ -1838,21 +2153,9 @@ async function renderSettings(v) {
 
       <div>
         <div class="card card-pad">
-          <h3 style="font-weight:700;" class="mb2">Server Connection</h3>
-          <div class="field mb2">
-            <label class="muted small">Server address</label>
-            <input class="inp" id="st-server" value="${esc(state.serverUrl)}" />
-          </div>
-          <button class="btn" id="st-reconnect">Reconnect</button>
-          <div class="muted small mt2">
-            Code execution: ${cfg.codeExecution?.sampleRun ? '<span class="badge badge-green">available</span>' : '<span class="badge badge-orange">not configured</span>'}<br/><br/>
-            Hidden test runs: ${cfg.codeExecution?.testCasesRun ? '<span class="badge badge-green">available</span>' : '<span class="badge badge-orange">not configured</span>'}<br/><br/>
-            ATOM AI tutor: ${cfg.aiTutorEnabled ? '<span class="badge badge-green">enabled</span>' : '<span class="badge">disabled</span>'}
-          </div>
-        </div>
-        <div class="card card-pad mt2">
           <h3 style="font-weight:700;" class="mb1">About</h3>
           <p class="muted small" id="st-about">AtomCode Student Desktop v2.0</p>
+          <p class="muted small" id="st-server-info" style="margin-top:0.5rem;"></p>
         </div>
       </div>
     </div>`;
@@ -1927,15 +2230,8 @@ async function renderSettings(v) {
     };
   };
 
-  $("#st-reconnect").onclick = async () => {
-    const url = $("#st-server").value.trim().replace(/\/+$/, "");
-    if (!/^https?:\/\//i.test(url)) return toast("Server address must start with http:// or https://", "error");
-    state.serverUrl = url;
-    localStorage.setItem(LS.server, url);
-    const res = await app.api({ serverUrl: url, path: "/config" });
-    toast(res.ok ? "Connected to server" : res.data?.error || "Cannot reach server", res.ok ? "success" : "error");
-    if (res.ok) renderSettings(v);
-  };
+  const serverEl = $("#st-server-info");
+  if (serverEl) serverEl.textContent = `Connected to ${state.serverUrl || "—"}`;
 
   const info = await app.info();
   $("#st-about").innerHTML =
@@ -1946,5 +2242,26 @@ async function renderSettings(v) {
 
 /* inject static icons into shell chrome (prepend keeps existing labels) */
 $$("[data-icon]").forEach((el) => el.insertAdjacentHTML("afterbegin", icon(el.dataset.icon)));
+
+/* ============== startup preflight (runtimes/config check) ============== */
+
+if (typeof app.onPreflight === "function") {
+  app.onPreflight((p) => {
+    const banner = $("#preflight-banner");
+    const text = $("#preflight-text");
+    if (!banner) return;
+    if (!p || p.stage === "done") {
+      banner.classList.add("hidden");
+      if (p && p.installed) toast("Local runtimes installed successfully", "success");
+      return;
+    }
+    banner.classList.remove("hidden");
+    if (text) text.textContent = p.message || "Preparing local runtimes…";
+    if (p.level === "error") {
+      banner.classList.add("hidden");
+      toast(p.message || "Local runtime setup failed", "error");
+    }
+  });
+}
 
 window.addEventListener("DOMContentLoaded", boot);

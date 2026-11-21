@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdminApi } from "@/lib/api-admin-guard";
 import { lambdaJudgeMultiRun } from "@/lib/lambda-judge-server";
+import { composeUserCode } from "@/lib/judge";
 
 /**
  * POST /api/questions/test — Lambda-judge verifier for code questions.
@@ -40,6 +41,7 @@ async function testQuestion(qid: string): Promise<QuestionResult> {
       id: true,
       lang: true,
       sourcecode: true,
+      headerCode: true,
       sampleinput1: true,
       sampleoutput1: true,
       sampleinput2: true,
@@ -73,7 +75,13 @@ async function testQuestion(qid: string): Promise<QuestionResult> {
   ];
 
   const lang = (question.lang ?? "").toLowerCase();
-  const code = question.sourcecode ?? "";
+  // SQL setup (header) code is prepended so the verifier exercises the
+  // exact code the student will run: header first, solution next.
+  const code = composeUserCode(
+    lang,
+    question.headerCode,
+    question.sourcecode ?? ""
+  );
 
   if (!lang || !code.trim()) {
     const results = testcases.map(() => false);

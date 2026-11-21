@@ -87,8 +87,10 @@ export async function PATCH(req: Request, ctx: RouteContext) {
 }
 
 /**
- * DELETE /api/question-groups/[id] — delete a group. Questions inside the
- * group are kept, they simply become ungrouped (onDelete: SetNull).
+ * DELETE /api/question-groups/[id] — delete a group. With the required
+ * questionGroupId FK + onDelete: Cascade, every code question and MCQ in
+ * the group is deleted WITH it — questions can never outlive their group,
+ * so no orphans can appear outside the question banks.
  */
 export async function DELETE(_req: Request, ctx: RouteContext) {
     const guard = await requireAdminApi();
@@ -97,7 +99,7 @@ export async function DELETE(_req: Request, ctx: RouteContext) {
     const { id } = await ctx.params;
     const existing = await db.questionGroup.findUnique({
         where: { id },
-        include: { _count: { select: { questions: true } } },
+        include: { _count: { select: { questions: true, mcqQuestions: true } } },
     });
     if (!existing) {
         return NextResponse.json({ error: "Group not found" }, { status: 404 });
@@ -106,7 +108,8 @@ export async function DELETE(_req: Request, ctx: RouteContext) {
     await db.questionGroup.delete({ where: { id } });
 
     return NextResponse.json({
-        success: "Question group deleted",
+        success: "Question group deleted (its questions were deleted with it)",
         detachedQuestions: existing._count.questions,
+        deletedMcqQuestions: existing._count.mcqQuestions,
     });
 }

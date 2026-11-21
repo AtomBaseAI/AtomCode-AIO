@@ -56,9 +56,9 @@ const SubmitCourseModule = ({ cid, umid }: { cid: string, umid: string }) => {
                             Are you sure want to submit Module ?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setSubmitModuleModel(false)} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
-                        <AlertDialogAction onClick={submitModuleData} className='w-full' disabled={isLoading}>
+                    <AlertDialogFooter className="flex flex-row gap-2">
+                        <AlertDialogCancel onClick={() => setSubmitModuleModel(false)} className='bg-red-500 text-white flex-1 hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
+                        <AlertDialogAction onClick={submitModuleData} className='flex-1' disabled={isLoading}>
                             {isLoading && (
                                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
                             )}

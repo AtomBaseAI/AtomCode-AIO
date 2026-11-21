@@ -233,9 +233,9 @@ const MCQView = ({ mcqs, mid, uid, umid }: { mcqs: MCQ[], mid: string, uid: stri
                             Are you sure want to submit MCQs ?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setSubmitTestModel(false)} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
-                        <AlertDialogAction onClick={submitMCQ} className='w-full' disabled={isLoading}>
+                    <AlertDialogFooter className="flex flex-row gap-2">
+                        <AlertDialogCancel onClick={() => setSubmitTestModel(false)} className='bg-red-500 text-white flex-1 hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
+                        <AlertDialogAction onClick={submitMCQ} className='flex-1' disabled={isLoading}>
                             {isLoading && (
                                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
                             )}

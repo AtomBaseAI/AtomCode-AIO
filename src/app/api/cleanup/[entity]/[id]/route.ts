@@ -239,7 +239,8 @@ async function countStudent(uid: string): Promise<CleanupSection[]> {
 /**
  * Sections for the question-group delete dialog. The group row itself is
  * deleted by the dialog's final action; topics/subtopics cascade with it
- * automatically, while questions only become ungrouped (SetNull) unless
+ * automatically, and questions CASCADE-delete with the group (required
+ * questionGroupId FK) — a group delete is total unless sections are cleaned
  * they are explicitly removed via these sections first.
  */
 async function countQuestionGroup(gid: string): Promise<CleanupSection[]> {
@@ -259,7 +260,7 @@ async function countQuestionGroup(gid: string): Promise<CleanupSection[]> {
         {
             key: "mcq-questions",
             label: "MCQ questions",
-            subtitle: "MCQ questions in this group (they are kept ungrouped if you skip this)",
+            subtitle: "MCQ questions in this group (deleted with the group via cascade)",
             count: mcqQuestions,
         },
         {

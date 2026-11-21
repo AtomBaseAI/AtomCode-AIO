@@ -30,6 +30,12 @@ export const AddMCQSchema = z.object({
     iscodesnippet: z.boolean(),
     topic: z.string().optional(),
     subtopic: z.string().optional(),
+    // Every MCQ must belong to a question-group bank (cascade on group delete).
+    questionGroupId: z.string().min(1, {
+        message: "Question group is required"
+    }),
+    // Comma-separated topic tags.
+    tags: z.string().optional(),
     moduleId: z.string().optional().nullable(),
     assessmentId: z.string().optional().nullable(),
 })
@@ -88,6 +94,10 @@ export const MCQUpdateSchema = z.object({
     iscodesnippet: z.boolean(),
     topic: z.string().optional(),
     subtopic: z.string().optional(),
+    questionGroupId: z.string().min(1, {
+        message: "Question group is required"
+    }),
+    tags: z.string().optional(),
 });
 export const ImportMCQSchema = z.object({
     moduleId: z.string().optional().nullable(),

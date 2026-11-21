@@ -39,6 +39,8 @@ export const GroupMcqSchema = z.object({
     snippetLang: z.string().optional().nullable(),
     topic: z.string().optional().nullable(),
     subtopic: z.string().optional().nullable(),
+    /** Comma-separated topic tags. */
+    tags: z.string().optional().nullable(),
 });
 
 export const GroupMcqUpdateSchema = GroupMcqSchema.extend({
@@ -64,5 +66,6 @@ export type GroupMcqRow = {
     codesnippet: string | null;
     iscodesnippet: boolean;
     snippetLang: string | null;
+    tags: string | null;
     groupTitle: string | null;
 };

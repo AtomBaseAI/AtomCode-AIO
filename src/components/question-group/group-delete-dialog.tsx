@@ -35,7 +35,7 @@ interface GroupDeleteDialogProps {
  * Typed-confirmation delete dialog for a question group, with the shared
  * smart-delete cleanup list: topics go with the group automatically, while
  * attached questions are only deleted when explicitly removed above —
- * otherwise they become ungrouped.
+ * (with the required group FK they cascade-delete with the group).
  */
 export function GroupDeleteDialog({
     groupId,
@@ -106,7 +106,7 @@ export function GroupDeleteDialog({
                     <DialogDescription className="text-left text-muted-foreground">
                         This deletes the group and its topic tree. Questions can
                         be removed permanently below — any you skip are kept
-                        and simply become ungrouped. This action cannot be
+                        and cascade-deleted with it. This action cannot be
                         undone.
                     </DialogDescription>
                 </DialogHeader>

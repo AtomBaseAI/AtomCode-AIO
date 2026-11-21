@@ -13,7 +13,9 @@ export async function GET() {
   return json({
     appName: "AtomCode Student Desktop",
     clientName: branding.clientName,
+    clientBanner: branding.clientBanner,
     vendorName: branding.vendorName,
+    vendorLogo: branding.vendorLogo,
     codeExecution: {
       sampleRun: Boolean(process.env.NEXT_PUBLIC_LAMBDA_URL),
       testCasesRun: Boolean(process.env.NEXT_PUBLIC_LAMBDA_MULTI_URL),

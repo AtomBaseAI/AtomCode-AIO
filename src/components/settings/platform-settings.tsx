@@ -86,6 +86,14 @@ export function PlatformSettings({
           toast.error(res.error);
         } else {
           toast.success(`${row.title} ${next ? "enabled" : "disabled"}`);
+          if (next && row.role && "code" in res && res.code) {
+            // Enabling auto-generated an access code server-side — surface
+            // it immediately instead of erroring + snapping the switch back.
+            setCodes((c) => ({ ...c, [row.role!]: res.code! }));
+            toast.success(
+              `Access code ${res.code} generated — ${row.role}s register with it`
+            );
+          }
           if (!next && row.role) {
             // Server deleted the access code when registration closed.
             setCodes((c) => ({ ...c, [row.role!]: null }));

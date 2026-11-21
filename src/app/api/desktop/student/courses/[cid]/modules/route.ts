@@ -53,7 +53,37 @@ export async function GET(
       progressRows.map((p) => [p.moduleId, p])
     );
 
-    return json({ course, modules, progress, feedbacks });
+    // Additive course-type flags + default language for the desktop renderer:
+    // "mcq-only" courses hide the code section, anyLanguage courses show a
+    // language selector in the code practice view.
+    const [courseMeta, moduleLangs] = await Promise.all([
+      db.course.findUnique({
+        where: { id: cid },
+        select: { language: true, courseType: true, anyLanguage: true },
+      }),
+      db.module.findMany({
+        where: { courseId: cid },
+        select: { id: true, language: true },
+      }),
+    ]);
+    const langById = Object.fromEntries(
+      moduleLangs.map((m) => [m.id, m.language])
+    );
+
+    return json({
+      course: {
+        ...course,
+        language: courseMeta?.language ?? null,
+        courseType: courseMeta?.courseType ?? "code-mcq",
+        anyLanguage: courseMeta?.anyLanguage ?? false,
+      },
+      modules: (modules || []).map((m) => ({
+        ...m,
+        language: langById[m.id] ?? null,
+      })),
+      progress,
+      feedbacks,
+    });
   } catch (e) {
     console.error("[desktop/course modules]", e);
     return fail(500, "Failed to load modules");

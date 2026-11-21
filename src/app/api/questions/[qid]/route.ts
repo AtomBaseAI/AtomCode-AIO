@@ -57,6 +57,12 @@ export async function GET(_req: Request, ctx: RouteContext) {
             whitelist: question.whitelist || undefined,
             questionGroupId: question.questionGroupId ?? null,
             questionGroupTitle: question.questionGroup?.title ?? null,
+            questionType: question.questionType ?? "practice",
+            company: question.company ?? undefined,
+            frequency: question.frequency ?? undefined,
+            acceptanceRate: question.acceptanceRate ?? undefined,
+            headerCode: question.headerCode ?? undefined,
+            tags: question.tags ?? undefined,
         },
     });
 }

@@ -52,6 +52,8 @@ export function sanitizeMcq(mcq: MCQQuestion) {
     codesnippet: mcq.codesnippet,
     iscodesnippet: mcq.iscodesnippet,
     referenceimg: mcq.referenceimg,
+    // Comma-separated topic tags (additive, display-only)
+    tags: mcq.tags,
   };
 }
 
@@ -78,6 +80,16 @@ export function sanitizeCodeQuestion(
     sampleinput2: q.sampleinput2,
     sampleoutput1: q.sampleoutput1,
     sampleoutput2: q.sampleoutput2,
+    // Optional SQL setup code — prepended to the student's code at judge
+    // time (mirrors composeUserCode on the web). Not secret: it gates the
+    // hidden tests by language, same trust level as the web client.
+    headerCode: q.headerCode,
+    // Question classification / metadata (additive, display-only)
+    questionType: q.questionType,
+    company: q.company,
+    frequency: q.frequency,
+    acceptanceRate: q.acceptanceRate,
+    tags: q.tags,
   };
 
   // Hidden test cases are shipped only for the languages the desktop client
@@ -116,6 +128,16 @@ export async function isEnrolledInModule(userId: string, moduleId: string) {
       language: true,
       maxscore: true,
       concepturl: true,
+      // Course type flags the desktop renderer needs: "mcq-only" hides the
+      // code section (module completes with MCQs alone); anyLanguage shows
+      // the language selector in the code practice view.
+      course: {
+        select: {
+          courseType: true,
+          anyLanguage: true,
+          language: true,
+        },
+      },
     },
   });
   if (!mod) return { ok: false, module: null };

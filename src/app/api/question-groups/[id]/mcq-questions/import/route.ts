@@ -4,72 +4,17 @@ import * as z from "zod";
 import { db } from "@/lib/db";
 import { requireSuperAdminApi } from "@/lib/api-admin-guard";
 import { GroupMcqSchema } from "@/schemas/group-mcq-schema";
+import {
+    normalizeMcqImportRow,
+    GROUP_IMPORT_CHUNK_SIZE,
+} from "@/lib/question-group-import";
 
 type RouteContext = { params: Promise<{ id: string }> };
-
-/**
- * No per-import size cap — admins may import as many MCQs as they want.
- * Rows are inserted in concurrent chunks so huge files stay fast.
- */
-const INSERT_CHUNK_SIZE = 20;
 
 interface ImportIssue {
     index: number;
     title: string;
     error: string;
-}
-
-/**
- * Tolerate hand-edited files: booleans as "true"/"false"/1/0, CorrectOption
- * as a numeric string, and empty strings for optional fields are accepted
- * (the Create MCQ form always produces clean values, exports too).
- */
-function normalizeImportItem(item: unknown): unknown {
-    if (!item || typeof item !== "object") return item;
-    const obj = { ...(item as Record<string, unknown>) };
-
-    // iscodesnippet: boolean, "true"/"false" (case-insensitive) or 1/0.
-    if (typeof obj.iscodesnippet === "string") {
-        const flag = obj.iscodesnippet.trim().toLowerCase();
-        if (flag === "true" || flag === "1") obj.iscodesnippet = true;
-        else if (flag === "false" || flag === "0") obj.iscodesnippet = false;
-    } else if (typeof obj.iscodesnippet === "number") {
-        if (obj.iscodesnippet === 1) obj.iscodesnippet = true;
-        else if (obj.iscodesnippet === 0) obj.iscodesnippet = false;
-    }
-
-    // CorrectOption: numeric string → number.
-    if (
-        typeof obj.CorrectOption === "string" &&
-        obj.CorrectOption.trim() !== "" &&
-        !Number.isNaN(Number(obj.CorrectOption))
-    ) {
-        obj.CorrectOption = Number(obj.CorrectOption);
-    }
-
-    // difficulty: tolerate "Easy"/"HARD" casing; unknown → omit (DB default "easy").
-    if (typeof obj.difficulty === "string") {
-        const value = obj.difficulty.trim().toLowerCase();
-        obj.difficulty =
-            value === "medium" || value === "hard" || value === "easy"
-                ? value
-                : undefined;
-    } else if (obj.difficulty === null) {
-        obj.difficulty = undefined;
-    }
-
-    // Empty strings for optional fields → null.
-    for (const field of [
-        "snippetLang",
-        "codesnippet",
-        "referenceimg",
-        "topic",
-        "subtopic",
-    ] as const) {
-        if (obj[field] === "") obj[field] = null;
-    }
-
-    return obj;
 }
 
 /**
@@ -113,7 +58,7 @@ export async function POST(req: Request, ctx: RouteContext) {
         data: z.infer<typeof GroupMcqSchema>;
     }[] = [];
     for (let i = 0; i < raw.length; i++) {
-        const item = normalizeImportItem(raw[i]);
+        const item = normalizeMcqImportRow(raw[i]);
         const title =
             typeof (item as { title?: unknown })?.title === "string" &&
             (item as { title: string }).title.trim() !== ""
@@ -134,8 +79,8 @@ export async function POST(req: Request, ctx: RouteContext) {
 
     // zod strips unknown keys (id, moduleId, assessmentsId, …), so only
     // portable content fields reach the create call.
-    for (let c = 0; c < validItems.length; c += INSERT_CHUNK_SIZE) {
-        const chunk = validItems.slice(c, c + INSERT_CHUNK_SIZE);
+    for (let c = 0; c < validItems.length; c += GROUP_IMPORT_CHUNK_SIZE) {
+        const chunk = validItems.slice(c, c + GROUP_IMPORT_CHUNK_SIZE);
         const results = await Promise.allSettled(
             chunk.map((m) =>
                 db.mCQQuestion.create({

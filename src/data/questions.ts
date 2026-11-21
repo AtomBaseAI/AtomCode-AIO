@@ -9,6 +9,17 @@ export const getAllQuestionsByLang = (lang: string) => {
         return null
     }
 }
+// All code questions regardless of language — used by any-language courses,
+// where questions from every language may be attached to modules/assessments.
+export const getAllQuestions = () => {
+    try {
+        const questions = db.codeQuestion.findMany()
+        return questions
+    }
+    catch {
+        return null
+    }
+}
 export const getQuestionsCount = () => {
     try {
         const qcount = db.codeQuestion.count()

@@ -1,7 +1,13 @@
 import * as z from "zod"
 
 
-export const AddQuestionSchema = z.object({
+/**
+ * Base code-question shape WITHOUT the lab-question refinement. The import
+ * pipeline (lib/question-group-import.ts) needs to .omit()/.extend() this
+ * raw object — zod v4 forbids omit/extend on schemas that already carry
+ * refinements, so the refined form is derived below.
+ */
+export const AddQuestionBaseSchema = z.object({
     title: z.string().min(1, {
         message: "Title is required"
     }),
@@ -58,8 +64,50 @@ export const AddQuestionSchema = z.object({
     inputconstrains: z.string().optional(),
     blacklist: z.string().optional(),
     whitelist: z.string().optional(),
-    questionGroupId: z.string().nullable().optional()
-});
+    // Every question lives in exactly one question-group bank — required.
+    questionGroupId: z.string().min(1, {
+        message: "Question group is required"
+    }),
+    // "practice" | "lab" — lab questions carry interview metadata.
+    questionType: z.enum(["practice", "lab"]).default("practice"),
+    company: z.string().optional(),
+    frequency: z.string().optional(),
+    acceptanceRate: z.coerce.number().min(0).max(100).nullable().optional(),
+    // Optional SQL setup code (CREATE TABLE ...). Executed BEFORE the user's
+    // code at judge time (header first, user code next).
+    headerCode: z.string().optional(),
+    // Comma-separated topic tags.
+    tags: z.string().optional()
+})
+
+/** Lab questions must carry company + frequency + acceptance rate. */
+const labRequirementsRefinement = (data: z.infer<typeof AddQuestionBaseSchema>, ctx: z.RefinementCtx) => {
+    if (data.questionType === "lab") {
+        if (!data.company || !data.company.trim()) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["company"],
+                message: "Company name is required for lab questions"
+            });
+        }
+        if (!data.frequency || !data.frequency.trim()) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["frequency"],
+                message: "Frequency is required for lab questions"
+            });
+        }
+        if (data.acceptanceRate === undefined || data.acceptanceRate === null) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["acceptanceRate"],
+                message: "Acceptance rate is required for lab questions"
+            });
+        }
+    }
+};
+
+export const AddQuestionSchema = AddQuestionBaseSchema.superRefine(labRequirementsRefinement);
 
 export const DeleteQuestionSchema = z.object({
     id: z.string()
@@ -105,7 +153,15 @@ export const QuestionUpdateSchema = z.object({
     inputconstrains: z.string().optional(),
     blacklist: z.string().optional(),
     whitelist: z.string().optional(),
-    questionGroupId: z.string().nullable().optional(),
+    questionGroupId: z.string().min(1, {
+        message: "Question group is required"
+    }),
+    questionType: z.enum(["practice", "lab"]).default("practice"),
+    company: z.string().nullable().optional(),
+    frequency: z.string().nullable().optional(),
+    acceptanceRate: z.coerce.number().min(0).max(100).nullable().optional(),
+    headerCode: z.string().nullable().optional(),
+    tags: z.string().nullable().optional(),
     /**
      * Edit-panel override — when true the update re-marks the question as
      * fully tested (all 5 dots green) instead of resetting the verdict.

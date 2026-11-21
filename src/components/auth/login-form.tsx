@@ -37,6 +37,16 @@ export function LoginForm() {
     const [error, setError] = useState<string | undefined>("")
     const [success, setSuccess] = useState<string | undefined>("")
 
+    // Next 16: a Server Action that ends in redirect() REJECTS its client
+    // promise with a NEXT_REDIRECT error (handled by the router — navigation
+    // proceeds). That rejection is success for us: the session was issued.
+    // Treating it as an error painted a wrong "Something went wrong" flash
+    // right before every successful redirect — gate on the digest instead.
+    const isRedirectError = (e: unknown) =>
+        typeof e === "object" && e !== null &&
+        "digest" in e && typeof (e as { digest: unknown }).digest === "string" &&
+        (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+
     // Super admin second step — after valid credentials the action returns
     // { twoFactor: true } and we show the 4-digit auth code panel instead
     // of the email/password fields.
@@ -66,7 +76,14 @@ export function LoginForm() {
                         setSuccess("Credentials verified. Enter the 4-digit auth code.");
                     }
                 })
-                .catch(() => setError("Something went wrong"));
+                .catch((e) => {
+                    if (isRedirectError(e)) {
+                        // Session issued — the router is already navigating.
+                        setSuccess("Login successful! Redirecting...");
+                        return;
+                    }
+                    setError("Something went wrong");
+                });
         });
     }
 
@@ -85,7 +102,13 @@ export function LoginForm() {
                         return;
                     }
                 })
-                .catch(() => setError("Something went wrong"));
+                .catch((e) => {
+                    if (isRedirectError(e)) {
+                        setSuccess("Login successful! Redirecting...");
+                        return;
+                    }
+                    setError("Something went wrong");
+                });
         });
     }
 

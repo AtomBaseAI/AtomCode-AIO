@@ -51,6 +51,9 @@ const PrepareModules = async ({ params }: { params: Promise<{ cid: string, mid: 
     }
     const moduleData = await getCourseModuleData(mid);
     const userModuleData = await getCourseModuleSubmissionData(uid, cid, mid)
+    // "mcq-only" courses complete with the MCQ section alone — the code card
+    // is hidden and the submit gate no longer waits for questionstatus.
+    const isMcqOnly = moduleData?.courseType === "mcq-only"
     // console.log(moduleData)
     // console.log(userModuleData)
     if (moduleData === null) {
@@ -120,32 +123,36 @@ const PrepareModules = async ({ params }: { params: Promise<{ cid: string, mid: 
                             )
                             }
                             <div className='h-full w-[15rem] items-center justify-center flex-col '>
-                                <div className='w-full h-2/4 border-collapse border-2 rounded-sm flex flex-col justify-center items-center'>
-                                    <div className='h-1/2 w-full flex justify-center items-center gap-1 flex-col'>
-                                        <h2> Programs </h2>
-                                        <h4 className='font-bold text-2xl'> {userModuleData?.totalquestionscore ? (userModuleData.totalquestionscore / 10) : 0} </h4>
-                                    </div>
-                                    <div className='h-1/2 w-full flex justify-center items-center gap-1 flex-col'>
-                                        <h2>
-                                            Marks
-                                        </h2>
-                                        <h4 className='font-bold text-2xl'>{userModuleData?.totalquestionscore}</h4>
-                                    </div>
-                                </div>
-                                {
-                                    userModuleData?.questionstatus === 'submitted' ? (
-                                        <div className='h-9 w-full flex justify-center items-center flex-row bg-primary/50 cursor-not-allowed text-white'>
-                                            <Code className="mr-2" /> Code Submitted
+                                {!isMcqOnly && (
+                                    <>
+                                        <div className='w-full h-2/4 border-collapse border-2 rounded-sm flex flex-col justify-center items-center'>
+                                            <div className='h-1/2 w-full flex justify-center items-center gap-1 flex-col'>
+                                                <h2> Programs </h2>
+                                                <h4 className='font-bold text-2xl'> {userModuleData?.totalquestionscore ? (userModuleData.totalquestionscore / 10) : 0} </h4>
+                                            </div>
+                                            <div className='h-1/2 w-full flex justify-center items-center gap-1 flex-col'>
+                                                <h2>
+                                                    Marks
+                                                </h2>
+                                                <h4 className='font-bold text-2xl'>{userModuleData?.totalquestionscore}</h4>
+                                            </div>
                                         </div>
-                                    ) : (
-                                        <Link href={`/student/practice/${cid}/${mid}/${userModuleData?.id}/code/`}>
-                                            <Button variant="outline" className="bg-green-500 text-white hover:bg-green-700 hover:text-white w-full">
-                                                <Code className="mr-2" />
-                                                Start Code
-                                            </Button>
-                                        </Link>
-                                    )
-                                }
+                                        {
+                                            userModuleData?.questionstatus === 'submitted' ? (
+                                                <div className='h-9 w-full flex justify-center items-center flex-row bg-primary/50 cursor-not-allowed text-white'>
+                                                    <Code className="mr-2" /> Code Submitted
+                                                </div>
+                                            ) : (
+                                                <Link href={`/student/practice/${cid}/${mid}/${userModuleData?.id}/code/`}>
+                                                    <Button variant="outline" className="bg-green-500 text-white hover:bg-green-700 hover:text-white w-full">
+                                                        <Code className="mr-2" />
+                                                        Start Code
+                                                    </Button>
+                                                </Link>
+                                            )
+                                        }
+                                    </>
+                                )}
                             </div>
                         </div>
                         <div className='flex gap-3'>
@@ -155,7 +162,9 @@ const PrepareModules = async ({ params }: { params: Promise<{ cid: string, mid: 
                                     Back
                                 </Button>
                             </Link>
-                            {userModuleData?.mcqstatus === 'submitted' && userModuleData?.questionstatus === 'submitted' &&
+                            {(isMcqOnly
+                                ? userModuleData?.mcqstatus === 'submitted'
+                                : userModuleData?.mcqstatus === 'submitted' && userModuleData?.questionstatus === 'submitted') &&
                                 <>
                                     <SubmitCourseModule cid={cid} umid={userModuleData.id} />
                                 </>

@@ -253,9 +253,9 @@ const ModuleAction = ({ Module, uid, cid, lockState, completionOrder }: { Module
                                                                             Do not disable/exit the fullscreen during the test , else test will be auto submitted !
                                                                         </AlertDialogDescription>
                                                                     </AlertDialogHeader>
-                                                                    <AlertDialogFooter>
-                                                                        <AlertDialogCancel onClick={exitFs} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Cancel</AlertDialogCancel>
-                                                                        <AlertDialogAction onClick={routeAtom} disabled={isLoading} className='w-full'>Start</AlertDialogAction>
+                                                                    <AlertDialogFooter className="flex flex-row gap-2">
+                                                                        <AlertDialogCancel onClick={exitFs} className='bg-red-500 text-white flex-1 hover:bg-red-400 hover:text-white'>Cancel</AlertDialogCancel>
+                                                                        <AlertDialogAction onClick={routeAtom} disabled={isLoading} className='flex-1'>Start</AlertDialogAction>
                                                                     </AlertDialogFooter>
                                                                 </AlertDialogContent>
                                                             </AlertDialog>

@@ -104,9 +104,11 @@ export function GroupExportDialog({ group }: GroupExportDialogProps) {
                     <DialogTitle>Export &quot;{group.title}&quot;?</DialogTitle>
                     <DialogDescription className="text-left text-muted-foreground">
                         The group is exported as a single JSON file containing
-                        its topics with sub topics, every code question (with
-                        test cases and server code) and every MCQ. The file can
-                        be re-imported from the Import button on this page.
+                        its topics with sub topics, every code question (test
+                        cases, server code, SQL header code, classification
+                        metadata and tags) and every MCQ (options, snippets and
+                        tags). The file can be re-imported from the Import
+                        button on this page.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4">

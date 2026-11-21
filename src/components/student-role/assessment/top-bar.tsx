@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Timer } from "@/components/student-role/assessment/timer"
@@ -11,6 +12,7 @@ const OnlineStatus = dynamic(() => import("@/hooks/NetworkDector"), { ssr: false
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input"
+import { finalizeassessment } from "@/actions/assessment"
 
 interface TopBarProps {
   onQuestionTypeChange: (type: string) => void
@@ -18,9 +20,15 @@ interface TopBarProps {
   initialTime: number
   onTimeExpired: () => void
   maxTabSwitches: number
+  /** Parent-course type — "mcq-only" courses hide the Code toggle. */
+  courseType?: string
+  /** Attempt identifiers used by the overall Submit Test action. */
+  uaid: string
+  uid: string
+  aid: string
 }
 
-export function TopBar({ onQuestionTypeChange, tabSwitchCount, initialTime, onTimeExpired, maxTabSwitches }: TopBarProps) {
+export function TopBar({ onQuestionTypeChange, tabSwitchCount, initialTime, onTimeExpired, maxTabSwitches, courseType, uaid, uid, aid }: TopBarProps) {
   const [questionType, setQuestionType] = useState<string>("MCQ")
   const [isLoading, startTransition] = useTransition()
   const [SubmitTestModel, setSubmitTestModel] = useState(false)
@@ -37,14 +45,31 @@ export function TopBar({ onQuestionTypeChange, tabSwitchCount, initialTime, onTi
     setInputValue(e.target.value)
   }
 
+  const router = useRouter()
+
   const handleSubmit = () => {
-    if (isSubmitEnabled) {
-      setInputValue("")
-      setSubmitTestModel(false)
-      console.log(tabSwitchCount)
-    }
-    //totaltimetaken
-    //totalusertabswitches
+    if (!isSubmitEnabled || isLoading) return
+    startTransition(() => {
+      finalizeassessment({ id: uaid, userId: uid, assessmentId: aid })
+        .then((res) => {
+          setSubmitTestModel(false)
+          if (res.success) {
+            localStorage.removeItem("testInProgress")
+            localStorage.removeItem("tabSwitchCount")
+            localStorage.removeItem("testStartTime")
+            toast.success(res.success)
+            router.push("/student/assessments")
+          } else if (res.error) {
+            toast.error(res.error)
+          } else {
+            toast.error("Something went wrong, try again")
+          }
+        })
+        .catch(() => {
+          setSubmitTestModel(false)
+          toast.error("Something went wrong, try again")
+        })
+    })
   }
 
   return (
@@ -58,7 +83,10 @@ export function TopBar({ onQuestionTypeChange, tabSwitchCount, initialTime, onTi
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="MCQ">MCQ</SelectItem>
-                <SelectItem value="Code">Code</SelectItem>
+                {/* mcq-only courses have no code section to switch to */}
+                {courseType !== "mcq-only" && (
+                  <SelectItem value="Code">Code</SelectItem>
+                )}
               </SelectContent>
             </Select>
             <ThemeToggle className="my-4 border shadow-sm cursor-pointer [&_svg]:h-5 [&_svg]:w-5" />
@@ -89,25 +117,21 @@ export function TopBar({ onQuestionTypeChange, tabSwitchCount, initialTime, onTi
           <AlertDialogHeader>
             <AlertDialogTitle>Submit Assessment</AlertDialogTitle>
             <AlertDialogDescription>
-              <div className="space-y-4 py-4">
-                <p>
-                  Are you sure want to submit Assessment ?
-                </p>
-                <div className="space-y-2">
-                  <Input
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    placeholder="Type END TEST to confirm"
-                    className="w-full"
-                    autoFocus
-                  />
-                </div>
-              </div>
+              Are you sure want to submit Assessment ?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setSubmitTestModel(false)} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
-            <AlertDialogAction className='w-full' disabled={!isSubmitEnabled || isLoading} onClick={handleSubmit}>
+          <div className="space-y-2">
+            <Input
+              value={inputValue}
+              onChange={handleInputChange}
+              placeholder="Type END TEST to confirm"
+              className="w-full"
+              autoFocus
+            />
+          </div>
+          <AlertDialogFooter className="flex flex-row gap-2">
+            <AlertDialogCancel onClick={() => setSubmitTestModel(false)} className='bg-red-500 text-white flex-1 hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
+            <AlertDialogAction className='flex-1' disabled={!isSubmitEnabled || isLoading} onClick={handleSubmit}>
               {isLoading && (
                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
               )}

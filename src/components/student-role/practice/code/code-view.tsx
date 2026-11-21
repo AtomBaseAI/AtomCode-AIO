@@ -17,6 +17,13 @@ import { Check, LoaderIcon, Play, X } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from "sonner"
 import { Separator } from '@/components/ui/separator';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { usePageEnter } from '@/hooks/MouseEnter';
 import { submitcode, submitquestion } from '@/actions/submitquestion';
 import { useRouter } from 'next/navigation';
@@ -34,6 +41,7 @@ import { LanguageVersionSelect } from '@/components/code/language-version-select
 import {
     getInitialVersionProfileId,
     setStoredVersionForLang,
+    LANGUAGES,
 } from '@/lib/runtime-registry';
 import { judgeRunSingle, judgeRunTestCases } from '@/lib/judge';
 
@@ -62,10 +70,11 @@ interface CodeQuestion {
     inputconstrains: string | null;
     blacklist: string | null;
     whitelist: string | null;
+    headerCode: string | null;
     submissionstatus: boolean
 }
 
-const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[], mid: string, uid: string, cid: string, umid: string }) => {
+const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, defaultLanguage }: { questions: CodeQuestion[], mid: string, uid: string, cid: string, umid: string, anyLanguage?: boolean, defaultLanguage?: string }) => {
     const { theme } = useTheme();
     const [questionData, setQuestionData] = useState<CodeQuestion[]>(questions);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -125,6 +134,9 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
     const [score2, setScore2] = useState<number>(0);
     const [score3, setScore3] = useState<number>(0);
     const [versionProfileId, setVersionProfileId] = useState<string | undefined>(undefined);
+    // Any-language courses let the student pick the solution language in the
+    // code panel; otherwise the question's own language is fixed.
+    const [activeLang, setActiveLang] = useState<string>(questions[0]?.lang ?? defaultLanguage ?? 'python');
     const router = useRouter()
 
     const RunCode = async () => {
@@ -157,10 +169,13 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
             setShowModal(true);
             setExecuting(true);
             // Judge execution — Lambda judge, server toolchain fallback for C/C++/Java.
+            // SQL questions prepend their optional header (setup) code: it
+            // executes first, then the student's query.
             const res = await judgeRunSingle({
-                lang: currentQuestion.lang,
+                lang: activeLang,
                 versionProfileId,
                 code: userCode,
+                headerCode: activeLang === "sql" ? currentQuestion.headerCode : undefined,
                 input: currentQuestion.sampleinput1,
                 expectedOutput: currentQuestion.sampleoutput1,
             });
@@ -202,9 +217,10 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
         try {
             // Judge execution — Lambda judge, server toolchain fallback for C/C++/Java.
             const outcomes = await judgeRunTestCases({
-                lang: currentQuestion.lang,
+                lang: activeLang,
                 versionProfileId,
                 code: userCode,
+                headerCode: activeLang === "sql" ? currentQuestion.headerCode : undefined,
                 cases: [
                     { input: currentQuestion.input1, expectedOutput: currentQuestion.output1 },
                     { input: currentQuestion.input2, expectedOutput: currentQuestion.output2 },
@@ -278,6 +294,13 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
             }
         }
         setTestStartTime(Date.now());
+        // Language resets to the question's own language on every question
+        // switch (any-language courses may then override via the selector).
+        // Deferred via queueMicrotask to avoid the set-state-in-effect
+        // re-entrancy React 19 flags for synchronous effect updates.
+        queueMicrotask(() => {
+            setActiveLang(currentQuestion.lang ?? defaultLanguage ?? 'python');
+        });
     }, [currentQuestion.id]);
 
     const setStaticText = (e: React.ClipboardEvent) => {
@@ -369,7 +392,9 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
                 })
         })
     }
-    usePageEnter(() => navigator.clipboard.writeText(''));
+    // Clipboard clear is best-effort proctoring — swallow the rejection so an
+    // unpermitted environment (or unfocused document) never logs an unhandled error.
+    usePageEnter(() => navigator.clipboard.writeText('').catch(() => {}));
 
 
     const [languageExtension, setLanguageExtension] = useState<{
@@ -379,10 +404,10 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
 
     useEffect(() => {
         if (
-            currentQuestion?.lang &&
-            isCodeMirrorLanguage(currentQuestion.lang)
+            activeLang &&
+            isCodeMirrorLanguage(activeLang)
         ) {
-            const lang = currentQuestion.lang;
+            const lang = activeLang;
             loadLanguageExtension(lang).then((extension) => {
                 setLanguageExtension({
                     extension,
@@ -390,12 +415,12 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
                 });
             });
         }
-        // Reset the runtime-version selection for the question's language:
+        // Reset the runtime-version selection for the active language:
         // remembered choice if valid, otherwise the language default.
         setVersionProfileId(
-            currentQuestion?.lang ? getInitialVersionProfileId(currentQuestion.lang) : undefined
+            activeLang ? getInitialVersionProfileId(activeLang) : undefined
         );
-    }, [currentQuestion]);
+    }, [activeLang, currentQuestion.id]);
     useEffect(() => {
         const preventDefaultShortcuts = (e: KeyboardEvent) => {
             // Check for copy/paste shortcuts across different platforms
@@ -565,13 +590,34 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
                                                         )}
                                                     </Button>
                                                 }
-                                                {currentQuestion?.lang && (
+                                                {anyLanguage && (
+                                                    <Select
+                                                        value={activeLang}
+                                                        onValueChange={(v) => {
+                                                            setActiveLang(v);
+                                                            setVersionProfileId(getInitialVersionProfileId(v));
+                                                        }}
+                                                        disabled={executing || executingTestcases}
+                                                    >
+                                                        <SelectTrigger className="w-[180px]" aria-label="Solution language">
+                                                            <SelectValue placeholder="Language" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {LANGUAGES.map((l) => (
+                                                                <SelectItem key={l.id} value={l.id}>
+                                                                    {l.label}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                                {activeLang && (
                                                     <LanguageVersionSelect
-                                                        lang={currentQuestion.lang}
+                                                        lang={activeLang}
                                                         value={versionProfileId}
                                                         onChange={(profileId) => {
                                                             setVersionProfileId(profileId);
-                                                            setStoredVersionForLang(currentQuestion.lang, profileId);
+                                                            setStoredVersionForLang(activeLang, profileId);
                                                         }}
                                                         className="w-[220px] ml-auto"
                                                         disabled={executing || executingTestcases}
@@ -638,8 +684,8 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
                             )}
                     </AlertDialogHeader>
                     {!executing && (
-                        <AlertDialogFooter>
-                            <AlertDialogCancel className='bg-primary hover:bg-primary/80 text-white hover:text-white w-full ' onClick={closeRunModel}>Close</AlertDialogCancel>
+                        <AlertDialogFooter className="flex flex-row gap-2">
+                            <AlertDialogCancel className='bg-primary hover:bg-primary/80 text-white hover:text-white flex-1 ' onClick={closeRunModel}>Close</AlertDialogCancel>
                         </AlertDialogFooter>
                     )}
                 </AlertDialogContent>
@@ -711,8 +757,8 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
                         </div>
                     </AlertDialogHeader>
                     {!executingTestcases && (
-                        <AlertDialogFooter>
-                            <AlertDialogCancel className='bg-primary hover:bg-primary/80 text-white hover:text-white w-full' onClick={closeTestCaseModel}>Close</AlertDialogCancel>
+                        <AlertDialogFooter className="flex flex-row gap-2">
+                            <AlertDialogCancel className='bg-primary hover:bg-primary/80 text-white hover:text-white flex-1' onClick={closeTestCaseModel}>Close</AlertDialogCancel>
                         </AlertDialogFooter>
                     )}
                 </AlertDialogContent>
@@ -726,9 +772,9 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
                             Are you sure want to submit question ?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setSubmitTestModel(false)} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
-                        <AlertDialogAction onClick={submitQuestion} className='w-full' disabled={isLoading}>
+                    <AlertDialogFooter className="flex flex-row gap-2">
+                        <AlertDialogCancel onClick={() => setSubmitTestModel(false)} className='bg-red-500 text-white flex-1 hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
+                        <AlertDialogAction onClick={submitQuestion} className='flex-1' disabled={isLoading}>
                             {isLoading && (
                                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
                             )}
@@ -746,11 +792,11 @@ const CodeView = ({ questions, mid, uid, cid, umid }: { questions: CodeQuestion[
                             Are you sure want to submit Codes ?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setEndTestModel(false)} className='bg-red-500 text-white w-full hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
+                    <AlertDialogFooter className="flex flex-row gap-2">
+                        <AlertDialogCancel onClick={() => setEndTestModel(false)} className='bg-red-500 text-white flex-1 hover:bg-red-400 hover:text-white'>Close</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={submitCode}
-                            className='w-full' disabled={isLoading}>
+                            className='flex-1' disabled={isLoading}>
                             {routeBtnLoading && (
                                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
                             )}

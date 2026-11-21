@@ -1,65 +1,20 @@
 import { NextResponse } from "next/server";
-import * as z from "zod";
 
 import { db } from "@/lib/db";
 import { requireSuperAdminApi } from "@/lib/api-admin-guard";
-import { AddQuestionSchema } from "@/schemas/question-schema";
-import { TRANSFER_LANG_IDS } from "@/lib/question-transfer";
+import {
+    GroupImportQuestionSchema,
+    normalizeCodeImportRow,
+    type GroupImportQuestionData,
+    GROUP_IMPORT_CHUNK_SIZE,
+} from "@/lib/question-group-import";
 
 type RouteContext = { params: Promise<{ id: string }> };
-
-/**
- * No per-import size cap — admins may import as many questions as they
- * want. Rows are inserted in concurrent chunks so huge files stay fast.
- */
-const INSERT_CHUNK_SIZE = 20;
-
-/** Extended language check — AddQuestionSchema only requires a non-empty string. */
-const ImportQuestionSchema = AddQuestionSchema.superRefine((value, ctx) => {
-    if (!(TRANSFER_LANG_IDS as readonly string[]).includes(value.lang)) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["lang"],
-            message: `Unsupported language "${value.lang}"`,
-        });
-    }
-});
 
 interface ImportIssue {
     index: number;
     title: string;
     error: string;
-}
-
-/**
- * Tolerate hand-edited and DB-shaped files: numeric strings for maxscore are
- * accepted (the Create Question form always produces a number, exports too),
- * and optional string fields that JSON exports emit as `null` are turned
- * back into `undefined` so the schema's `.optional()` accepts them.
- */
-const OPTIONAL_STRING_FIELDS = [
-    "topic",
-    "subtopic",
-    "inputconstrains",
-    "blacklist",
-    "whitelist",
-    "referenceimg",
-] as const;
-
-function normalizeImportItem(item: unknown): unknown {
-    if (!item || typeof item !== "object") return item;
-    const obj = { ...(item as Record<string, unknown>) };
-    if (
-        typeof obj.maxscore === "string" &&
-        obj.maxscore.trim() !== "" &&
-        !Number.isNaN(Number(obj.maxscore))
-    ) {
-        obj.maxscore = Number(obj.maxscore);
-    }
-    for (const field of OPTIONAL_STRING_FIELDS) {
-        if (obj[field] === null) obj[field] = undefined;
-    }
-    return obj;
 }
 
 /**
@@ -100,17 +55,17 @@ export async function POST(req: Request, ctx: RouteContext) {
     const validItems: {
         index: number;
         title: string;
-        data: z.infer<typeof ImportQuestionSchema>;
+        data: GroupImportQuestionData;
     }[] = [];
     for (let i = 0; i < raw.length; i++) {
-        const item = normalizeImportItem(raw[i]);
+        const item = normalizeCodeImportRow(raw[i]);
         const title =
             typeof (item as { title?: unknown })?.title === "string" &&
             (item as { title: string }).title.trim() !== ""
                 ? (item as { title: string }).title
                 : `#${i + 1}`;
 
-        const parsed = ImportQuestionSchema.safeParse(item);
+        const parsed = GroupImportQuestionSchema.safeParse(item);
         if (!parsed.success) {
             errors.push({
                 index: i + 1,
@@ -124,8 +79,8 @@ export async function POST(req: Request, ctx: RouteContext) {
 
     // zod strips unknown keys (id, moduleId, assessmentsId, …), so only
     // portable content fields reach the create call.
-    for (let c = 0; c < validItems.length; c += INSERT_CHUNK_SIZE) {
-        const chunk = validItems.slice(c, c + INSERT_CHUNK_SIZE);
+    for (let c = 0; c < validItems.length; c += GROUP_IMPORT_CHUNK_SIZE) {
+        const chunk = validItems.slice(c, c + GROUP_IMPORT_CHUNK_SIZE);
         const results = await Promise.allSettled(
             chunk.map((q) =>
                 db.codeQuestion.create({

@@ -4,14 +4,39 @@ import BackBtn from "@/components/backbtn";
 import { TopbarBreadcrumb } from "@/components/topbar-title";
 import { Button } from "@/components/ui/button";
 import { Download, Loader, UploadCloud } from "lucide-react";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 export default function MCQImport({ params }: { params: Promise<{ cid: string; aid: string }> }) {
     const { cid, aid } = use(params)
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
     const mcqtype: string = 'assessment'
+    // Imported MCQs must land in a question-group bank (required FK).
+    const [groups, setGroups] = useState<{ id: string; title: string }[]>([]);
+    const [groupId, setGroupId] = useState<string>("");
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await fetch("/api/question-groups");
+                if (res.ok) {
+                    const data = await res.json();
+                    setGroups(Array.isArray(data) ? data : data.groups ?? []);
+                }
+            } catch {
+                // Select stays empty; import is blocked until a group is picked.
+            }
+        })();
+    }, []);
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
             setFile(e.target.files[0]);
@@ -23,12 +48,16 @@ export default function MCQImport({ params }: { params: Promise<{ cid: string; a
             toast.error("Please upload a file first.");
             return;
         }
+        if (!groupId) {
+            toast.error("Select the question group the imported MCQs belong to.");
+            return;
+        }
 
         setUploading(true);
         const reader = new FileReader();
         reader.onload = async (e) => {
             const text = e.target?.result as string;
-            const result = await importmcqs(text, "", aid, mcqtype);
+            const result = await importmcqs(text, "", aid, mcqtype, groupId);
             if (result.error) {
                 toast.error(result.error);
             } else {
@@ -69,6 +98,20 @@ export default function MCQImport({ params }: { params: Promise<{ cid: string; a
                         </p>
                     </div>
                     <div className="flex flex-col h-2/6 w-5/6 justify-center items-center gap-4">
+                        <div className="w-full">
+                            <Select value={groupId} onValueChange={setGroupId}>
+                                <SelectTrigger aria-label="Question group">
+                                    <SelectValue placeholder="Select question group" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {groups.map((g) => (
+                                        <SelectItem key={g.id} value={g.id}>
+                                            {g.title}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <input type="file" accept=".csv" onChange={handleFileChange} className="w-full overflow-clip rounded-md border border-neutral-300 bg-neutral-50/50 text-sm text-neutral-600 file:mr-4 file:cursor-pointer file:border-none file:bg-neutral-50 file:px-4 file:py-2 file:font-medium file:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-75 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-300 dark:file:bg-neutral-900 dark:file:text-white dark:focus-visible:outline-white" />
                         <Button onClick={handleImport} className="w-full">Upload</Button>
                         {uploading && <p>Uploading...</p>}

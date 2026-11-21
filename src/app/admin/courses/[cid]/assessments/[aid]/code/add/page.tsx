@@ -1,6 +1,6 @@
 
 import React from 'react'
-import { getAllQuestionsByLang } from "@/data/questions"
+import { getAllQuestionsByLang, getAllQuestions } from "@/data/questions"
 import BackBtn from "@/components/backbtn"
 import { AssessmentQuestionTableSchema } from "@/schemas/assessment-schema"
 import { getAssessmentById, getAssessmentCodeQuestionsById } from "@/data/assessments"
@@ -25,12 +25,20 @@ async function fetchQestoinbyLang(lang: string) {
     const langquestions = await getAllQuestionsByLang(lang)
     return langquestions;
 }
+async function fetchAllQuestions() {
+    const allquestions = await getAllQuestions()
+    return allquestions;
+}
 const AddAssessmentQuestions = async ({ params }: { params: Promise<{ cid: string; aid: string}> }) => {
     const { cid, aid } = await params
     const assessmentz = await fetchAssessment(aid)
     const course = await getCourseById(cid)
     const assessmentq = await fetchassessmentquestions(aid)
-    const questionsLang = await fetchQestoinbyLang(assessmentz.language)
+    // Any-language courses pool questions from every language; otherwise the
+    // pool is limited to the assessment's language.
+    const questionsLang = course?.anyLanguage
+        ? await fetchAllQuestions()
+        : await fetchQestoinbyLang(assessmentz.language)
 
     if (questionsLang === null) {
         return <p>No questions available for this language.</p>;

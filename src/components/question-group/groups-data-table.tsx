@@ -380,7 +380,7 @@ export function GroupsDataTable({ data, canExport = false }: GroupsDataTableProp
                     }}
                     label="Delete"
                     dialogTitle="Delete selected question groups"
-                    dialogDescription="Groups are removed; the questions inside them are kept and become ungrouped. This action cannot be undone."
+                    dialogDescription="Groups are removed and their questions are cascade-deleted with them. This action cannot be undone."
                     requirePhrase
                 />
             </BulkActionBar>

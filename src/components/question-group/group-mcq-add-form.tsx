@@ -87,6 +87,7 @@ export const GroupMcqAddForm = ({
             snippetLang: "python",
             topic: "general",
             subtopic: "general",
+            tags: "",
         },
     })
 
@@ -318,6 +319,25 @@ export const GroupMcqAddForm = ({
                                                             searchPlaceholder="Search sub topic…"
                                                             emptyText="No sub topic found."
                                                             loading={topicsLoading}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="tags"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Tags</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            disabled={isLoading}
+                                                            placeholder="e.g. dbms, indexes (comma separated)"
+                                                            type="text"
+                                                            autoComplete='false'
                                                         />
                                                     </FormControl>
                                                     <FormMessage />

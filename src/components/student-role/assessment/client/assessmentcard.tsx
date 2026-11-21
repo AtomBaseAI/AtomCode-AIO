@@ -35,6 +35,11 @@ const getStatusDetails = (data: AssessmentType) => {
             isClickable = true
             cursor = 'cursor-pointer'
             break
+        case 'completed':
+            // Submitted — the student can no longer attempt this assessment.
+            border = 'border-green-600'
+            label = 'Completed'
+            break
         case 'expired':
             border = 'border-red-500'
             label = 'Expired'
@@ -127,7 +132,7 @@ const AssessmentCard = ({ data }: { data: AssessmentType }) => {
                         ? 'bg-red-100 text-red-600'
                         : status === 'retake'
                             ? 'bg-orange-100 text-orange-600'
-                            : status === 'start'
+                            : status === 'start' || status === 'resume' || status === 'completed'
                                 ? 'bg-green-100 text-green-600'
                                 : 'bg-purple-100 text-purple-600'
                         }`}>

@@ -165,6 +165,15 @@ model Course {
   startdate          DateTime
   enddate            DateTime
   language           String
+  // Course type controls which sections modules/assessments require:
+  //   code-mcq  — classic course: MCQ + code both participate in completion
+  //   mcq-only  — MCQ-only course: code questions are not mandated (and the
+  //               student UI hides the code section) for completion
+  courseType         String               @default("code-mcq")
+  // anyLanguage — when true, students can solve code questions in ANY of the
+  // supported languages (the user code panel shows a language selector);
+  // `language` above remains the course's default/preferred language.
+  anyLanguage        Boolean              @default(false)
   // How students progress through the course modules:
   //   daywise  — each module unlocks on (and after) its moduledate
   //   queue    — modules unlock strictly in sequence; the next module unlocks
@@ -281,8 +290,28 @@ model CodeQuestion {
   userAssessmentCodeData userAssessmentCodeData[]
   Assessments            Assessments?             @relation(fields: [assessmentsId], references: [id])
   assessmentsId          String?
-  questionGroupId        String?
-  questionGroup          QuestionGroup?           @relation(fields: [questionGroupId], references: [id], onDelete: SetNull)
+  // Every question lives in exactly one question-group bank. Required FK +
+  // cascade: deleting a group deletes its questions — no orphans, so the
+  // dashboard counts can never outlive their group.
+  questionGroupId        String
+  questionGroup          QuestionGroup            @relation(fields: [questionGroupId], references: [id], onDelete: Cascade)
+
+  // ── Question classification ─────────────────────────────────────────
+  // "practice" | "lab" — lab questions surface company/frequency/acceptance
+  // metadata (interview-prep style).
+  questionType           String                   @default("practice")
+  company                String?
+  frequency              String?
+  acceptanceRate         Float?
+
+  // ── SQL header code ───────────────────────────────────────────────
+  // Optional setup SQL (e.g. CREATE TABLE ...) prepended to the student's
+  // code at judge time: header runs first, user code next. Empty for
+  // non-SQL questions and optional even for SQL.
+  headerCode             String?                  @db.Text
+
+  // Comma-separated topic tags (admin-authored, both question types).
+  tags                   String?
 
   // ── Testcase verification (admin table dots) ─────────────────────────
   // Overall verdict of the last Lambda judge run over all 5 test cases
@@ -377,8 +406,13 @@ model MCQQuestion {
   module          Module?        @relation(fields: [moduleId], references: [id])
   Assessments     Assessments?   @relation(fields: [assessmentsId], references: [id])
   assessmentsId   String?
-  questionGroupId String?
-  questionGroup   QuestionGroup? @relation(fields: [questionGroupId], references: [id], onDelete: SetNull)
+  // Every MCQ lives in exactly one question-group bank (cascade on group
+  // delete — same contract as CodeQuestion).
+  questionGroupId String
+  questionGroup   QuestionGroup  @relation(fields: [questionGroupId], references: [id], onDelete: Cascade)
+
+  // Comma-separated topic tags.
+  tags            String?
 
   @@index([moduleId])
   @@index([assessmentsId])

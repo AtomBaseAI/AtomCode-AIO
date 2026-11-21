@@ -58,6 +58,12 @@ type FullQuestion = {
     whitelist?: string
     questionGroupId: string | null
     questionGroupTitle: string | null
+    questionType?: string
+    company?: string
+    frequency?: string
+    acceptanceRate?: number
+    headerCode?: string
+    tags?: string
 }
 
 const DIFFICULTY_STYLES: Record<string, string> = {
@@ -269,6 +275,16 @@ const GroupQuestionPreview = ({ qid }: { qid: string }) => {
                                     <Hash className="size-3.5" />
                                     Max score: {question.maxscore}
                                 </Badge>
+                                <Badge
+                                    variant="outline"
+                                    className={`gap-1.5 border capitalize ${
+                                        question.questionType === "lab"
+                                            ? "border-purple-500/40 bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                                            : "border-primary/30 bg-primary/10 text-primary"
+                                    }`}
+                                >
+                                    {question.questionType === "lab" ? "Lab question" : "Practice question"}
+                                </Badge>
                                 {question.questionGroupTitle && (
                                     <Badge
                                         variant="outline"
@@ -294,6 +310,49 @@ const GroupQuestionPreview = ({ qid }: { qid: string }) => {
                                         <span className="font-medium text-foreground">
                                             {question.subtopic}
                                         </span>
+                                    </span>
+                                )}
+                                {question.questionType === "lab" && (
+                                    <span>
+                                        Company:{" "}
+                                        <span className="font-medium text-foreground">
+                                            {notAvailable(question.company)}
+                                        </span>
+                                    </span>
+                                )}
+                                {question.questionType === "lab" && question.frequency && (
+                                    <span>
+                                        Frequency:{" "}
+                                        <span className="font-medium text-foreground">
+                                            {question.frequency}
+                                        </span>
+                                    </span>
+                                )}
+                                {question.questionType === "lab" &&
+                                    question.acceptanceRate != null && (
+                                        <span>
+                                            Acceptance:{" "}
+                                            <span className="font-medium text-foreground">
+                                                {question.acceptanceRate}%
+                                            </span>
+                                        </span>
+                                    )}
+                                {question.tags && question.tags.trim() !== "" && (
+                                    <span className="flex flex-wrap items-center gap-1">
+                                        Tags:
+                                        {question.tags
+                                            .split(",")
+                                            .map((t) => t.trim())
+                                            .filter(Boolean)
+                                            .map((t) => (
+                                                <Badge
+                                                    key={t}
+                                                    variant="outline"
+                                                    className="px-1.5 py-0 text-[10px]"
+                                                >
+                                                    {t}
+                                                </Badge>
+                                            ))}
                                     </span>
                                 )}
                             </DialogDescription>
@@ -350,7 +409,23 @@ const GroupQuestionPreview = ({ qid }: { qid: string }) => {
                                         label="Starter Code"
                                         className="flex min-h-[420px] flex-col"
                                     >
-                                        <div className="flex h-full min-h-[380px] flex-col">
+                                        <div className="flex h-full min-h-[380px] flex-col gap-3">
+                                            {question.lang?.toLowerCase() === "sql" &&
+                                                question.headerCode &&
+                                                question.headerCode.trim() !== "" && (
+                                                    <div className="rounded-lg border border-dashed border-sky-500/50">
+                                                        <p className="border-b bg-muted/40 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                                                            Header Code (SQL) — executed before the user code
+                                                        </p>
+                                                        <div className="h-[140px] overflow-hidden">
+                                                            <CodeEditor
+                                                                Code={question.headerCode}
+                                                                readonly={true}
+                                                                lang="sql"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
                                             {question.sourcecode &&
                                             question.sourcecode.trim() !==
                                                 "" ? (

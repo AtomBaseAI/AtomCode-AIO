@@ -31,24 +31,26 @@ export const addMCQ = async (
         iscodesnippet: values.iscodesnippet,
         topic: values.topic,
         subtopic: values.subtopic,
+        // Every MCQ lives in a question-group bank (required by schema).
+        questionGroupId: values.questionGroupId,
+        tags: values.tags,
     };
 
     if (mcqtype === "module" && values.moduleId) {
         await db.mCQQuestion.create({
             data: {
                 ...parsedData,
-                module: {
-                    connect: { id: values.moduleId },
-                },
+                // Scalar FK — the generated UncheckedCreateInput accepts it
+                // unconditionally (relation `connect` payloads are rejected
+                // whenever any scalar field key is present).
+                moduleId: values.moduleId,
             },
         });
     } else if (mcqtype === "assessment" && values.assessmentId) {
         await db.mCQQuestion.create({
             data: {
                 ...parsedData,
-                Assessments: {
-                    connect: { id: values.assessmentId },
-                },
+                assessmentsId: values.assessmentId,
             },
         });
     } else {
@@ -142,7 +144,16 @@ export const updateMCQ = async (
 //         return { error: "Failed to import MCQs due to a database error" };
 //     }
 // };
-export const importmcqs = async (csvData: string, mid: string, aid: string, mcqtype: string) => {
+export const importmcqs = async (
+    csvData: string,
+    mid: string,
+    aid: string,
+    mcqtype: string,
+    questionGroupId?: string
+) => {
+    if (!questionGroupId) {
+        return { error: "Select the question group the imported MCQs belong to" };
+    }
     const parsedData = Papa.parse(csvData, {
         header: true,
         skipEmptyLines: true,
@@ -192,6 +203,7 @@ export const importmcqs = async (csvData: string, mid: string, aid: string, mcqt
                 iscodesnippet: mcq.iscodesnippet,
                 topic: mcq.topic,
                 subtopic: mcq.subtopic,
+                questionGroupId,
             };
 
             if (mcqtype === "module") {

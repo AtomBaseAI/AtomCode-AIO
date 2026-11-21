@@ -108,6 +108,9 @@ export const getCourseModuleByModuleID = async (moduleId: string) => {
                 course: {
                     select: {
                         title: true,
+                        courseType: true,
+                        anyLanguage: true,
+                        language: true,
                     },
                 },
             },
@@ -120,6 +123,9 @@ export const getCourseModuleByModuleID = async (moduleId: string) => {
         return {
             courseName: moduleData.course.title,
             moduleName: moduleData.title,
+            courseType: moduleData.course.courseType,
+            anyLanguage: moduleData.course.anyLanguage,
+            courseLanguage: moduleData.course.language,
         };
     } catch (error) {
         console.error("Error fetching module data:", error);

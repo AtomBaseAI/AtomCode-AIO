@@ -66,6 +66,22 @@ export function normalizeOutput(value: string): string {
     .trim();
 }
 
+/**
+ * SQL header code — optional question-level setup statements (e.g.
+ * `CREATE TABLE employee ...`) that must run BEFORE the student's code so
+ * the query has its schema. SQLite executes statements in source order, so
+ * concatenating header + user code (header first) gives exactly the
+ * contract: setup runs first, the student's query runs next.
+ */
+export function composeUserCode(
+  lang: string,
+  headerCode: string | null | undefined,
+  code: string
+): string {
+  if (lang !== "sql" || !headerCode || !headerCode.trim()) return code;
+  return `${headerCode.trim().replace(/\s*$/, "")}\n\n-- ── student query ──\n${code}`;
+}
+
 function renderOutput(result: RunResult): string {
   if (result.sql) {
     if (result.sql.columns.length === 0) {
@@ -199,6 +215,8 @@ export async function judgeRunSingle(opts: {
   lang: string;
   versionProfileId?: string | null;
   code: string;
+  /** Optional SQL setup code — prepended to `code` for sql questions. */
+  headerCode?: string | null;
   input?: string;
   expectedOutput?: string | null;
   timeoutMs?: number;
@@ -218,7 +236,7 @@ export async function judgeRunSingle(opts: {
 
   try {
     const result = await execute(profile, {
-      code: opts.code,
+      code: composeUserCode(opts.lang, opts.headerCode, opts.code),
       stdin: opts.input ?? "",
       timeoutMs: opts.timeoutMs,
     });
@@ -268,6 +286,8 @@ export async function judgeRunTestCases(opts: {
   lang: string;
   versionProfileId?: string | null;
   code: string;
+  /** Optional SQL setup code — prepended to `code` for sql questions. */
+  headerCode?: string | null;
   cases: { input: string; expectedOutput: string }[];
   timeoutMs?: number;
 }): Promise<TestCaseOutcome[]> {
@@ -290,6 +310,7 @@ export async function judgeRunTestCases(opts: {
       lang: opts.lang,
       versionProfileId: opts.versionProfileId,
       code: opts.code,
+      headerCode: opts.headerCode,
       input: testCase.input ?? "",
       expectedOutput: testCase.expectedOutput ?? "",
       timeoutMs: opts.timeoutMs,

@@ -84,18 +84,20 @@ export function TabSwitchAlert({
             <AlertTriangle className="h-5 w-5 text-amber-500" />
             Tab Switch Detected
           </AlertDialogTitle>
-          <AlertDialogDescription className="space-y-2">
-            <p>
-              We detected that you switched tabs or left the window. Please remain on this page during your assessment.
-            </p>
-            <p className="font-medium">
-              Tab switch count: {tabSwitchCount}/{maxTabSwitches}
-            </p>
-            {tabSwitchCount >= maxTabSwitches - 1 && (
-              <p className="text-red-500 font-semibold">
-                Warning: You have reached {tabSwitchCount} tab switches. One more switch will end your test.
+          <AlertDialogDescription asChild>
+            <div className="space-y-2">
+              <p>
+                We detected that you switched tabs or left the window. Please remain on this page during your assessment.
               </p>
-            )}
+              <p className="font-medium">
+                Tab switch count: {tabSwitchCount}/{maxTabSwitches}
+              </p>
+              {tabSwitchCount >= maxTabSwitches - 1 && (
+                <p className="text-red-500 font-semibold">
+                  Warning: You have reached {tabSwitchCount} tab switches. One more switch will end your test.
+                </p>
+              )}
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

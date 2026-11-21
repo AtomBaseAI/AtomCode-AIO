@@ -7,8 +7,11 @@
  * (title, language, completion order, dates, module count); confirming
  * downloads the re-importable JSON export via
  * GET /api/courses/[id]/export?format=json — the course shell plus every
- * module (structure + data, including reference material), in queue
- * sequence. Questions, students and staffs are deliberately NOT exported.
+ * module (structure + data, reference material and question references
+ * for both types) in queue sequence. On import, the referenced questions
+ * are resolved against the question groups of the target system and
+ * attached to the modules. Students and staffs are deliberately NOT
+ * exported.
  */
 
 import { useState } from "react"
@@ -49,7 +52,9 @@ export function CourseExportDialog({ course }: CourseExportDialogProps) {
             document.body.appendChild(anchor)
             anchor.click()
             anchor.remove()
-            toast.success(`Exporting "${course.title}" as JSON`)
+            toast.success(`Exporting "${course.title}" as JSON`, {
+                description: "Includes module question references.",
+            })
             setOpen(false)
         } catch {
             toast.error("Could not start the download — please try again.")
@@ -93,9 +98,12 @@ export function CourseExportDialog({ course }: CourseExportDialogProps) {
                     <DialogDescription className="text-left text-muted-foreground">
                         The course is exported as a single JSON file containing
                         its details and every module (structure and data, with
-                        reference material) in queue sequence. Questions,
-                        students and staffs are not included. The file can be
-                        re-imported from the Import Course button on this page.
+                        reference material and question references) in queue
+                        sequence. Students and staffs are not included. On
+                        import, the referenced questions are matched against
+                        the question groups and attached to the modules. The
+                        file can be re-imported from the Import Course button
+                        on this page.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4">

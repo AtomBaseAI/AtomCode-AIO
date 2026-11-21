@@ -37,7 +37,13 @@ export function roleHome(role?: string | null): string {
 
 /**
  * Super-admin-only areas — regular admins, staff and students are bounced
- * to their own dashboards by the proxy. Admins DO get every /admin/* area
- * (see proxy ROLE_AREA), but never these.
+ * to their own dashboards by the proxy. URL separation is symmetric:
+ *   - /admin/*        → admins only
+ *   - /superadmin/*   → superadmin only
+ * A superadmin session hitting /admin/* is canonicalized by the proxy to the
+ * mirrored /superadmin/* URL; pages that exist only under /admin/* are then
+ * rendered in place through the next.config fallback rewrite, so the super
+ * admin browses exclusively under /superadmin/* (native superadmin pages:
+ * dashboard, admins, revenue, settings — real files, never rewritten).
  */
 export const superAdminOnlyPrefixes = ["/superadmin"];

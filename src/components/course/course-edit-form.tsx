@@ -48,6 +48,7 @@ import {
     type CompletionOrder,
 } from "@/lib/module-access"
 import { toast } from "sonner"
+import { Switch } from "@/components/ui/switch"
 interface EditCourseFormProps {
     course: z.infer<typeof CourseUpdateSchema>
     /** Custom trigger element (defaults to the "Edit Course" button). */
@@ -66,10 +67,14 @@ const EditCourseForm = ({ course, trigger, onSuccess }: EditCourseFormProps) => 
             startdate: course.startdate || undefined,
             enddate: course.enddate || undefined,
             language: course.language,
+            courseType: course.courseType ?? "code-mcq",
+            anyLanguage: course.anyLanguage ?? false,
             completionOrder: course.completionOrder ?? "openflow",
         }
     })
     const selectedOrder = form.watch("completionOrder") as CompletionOrder | undefined
+    const courseType = form.watch("courseType")
+    const anyLanguage = form.watch("anyLanguage")
     const [open, setOpen] = useState(false)
     const [isLoading, startTransition] = useTransition()
     const [error, setError] = useState<string | undefined>("")
@@ -82,6 +87,8 @@ const EditCourseForm = ({ course, trigger, onSuccess }: EditCourseFormProps) => 
             startdate: course.startdate || undefined,
             enddate: course.enddate || undefined,
             language: course.language,
+            courseType: course.courseType ?? "code-mcq",
+            anyLanguage: course.anyLanguage ?? false,
             completionOrder: course.completionOrder ?? "openflow",
         })
     }, [course, form])
@@ -232,7 +239,7 @@ const EditCourseForm = ({ course, trigger, onSuccess }: EditCourseFormProps) => 
                                             name="language"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Language</FormLabel>
+                                                    <FormLabel>Language{anyLanguage ? " (default)" : ""}</FormLabel>
                                                     <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
                                                         <FormControl>
                                                             <SelectTrigger>
@@ -250,8 +257,68 @@ const EditCourseForm = ({ course, trigger, onSuccess }: EditCourseFormProps) => 
                                                             <SelectItem value="ruby">Ruby</SelectItem>
                                                         </SelectContent>
                                                     </Select>
+                                                    {anyLanguage && (
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Students can pick any supported language in the code panel — this stays the course default.
+                                                        </p>
+                                                    )}
                                                     <FormMessage />
                                                 </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="grid gap-1">
+                                        <FormField
+                                            control={form.control}
+                                            name="courseType"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Course Type</FormLabel>
+                                                    <Select
+                                                        onValueChange={field.onChange}
+                                                        defaultValue={field.value}
+                                                        disabled={isLoading}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select course type" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="code-mcq">Code &amp; MCQ</SelectItem>
+                                                            <SelectItem value="mcq-only">MCQ only</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {courseType === "mcq-only"
+                                                            ? "Modules and assessments complete with MCQs alone — code questions are not mandated."
+                                                            : "Modules and assessments require both the MCQ and code sections."}
+                                                    </p>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center justify-between gap-4 rounded-lg border p-3">
+                                        <div className="space-y-0.5">
+                                            <FormLabel className="text-sm">Any Language</FormLabel>
+                                            <p className="text-xs text-muted-foreground">
+                                                Let students write code in ANY supported language (language selector in the code panel).
+                                            </p>
+                                        </div>
+                                        <FormField
+                                            control={form.control}
+                                            name="anyLanguage"
+                                            render={({ field }) => (
+                                                <FormControl>
+                                                    <Switch
+                                                        checked={field.value}
+                                                        onCheckedChange={field.onChange}
+                                                        disabled={isLoading}
+                                                        aria-label="Allow any language"
+                                                    />
+                                                </FormControl>
                                             )}
                                         />
                                     </div>

@@ -136,6 +136,24 @@ const GroupMcqPreview = ({ mcq }: { mcq: GroupMcqRow }) => {
                                 </span>
                             </span>
                         )}
+                        {mcq.tags && mcq.tags.trim() !== "" && (
+                            <span className="flex flex-wrap items-center gap-1">
+                                Tags:
+                                {mcq.tags
+                                    .split(",")
+                                    .map((t) => t.trim())
+                                    .filter(Boolean)
+                                    .map((t) => (
+                                        <Badge
+                                            key={t}
+                                            variant="outline"
+                                            className="px-1.5 py-0 text-[10px]"
+                                        >
+                                            {t}
+                                        </Badge>
+                                    ))}
+                            </span>
+                        )}
                         <span>
                             Correct option:{" "}
                             <span className="font-medium text-emerald-600 dark:text-emerald-400">

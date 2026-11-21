@@ -80,6 +80,7 @@ export const GroupMcqEditForm = ({ groupId, mcq }: GroupMcqEditFormProps) => {
         snippetLang: mcq.snippetLang ?? "python",
         topic: mcq.topic ?? "",
         subtopic: mcq.subtopic ?? "",
+        tags: (mcq as unknown as { tags?: string | null }).tags ?? "",
     }
 
     const form = useForm<z.infer<typeof GroupMcqSchema>>({
@@ -317,6 +318,25 @@ export const GroupMcqEditForm = ({ groupId, mcq }: GroupMcqEditFormProps) => {
                                                             searchPlaceholder="Search sub topic…"
                                                             emptyText="No sub topic found."
                                                             loading={topicsLoading}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="tags"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Tags</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            disabled={isLoading}
+                                                            placeholder="e.g. dbms, indexes (comma separated)"
+                                                            type="text"
+                                                            autoComplete='false'
                                                         />
                                                     </FormControl>
                                                     <FormMessage />
