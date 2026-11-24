@@ -11,11 +11,8 @@ import type { NextConfig } from "next";
  */
 const devAllowedOrigins = [
   "*.space-z.ai",
-  "preview-chat-1945cbd9-55db-4b00-b567-bac737eb3797.space-z.ai",
   "localhost:3000",
   "127.0.0.1:3000",
-  "ws-fa-ebff-ceda-mdomjldeyy.cn-hongkong-vpc.fcapp.run",
-  "*.cn-hongkong-vpc.fcapp.run",
   "*.vercel.app",
   "*.atomcode.dev",
   "*.atomapps.space",
