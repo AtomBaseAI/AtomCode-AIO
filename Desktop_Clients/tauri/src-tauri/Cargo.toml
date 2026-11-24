@@ -1,0 +1,34 @@
+[package]
+name = "atomcode-student"
+version = "2.0.4"
+description = "AtomCode Student desktop client — Tauri recreation of the ElectronJS shell (elcetron/)"
+authors = ["AtomCode <support@atomcode.dev>"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.82"
+repository = "https://github.com/AtomBaseAI/AtomCode-AIO"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# The desktop HTTP proxy (http.rs) — rustls avoids a system OpenSSL dependency.
+reqwest = { version = "0.12", default-features = false, features = [
+    "rustls-tls",
+    "json",
+    "http2",
+] }
+
+# Keep dev builds lean (the sandbox disk is small) and strip release binaries.
+[profile.dev]
+debug = false
+incremental = false
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+opt-level = "s"

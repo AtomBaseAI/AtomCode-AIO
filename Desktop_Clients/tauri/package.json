@@ -1,0 +1,43 @@
+{
+  "name": "atomcode-student-tauri",
+  "productName": "AtomCode Student",
+  "version": "2.0.4",
+  "private": true,
+  "description": "Tauri desktop client for the AtomCode student portal — recreation of the Electron client in ../elcetron.",
+  "homepage": "https://github.com/AtomBaseAI/AtomCode-Repatch",
+  "author": {
+    "name": "AtomCode",
+    "email": "support@atomcode.dev"
+  },
+  "license": "MIT",
+  "scripts": {
+    "sync:engine": "node scripts/sync-engine-assets.mjs",
+    "prepare:bundle": "node scripts/prepare-bundle.mjs",
+    "preview": "bun run scripts/preview-server.mjs",
+    "preview:node": "node scripts/preview-server.mjs",
+    "tauri": "tauri",
+    "dev": "tauri dev",
+
+    "build": "node scripts/build-release.mjs auto",
+    "build:debug": "tauri build --debug",
+
+    "build:linux": "node scripts/build-release.mjs linux",
+    "build:linux:deb": "node scripts/build-release.mjs linux:deb",
+    "build:linux:rpm": "node scripts/build-release.mjs linux:rpm",
+    "build:linux:appimage": "node scripts/build-release.mjs linux:appimage",
+
+    "build:windows": "node scripts/build-release.mjs windows",
+    "build:windows:nsis": "node scripts/build-release.mjs windows:nsis",
+    "build:windows:msi": "node scripts/build-release.mjs windows:msi",
+
+    "build:mac": "node scripts/build-release.mjs mac",
+    "build:mac:arm64": "node scripts/build-release.mjs mac:arm64",
+    "build:mac:intel": "node scripts/build-release.mjs mac:intel",
+    "build:mac:universal": "node scripts/build-release.mjs mac:universal",
+
+    "build:help": "node -e \"console.log(['','Build native executables / installers (bundles are HOST-specific — Tauri only','offers app,dmg on macOS · msi,nsis on Windows · deb,rpm,appimage on Linux):','','  bun run build                best packages for the CURRENT OS','','  INLINE FORM (honored — no silent fallback to a host installer):','  bun run build windows:msi    .msi — REFUSES on macOS/Linux with clear fix-up steps','  bun run build windows        NSIS setup.exe + .msi (Windows only)','  bun run build mac:universal  universal dmg (macOS only)','','  on macOS (Apple Silicon):','  bun run build:mac            .app + .dmg for your Mac (arm64)','  bun run build:mac:universal  universal 2-in-1 (needs rustup target add x86_64-apple-darwin)','  bun run build:mac:intel      Intel .app + .dmg (needs x86_64-apple-darwin target)','','  on Windows:','  bun run build:windows        NSIS setup.exe + .msi','  bun run build:windows:nsis   NSIS setup.exe only','  bun run build:windows:msi    .msi only','','  on Linux:','  bun run build:linux          .deb + .rpm + AppImage','  bun run build:linux:deb      .deb only','  bun run build:linux:rpm      .rpm only','  bun run build:linux:appimage AppImage only','','  GitHub Actions — build ALL installers from any machine (.github/workflows/tauri-release.yml):','    git tag tauri-v2.0.4 && git push origin tauri-v2.0.4','    or repo Actions tab → Tauri Release → Run workflow','    → universal .dmg + .msi + NSIS setup.exe + .deb + .rpm + .AppImage (draft release)','','  Preview a command without building:','    DRY_RUN=1 bun run build windows:msi','','Every installer ships the UI and the local runtimes: wasm runtimes','(pyodide · sqlite-wasm · ruby 3.4 · clang/lld for C/C++) plus the','Doppio JVM for Java when elcetron/java-runtime/node_modules exists','(install once: cd elcetron/java-runtime && npm install --ignore-scripts &&','node node_modules/doppiojvm/install.js). No network download','is needed after install.','','Run each command on the matching OS — Windows MSI/NSIS and Linux','packages cannot be produced on macOS (MSVC / WiX / bundler bound);','the wrapper now fails loudly instead of building a Mac installer by','mistake. Use the GitHub Actions workflow for multi-platform releases.',''].join('\\n'))\""
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.6"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "identifier": "main-window",
+  "description": "AtomCode Student main window. The UI is served over the app-embedded local HTTP server (and the atomcode:// custom scheme), so remote access is scoped to loopback only. URLPattern note: an omitted pathname defaults to '/', so port-wildcard patterns must include a '**' pathname to match every page and asset of the app origin.",
+  "windows": [
+    "main"
+  ],
+  "remote": {
+    "urls": [
+      "http://**",
+      "http://**/**",
+      "http://127.0.0.1:*",
+      "http://127.0.0.1:*/**",
+      "http://localhost:*/**",
+      "atomcode://renderer/**"
+    ]
+  },
+  "permissions": [
+    "core:default"
+  ]
+}
