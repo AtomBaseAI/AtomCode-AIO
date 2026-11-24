@@ -28,7 +28,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { useForm } from "react-hook-form"
+import { useForm, type Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { FormError } from "@/components/auth/form-error"
 import { FormSuccess } from "@/components/auth/form-success"
@@ -77,7 +77,9 @@ const EditQuestionForm = ({
 }: EditQuestionFormProps) => {
 
     const form = useForm<z.infer<typeof QuestionUpdateSchema>>({
-        resolver: zodResolver(QuestionUpdateSchema),
+        resolver: zodResolver(QuestionUpdateSchema) as unknown as Resolver<
+            z.infer<typeof QuestionUpdateSchema>
+        >,
         defaultValues: {
             id: question.id,
             title: question.title,
@@ -495,6 +497,7 @@ const EditQuestionForm = ({
                                                     <FormControl>
                                                         <Input
                                                             {...field}
+                                                            value={field.value ?? ""}
                                                             disabled={isLoading}
                                                             placeholder="e.g. sql, joins (comma separated)"
                                                             type="text"
@@ -518,6 +521,7 @@ const EditQuestionForm = ({
                                                         <FormControl>
                                                             <Input
                                                                 {...field}
+                                                                value={field.value ?? ""}
                                                                 disabled={isLoading}
                                                                 placeholder="e.g. Amazon"
                                                                 type="text"
@@ -537,6 +541,7 @@ const EditQuestionForm = ({
                                                         <FormControl>
                                                             <Input
                                                                 {...field}
+                                                                value={field.value ?? ""}
                                                                 disabled={isLoading}
                                                                 placeholder="e.g. Asked often / 3x this year"
                                                                 type="text"

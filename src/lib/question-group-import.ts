@@ -346,7 +346,7 @@ export function validateGroupImportItems(parsed: ParsedGroupEnvelope): Validated
         validMcq.push({ index: i + 1, name: mTitle, data: parsedMcq.data });
     }
 
-    const subtopicCount = parsed.rawTopics.reduce((sum, t) => {
+    const subtopicCount = parsed.rawTopics.reduce<number>((sum, t) => {
         const subs = (t as { subtopics?: unknown })?.subtopics;
         return sum + (Array.isArray(subs) ? subs.length : 0);
     }, 0);
@@ -640,7 +640,6 @@ export async function* runGroupImport(
             result: {
                 error: `Group "${title}" was created but nothing could be imported into it.`,
                 groupId: group.id,
-                created: 0,
                 failed: errors.length,
                 errors: errors.slice(0, 10),
             },

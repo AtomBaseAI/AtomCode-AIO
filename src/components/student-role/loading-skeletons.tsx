@@ -19,7 +19,7 @@ export function Skeleton({ className }: { className?: string }) {
 }
 
 /** Shared page wrapper matching the student pages' admin-style spacing. */
-function PageShell({ children, title }: { children: React.ReactNode; title?: string }) {
+function PageShell({ children, title }: { children: React.ReactNode; title?: boolean }) {
   return (
     <div className="flex h-full w-full flex-1 flex-col gap-6 p-4 pb-8 md:p-8">
       {title ? <TopbarTitleSkeleton /> : null}

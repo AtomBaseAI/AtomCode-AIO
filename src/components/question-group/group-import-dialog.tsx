@@ -769,9 +769,9 @@ export function GroupImportDialog() {
                                             <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                                             <div>
                                                 <p className="font-semibold">{result.data.success}</p>
-                                                {result.data.failed > 0 && (
+                                                {(result.data.failed ?? 0) > 0 && (
                                                     <p className="mt-1 text-xs text-muted-foreground">
-                                                        {formatCount(result.data.failed)} item(s) were skipped —
+                                                        {formatCount(result.data.failed ?? 0)} item(s) were skipped —
                                                         see the list below.
                                                     </p>
                                                 )}

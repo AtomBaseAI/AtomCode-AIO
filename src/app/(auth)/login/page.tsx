@@ -9,6 +9,13 @@ import { BorderBeam } from "@/components/magicui/border-beam";
 import { HexagonPattern } from "@/components/magicui/hexagon-pattern";
 import { Card } from "@/components/ui/card";
 
+// Branding + maintenance mode are DB-backed and admin-editable at runtime.
+// Prerendering this page would freeze them at build time (on Vercel the
+// admin could never actually enable maintenance mode or change branding
+// without a rebuild) — always render per-request. The 30s TTL caches in
+// lib/platform-settings.ts / lib/branding-settings.ts keep this cheap.
+export const dynamic = "force-dynamic";
+
 export default async function Login() {
   // Maintenance switch: admin DB setting wins, env fallback keeps the
   // original NEXT_PUBLIC_APP_STATUS behavior when the DB is unreachable.

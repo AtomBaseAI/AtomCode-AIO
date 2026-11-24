@@ -560,13 +560,15 @@ async function removeCodeQuestionSection(tx: PrismaTx, qid: string, section: str
     if (hit("attachments")) {
         const question = await tx.codeQuestion.findUnique({
             where: { id: qid },
-            select: { moduleId: true, assessmentsId: true, questionGroupId: true },
+            select: { moduleId: true, assessmentsId: true },
         });
         if (question) {
+            // NOTE: the question-group link is a REQUIRED FK (cascade delete) —
+            // it cannot be "disconnected"; it disappears with the question
+            // itself when it is finally deleted.
             const attached = [
                 question.moduleId,
                 question.assessmentsId,
-                question.questionGroupId,
             ].filter(Boolean).length;
             if (attached > 0) {
                 await tx.codeQuestion.update({
@@ -574,7 +576,6 @@ async function removeCodeQuestionSection(tx: PrismaTx, qid: string, section: str
                     data: {
                         module: { disconnect: true },
                         Assessments: { disconnect: true },
-                        questionGroup: { disconnect: true },
                     },
                 });
             }
@@ -593,10 +594,11 @@ async function removeMcqQuestionSection(tx: PrismaTx, mcqId: string, section: st
     if (section !== null && section !== "attachments") return 0;
     const mcq = await tx.mCQQuestion.findUnique({
         where: { id: mcqId },
-        select: { moduleId: true, assessmentsId: true, questionGroupId: true },
+        select: { moduleId: true, assessmentsId: true },
     });
     if (!mcq) return 0;
-    const attached = [mcq.moduleId, mcq.assessmentsId, mcq.questionGroupId]
+    // NOTE: question-group link is a REQUIRED FK — see removeCodeQuestionSection.
+    const attached = [mcq.moduleId, mcq.assessmentsId]
         .filter(Boolean).length;
     if (attached > 0) {
         await tx.mCQQuestion.update({
@@ -604,7 +606,6 @@ async function removeMcqQuestionSection(tx: PrismaTx, mcqId: string, section: st
             data: {
                 module: { disconnect: true },
                 Assessments: { disconnect: true },
-                questionGroup: { disconnect: true },
             },
         });
     }

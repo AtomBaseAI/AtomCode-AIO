@@ -10,8 +10,9 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 /**
  * Topics carry the default row first, everything else alphabetical.
+ * (Not exported — Next.js route modules may only export HTTP handlers.)
  */
-export function sortedTopics<
+function sortedTopics<
     T extends { name: string; subtopics?: { name: string }[] },
 >(topics: T[]) {
     return [...topics].sort((a, b) => {

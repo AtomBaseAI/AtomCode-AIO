@@ -71,6 +71,7 @@ export const getMcqQuestionsForGroup = async (gid: string) => {
                 codesnippet: true,
                 snippetLang: true,
                 iscodesnippet: true,
+                tags: true,
                 questionGroup: { select: { title: true } },
             },
         })
@@ -109,7 +110,7 @@ export const getTopicsForGroup = async (gid: string) => {
 export type TopicQuestionKind = "code" | "mcq"
 
 export interface TopicQuestionCountRow {
-    topic: string
+    topic: string | null
     subtopic: string | null
     kind: TopicQuestionKind
 }

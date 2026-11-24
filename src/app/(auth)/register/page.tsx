@@ -7,6 +7,14 @@ import { getBrandingSettings } from "@/lib/branding-settings";
 import { isMaintenanceMode } from "@/lib/platform-settings";
 import { Wrench } from "lucide-react";
 
+// Branding + maintenance mode + registration toggles are DB-backed and
+// admin-editable at runtime — prerendering would freeze them at build
+// time (on Vercel the admin could never actually enable maintenance mode
+// or close registration without a rebuild). Always render per-request;
+// the 30s TTL caches in lib/platform-settings.ts / branding-settings.ts
+// keep this cheap.
+export const dynamic = "force-dynamic";
+
 // The register page has no role picker: the visitor enters the admin-
 // generated access code, the role (student/staff) is resolved from the
 // code and shown read-only above the matching form. Admins cannot

@@ -62,6 +62,7 @@ const GroupMcqQuestionsPage = async ({
         codesnippet: string | null
         snippetLang: string | null
         iscodesnippet: boolean
+        tags: string | null
         questionGroup: { title: string } | null
     }): GroupMcqRow => ({
         id: q.id,
@@ -79,6 +80,7 @@ const GroupMcqQuestionsPage = async ({
         codesnippet: q.codesnippet,
         snippetLang: q.snippetLang,
         iscodesnippet: q.iscodesnippet,
+        tags: q.tags,
         groupTitle: q.questionGroup?.title ?? null,
     })
 

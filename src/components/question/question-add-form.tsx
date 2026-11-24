@@ -24,7 +24,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { useForm } from "react-hook-form"
+import { useForm, type Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { FormError } from "@/components/auth/form-error"
 import { FormSuccess } from "@/components/auth/form-success"
@@ -70,7 +70,9 @@ const LANG_LABELS: Record<string, string> = {
 const AddQuestion = ({ groups = [], lockedGroup, triggerLabel = "Add Question" }: AddQuestionProps) => {
     const router = useRouter()
     const form = useForm<z.infer<typeof AddQuestionSchema>>({
-        resolver: zodResolver(AddQuestionSchema),
+        resolver: zodResolver(AddQuestionSchema) as unknown as Resolver<
+            z.infer<typeof AddQuestionSchema>
+        >,
         defaultValues: {
             title: '',
             description: '',

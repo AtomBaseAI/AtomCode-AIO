@@ -162,13 +162,12 @@ const PrepareModules = async ({ params }: { params: Promise<{ cid: string, mid: 
                                     Back
                                 </Button>
                             </Link>
-                            {(isMcqOnly
-                                ? userModuleData?.mcqstatus === 'submitted'
-                                : userModuleData?.mcqstatus === 'submitted' && userModuleData?.questionstatus === 'submitted') &&
-                                <>
+                            {userModuleData &&
+                                (isMcqOnly
+                                    ? userModuleData.mcqstatus === 'submitted'
+                                    : userModuleData.mcqstatus === 'submitted' && userModuleData.questionstatus === 'submitted') && (
                                     <SubmitCourseModule cid={cid} umid={userModuleData.id} />
-                                </>
-                            }
+                                )}
                         </div>
                     </div>
                 </div>

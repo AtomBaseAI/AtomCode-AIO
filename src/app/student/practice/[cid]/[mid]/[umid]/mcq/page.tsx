@@ -12,7 +12,6 @@ import {
 import { auth } from '@/auth';
 import Link from 'next/link';
 import { CircleSlash } from 'lucide-react';
-import { MCQ } from '@/schemas/student/mcq-schema';
 import { TopbarBreadcrumb } from '@/components/topbar-title';
 
 const getSessionUserID = async () => {
@@ -44,8 +43,11 @@ const MCQMain = async ({ params }: { params: Promise<{ cid: string, mid: string,
         return <ModuleLockedScreen lock={lock} backHref={`/student/courses/${cid}/module`} />
     }
     const courseModule = await getCourseModuleByModuleID(mid)
+    // The query already scopes to this module (moduleId = mid), the boolean
+    // filter is just a defensive guard. Plain rows satisfy the MCQ schema
+    // type, so no type predicate is needed here.
     const ModuleMCQs = (await getAllMCQByModuleId(mid))
-        .filter((mcq): mcq is MCQ => mcq.moduleId !== null);
+        .filter((mcq) => mcq.moduleId !== null);
 
     return (
         <ContextMenu>

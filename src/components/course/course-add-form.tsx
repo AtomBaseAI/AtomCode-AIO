@@ -33,7 +33,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { format } from "date-fns"
-import { useForm } from "react-hook-form"
+import { useForm, type Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { FormError } from "@/components/auth/form-error"
 import { FormSuccess } from "@/components/auth/form-success"
@@ -51,7 +51,9 @@ import { toast } from "sonner"
 const AddCourse = () => {
 
     const form = useForm<z.infer<typeof AddCourseSchema>>({
-        resolver: zodResolver(AddCourseSchema),
+        resolver: zodResolver(AddCourseSchema) as unknown as Resolver<
+            z.infer<typeof AddCourseSchema>
+        >,
         defaultValues: {
             title: '',
             startdate: undefined,

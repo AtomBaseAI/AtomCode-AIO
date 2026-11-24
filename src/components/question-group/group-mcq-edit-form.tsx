@@ -333,6 +333,7 @@ export const GroupMcqEditForm = ({ groupId, mcq }: GroupMcqEditFormProps) => {
                                                     <FormControl>
                                                         <Input
                                                             {...field}
+                                                            value={field.value ?? ""}
                                                             disabled={isLoading}
                                                             placeholder="e.g. dbms, indexes (comma separated)"
                                                             type="text"

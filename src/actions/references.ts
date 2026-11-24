@@ -115,12 +115,12 @@ export const deletereferencesbulk = async (ids: string[]) => {
     // allowed to manage (requireAdminOrCourseStaff scopes it).
     const targets = await db.moduleReferences.findMany({
         where: { id: { in: validIds } },
-        select: { id: true, module: { select: { courseId: true } } },
+        select: { id: true, Module: { select: { courseId: true } } },
     });
     const checkedCourses = new Map<string, boolean>();
     const deletableIds: string[] = [];
     for (const target of targets) {
-        const courseId = target.module?.courseId ?? null;
+        const courseId = target.Module?.courseId ?? null;
         if (!courseId) continue;
         let allowed = checkedCourses.get(courseId);
         if (allowed === undefined) {
