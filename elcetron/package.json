@@ -19,7 +19,7 @@
     "prebuild": "node scripts/sync-engine-assets.mjs",
     "preexport": "node scripts/sync-engine-assets.mjs",
     "preexport:linux": "node scripts/sync-engine-assets.mjs",
-    "preexport:win": "node scripts/sync-engine-assets.mjs && node scripts/fix-nsis-arch.mjs",
+    "preexport:win": "node scripts/sync-engine-assets.mjs && node scripts/pre-win-clean.mjs && node scripts/fix-nsis-arch.mjs",
     "preexport:mac": "node scripts/sync-engine-assets.mjs",
     "preexport:all": "node scripts/sync-engine-assets.mjs",
     "build": "electron-builder --dir",

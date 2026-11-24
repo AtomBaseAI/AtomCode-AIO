@@ -208,6 +208,22 @@
     return profiles.find((p) => p.verified) || profiles[0] || null;
   }
 
+  /**
+   * Resolve the runtime profile for a language honouring an explicit
+   * version choice (web parity: LanguageVersionSelect) — unknown or
+   * unverified ids fall back to the language default.
+   */
+  function resolveEngineProfile(lang, versionProfileId) {
+    const id = String(versionProfileId || "");
+    if (id) {
+      const wanted = ENGINE_PROFILES.find(
+        (p) => p.id === id && p.language === normLang(lang)
+      );
+      if (wanted) return wanted;
+    }
+    return getDefaultEngineProfile(lang);
+  }
+
   /* ======================= execution manager ======================== */
 
   const MIN_TIMEOUT_MS = 100;
@@ -463,7 +479,7 @@
    * the same judge contract as the web app's judgeRunSingle.
    */
   async function judgeRunSingle(opts) {
-    const profile = getDefaultEngineProfile(opts.lang);
+    const profile = resolveEngineProfile(opts.lang, opts.versionProfileId);
     if (!profile) {
       return errorOutcome(
         'No runtime is configured for "' + opts.lang + '".'
@@ -527,7 +543,7 @@
    * expected output are placeholders and auto-pass.
    */
   async function judgeRunTestCases(opts) {
-    const profile = getDefaultEngineProfile(opts.lang);
+    const profile = resolveEngineProfile(opts.lang, opts.versionProfileId);
     const cases = opts.cases || [];
 
     if (profile && profile.viaMain) {
@@ -636,6 +652,11 @@
     isEngineLanguage,
     isNativeLanguage,
     getDefaultEngineProfile,
+    resolveEngineProfile,
+    profilesForLanguage(lang) {
+      const l = normLang(lang);
+      return ENGINE_PROFILES.filter((p) => p.language === l);
+    },
     manager,
     normalizeOutput,
     judgeRunSingle,

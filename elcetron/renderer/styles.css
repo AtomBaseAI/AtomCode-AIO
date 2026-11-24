@@ -769,3 +769,154 @@ pre.codesnippet {
 }
 .editor-wrap.light .editor-gutter { color: hsl(220 15% 60%); background: hsl(220 20% 94%); }
 .editor-gutter + .editor-area { padding-left: 0.75rem; }
+
+
+/* ================= v3: web-parity code workspace (practice + assessment) =================
+ * Mirrors the web React views exactly (src/components/student-role/practice/code/code-question.tsx,
+ * code-view.tsx, assessment equivalents): rail with numbered chips + theme/check,
+ * plain two-panel card (no purple headers), badge chips, gray IO boxes, CodeMirror-like
+ * editor (eclipse light / vscode dark) and the web AlertDialogs. */
+
+/* ---- rail (web aside: w-20, numbered chips, theme toggle + check + exit) ---- */
+.rail-btn { transition: background 0.15s, border-color 0.15s; }
+.rail-btn.submitted { background: hsl(142 71% 45%); border-color: hsl(142 71% 45%); color: white; cursor: not-allowed; pointer-events: none; }
+.rail-icon-btn {
+  width: 2.5rem; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--radius); border: none; cursor: pointer;
+  background: var(--primary); color: var(--primary-foreground); font-weight: 700;
+}
+.rail-icon-btn:hover { opacity: 0.9; }
+.rail-icon-btn.ghost { background: transparent; color: var(--muted-foreground); }
+.rail-icon-btn.ghost:hover { background: var(--accent); color: var(--foreground); }
+
+/* ---- panel card (web ResizablePanelGroup rounded-lg border) ---- */
+.wq-panels {
+  display: flex; width: 100%; height: 100%;
+  border: 1px solid var(--border); border-radius: 0.5rem;
+  overflow: hidden; background: var(--card);
+}
+.wq-panels > .wpanel { width: 50%; display: flex; flex-direction: column; min-width: 0; }
+.wq-panels > .wpanel + .wpanel { border-left: 1px solid var(--border); }
+.wq-drag { flex-shrink: 0; width: 1px; background: var(--border); position: relative; }
+.wq-drag::after {
+  content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  height: 2.5rem; width: 0.55rem; border-radius: 9999px; background: var(--border);
+}
+.wq-drag:hover::after { background: color-mix(in srgb, var(--primary) 45%, var(--border)); }
+
+/* question body (web h-[95%] p-6 overflow-y-auto) */
+.wq-body {
+  flex: 1; min-height: 0; width: 100%; overflow-y: auto;
+  padding: 1.5rem; display: flex; flex-direction: column; align-items: stretch;
+}
+/* question footer (web h-[5%] border absolute bottom) */
+.wq-foot {
+  flex-shrink: 0; height: 3rem; border-top: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 1.5rem; background: var(--card);
+}
+
+/* web section badge chips (w-20 / w-40, violet border, centered) */
+.wq-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 5rem; padding: 0.25rem 0; margin: 0.5rem 0;
+  border: 1px solid var(--primary); border-radius: var(--radius);
+  color: var(--primary); font-size: 0.75rem; font-weight: 600;
+  align-self: flex-start;
+}
+.wq-chip.w40 { width: 10rem; }
+.wq-title { font-size: 1.5rem; font-weight: 700; }
+.wq-sep { height: 1px; width: 100%; background: var(--border); margin: 1rem 0; flex-shrink: 0; }
+.wq-desc { font-size: 1rem; font-weight: 400; line-height: 1.5; word-break: break-word; overflow-wrap: anywhere; }
+
+/* gray IO boxes (web bg-gray-700/30 h-[110px] rounded-md p-2 font-bold) */
+.wq-gray {
+  width: 100%; height: 110px; border-radius: var(--radius);
+  background: rgba(55, 65, 81, 0.3); padding: 0.5rem;
+  font-weight: 700; overflow-y: auto; overflow-x: auto;
+  display: flex; align-items: flex-start;
+}
+.wq-gray pre {
+  font-family: "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  font-size: 0.875rem; font-weight: 600; margin: 0; width: 100%;
+  white-space: pre-wrap; word-break: break-word; color: var(--foreground);
+}
+.wq-gray.tall { height: 150px; }
+.dark .wq-gray { background: rgba(148, 163, 184, 0.14); }
+
+/* blacklist / whitelist chips (web red / green bordered pills) */
+.wq-bw-cols { width: 100%; display: flex; gap: 4%; }
+.wq-bw-col { width: 48%; display: flex; flex-direction: column; }
+.wq-bw-title { margin-top: 0.5rem; color: var(--primary); font-weight: 700; width: 100%; }
+.wq-bw-box { width: 100%; height: 110px; border-radius: var(--radius); background: rgba(55, 65, 81, 0.3); padding: 0.5rem; overflow-y: auto; overflow-x: auto; display: flex; flex-wrap: wrap; align-content: flex-start; }
+.dark .wq-bw-box { background: rgba(148, 163, 184, 0.14); }
+.wq-bw-item { display: inline-block; padding: 0.25rem 0.5rem; margin: 0.35rem; border-radius: var(--radius); font-size: 0.8rem; }
+.wq-bw-item.red { border: 1px solid hsl(0 84% 60%); color: hsl(0 84% 60%); }
+.wq-bw-item.green { border: 1px solid hsl(142 71% 45%); color: hsl(142 71% 35%); }
+.dark .wq-bw-item.green { color: hsl(142 70% 60%); }
+
+/* sample testcases (web: bold head, violet labels w-1/2, gray boxes w-[48%] + vsep) */
+.wq-tc-head { margin-top: 0.5rem; font-weight: 700; padding: 0 0.5rem; }
+.wq-tc-labels { width: 100%; display: flex; padding-bottom: 0.25rem; }
+.wq-tc-label { width: 50%; height: 1.25rem; padding: 0 0.5rem; color: var(--primary); font-weight: 700; }
+.wq-tc-boxes { width: 100%; display: flex; align-items: stretch; padding: 0.5rem 0; }
+.wq-tc-boxes .wq-gray { width: 48%; }
+.wq-vsep { width: 1px; background: var(--border); margin: 0 0.5rem; flex-shrink: 0; }
+.wq-refimg { max-height: 300px; width: 100%; object-fit: fill; border-radius: var(--radius); border: 1px solid var(--border); }
+
+/* online status (web OnlineStatus hook in the question footer) */
+.wq-net { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.9rem; color: hsl(142 71% 35%); }
+.dark .wq-net { color: hsl(142 70% 55%); }
+.wq-net.offline { color: hsl(0 72% 45%); }
+.wq-net svg { height: 1rem; width: 1rem; }
+
+/* editor (web CodeMirror: eclipse light / vscode dark, fontSize 16) */
+.editor-area { font-size: 1rem; }
+.editor-gutter { font-size: 1rem; }
+.editor-wrap { background: #1e1e1e; border-radius: var(--radius); }
+.editor-area { background: #1e1e1e; color: #d4d4d4; }
+.editor-head { background: #252526; color: #cccccc; }
+.editor-gutter { color: #858585; background: #1e1e1e; }
+.editor-wrap.light { background: #ffffff; }
+.editor-wrap.light .editor-area { background: #ffffff; color: #000000; }
+.editor-wrap.light .editor-head { background: hsl(220 14% 96%); color: hsl(224 71% 30%); }
+.editor-wrap.light .editor-gutter { color: hsl(215 15% 55%); background: #fdfeff; }
+
+/* bottom action bar (web h-[5%] border: left 70% buttons / right 30% submit) */
+.wq-bar { flex-shrink: 0; height: 3.25rem; border-top: 1px solid var(--border); display: flex; align-items: center; width: 100%; background: var(--card); }
+.wq-bar-left { width: 70%; display: flex; flex-direction: row; align-items: center; gap: 0.5rem; margin: 0 0.25rem; padding: 0.25rem; min-width: 0; }
+.wq-bar-right { width: 30%; display: flex; flex-direction: row; align-items: center; justify-content: flex-end; margin: 0 0.25rem; padding: 0.25rem; gap: 0.5rem; }
+.wq-select {
+  height: 2.25rem; border: 1px solid var(--input); border-radius: var(--radius);
+  background: var(--background); color: var(--foreground);
+  font-size: 0.875rem; padding: 0 0.5rem; cursor: pointer;
+}
+.wq-select.w180 { width: 11.25rem; }
+.wq-select.w220 { width: 13.75rem; margin-left: auto; }
+.wq-run-btn { height: 2.25rem; padding: 0.5rem 1rem; }
+.wq-run-btn .ic { height: 1.25rem; width: 1.25rem; margin-right: 0.5rem; }
+
+/* submitted state (web "Code Submitted !" panel) */
+.wq-submitted { flex: 1; min-height: 0; width: 100%; overflow-y: auto; background: #1e1e1e; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.dark .wq-submitted { background: #1e1e1e; }
+.wq-submitted .t { color: var(--foreground); font-weight: 700; font-size: 1.5rem; margin-bottom: 1.25rem; }
+.wq-submitted .dark-text { color: #ffffff; }
+
+/* web dialogs (AlertDialog parity) */
+.dlg-head-row { display: flex; flex-direction: row; justify-content: center; align-items: center; width: 100%; }
+.dlg-head-row h2 { width: 50%; padding: 0 0.5rem; font-size: 1rem; font-weight: 600; }
+.dlg-cols { display: flex; flex-direction: row; justify-content: space-around; align-items: center; width: 100%; padding: 0.5rem 0; flex: 1; }
+.dlg-cols > .dlg-gray { width: 48%; }
+.dlg-foot { display: flex; flex-direction: row; gap: 0.5rem; width: 100%; }
+.dlg-foot .btn { flex: 1; }
+.dlg-close { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+.dlg-close:hover { opacity: 0.85; }
+.dlg-cancel-red { background: hsl(0 84.2% 60.2%); border-color: hsl(0 84.2% 60.2%); color: white; }
+.dlg-cancel-red:hover { opacity: 0.9; }
+.dlg-case-row { width: 100%; display: flex; flex-direction: row; flex-grow: 1; justify-content: center; align-items: center; padding: 0.5rem; border: 1px solid hsl(220 13% 91%); border-radius: var(--radius); gap: 0.5rem; }
+.dark .dlg-case-row { border-color: hsl(215 27.9% 16.9%); }
+.dlg-case-row .half { width: 50%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
+.dlg-case-row .verdict { display: inline-flex; align-items: center; gap: 0.5rem; }
+.dlg-case-row .dot { height: 1.25rem; width: 1.25rem; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; color: white; }
+.dlg-case-row .dot.ok { background: hsl(142 71% 45%); }
+.dlg-case-row .dot.bad { background: hsl(0 84.2% 60.2%); }
+.dlg-case-row .dot svg { height: 0.8rem; width: 0.8rem; }

@@ -62,6 +62,7 @@ const P = {
   edit: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>',
   shieldAlert: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
   alertCircle: '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+  wifi: '<path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.55a11 11 0 0 1 14 0"/><path d="M8.82 16a5 5 0 0 1 7 0"/>',
   circleSlash: '<circle cx="12" cy="12" r="10"/><path d="m22 2-20 20"/>',
   maximize: '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/>',
   chevRr: '<path d="m6 17 5-5-5-5"/><path d="m13 17 5-5-5-5"/>',
@@ -233,47 +234,181 @@ const tagChips = (tags) =>
     .map((t) => `<span class="chip chip-soft">#${esc(t)}</span>`)
     .join("");
 
-/* ============== web-matching workspace renderers ============== */
+/* ============== web-matching workspace renderers ==============
+ * Exact mirrors of the web React views (code-question.tsx + the
+ * AlertDialogs in code-view.tsx / assessment-code-view.tsx). */
 
-/** Bordered section label chip — mirrors the web "Question"/"Description"… badges. */
-const qChip = (label) => `<span class="q-chip">${esc(label)}</span>`;
+/** Web section badge chip — "Question"/"Description" (w-20) / "Input Constrains"… (w-40). */
+const qChip = (label, wide = false) => `<span class="wq-chip${wide ? " w40" : ""}">${esc(label)}</span>`;
 
-/** One sample testcase block — grey Input/Output boxes side by side (web look). */
+/** shadcn Separator (web <Separator className='my-4' />). */
+const wqSep = () => `<div class="wq-sep"></div>`;
+
+/** Web gray IO box (bg-gray-700/30 rounded-md p-2 font-bold; h-110 / h-150). */
+const wqGray = (content, { tall = false } = {}) =>
+  `<div class="wq-gray${tall ? " tall" : ""}"><pre>${esc(content == null ? "" : String(content))}</pre></div>`;
+
+/** One sample testcase — web Sample Testcase N (violet labels w-1/2, boxes w-[48%] + vsep). */
 const sampleBlock = (n, input, output) => `
-  <div class="sample-block">
-    <div class="sample-head">Sample Testcase ${n}</div>
-    <div class="sample-pair">
-      <div class="sample-col"><span class="lbl">Sample Input</span><pre class="q-box pre">${esc(input || "")}</pre></div>
-      <div class="sample-col"><span class="lbl">Sample Output</span><pre class="q-box pre">${esc(output || "")}</pre></div>
-    </div>
-  </div>`;
+  <div class="wq-tc-head">Sample Testcase ${n}</div>
+  <div class="wq-tc-labels"><span class="wq-tc-label">Sample Input</span><span class="wq-tc-label">Sample Output</span></div>
+  <div class="wq-tc-boxes">${wqGray(input)}<span class="wq-vsep"></span>${wqGray(output)}</div>`;
+
+/** Blacklist / Whitelist — web red / green bordered pills. */
+const bwSection = (q) => {
+  const items = (list, cls) =>
+    String(list || "").split(",").map((s) => s.trim()).filter(Boolean)
+      .map((t) => `<span class="wq-bw-item ${cls}">${esc(t)}</span>`).join("");
+  return `
+    ${wqSep()}
+    ${qChip("Blacklist / Whitelist", true)}
+    <div class="wq-bw-cols">
+      ${q.blacklist ? `<div class="wq-bw-col"><div class="wq-bw-title">Black list</div><div class="wq-bw-box">${items(q.blacklist, "red")}</div></div>` : ""}
+      ${q.whitelist ? `<div class="wq-bw-col"><div class="wq-bw-title">White list</div><div class="wq-bw-box">${items(q.whitelist, "green")}</div></div>` : ""}
+    </div>`;
+};
 
 /**
- * Question body exactly like the web practice/assessment code panel:
- * Question chip → title → meta chips → Description chip → text →
- * Input Constrains chip → box → Sample Testcases chip → sample blocks.
+ * Question body exactly like the web practice/assessment code panel
+ * (code-question.tsx): Question chip → title → sep → Description chip →
+ * text → referenceimg → Input Constrains chip → box → Blacklist/Whitelist
+ * → Sample Testcases chip → sample blocks. No metadata chips, no purple
+ * headers, no Max Score footer — the web panel has none of those.
  */
 const questionBodyHtml = (q) => `
-  <div>${qChip("Question")}</div>
-  <div class="q-title">${esc(q.title)}</div>
-  <div class="chip-row">
-    <span class="chip chip-lang">${langIcon(q.lang)} <b>${esc((q.lang || "").toUpperCase())}</b></span>
-    ${q.difficulty ? `<span class="chip chip-${esc(q.difficulty)}">${esc(q.difficulty)}</span>` : ""}
-    ${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}
-    ${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}
-    ${tagChips(q.tags)}
-    ${q.company ? `<span class="chip chip-soft">${esc(q.company)}</span>` : ""}
-    <span class="chip chip-soft">Max score: ${q.maxscore ?? 10}</span>
-  </div>
-  <div>${qChip("Description")}</div>
-  <div class="q-desc">${esc(q.description)}</div>
-  <div>${qChip("Input Constrains")}</div>
-  <div class="q-box">${esc(q.inputconstrains || "None")}</div>
-  <div>${qChip("Sample Testcases")}</div>
-  <div style="width:100%; display:flex; flex-direction:column; gap:1rem;">
-    ${sampleBlock(1, q.sampleinput1, q.sampleoutput1)}
-    ${(q.sampleinput2 || q.sampleoutput2) ? sampleBlock(2, q.sampleinput2, q.sampleoutput2) : ""}
-  </div>`;
+  ${qChip("Question")}
+  <div class="wq-title">${esc(q.title)}</div>
+  ${wqSep()}
+  ${qChip("Description")}
+  <div class="wq-desc">${esc(q.description)}</div>
+  ${q.referenceimg ? `<img class="wq-refimg" src="${esc(q.referenceimg)}" alt="${esc(q.title)}" />` : ""}
+  ${q.inputconstrains ? `${wqSep()}${qChip("Input Constrains", true)}${wqGray(q.inputconstrains)}` : ""}
+  ${(q.blacklist || q.whitelist) ? bwSection(q) : ""}
+  ${wqSep()}
+  ${qChip("Sample Testcases", true)}
+  ${sampleBlock(1, q.sampleinput1, q.sampleoutput1)}
+  ${(q.sampleinput2 || q.sampleoutput2) ? sampleBlock(2, q.sampleinput2, q.sampleoutput2) : ""}`;
+
+/* ---- online status (web OnlineStatus hook in the question footer) ---- */
+const WIFI_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="height:1rem;width:1rem;"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.55a11 11 0 0 1 14 0"/><path d="M8.82 16a5 5 0 0 1 7 0"/></svg>';
+let wqNetBound = false;
+function bindOnlineStatus() {
+  const paint = () => {
+    const el = $("#wq-net");
+    if (!el) return;
+    const off = isOffline();
+    el.classList.toggle("offline", off);
+    el.innerHTML = `${WIFI_SVG}<span>${off ? "Offline" : "Online"}</span>`;
+  };
+  if (!wqNetBound) {
+    window.addEventListener("online", paint);
+    window.addEventListener("offline", paint);
+    wqNetBound = true;
+  }
+  paint();
+}
+
+/* ---- runtime-version dropdown (web LanguageVersionSelect parity) ---- */
+const versionProfiles = (lang) =>
+  window.AtomEngine && window.AtomEngine.profilesForLanguage
+    ? window.AtomEngine.profilesForLanguage(lang)
+    : [];
+const defaultVersionId = (lang) => {
+  const p = window.AtomEngine && window.AtomEngine.getDefaultEngineProfile
+    ? window.AtomEngine.getDefaultEngineProfile(lang)
+    : null;
+  return p ? p.id : "";
+};
+const versionSelectHtml = (id, lang, selected) => {
+  const profiles = versionProfiles(lang);
+  if (profiles.length === 0) return "";
+  const cur = profiles.find((p) => p.id === selected) || profiles.find((p) => p.verified) || profiles[0];
+  return `<select class="wq-select w220" id="${esc(id)}" aria-label="Runtime version">
+    ${profiles.map((p) => `<option value="${esc(p.id)}" ${p.id === cur.id ? "selected" : ""}${p.verified ? "" : " disabled"}>${esc(p.label)}${p.verified ? "" : " (not configured)"}</option>`).join("")}
+  </select>`;
+};
+
+/** Draggable panel divider — web ResizableHandle withHandle (20%…80%). */
+function bindPanelDrag(root) {
+  const handle = root.querySelector(".wq-drag");
+  const left = root.querySelector(".wpanel");
+  if (!handle || !left) return;
+  let dragging = false;
+  handle.addEventListener("mousedown", (e) => {
+    dragging = true;
+    document.body.style.cursor = "col-resize";
+    e.preventDefault();
+  });
+  const move = (e) => {
+    if (!dragging) return;
+    const rect = root.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const pct = Math.min(80, Math.max(20, ((e.clientX - rect.left) / rect.width) * 100));
+    left.style.width = pct + "%";
+  };
+  const up = () => { dragging = false; document.body.style.cursor = ""; };
+  window.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", up);
+}
+
+/* ---- web AlertDialogs (run output / test cases / confirms) ---- */
+
+/** Web Run dialog — "Expected Output | Program Output" (spinner while running, single box on compile error). */
+function webRunDialog({ expected = null, output = null, isError = false, running = false }) {
+  if (running) {
+    dialog(`
+      <div class="dlg-head-row"><h2>Expected Output</h2><h2>Program Output</h2></div>
+      <div class="dlg-cols">
+        ${wqGray(expected == null ? "" : expected, { tall: true })}
+        <span class="wq-vsep"></span>
+        <div class="wq-gray tall" style="width:48%; display:flex; align-items:center; justify-content:center;">
+          <span style="height:1.5rem;width:1.5rem;border-radius:9999px;border:2px solid var(--border);border-top-color:var(--primary);display:inline-block;animation:pf-rot 0.9s linear infinite;"></span>
+        </div>
+      </div>`);
+    return;
+  }
+  dialog(`
+    <div class="dlg-head-row"><h2>Expected Output</h2><h2>Program Output</h2></div>
+    ${isError
+      ? wqGray(output, { tall: true })
+      : `<div class="dlg-cols">${wqGray(expected, { tall: true })}<span class="wq-vsep"></span>${wqGray(output, { tall: true })}</div>`}
+    <div class="dlg-foot"><button class="btn dlg-close" data-close>Close</button></div>`);
+}
+
+/** Web test-cases dialog — Test Case 1/2/3 rows with spinner or Passed/Failed chips. */
+function webTestcasesDialog(statuses) {
+  const row = (n, st) => {
+    let verdict;
+    if (!st) {
+      verdict = '<span style="height:1.5rem;width:1.5rem;border-radius:9999px;border:2px solid var(--border);border-top-color:var(--primary);display:inline-block;animation:pf-rot 0.9s linear infinite;"></span>';
+    } else if (st === "pass") {
+      verdict = `<span class="verdict"><span class="dot ok">${icon("check", "ic")}</span> Passed</span>`;
+    } else {
+      verdict = `<span class="verdict"><span class="dot bad">${icon("x", "ic")}</span> Failed</span>`;
+    }
+    return `<div class="dlg-case-row"><div class="half">Test Case ${n}</div><div class="half">${verdict}</div></div>`;
+  };
+  dialog(`
+    <div style="display:flex; flex-direction:column; gap:0.5rem; width:100%; padding:0.5rem 0;">
+      ${row(1, statuses[0])}${row(2, statuses[1])}${row(3, statuses[2])}
+    </div>
+    ${statuses.every(Boolean) ? `<div class="dlg-foot"><button class="btn dlg-close" data-close>Close</button></div>` : ""}`);
+}
+
+/** Web confirm AlertDialog ("Submit Question" / "Submit Codes ?" / "Submit MCQs") — red Close + violet Submit. */
+function webConfirmDialog(title, desc, okLabel = "Submit") {
+  return new Promise((resolve) => {
+    dialog(`
+      <h2 class="dialog-title">${esc(title)}</h2>
+      <p class="dialog-desc">${esc(desc)}</p>
+      <div class="dlg-foot">
+        <button class="btn dlg-cancel-red" id="wqd-no">Close</button>
+        <button class="btn btn-primary" id="wqd-yes">${esc(okLabel)}</button>
+      </div>`);
+    $("#wqd-no").onclick = () => { closeDialog(); resolve(false); };
+    $("#wqd-yes").onclick = () => resolve(true);
+  });
+}
 
 /**
  * Code editor with a synced line-number gutter (CodeMirror-like, web look).
@@ -309,7 +444,7 @@ function bindGutter(textarea, gutter) {
  * - c/cpp/java are judged by the platform server's built-in toolchains via
  *   /api/desktop/run — their hidden test cases never leave the server
  */
-async function runQuestionCode({ q, code, lang: langOverride, mode, moduleId, assessmentId }) {
+async function runQuestionCode({ q, code, lang: langOverride, mode, moduleId, assessmentId, versionProfileId }) {
   // anyLanguage courses pass the selected language here; otherwise the
   // question's own language is used.
   const lang = String(langOverride || q.lang || "").toLowerCase();
@@ -322,7 +457,7 @@ async function runQuestionCode({ q, code, lang: langOverride, mode, moduleId, as
   if (!CLIENT_JUDGE_LANGS.includes(lang) && (moduleId || assessmentId)) {
     const res = await apiOrThrow("/run", {
       method: "POST",
-      body: { questionId: q.id, code: judgedCode, mode, moduleId, assessmentId },
+      body: { questionId: q.id, code: judgedCode, mode, moduleId, assessmentId, versionProfileId },
     });
     if (mode === "sample") {
       return {
@@ -350,6 +485,7 @@ async function runQuestionCode({ q, code, lang: langOverride, mode, moduleId, as
     if (mode === "sample") {
       const outcome = await window.AtomEngine.judgeRunSingle({
         lang,
+        versionProfileId,
         code: judgedCode,
         input: q.sampleinput1 || "",
         expectedOutput: q.sampleoutput1 == null ? null : q.sampleoutput1,
@@ -364,6 +500,7 @@ async function runQuestionCode({ q, code, lang: langOverride, mode, moduleId, as
 
     const results = await window.AtomEngine.judgeRunTestCases({
       lang,
+      versionProfileId,
       code: judgedCode,
       cases: [
         { input: q.input1, expected: q.output1 },
@@ -1339,39 +1476,63 @@ function openCodePractice(d) {
 
   const saved = () => {
     const q = qs[idx];
-    if (!perQ[q.id]) perQ[q.id] = { code: q.lastcode || `// code here ! \n\n`, samplePassed: false, tests: null, compiles: 0, errors: 0 };
+    if (!perQ[q.id]) perQ[q.id] = { code: q.lastcode || `// code here ! \n\n`, samplePassed: false, tests: null, compiles: 0, errors: 0, versionId: "" };
     return perQ[q.id];
+  };
+  /** Runtime version for the active language (web LanguageVersionSelect default). */
+  const currentVersionId = () => {
+    const s = saved();
+    if (!s.versionId) s.versionId = defaultVersionId(activeLang);
+    return s.versionId;
   };
 
   pr.innerHTML = `
     <aside class="practice-rail">
       <div class="rail-nav">${qs.map((_, i) => `<button class="rail-btn" data-i="${i}">${i + 1}</button>`).join("")}</div>
       <div class="rail-foot">
-        <button class="rail-btn" id="cp-ai" title="ATOM AI">${icon("sparkles", "ic")}</button>
-        <button class="rail-btn active" id="cp-submit" title="Submit">${icon("check", "ic")}</button>
-        <button class="rail-btn" id="cp-exit" title="Exit">${icon("x", "ic")}</button>
+        <button class="rail-icon-btn ghost" id="cp-theme" title="Toggle theme">${icon(document.body.classList.contains("dark") ? "sun" : "moon", "ic")}</button>
+        <button class="rail-icon-btn" id="cp-submit" title="Submit Codes">${icon("check", "ic")}</button>
+        <button class="rail-icon-btn ghost" id="cp-exit" title="Exit">${icon("x", "ic")}</button>
       </div>
     </aside>
     <div class="practice-main">
-      <div class="practice-panels" style="height:86%;">
-        <div class="ppanel">
-          <div class="p-head">Question : <span id="c-num">1</span>&nbsp;/&nbsp;${qs.length}</div>
-          <div class="p-body" id="cq-body"></div>
-          <div class="p-foot left">Max Score : <span id="cq-marks"></span></div>
+      <div class="wq-panels" style="width:calc(100% - 2rem); height:calc(100% - 2rem);">
+        <div class="wpanel">
+          <div class="wq-body" id="cq-body"></div>
+          <div class="wq-foot">${onlineStatusHtml()}</div>
         </div>
-        <div class="ppanel">
-          <div class="p-head">Write your code</div>
-          <div style="height:72%; width:100%; padding:0.75rem 1rem;" id="ed-wrap"></div>
-          <div class="p-foot" style="gap:0.5rem;">
-            <button class="btn btn-green btn-sm" id="run-sample">${icon("play", "ic sm")} Run</button>
-            <button class="btn btn-green btn-sm" id="run-tests">${icon("clock", "ic sm")} Run Test Cases</button>
-            ${anyLang ? `<select class="inp" id="lang-select" title="Solution language" aria-label="Solution language" style="height:2rem; width:auto; padding:0 0.5rem; font-size:0.8rem;">${ENGINE_LANGS.map((l) => `<option value="${l}" ${l === activeLang ? "selected" : ""}>${ENGINE_LANG_LABELS[l] || l}</option>`).join("")}</select>` : ""}
-            <span class="spacer"></span>
-            <button class="btn btn-green btn-sm" id="cp-submit2">Submit Question</button>
+        <div class="wq-drag"></div>
+        <div class="wpanel">
+          <div id="cp-editor-host" style="flex:1; min-height:0; display:flex; flex-direction:column; width:100%;">
+            <div style="flex:1; min-height:0;" id="ed-wrap"></div>
+            <div class="wq-bar">
+              <div class="wq-bar-left">
+                <button class="btn btn-green wq-run-btn" id="run-sample">${icon("play", "ic sm")} Run</button>
+                <button class="btn btn-green wq-run-btn hidden" id="run-tests">${icon("play", "ic sm")} Run Test Cases</button>
+                ${anyLang ? `<select class="wq-select w180" id="lang-select" title="Solution language" aria-label="Solution language">${ENGINE_LANGS.map((l) => `<option value="${l}" ${l === activeLang ? "selected" : ""}>${ENGINE_LANG_LABELS[l] || l}</option>`).join("")}</select>` : ""}
+                <span id="ver-host"></span>
+              </div>
+              <div class="wq-bar-right">
+                <button class="btn btn-primary hidden" id="cp-submit2">${icon("check", "ic sm")} Submit Question</button>
+              </div>
+            </div>
+          </div>
+          <div class="wq-submitted hidden" id="cp-submitted">
+            <p class="t">Code Submitted !</p>
+            <button class="btn btn-primary" id="cp-ai">${icon("sparkles", "ic sm")} ATOM AI</button>
           </div>
         </div>
       </div>
     </div>`;
+
+  const syncButtons = () => {
+    const q = qs[idx];
+    const s = saved();
+    // Web parity: "Run Test Cases" appears only after a passed sample run,
+    // "Submit Question" only after the hidden test cases have executed.
+    $("#run-tests").classList.toggle("hidden", !s.samplePassed);
+    $("#cp-submit2").classList.toggle("hidden", !s.tests);
+  };
 
   const paint = () => {
     const q = qs[idx];
@@ -1379,26 +1540,40 @@ function openCodePractice(d) {
     // Fixed-language courses always judge in the question's own language —
     // keep the active language in sync on every question switch.
     if (!anyLang) activeLang = String(q.lang || "python").toLowerCase();
-    $("#c-num").textContent = idx + 1;
-    $("#cq-marks").textContent = q.maxscore ?? 10;
-    $("#cq-body").innerHTML = `${questionBodyHtml(q)}
-      ${q.referenceimg ? `<img src="${esc(q.referenceimg)}" alt="${esc(q.title)}" style="max-height:220px; border-radius:var(--radius); border:1px solid var(--border);" />` : ""}`;
-    $("#ed-wrap").innerHTML = editorWithGutter("code-editor", "ed-gutter", activeLang,
-      `${(q.testcaseStatuses || []).some(Boolean) ? `<span class="editor-tests">${(q.testcaseStatuses || []).map((st, i) => `<span class="badge ${st === "pass" ? "badge-green" : st === "error" ? "badge-red" : "badge-orange"}" title="Saved run — test ${i + 1}">T${i + 1}: ${st || "—"}</span>`).join("")}</span>` : ""}
-      ${q.submissionstatus ? '<span class="badge badge-green" style="margin-left:auto;">submitted</span>' : ""}`);
-    const ed = $("#code-editor");
-    ed.value = s.code;
-    bindGutter(ed, $("#ed-gutter"));
-    ed.addEventListener("keydown", (e) => {
-      if (e.key === "Tab") {
-        e.preventDefault();
-        const st = ed.selectionStart;
-        ed.value = ed.value.slice(0, st) + "    " + ed.value.slice(ed.selectionEnd);
-        ed.selectionStart = ed.selectionEnd = st + 4;
-      }
+    $("#cq-body").innerHTML = questionBodyHtml(q);
+    bindOnlineStatus();
+    $$(".rail-btn[data-i]", pr).forEach((b) => {
+      const i = Number(b.dataset.i);
+      b.classList.toggle("active", i === idx);
+      b.classList.toggle("submitted", Boolean(qs[i].submissionstatus));
+      b.disabled = Boolean(qs[i].submissionstatus);
     });
-    ed.addEventListener("input", () => (s.code = ed.value));
-    $$(".rail-btn[data-i]", pr).forEach((b) => b.classList.toggle("active", Number(b.dataset.i) === idx));
+    const host = $("#cp-editor-host");
+    const sub = $("#cp-submitted");
+    if (q.submissionstatus) {
+      host.classList.add("hidden");
+      sub.classList.remove("hidden");
+    } else {
+      sub.classList.add("hidden");
+      host.classList.remove("hidden");
+      $("#ed-wrap").innerHTML = editorWithGutter("code-editor", "ed-gutter", activeLang);
+      const ed = $("#code-editor");
+      ed.value = s.code;
+      bindGutter(ed, $("#ed-gutter"));
+      ed.addEventListener("keydown", (e) => {
+        if (e.key === "Tab") {
+          e.preventDefault();
+          const st = ed.selectionStart;
+          ed.value = ed.value.slice(0, st) + "    " + ed.value.slice(ed.selectionEnd);
+          ed.selectionStart = ed.selectionEnd = st + 4;
+        }
+      });
+      ed.addEventListener("input", () => (s.code = ed.value));
+    }
+    $("#ver-host").innerHTML = versionSelectHtml("ver-select", activeLang, s.versionId);
+    const verSel = $("#ver-select");
+    if (verSel) verSel.onchange = () => { s.versionId = verSel.value; };
+    syncButtons();
   };
 
   const getCode = () => $("#code-editor").value;
@@ -1413,101 +1588,104 @@ function openCodePractice(d) {
 
   $$(".rail-btn[data-i]", pr).forEach((b) => (b.onclick = () => { idx = Number(b.dataset.i); paint(); }));
   const langSel = $("#lang-select");
-  if (langSel) langSel.onchange = () => { activeLang = langSel.value; paint(); };
+  if (langSel) langSel.onchange = () => {
+    activeLang = langSel.value;
+    saved().versionId = defaultVersionId(activeLang);
+    paint();
+  };
   $("#cp-exit").onclick = () => { closePractice(); navigate("practice"); };
-  $("#cp-theme") && ($("#cp-theme").onclick = () => {});
+  // Web parity: the rail hosts a theme toggle (moon/sun) like the web aside.
+  $("#cp-theme").onclick = () => {
+    applyTheme(document.body.classList.contains("dark") ? "light" : "dark");
+    $("#cp-theme").innerHTML = icon(document.body.classList.contains("dark") ? "sun" : "moon", "ic");
+    const wrap = $(".editor-wrap", pr);
+    if (wrap) wrap.classList.toggle("light", !document.body.classList.contains("dark"));
+  };
+  // Web ResizableHandle parity — drag to resize the two panels (20%…80%).
+  bindPanelDrag($(".wq-panels", pr));
 
   $("#run-sample").onclick = async () => {
     const q = qs[idx]; const s = saved();
     if (!guardKeywords(q, getCode())) return;
-    dialog(`
-      <h2 class="dialog-title">Running sample…</h2>
-      <p class="dialog-desc">${icon("loader", "ic spin")} Executing against sample testcase</p>`);
+    webRunDialog({ running: true });
     try {
-      const r = await runQuestionCode({ q, code: getCode(), lang: activeLang, mode: "sample", moduleId: state.moduleCtx.mid });
+      const r = await runQuestionCode({ q, code: getCode(), lang: activeLang, mode: "sample", moduleId: state.moduleCtx.mid, versionProfileId: currentVersionId() });
       s.compiles += 1;
-      if (r.passed) {
-        s.samplePassed = true;
-        dialog(`
-          <h2 class="dialog-title">Sample Testcase ${icon("check", "ic")}</h2>
-          <p class="dialog-desc" style="color:hsl(142 71% 35%); font-weight:600;">Passed</p>
-          <pre class="out-pre">${esc(r.output ?? "")}</pre>
-          <div class="dialog-footer single"><button class="btn btn-primary" data-close>Close</button></div>`);
-      } else {
-        s.errors += 1;
-        dialog(`
-          <h2 class="dialog-title">Sample Testcase</h2>
-          <p class="dialog-desc" style="color:var(--destructive); font-weight:600;">${esc(r.compileMessage || "Failed")}</p>
-          <pre class="out-pre">${esc(r.output ?? "")}</pre>
-          <div class="dialog-footer single"><button class="btn btn-primary" data-close>Close</button></div>`);
-      }
+      s.samplePassed = Boolean(r.passed);
+      if (!r.passed) s.errors += 1;
+      if (r.compileMessage === "Error") toast("Compilation Error!", "error");
+      else if (r.passed) toast("Sample Testcase Passed");
+      else toast("Sample Testcase Failed!", "error");
+      webRunDialog({ expected: q.sampleoutput1, output: r.output, isError: r.compileMessage === "Error" });
+      syncButtons();
     } catch (e) { closeDialog(); toast(e.message, "error"); }
   };
 
   $("#run-tests").onclick = async () => {
     const q = qs[idx]; const s = saved();
     if (!guardKeywords(q, getCode())) return;
-    dialog(`
-      <h2 class="dialog-title">Running testcases…</h2>
-      <p class="dialog-desc">${icon("loader", "ic spin")} Executing hidden test cases</p>`);
+    webTestcasesDialog([null, null, null]);
     try {
-      const r = await runQuestionCode({ q, code: getCode(), lang: activeLang, mode: "tests", moduleId: state.moduleCtx.mid });
+      const r = await runQuestionCode({ q, code: getCode(), lang: activeLang, mode: "tests", moduleId: state.moduleCtx.mid, versionProfileId: currentVersionId() });
       s.compiles += 1;
       s.tests = [r.testcase1status, r.testcase2status, r.testcase3status];
       if (s.tests.includes("error")) s.errors += 1;
-      const row = (n, st) => `<div class="testcase-row"><b>Test case ${n}</b><span class="spacer"></span>
-        <span class="badge ${st === "pass" ? "badge-green" : st === "error" ? "badge-red" : "badge-orange"}">${st || "—"}</span></div>`;
-      dialog(`
-        <h2 class="dialog-title">Test cases</h2>
-        ${row(1, r.testcase1status)}${row(2, r.testcase2status)}${row(3, r.testcase3status)}
-        <p class="dialog-desc">${r.passedCount}/3 passed · earns ${1 + r.passedCount * 3} / 10 marks (incl. sample bonus)</p>
-        <div class="dialog-footer single"><button class="btn btn-primary" data-close>Close</button></div>`);
+      webTestcasesDialog(s.tests.map((t) => (t === "pass" ? "pass" : t ? "fail" : "")));
+      syncButtons();
     } catch (e) { closeDialog(); toast(e.message, "error"); }
   };
 
-  const submitQ = () => {
+  const submitQ = async () => {
     const q = qs[idx]; const s = saved();
     if (q.submissionstatus) { toast("Already submitted !", "warning"); return; }
-    dialog(`
-      <h2 class="dialog-title">Submit Solution</h2>
-      <p class="dialog-desc">Are you sure want to submit this solution ?</p>
-      <div class="dialog-footer">
-        <button class="btn btn-destructive" id="cq-no">Close</button>
-        <button class="btn btn-primary" id="cq-yes">Submit</button>
-      </div>`);
-    $("#cq-no").onclick = closeDialog;
-    $("#cq-yes").onclick = async () => {
-      $("#cq-yes").disabled = true;
-      const tests = s.tests || [null, null, null];
-      const passedTests = tests.filter((t) => t === "pass").length;
-      try {
-        const r = await apiOrThrow("/student/practice/code", {
-          method: "POST",
-          body: {
-            questionId: q.id, moduleId: state.moduleCtx.mid,
-            usercode: getCode(),
-            score: (s.samplePassed ? 1 : 0) + passedTests * 3,
-            compiles: s.compiles || 1, errors: s.errors || 0,
-            testcase1status: tests[0], testcase2status: tests[1], testcase3status: tests[2],
-            duration: Math.floor((Date.now() - startAt) / 1000), tabswitches: 0,
-          },
-        });
-        closeDialog();
-        toast(r.message || "Code Submitted !");
-        q.submissionstatus = true;
-        if (qs.every((x) => x.submissionstatus)) {
-          closePractice();
-          toast("All programs submitted — you can submit the module now.");
-          navigate("practice");
-        } else {
-          const next = qs.findIndex((x) => !x.submissionstatus);
-          if (next >= 0) idx = next;
-          paint();
-        }
-      } catch (e) { closeDialog(); toast(e.message, "error"); }
-    };
+    const ok = await webConfirmDialog("Submit Question", "Are you sure want to submit question ?");
+    if (!ok) return;
+    const yes = $("#wqd-yes");
+    if (yes) yes.disabled = true;
+    const tests = s.tests || [null, null, null];
+    const passedTests = tests.filter((t) => t === "pass").length;
+    try {
+      const r = await apiOrThrow("/student/practice/code", {
+        method: "POST",
+        body: {
+          questionId: q.id, moduleId: state.moduleCtx.mid,
+          usercode: getCode(),
+          score: (s.samplePassed ? 1 : 0) + passedTests * 3,
+          compiles: s.compiles || 1, errors: s.errors || 0,
+          testcase1status: tests[0], testcase2status: tests[1], testcase3status: tests[2],
+          duration: Math.floor((Date.now() - startAt) / 1000), tabswitches: 0,
+        },
+      });
+      closeDialog();
+      toast(r.message || "Code Submitted !");
+      q.submissionstatus = true;
+      if (qs.every((x) => x.submissionstatus)) {
+        closePractice();
+        toast("All programs submitted — you can submit the module now.");
+        navigate("practice");
+      } else {
+        const next = qs.findIndex((x) => !x.submissionstatus);
+        if (next >= 0) idx = next;
+        paint();
+      }
+    } catch (e) { closeDialog(); toast(e.message, "error"); }
   };
-  $("#cp-submit").onclick = submitQ;
+  // Rail check — web parity: "Submit Codes ?" dialog submits the whole
+  // module (submitcode → codedataUpdateModule) and leaves the workspace.
+  $("#cp-submit").onclick = async () => {
+    const ok = await webConfirmDialog("Submit Codes ?", "Are you sure want to submit Codes ?");
+    if (!ok) return;
+    try {
+      await apiOrThrow("/student/practice/module", {
+        method: "POST",
+        body: { moduleId: state.moduleCtx.mid, action: "submit" },
+      });
+      closeDialog();
+      closePractice();
+      toast("Codes submitted !");
+      navigate("practice");
+    } catch (e) { closeDialog(); toast(e.message, "error"); }
+  };
   $("#cp-submit2").onclick = submitQ;
 
   $("#cp-ai").onclick = () => {
@@ -1691,6 +1869,12 @@ async function loadAttempt() {
   A.codeRuns = A.codeRuns || {}; // qid -> {statuses, passed, code, saved}
   A.samplePassed = A.samplePassed || {}; // qid -> sample testcase passed
   A.langChoice = A.langChoice || {};     // qid -> chosen language (anyLanguage)
+  A.versionChoice = A.versionChoice || {}; // qid -> chosen runtime version
+  A.mcqSubmitted = String(d.mcqstatus || "") === "submitted";
+  // Web TopBar parity: the attempt shows ONE section at a time (MCQ | Code).
+  let asmView = d.mcqs.length ? "mcq" : "code";
+  let asmMcqIdx = 0;
+  let asmCodeIdx = 0;
   // anyLanguage assessments let the student pick the solution language per
   // question (mirrors the web code view's activeLang).
   const langFor = (q) => String(A.langChoice[q.id] || q.lang || "").toLowerCase();
@@ -1711,13 +1895,16 @@ async function loadAttempt() {
       <div style="flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden;">
         <div class="asm-topbar">
           <span class="t">${esc(d.assessment.title)}</span>
-          <span class="muted small">max ${esc(d.attemptState.maxtabswitches)} tab switches</span>
+          <select class="wq-select" id="asm-view-select" aria-label="Question type" style="width:auto; min-width:6.5rem;">
+            ${d.mcqs.length ? `<option value="mcq"${asmView === "mcq" ? " selected" : ""}>MCQ</option>` : ""}
+            ${d.code.length && d.assessment.courseType !== "mcq-only" ? `<option value="code"${asmView === "code" ? " selected" : ""}>Code</option>` : ""}
+          </select>
           <span class="spacer"></span>
           <span class="tab-count" title="Tab switches used">${icon("shieldAlert", "ic sm")} <span id="tab-count">${A.tabCount}</span>/${esc(d.attemptState.maxtabswitches)}</span>
           <span class="timer-chip" id="asm-timer">${icon("clock", "ic sm")} --:--</span>
           <button class="btn btn-destructive btn-sm" id="asm-end">End Test</button>
         </div>
-        <div style="flex:1; overflow-y:auto; padding:1.5rem;" id="asm-body"></div>
+        <div style="flex:1; min-height:0; display:flex;" id="asm-body"></div>
       </div>`;
 
     $("#asm-end").onclick = () => {
@@ -1732,42 +1919,73 @@ async function loadAttempt() {
       $("#ae-yes").onclick = () => finalizeAttempt(false);
     };
 
-    paintMcq();
-    // "mcq-only" courses: no coding section — the assessment completes with
-    // the MCQ part alone (mirrors the web mcq-only gating).
-    if (d.assessment.courseType !== "mcq-only") paintCode();
+    // Web TopBar parity — the question-type Select switches between the
+    // MCQ and Code workspaces (mcq-only courses hide the Code option).
+    const viewSel = $("#asm-view-select");
+    if (viewSel) viewSel.onchange = () => { asmView = viewSel.value; paintAsmView(); };
+    paintAsmView();
     startTimer();
     trackTabSwitches();
   }
 
-  function paintMcq() {
+  function paintAsmView() {
     const body = $("#asm-body");
+    body.innerHTML = "";
+    if (asmView === "mcq") paintMcq(body);
+    else paintCode(body);
+  }
+
+  /** Web aside — numbered chips + check button (assessment rails have no exit). */
+  const asmRail = (items, checkId, checkTitle, doneFlags) => `
+    <aside class="practice-rail">
+      <div class="rail-nav">${items.map((_, i) => `<button class="rail-btn${doneFlags && doneFlags[i] ? " submitted" : ""}" data-rail-i="${i}">${i + 1}</button>`).join("")}</div>
+      <div class="rail-foot">
+        <button class="rail-icon-btn" id="${checkId}" title="${esc(checkTitle)}">${icon("check", "ic")}</button>
+      </div>
+    </aside>`;
+
+  function paintMcq(body) {
     if (d.mcqs.length === 0) return;
-    const wrap = document.createElement("div");
-    wrap.innerHTML = `
-      <h3 style="font-weight:700; margin-bottom:0.75rem;">Section 1 — MCQ (${d.mcqs.length})</h3>
-      <div class="practice-panels" style="width:100%; height:auto; min-height:22rem;">
-        <div class="ppanel">
-          <div class="p-head">Question : <span id="am-num">1</span>&nbsp;/&nbsp;${d.mcqs.length}</div>
-          <div class="p-body" id="am-qbody"></div>
-          <div class="p-foot left">Marks : 1</div>
-        </div>
-        <div class="ppanel">
-          <div class="p-head">Answer here</div>
-          <div class="p-body" id="am-abody"></div>
-          <div class="p-foot"><button class="btn btn-green" id="am-next">Next ${icon("arrowR", "ic")}</button></div>
+    if (A.mcqSubmitted) {
+      // Web parity: submitted MCQ section shows the "MCQ Submitted !" card.
+      body.innerHTML = `
+        <div style="flex:1; display:flex; align-items:center; justify-content:center; width:100%;">
+          <div class="card card-pad" style="width:20rem; border:1px solid hsl(142 71% 45%);">
+            <div style="font-weight:700; color:hsl(142 71% 35%); display:flex; flex-direction:column; align-items:center; gap:1.25rem; padding:1.25rem; font-size:1.25rem;">
+              ${icon("puzzle", "ic xl")} MCQ Submitted !
+            </div>
+          </div>
+        </div>`;
+      return;
+    }
+    body.innerHTML = `
+      ${asmRail(d.mcqs, "asm-mcq-check", "Submit MCQs")}
+      <div class="practice-main">
+        <div class="wq-panels" style="width:83.333%; height:66.667%;">
+          <div class="ppanel">
+            <div class="p-head">Question : <span id="am-num">${asmMcqIdx + 1}</span>&nbsp;/&nbsp;${d.mcqs.length}</div>
+            <div class="p-body" id="am-qbody"></div>
+            <div class="p-foot left">Marks : 1</div>
+          </div>
+          <div class="wq-drag"></div>
+          <div class="ppanel">
+            <div class="p-head">Answer here</div>
+            <div class="p-body" id="am-abody"></div>
+            <div class="p-foot"><button class="btn btn-green" id="am-next">Next ${icon("arrowR", "ic")}</button></div>
+          </div>
         </div>
       </div>`;
-    body.appendChild(wrap);
 
-    let mi = 0;
+    $$(".rail-btn[data-rail-i]", body).forEach((b) => (b.onclick = () => { asmMcqIdx = Number(b.dataset.railI); paintMcq(body); }));
+    bindPanelDrag($(".wq-panels", body));
+
     const paintM = () => {
-      const q = d.mcqs[mi];
-      $("#am-num").textContent = mi + 1;
+      const q = d.mcqs[asmMcqIdx];
+      $("#am-num").textContent = asmMcqIdx + 1;
       $("#am-qbody").innerHTML = `
-        <div class="q-title">${esc(q.title)}</div>
-        ${(q.topic || q.subtopic || q.tags) ? `<div class="chip-row">${q.topic ? `<span class="chip">${icon("bookIcon", "ic sm")} ${esc(q.topic)}</span>` : ""}${q.subtopic ? `<span class="chip chip-soft">${esc(q.subtopic)}</span>` : ""}${tagChips(q.tags)}</div>` : ""}
-        <div class="q-desc">${esc(q.description)}</div>
+        <div style="font-weight:700; font-size:1.25rem;">${esc(q.title)}</div>
+        <div style="font-weight:500;">${esc(q.description)}</div>
+        ${q.referenceimg ? `<img class="wq-refimg" src="${esc(q.referenceimg)}" alt="${esc(q.title)}" />` : ""}
         ${q.iscodesnippet && q.codesnippet ? `<pre class="codesnippet">${esc(q.codesnippet)}</pre>` : ""}`;
       $("#am-abody").innerHTML = q.options.map((o, i) => `
         <div class="opt-row ${A.answers[q.id] === i + 1 ? "selected" : ""}" data-opt="${i + 1}">
@@ -1779,158 +1997,183 @@ async function loadAttempt() {
           el.classList.add("selected");
         })
       );
-      $("#am-next").disabled = mi >= d.mcqs.length - 1;
+      $("#am-next").disabled = asmMcqIdx >= d.mcqs.length - 1;
     };
-    $("#am-next").onclick = () => { if (mi < d.mcqs.length - 1) { mi += 1; paintM(); } };
+    $("#am-next").onclick = () => { if (asmMcqIdx < d.mcqs.length - 1) { asmMcqIdx += 1; paintM(); } };
+    $("#asm-mcq-check").onclick = async () => {
+      const ok = await webConfirmDialog("Submit MCQs", "Are you sure want to submit MCQs ?");
+      if (!ok) return;
+      const yes = $("#wqd-yes");
+      if (yes) yes.disabled = true;
+      try {
+        const answers = Object.entries(A.answers || {}).map(([mcqId, selected]) => ({ mcqId, selected }));
+        await apiOrThrow(`/student/assessments/${A.aid}/submit`, {
+          method: "POST",
+          body: { uaid: A.uaid, mcq: { answers }, finalize: false },
+        });
+        closeDialog();
+        A.mcqSubmitted = true;
+        toast("MCQs submitted !");
+        paintAsmView();
+      } catch (e) { closeDialog(); toast(e.message, "error"); }
+    };
     paintM();
   }
 
-  function paintCode() {
-    const body = $("#asm-body");
+  function paintCode(body) {
     if (d.code.length === 0) return;
-    const wrap = document.createElement("div");
-    wrap.innerHTML = `<h3 style="font-weight:700; margin:1.5rem 0 0.75rem;">Section 2 — Coding (${d.code.length})</h3>`;
-    body.appendChild(wrap);
-
-    d.code.forEach((q, qi) => {
-      const card = document.createElement("div");
-      card.className = "practice-panels";
-      card.style.cssText = "width:100%; height:auto; min-height:20rem; margin-bottom:1.25rem;";
-      card.innerHTML = `
-        <div class="ppanel">
-          <div class="p-head">Question : ${qi + 1}&nbsp;/&nbsp;${d.code.length}</div>
-          <div class="p-body">${questionBodyHtml(q)}</div>
-          <div class="p-foot left">Max Score : ${q.maxscore ?? 10}</div>
+    const q = d.code[asmCodeIdx];
+    const submitted = Boolean(q.questionstatus);
+    const versionIdFor = () => {
+      if (!A.versionChoice[q.id]) A.versionChoice[q.id] = defaultVersionId(langFor(q));
+      return A.versionChoice[q.id];
+    };
+    const syncAsmButtons = () => {
+      const rt = $("#asm-run-tests");
+      const sq = $("#asm-submit-q");
+      if (rt) rt.classList.toggle("hidden", !A.samplePassed[q.id]);
+      if (sq) sq.classList.toggle("hidden", !A.codeRuns[q.id]);
+    };
+    body.innerHTML = `
+      ${asmRail(d.code, "asm-code-check", "Submit Codes", d.code.map((x) => Boolean(x.questionstatus)))}
+      <div class="practice-main">
+        <div class="wq-panels" style="width:calc(100% - 2rem); height:calc(100% - 2rem);">
+          <div class="wpanel">
+            <div class="wq-body">${questionBodyHtml(q)}</div>
+            <div class="wq-foot"></div>
+          </div>
+          <div class="wq-drag"></div>
+          <div class="wpanel">
+            ${submitted ? `
+              <div class="wq-submitted" style="height:100%;"><p class="t">Code Submitted !</p></div>` : `
+              <div style="flex:1; min-height:0; display:flex; flex-direction:column; width:100%;">
+                <div style="flex:1; min-height:0;" id="asm-ed-wrap"></div>
+                <div class="wq-bar">
+                  <div class="wq-bar-left">
+                    <button class="btn btn-green wq-run-btn" id="asm-run-sample">${icon("play", "ic sm")} Run</button>
+                    <button class="btn btn-green wq-run-btn hidden" id="asm-run-tests">${icon("play", "ic sm")} Run Test Cases</button>
+                    ${d.assessment.anyLanguage ? `<select class="wq-select w180" id="asm-lang-select" title="Solution language" aria-label="Solution language">${ENGINE_LANGS.map((l) => `<option value="${l}" ${langFor(q) === l ? "selected" : ""}>${ENGINE_LANG_LABELS[l] || l}</option>`).join("")}</select>` : ""}
+                    <span id="asm-ver-host"></span>
+                  </div>
+                  <div class="wq-bar-right">
+                    <button class="btn btn-primary hidden" id="asm-submit-q">${icon("check", "ic sm")} Submit Question</button>
+                  </div>
+                </div>
+              </div>`}
+          </div>
         </div>
-        <div class="ppanel">
-          <div class="p-head">Write your code ${q.questionstatus ? '<span class="badge badge-green" style="margin-left:auto;">submitted</span>' : ""}</div>
-          <div style="height:70%; width:100%; padding:0.75rem 1rem;">
-            ${editorWithGutter(q.id, `gut-${esc(q.id)}`, langFor(q))}
-          </div>
-          <div class="p-foot" style="gap:0.5rem;">
-            <button class="btn btn-outline btn-sm" data-airun="${esc(q.id)}">${icon("sparkles", "ic sm")} AI</button>
-            <button class="btn btn-outline btn-sm" data-sample="${esc(q.id)}">${icon("play", "ic sm")} Run Sample</button>
-            <button class="btn btn-outline btn-sm" data-run="${esc(q.id)}">${icon("clock", "ic sm")} Run Testcases</button>
-            ${d.assessment.anyLanguage ? `<select class="inp" data-langsel="${esc(q.id)}" title="Solution language" aria-label="Solution language" style="height:2rem; width:auto; padding:0 0.5rem; font-size:0.8rem;">${ENGINE_LANGS.map((l) => `<option value="${l}" ${langFor(q) === l ? "selected" : ""}>${ENGINE_LANG_LABELS[l] || l}</option>`).join("")}</select>` : ""}
-            <span class="spacer"></span>
-            <button class="btn btn-green btn-sm" data-save="${esc(q.id)}">Save</button>
-          </div>
-        </div>`;
-      body.appendChild(card);
+      </div>`;
 
-      // Hydrate the editor value + line-number gutter (web CodeMirror look).
-      {
-        const ta = $(`[data-code="${q.id}"]`, card);
-        if (ta) {
-          ta.value = q.lastcode || "// code here ! \n\n";
-          bindGutter(ta, $(`#gut-${CSS.escape ? CSS.escape(q.id) : q.id}`, card));
-        }
+    $$(".rail-btn[data-rail-i]", body).forEach((b) => (b.onclick = () => {
+      asmCodeIdx = Number(b.dataset.railI);
+      paintCode(body);
+    }));
+    bindPanelDrag($(".wq-panels", body));
+
+    if (submitted) {
+      $("#asm-code-check").onclick = async () => {
+        const ok = await webConfirmDialog("Submit Codes ?", "Are you sure want to submit Codes ?");
+        if (ok) finalizeAttempt(false);
+      };
+      return;
+    }
+
+    // Hydrate the editor value + line-number gutter (web CodeMirror look).
+    $("#asm-ed-wrap").innerHTML = editorWithGutter("asm-code-editor", "asm-ed-gutter", langFor(q));
+    const ta = $("#asm-code-editor");
+    ta.value = q.lastcode || "// code here ! \n\n";
+    bindGutter(ta, $("#asm-ed-gutter"));
+    ta.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const st = ta.selectionStart;
+        ta.value = ta.value.slice(0, st) + "    " + ta.value.slice(ta.selectionEnd);
+        ta.selectionStart = ta.selectionEnd = st + 4;
       }
-
-      // anyLanguage assessments: switching the language re-labels the editor
-      // (the chosen language is used by both sample and testcase runs).
-      const langSel = $(`[data-langsel="${q.id}"]`, card);
-      if (langSel) langSel.onchange = () => {
-        A.langChoice[q.id] = langSel.value;
-        const label = $(`[data-langlabel="${q.id}"]`, card);
-        if (label) label.textContent = String(langSel.value || "").toUpperCase();
-        const headIcon = langSel.parentElement && langSel.parentElement.querySelector("img");
-        if (headIcon) headIcon.outerHTML = langIcon(langSel.value);
-      };
-
-      // Run Sample — executes against sampleinput1/sampleoutput1 (web parity:
-      // a passed sample earns a 1-mark bonus that is added on Save).
-      const sampleBtn = $(`[data-sample="${q.id}"]`, card);
-      sampleBtn.onclick = async () => {
-        const code = $(`[data-code="${q.id}"]`, card).value;
-        if (!guardKeywordsAsm(q, code)) return;
-        sampleBtn.disabled = true;
-        dialog(`
-          <h2 class="dialog-title">Running sample…</h2>
-          <p class="dialog-desc">${icon("loader", "ic spin")} Executing against sample testcase</p>`);
-        try {
-          const r = await runQuestionCode({ q, code, lang: d.assessment.anyLanguage ? langFor(q) : undefined, mode: "sample", assessmentId: A.aid });
-          A.samplePassed[q.id] = Boolean(r.passed);
-          dialog(`
-            <h2 class="dialog-title">Sample Testcase ${r.passed ? icon("check", "ic") : ""}</h2>
-            <p class="dialog-desc" style="font-weight:600; color:${r.passed ? "hsl(142 71% 35%)" : "var(--destructive)"};">${r.passed ? "Passed" : esc(r.compileMessage || "Failed")}</p>
-            <pre class="out-pre">${esc(r.output ?? "")}</pre>
-            <div class="dialog-footer single"><button class="btn btn-primary" data-close>Close</button></div>`);
-        } catch (e) { closeDialog(); toast(e.message, "error"); }
-        sampleBtn.disabled = false;
-      };
-
-      const runBtn = $(`[data-run="${q.id}"]`, card);
-      runBtn.onclick = async () => {
-        const code = $(`[data-code="${q.id}"]`, card).value;
-        if (!guardKeywordsAsm(q, code)) return;
-        runBtn.disabled = true;
-        try {
-          const r = await runQuestionCode({ q, code, lang: d.assessment.anyLanguage ? langFor(q) : undefined, mode: "tests", assessmentId: A.aid });
-          A.codeRuns[q.id] = { statuses: [r.testcase1status, r.testcase2status, r.testcase3status], passed: r.passedCount, code, saved: false };
-          const band = (n, st) => `<span class="badge ${st === "pass" ? "badge-green" : st === "error" ? "badge-red" : "badge-orange"}">T${n}: ${st || "—"}</span>`;
-          toast(`${r.passedCount}/3 test cases passed — ${r.passedCount * 3} marks earned (of 9) + 1 sample bonus on save`);
-          const prevRes = card.querySelector(`[data-res="${q.id}"]`);
-          if (prevRes) prevRes.remove();
-          runBtn.insertAdjacentHTML("beforebegin", `<span class="row" data-res="${q.id}" style="gap:0.25rem;">${band(1, r.testcase1status)}${band(2, r.testcase2status)}${band(3, r.testcase3status)}</span>`);
-        } catch (e) { toast(e.message, "error"); }
-        runBtn.disabled = false;
-      };
-
-      const saveBtn = $(`[data-save="${q.id}"]`, card);
-      saveBtn.onclick = async () => {
-        const code = $(`[data-code="${q.id}"]`, card).value;
-        const run = A.codeRuns[q.id];
-        if (!run) { toast("Run the test cases first — they are graded on save.", "warning"); return; }
-        saveBtn.disabled = true;
-        try {
-          await apiOrThrow(`/student/assessments/${A.aid}/submit`, {
-            method: "POST",
-            body: {
-              uaid: A.uaid, finalize: false,
-              code: [{
-                questionId: q.id, usercode: code,
-                score: (A.samplePassed[q.id] ? 1 : 0) + run.passed * 3,
-                compiles: 1, errors: run.statuses.filter((s) => s === "error").length,
-                testcase1status: run.statuses[0], testcase2status: run.statuses[1], testcase3status: run.statuses[2],
-                duration: 0,
-              }],
-            },
-          });
-          q.questionstatus = true;
-          run.saved = true;
-          toast("Solution saved !");
-          const head = card.querySelector(".p-head .badge");
-          if (!head) $(".p-head", card).insertAdjacentHTML("beforeend", '<span class="badge badge-green" style="margin-left:auto;">submitted</span>');
-        } catch (e) { toast(e.message, "error"); }
-        saveBtn.disabled = false;
-      };
-
-      const aiBtn = $(`[data-airun="${q.id}"]`, card);
-      aiBtn.onclick = () => {
-        const code = $(`[data-code="${q.id}"]`, card).value;
-        openSheet(`
-          <div class="sheet-head">${icon("sparkles", "ic")} ATOM AI <span class="spacer"></span>
-            <button class="btn btn-ghost btn-sm" id="ai-close">${icon("x", "ic sm")}</button></div>
-          <div class="sheet-body" id="ai-log"><div class="ai-msg">Analyzing <b>${esc(q.title)}</b>…</div></div>
-          <div class="sheet-foot">
-            <input class="inp" id="ai-input" placeholder="Ask for a hint…" style="flex:1;" />
-            <button class="btn btn-primary" id="ai-send">${icon("send", "ic sm")}</button>
-          </div>`);
-        $("#ai-close").onclick = closeSheet;
-        const ask = async (useCode) => {
-          try {
-            const r = await apiOrThrow("/student/ai", { method: "POST", body: { questionId: q.id, assessmentId: A.aid, code: useCode ? code : null } });
-            $("#ai-log").insertAdjacentHTML("beforeend", `<div class="ai-msg">${esc(r.reply)}</div>`);
-          } catch (e) {
-            $("#ai-log").insertAdjacentHTML("beforeend", `<div class="ai-msg" style="color:var(--destructive)">${esc(e.message)}</div>`);
-          }
-          $("#ai-log").scrollTop = $("#ai-log").scrollHeight;
-        };
-        ask(true);
-        $("#ai-send").onclick = () => ask(false);
-      };
     });
+    const getCode = () => $("#asm-code-editor").value;
+
+    $("#asm-ver-host").innerHTML = versionSelectHtml("asm-ver-select", langFor(q), versionIdFor());
+    const verSel = $("#asm-ver-select");
+    if (verSel) verSel.onchange = () => { A.versionChoice[q.id] = verSel.value; };
+
+    const langSel = $("#asm-lang-select");
+    if (langSel) langSel.onchange = () => {
+      A.langChoice[q.id] = langSel.value;
+      A.versionChoice[q.id] = defaultVersionId(langSel.value);
+      paintCode(body);
+    };
+
+    // Rail check — web parity: "Submit Codes ?" finalizes the assessment.
+    $("#asm-code-check").onclick = async () => {
+      const ok = await webConfirmDialog("Submit Codes ?", "Are you sure want to submit Codes ?");
+      if (ok) finalizeAttempt(false);
+    };
+
+    // Run — web parity: Expected/Program dialog; a passed sample reveals
+    // "Run Test Cases" and earns the 1-mark bonus added on Submit Question.
+    $("#asm-run-sample").onclick = async () => {
+      const code = getCode();
+      if (!guardKeywordsAsm(q, code)) return;
+      webRunDialog({ running: true });
+      try {
+        const r = await runQuestionCode({ q, code, lang: d.assessment.anyLanguage ? langFor(q) : undefined, mode: "sample", assessmentId: A.aid, versionProfileId: versionIdFor() });
+        A.samplePassed[q.id] = Boolean(r.passed);
+        if (r.compileMessage === "Error") toast("Compilation Error!", "error");
+        else if (r.passed) toast("Sample Testcase Passed");
+        else toast("Sample Testcase Failed!", "error");
+        webRunDialog({ expected: q.sampleoutput1, output: r.output, isError: r.compileMessage === "Error" });
+        syncAsmButtons();
+      } catch (e) { closeDialog(); toast(e.message, "error"); }
+    };
+
+    // Run Test Cases — web parity: Test Case 1/2/3 dialog with verdicts.
+    $("#asm-run-tests").onclick = async () => {
+      const code = getCode();
+      if (!guardKeywordsAsm(q, code)) return;
+      webTestcasesDialog([null, null, null]);
+      try {
+        const r = await runQuestionCode({ q, code, lang: d.assessment.anyLanguage ? langFor(q) : undefined, mode: "tests", assessmentId: A.aid, versionProfileId: versionIdFor() });
+        A.codeRuns[q.id] = { statuses: [r.testcase1status, r.testcase2status, r.testcase3status], passed: r.passedCount, code, saved: false };
+        webTestcasesDialog((A.codeRuns[q.id].statuses || []).map((t) => (t === "pass" ? "pass" : t ? "fail" : "")));
+        toast(`${r.passedCount}/3 test cases passed — ${r.passedCount * 3} marks earned (of 9) + 1 sample bonus on submit`);
+        syncAsmButtons();
+      } catch (e) { closeDialog(); toast(e.message, "error"); }
+    };
+
+    // Submit Question — web parity: confirm dialog, then the question is
+    // graded server-side and the right panel turns into "Code Submitted !".
+    $("#asm-submit-q").onclick = async () => {
+      const run = A.codeRuns[q.id];
+      if (!run) { toast("Run the test cases first — they are graded on submit.", "warning"); return; }
+      const ok = await webConfirmDialog("Submit Question", "Are you sure want to submit question ?");
+      if (!ok) return;
+      const yes = $("#wqd-yes");
+      if (yes) yes.disabled = true;
+      const code = getCode();
+      try {
+        await apiOrThrow(`/student/assessments/${A.aid}/submit`, {
+          method: "POST",
+          body: {
+            uaid: A.uaid, finalize: false,
+            code: [{
+              questionId: q.id, usercode: code,
+              score: (A.samplePassed[q.id] ? 1 : 0) + run.passed * 3,
+              compiles: 1, errors: run.statuses.filter((s) => s === "error").length,
+              testcase1status: run.statuses[0], testcase2status: run.statuses[1], testcase3status: run.statuses[2],
+              duration: 0,
+            }],
+          },
+        });
+        q.questionstatus = true;
+        run.saved = true;
+        closeDialog();
+        toast("Code Submitted !");
+        paintCode(body);
+      } catch (e) { closeDialog(); toast(e.message, "error"); }
+    };
+
+    syncAsmButtons();
   }
 
   function startTimer() {

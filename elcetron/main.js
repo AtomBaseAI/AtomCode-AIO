@@ -148,8 +148,10 @@ async function verifyInstallation() {
     dialog.showErrorBox(
       "AtomCode Student — installation check failed",
       "The installation integrity manifest is missing or unreadable.\n\n" +
-        "The app cannot verify that its bundled code and runtimes are intact.\n" +
-        "Please reinstall AtomCode Student."
+        "The app cannot verify that its bundled code and runtimes are intact.\n\n" +
+        "This is usually caused by an incomplete installation — not by tampering.\n" +
+        "Run the AtomCode Student installer again (it verifies and repairs itself),\n" +
+        "and make sure the install drive has at least 2 GB of free disk space."
     );
     return false;
   }
@@ -184,7 +186,15 @@ async function verifyInstallation() {
       `${failures.length} installed file(s) are missing or modified:\n\n` +
         failures.slice(0, 6).join("\n") +
         (failures.length > 6 ? `\n… and ${failures.length - 6} more` : "") +
-        "\n\nTo stay protected the app will not start.\nPlease reinstall AtomCode Student."
+        "\n\nTo stay protected, the app will not start.\n\n" +
+        "This is almost always caused by an incomplete installation (low disk\n" +
+        "space during setup, antivirus interference, or an interrupted copy) —\n" +
+        "not by tampering. To fix it:\n" +
+        "  1. Run the AtomCode Student installer again — it detects and repairs\n" +
+        "     incomplete installations automatically.\n" +
+        "  2. Make sure the install drive has at least 2 GB of free space.\n" +
+        "  3. If it keeps failing, temporarily pause antivirus real-time\n" +
+        "     protection while installing."
     );
     return false;
   }
