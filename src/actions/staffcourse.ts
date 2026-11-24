@@ -2,14 +2,24 @@
 import { db } from "@/lib/db"
 import * as z from 'zod'
 import { revalidatePath } from "next/cache"
-import { requireAdmin } from "@/lib/action-guards"
+import { requireAdmin, requireAdminOrCourseStaff } from "@/lib/action-guards"
 export const addcoursestaffs = async (
     courseId: string,
     studentIds: string[]
 ) => {
+    const session = await requireAdmin();
+    if (!session) {
+        return { error: "Only admins can manage course staff assignments." };
+    }
+
+    const validIds = (studentIds ?? []).filter(
+        (id) => typeof id === "string" && id.trim().length > 0
+    );
+    if (validIds.length === 0) return { error: "No staff members selected." };
+
     try {
         await db.staffCourse.createMany({
-            data: studentIds.map(staffId => ({
+            data: validIds.map(staffId => ({
                 staffId,
                 courseId,
                 active: true
@@ -67,10 +77,31 @@ export const deletecoursestaff = async (
 }
 
 export const getstaffsbycourseid = async (courseId: string) => {
+    // Admins always pass; staff only when assigned to the course.
+    // Unauthorized callers get the same `null` shape as "no data".
+    const session = await requireAdminOrCourseStaff(courseId);
+    if (!session) {
+        return null;
+    }
+
     try {
+        // Password hashes NEVER leave the server — explicit safe-field
+        // whitelist (the old include leaked bcrypt hashes to the UI).
         const courseStaffs = await db.staffCourse.findMany({
             where: { courseId },
-            include: { staff: true }
+            include: {
+                staff: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true,
+                        image: true,
+                        department: true,
+                        staffnumber: true,
+                    },
+                },
+            },
         });
 
         if (!courseStaffs) {

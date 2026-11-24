@@ -1,6 +1,20 @@
 import * as z from "zod"
 import { QuestionTableSchema } from './question-schema';
 
+/**
+ * Concept URLs render inside <iframe src> — only http(s) URLs without
+ * whitespace are accepted (audit finding: XSS chain via concepturl).
+ * Empty string / undefined are still allowed ("no concept URL").
+ */
+const httpUrlRegex = /^https?:\/\/\S+$/i;
+const optionalHttpUrl = z
+    .string()
+    .regex(httpUrlRegex, {
+        message: "Concept URL must be a http(s) URL"
+    })
+    .or(z.literal(""))
+    .optional();
+
 export const AddModuleSchema = z.object({
     courseId: z.string(),
     title: z.string().min(1, {
@@ -12,7 +26,7 @@ export const AddModuleSchema = z.object({
     }),
     maxscore: z.coerce.number(),
     language: z.string(),
-    concepturl: z.string().optional()
+    concepturl: optionalHttpUrl
 });
 
 export const DeleteModuleSchema = z.object({
@@ -77,7 +91,7 @@ export const ModuleUpdateSchema = z.object({
     moduledate: z.date(),
     modulestatus: z.string(),
     maxscore: z.coerce.number(),
-    concepturl: z.string().optional()
+    concepturl: optionalHttpUrl
 })
 
 export const DeleteModuleQuestionSchema = z.object({

@@ -1,13 +1,6 @@
-import { Loader, Loader2 } from 'lucide-react'
-import React from 'react'
+import { CourseGridSkeleton } from "@/components/student-role/loading-skeletons";
 
-const Loading = () => {
-  return (
-
-    <div className="w-full h-[75vh] flex flex-col gap-2 justify-center items-center">
-      <Loader2 className='animate-spin h-10 w-10' />
-    </div>
-  )
+/** Courses loading state — mirrors the re-implemented course card grid. */
+export default function Loading() {
+  return <CourseGridSkeleton />;
 }
-
-export default Loading

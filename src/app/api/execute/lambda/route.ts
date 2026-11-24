@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { consumeQuota } from "@/lib/rate-limit";
 
 /**
  * POST /api/execute/lambda — server-side proxy to the AtomCode AWS Lambda
@@ -21,6 +22,8 @@ import { auth } from "@/auth";
 
 const MAX_BODY_CHARS = 1_500_000; // code 200k + stdin 1M + envelope
 const LAMBDA_CALL_TIMEOUT_MS = 240_000;
+/** Per-user execution budget — same as /api/execute/native. */
+const EXEC_QUOTA = { perMinute: 10, perDay: 150 };
 
 interface TargetConfig {
   url: string;
@@ -79,6 +82,25 @@ export async function POST(req: Request) {
         stage: "loading",
       },
       { status: 401 }
+    );
+  }
+
+  // Per-user execution budget (any authenticated role may run code).
+  const quota = consumeQuota("exec", session.user.id, EXEC_QUOTA);
+  if (!quota.allowed) {
+    const message = "Execution quota exceeded — try again later.";
+    return Response.json(
+      {
+        type: "error",
+        executionId: "",
+        message,
+        stage: "quota",
+        error: message,
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.max(1, quota.retryAfterSec)) },
+      }
     );
   }
 

@@ -44,19 +44,26 @@ const GroupTopicsPage = async ({
 
     const rawTopics = (await getTopicsForGroup(gid)) ?? []
 
-    // Question usage counts per topic and per (topic, sub topic). Questions
-    // store topic / subtopic names, so counts are keyed by lowercase names.
+    // Question usage counts per topic and per (topic, sub topic), split by
+    // question kind. Questions store topic / subtopic names, so counts are
+    // keyed by lowercase names.
     const countRows = (await getTopicQuestionCounts(gid)) ?? []
-    const topicCounts = new Map<string, number>()
-    const subCounts = new Map<string, number>()
+    const topicCounts = new Map<string, { code: number; mcq: number }>()
+    const subCounts = new Map<string, { code: number; mcq: number }>()
     for (const row of countRows) {
         const t = (row.topic ?? "").trim().toLowerCase()
         if (!t) continue
-        topicCounts.set(t, (topicCounts.get(t) ?? 0) + 1)
+        const tt = topicCounts.get(t) ?? { code: 0, mcq: 0 }
+        if (row.kind === "mcq") tt.mcq += 1
+        else tt.code += 1
+        topicCounts.set(t, tt)
         const s = (row.subtopic ?? "").trim().toLowerCase()
         if (!s) continue
         const key = `${t}|${s}`
-        subCounts.set(key, (subCounts.get(key) ?? 0) + 1)
+        const st = subCounts.get(key) ?? { code: 0, mcq: 0 }
+        if (row.kind === "mcq") st.mcq += 1
+        else st.code += 1
+        subCounts.set(key, st)
     }
 
     // Default "general" topic first, then alphabetical (API order is
@@ -67,27 +74,39 @@ const GroupTopicsPage = async ({
         return a.name.localeCompare(b.name)
     })
 
-    const topics: TopicViewData[] = sorted.map((t) => ({
-        id: t.id,
-        name: t.name,
-        isDefault: t.name.toLowerCase() === DEFAULT_TOPIC_NAME,
-        questionCount: topicCounts.get(t.name.toLowerCase()) ?? 0,
-        subtopics: [...t.subtopics]
-            .sort((a, b) => {
-                if (a.name.toLowerCase() === DEFAULT_TOPIC_NAME) return -1
-                if (b.name.toLowerCase() === DEFAULT_TOPIC_NAME) return 1
-                return a.name.localeCompare(b.name)
-            })
-            .map((s) => ({
-                id: s.id,
-                name: s.name,
-                isDefault: s.name.toLowerCase() === DEFAULT_TOPIC_NAME,
-                questionCount:
-                    subCounts.get(
+    const topics: TopicViewData[] = sorted.map((t) => {
+        const counts = topicCounts.get(t.name.toLowerCase()) ?? {
+            code: 0,
+            mcq: 0,
+        }
+        return {
+            id: t.id,
+            name: t.name,
+            isDefault: t.name.toLowerCase() === DEFAULT_TOPIC_NAME,
+            questionCount: counts.code + counts.mcq,
+            codeCount: counts.code,
+            mcqCount: counts.mcq,
+            subtopics: [...t.subtopics]
+                .sort((a, b) => {
+                    if (a.name.toLowerCase() === DEFAULT_TOPIC_NAME) return -1
+                    if (b.name.toLowerCase() === DEFAULT_TOPIC_NAME) return 1
+                    return a.name.localeCompare(b.name)
+                })
+                .map((s) => {
+                    const sub = subCounts.get(
                         `${t.name.toLowerCase()}|${s.name.toLowerCase()}`
-                    ) ?? 0,
-            })),
-    }))
+                    ) ?? { code: 0, mcq: 0 }
+                    return {
+                        id: s.id,
+                        name: s.name,
+                        isDefault: s.name.toLowerCase() === DEFAULT_TOPIC_NAME,
+                        questionCount: sub.code + sub.mcq,
+                        codeCount: sub.code,
+                        mcqCount: sub.mcq,
+                    }
+                }),
+        }
+    })
 
     const totalTopics = topics.length
     const totalSubs = topics.reduce((acc, t) => acc + t.subtopics.length, 0)

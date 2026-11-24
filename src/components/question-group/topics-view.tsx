@@ -8,6 +8,9 @@
  * - Topics render as cards; opening a card's accordion reveals its sub
  *   topics with rename / delete actions (the default "general" topic and
  *   the "general" sub topics are protected).
+ * - Each accordion header shows code vs MCQ question counts as separate
+ *   badges (Code2 / Puzzle icons); sub topic rows repeat the same counts
+ *   with matching icons.
  * - Import / Export / Download CSV via TopicsImportExportMenu.
  */
 
@@ -16,12 +19,13 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
     ChevronDown,
-    FileText,
+    Code2,
     FolderTree,
     LoaderIcon,
     ListTree,
     Pencil,
     Plus,
+    Puzzle,
     Search,
     SearchX,
     Trash,
@@ -55,16 +59,24 @@ export interface SubTopicViewData {
     id: string
     name: string
     isDefault: boolean
-    /** Questions in this group tagged with this sub topic. */
+    /** Total questions (code + mcq) in this group tagged with this sub topic. */
     questionCount: number
+    /** Code questions in this group tagged with this sub topic. */
+    codeCount: number
+    /** MCQ questions in this group tagged with this sub topic. */
+    mcqCount: number
 }
 
 export interface TopicViewData {
     id: string
     name: string
     isDefault: boolean
-    /** Questions in this group tagged with this topic. */
+    /** Total questions (code + mcq) in this group tagged with this topic. */
     questionCount: number
+    /** Code questions in this group tagged with this topic. */
+    codeCount: number
+    /** MCQ questions in this group tagged with this topic. */
+    mcqCount: number
     subtopics: SubTopicViewData[]
 }
 
@@ -516,14 +528,27 @@ export function TopicsView({ groupId, groupTitle, topics }: TopicsViewProps) {
                                                         )}
                                                         <Badge
                                                             variant="outline"
-                                                            aria-label={`${topic.questionCount} question${topic.questionCount === 1 ? "" : "s"} tagged with this topic`}
-                                                            title={`${topic.questionCount} question${topic.questionCount === 1 ? "" : "s"} tagged with this topic`}
+                                                            aria-label={`${topic.codeCount} code question${topic.codeCount === 1 ? "" : "s"} tagged with this topic`}
+                                                            title={`${topic.codeCount} code question${topic.codeCount === 1 ? "" : "s"} tagged with this topic`}
                                                             className="shrink-0 gap-1 border-primary/30 bg-primary/10 text-primary"
                                                         >
-                                                            <FileText className="size-3" />
+                                                            <Code2 className="size-3" />
                                                             <span className="tabular-nums">
                                                                 {
-                                                                    topic.questionCount
+                                                                    topic.codeCount
+                                                                }
+                                                            </span>
+                                                        </Badge>
+                                                        <Badge
+                                                            variant="outline"
+                                                            aria-label={`${topic.mcqCount} MCQ question${topic.mcqCount === 1 ? "" : "s"} tagged with this topic`}
+                                                            title={`${topic.mcqCount} MCQ question${topic.mcqCount === 1 ? "" : "s"} tagged with this topic`}
+                                                            className="shrink-0 gap-1 border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                                                        >
+                                                            <Puzzle className="size-3" />
+                                                            <span className="tabular-nums">
+                                                                {
+                                                                    topic.mcqCount
                                                                 }
                                                             </span>
                                                         </Badge>
@@ -610,18 +635,25 @@ export function TopicsView({ groupId, groupTitle, topics }: TopicsViewProps) {
                                                                         </Badge>
                                                                     )}
                                                                 </span>
-                                                                <span
-                                                                    className="ml-auto shrink-0 text-xs font-medium tabular-nums text-muted-foreground"
-                                                                    title={`${sub.questionCount} question${sub.questionCount === 1 ? "" : "s"} tagged with this sub topic`}
-                                                                >
-                                                                    {
-                                                                        sub.questionCount
-                                                                    }{" "}
-                                                                    question
-                                                                    {sub.questionCount ===
-                                                                    1
-                                                                        ? ""
-                                                                        : "s"}
+                                                                <span className="ml-auto flex shrink-0 items-center gap-2">
+                                                                    <span
+                                                                        className="flex items-center gap-1 text-xs font-medium tabular-nums text-primary"
+                                                                        title={`${sub.codeCount} code question${sub.codeCount === 1 ? "" : "s"} tagged with this sub topic`}
+                                                                    >
+                                                                        <Code2 className="size-3.5" />
+                                                                        {
+                                                                            sub.codeCount
+                                                                        }
+                                                                    </span>
+                                                                    <span
+                                                                        className="flex items-center gap-1 text-xs font-medium tabular-nums text-amber-600 dark:text-amber-400"
+                                                                        title={`${sub.mcqCount} MCQ question${sub.mcqCount === 1 ? "" : "s"} tagged with this sub topic`}
+                                                                    >
+                                                                        <Puzzle className="size-3.5" />
+                                                                        {
+                                                                            sub.mcqCount
+                                                                        }
+                                                                    </span>
                                                                 </span>
                                                                 {!sub.isDefault && (
                                                                     <span className="flex shrink-0 items-center gap-0.5">

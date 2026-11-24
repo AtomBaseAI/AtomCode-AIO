@@ -63,8 +63,10 @@ async function ping(url: string): Promise<Omit<PingResult, "language">> {
     const res = await fetch(url, {
       method: "GET",
       signal: AbortSignal.timeout(PING_TIMEOUT_MS),
+      // Handlers (AWS Lambda images + the local emulator) check
+      // `x-atom-token` — NOT x-api-token.
       headers: process.env.LAMBDA_JUDGE_TOKEN
-        ? { "x-api-token": process.env.LAMBDA_JUDGE_TOKEN }
+        ? { "x-atom-token": process.env.LAMBDA_JUDGE_TOKEN }
         : undefined,
     });
     return {

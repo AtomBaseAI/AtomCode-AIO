@@ -26,6 +26,15 @@ interface Reference {
     type: string;
 }
 
+/**
+ * Reference links render as <a href> — only http(s) URLs get a real anchor;
+ * anything else (javascript:, data:, …) renders as a plain, non-clickable
+ * card (audit finding: XSS chain via unguarded reference links).
+ */
+const safeHttpUrl = (url: string): string | null => {
+    return /^https?:\/\/\S+$/i.test(url) ? url : null
+}
+
 interface MergedModuleType {
     id: string;
     userId: string | null;
@@ -350,9 +359,10 @@ const ModuleAction = ({ Module, uid, cid, lockState, completionOrder }: { Module
                         </TabsContent>
                         <TabsContent value="references">
                             <div className="h-[30rem] w-full flex items-center justify-center flex-wrap gap-x-[4%] gap-y-[4%]">
-                                {Module?.modulereference.map((reference, index) => (
-                                    <Card className='w-[24%] h-[32%] rounded-md hover:border hover:border-primary' key={index}>
-                                        <a href={reference.link} target="_blank" rel="noopener noreferrer" className="w-full h-full flex flex-col">
+                                {Module?.modulereference.map((reference, index) => {
+                                    const safeLink = safeHttpUrl(reference.link);
+                                    const cardBody = (
+                                        <>
                                             <div className="w-full h-[80%] flex justify-center items-center">
                                                 {
                                                     reference.type === 'yt' ? (
@@ -365,9 +375,23 @@ const ModuleAction = ({ Module, uid, cid, lockState, completionOrder }: { Module
                                             <div className="w-full px-4 h-[20%]  flex justify-start items-center border-t">
                                                 <p className="line-clamp-1 text-wrap">{reference.title}</p>
                                             </div>
-                                        </a>
-                                    </Card>
-                                ))
+                                        </>
+                                    );
+                                    return (
+                                        <Card className='w-[24%] h-[32%] rounded-md hover:border hover:border-primary' key={index}>
+                                            {safeLink ? (
+                                                <a href={safeLink} target="_blank" rel="noopener noreferrer" className="w-full h-full flex flex-col">
+                                                    {cardBody}
+                                                </a>
+                                            ) : (
+                                                // Unsafe scheme → inert card, no anchor.
+                                                <div className="w-full h-full flex flex-col cursor-not-allowed opacity-80">
+                                                    {cardBody}
+                                                </div>
+                                            )}
+                                        </Card>
+                                    );
+                                })
                                 }
                             </div>
                         </TabsContent>

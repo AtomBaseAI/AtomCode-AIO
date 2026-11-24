@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Brain, Maximize2, X } from "lucide-react"
 
+/**
+ * Belt-and-braces URL guard for the concept iframe: only http(s) URLs are
+ * ever embedded. javascript:/data:/vbscript: or whitespace-bearing values
+ * return null and the preview renders nothing (defense beyond the zod
+ * schema, which already validates at the action boundary).
+ */
+const safeHttpUrl = (url: string): string | null => {
+    return /^https?:\/\/\S+$/i.test(url) ? url : null
+}
+
 export default function ConceptPreview({ concepturl }: { concepturl: string }) {
     const [isOpen, setIsOpen] = useState(false)
     const [isEnlarged, setIsEnlarged] = useState(false)
@@ -17,6 +27,10 @@ export default function ConceptPreview({ concepturl }: { concepturl: string }) {
         setIsOpen(false)
         setIsEnlarged(false)
     }
+
+    const safeSrc = safeHttpUrl(concepturl)
+    // Unsafe scheme → render nothing at all (no trigger, no iframe).
+    if (!safeSrc) return null
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -52,12 +66,17 @@ export default function ConceptPreview({ concepturl }: { concepturl: string }) {
                         </Button>
                     </div>
 
-                    {/* Iframe */}
+                    {/* Iframe — sandboxed; allow-same-origin is required because
+                        the embedded concept pages are plain documents that read
+                        their own localStorage, and allow-scripts lets static
+                        concept demos run. src never carries a script scheme. */}
                     <iframe
-                        src={concepturl}
+                        src={safeSrc}
                         className="w-full h-full border-0 rounded-lg"
                         title="Embedded Content"
                         loading="lazy"
+                        sandbox="allow-scripts allow-same-origin allow-popups"
+                        referrerPolicy="no-referrer"
                     />
                 </div>
             </DialogContent>

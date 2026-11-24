@@ -1,4 +1,5 @@
 "use server"
+import { randomBytes } from "crypto"
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 // import bcrypt from 'bcryptjs'
@@ -7,8 +8,19 @@ import { revalidatePath } from "next/cache"
 import { AddStaffSchema, DeleteStaffSchema, StaffPasswordResetSchema, StaffUpdateSchema } from "@/schemas/staff-schema"
 import { compareSync, genSaltSync, hashSync } from 'bcrypt-ts';
 import { requireAdmin } from "@/lib/action-guards";
+import { bumpTokenVersion } from "@/lib/auth-validate";
+
+/**
+ * One-time reset password: "Atom-" + 6 base64url chars. Returned ONCE in
+ * the success message and hashed at rest — no shared default passwords.
+ */
+const generateOneTimePassword = () =>
+    `Atom-${randomBytes(4).toString("base64url")}`;
 
 export const addstaff = async (values: z.infer<typeof AddStaffSchema>) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can add staff members." };
+
     const validatedFields = AddStaffSchema.safeParse(values)
     if (!validatedFields.success) {
         return { error: "Invalid email/password" }
@@ -74,14 +86,16 @@ export const deletestaff = async (
 export const updatestaff = async (
     values: z.infer<typeof StaffUpdateSchema>
 ) => {
-    const uid = values.id;
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can update staff members." };
+
+    // Strip the id from the written data — it is only the where-key.
+    const { id: uid, ...data } = values;
     await db.staff.update({
         where: {
             id: uid
         },
-        data: {
-            ...values,
-        }
+        data,
     })
 
     revalidatePath("/admin/staffs")
@@ -91,9 +105,10 @@ export const updatestaff = async (
 
 
 /**
- * Admin-side reset — sets a staff account back to the default password.
- * No current password needed (the admin is acting on someone else's
- * account), but the caller must be an authenticated admin.
+ * Admin-side reset — issues a RANDOM one-time password instead of a shared
+ * default. No current password needed (the admin is acting on someone
+ * else's account), but the caller must be an authenticated admin. The OTP
+ * is returned once in the success message and old sessions are revoked.
  */
 export const resetpasswordstaff = async (
     values: z.infer<typeof StaffPasswordResetSchema>
@@ -102,11 +117,17 @@ export const resetpasswordstaff = async (
     if (!session) return { error: "Only admins can reset staff passwords." };
 
     const uid = values.id;
-    const password = "Staff@Atom"
+    const staff = await db.staff.findUnique({
+        where: { id: uid },
+        select: { id: true },
+    });
+    if (!staff) return { error: "Staff not found." };
+
+    const oneTimePassword = generateOneTimePassword();
     // const hashedPassword = await bcrypt.hash(password, 10)
 
     const salt = genSaltSync(10);
-    const hashedPassword = hashSync(password, salt);
+    const hashedPassword = hashSync(oneTimePassword, salt);
     await db.staff.update({
         where: {
             id: uid
@@ -115,7 +136,12 @@ export const resetpasswordstaff = async (
             password: hashedPassword
         }
     })
-    return { success: "Default Password Updated !" }
+    // Old sessions (JWT jv frozen at sign-in) must not survive a reset.
+    await bumpTokenVersion("staff", uid);
+
+    return {
+        success: `One-time password: ${oneTimePassword} — share it with the staff member now; it is not shown again.`,
+    }
 }
 
 /** Schema shape for the staff self-service password change (see component). */

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { json, fail, preflight, authGuard } from "@/lib/desktop-auth";
+import { recordUserActivitySafe } from "@/lib/activity";
 
 /**
  * POST /api/desktop/student/assessments/[aid]/submit
@@ -155,6 +156,8 @@ export async function POST(
         submissiontype: "desktop",
       },
     });
+
+    if (finalize) recordUserActivitySafe(uid);
 
     return json({
       success: true,

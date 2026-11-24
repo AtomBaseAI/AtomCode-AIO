@@ -1,5 +1,19 @@
 import * as z from "zod"
 
+/**
+ * Profile links are rendered as <a href> — only http(s) URLs are accepted
+ * (audit finding: XSS chain via github/linkedin). Empty string / undefined
+ * mean "not set" and stay allowed.
+ */
+const httpUrlRegex = /^https?:\/\/\S+$/i;
+const optionalHttpUrl = z
+    .string()
+    .regex(httpUrlRegex, {
+        message: "Must be a http(s) URL"
+    })
+    .or(z.literal(""))
+    .optional();
+
 export const StudentUpdateSchema = z.object({
     id: z.string(),
     rollnumber: z.string(),
@@ -8,8 +22,8 @@ export const StudentUpdateSchema = z.object({
     department: z.string(),
     section: z.string(),
     batch: z.string(),
-    github: z.string().optional(),
-    linkedin: z.string().optional(),
+    github: optionalHttpUrl,
+    linkedin: optionalHttpUrl,
 })
 
 // export const StudentPasswordResetSchema = z.object({

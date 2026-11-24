@@ -14,6 +14,12 @@ const EditModulex = async ({ params }: { params: Promise<{ cid: string; mid: str
   // const moduleId = parseInt(mid, 10);
   const moduleog = await getModuleById(mid)
   const course = await getCourseById(cid)
+  // Concept URL is embedded as an <iframe src> — only http(s) URLs are
+  // ever embedded (javascript:/data: schemes render as N/A instead).
+  const safeConceptUrl =
+    moduleog?.concepturl && /^https?:\/\/\S+$/i.test(moduleog.concepturl)
+      ? moduleog.concepturl
+      : null;
   const modulex = {
     id: moduleog?.id ?? '',
     title: moduleog?.title ?? '',
@@ -96,7 +102,17 @@ const EditModulex = async ({ params }: { params: Promise<{ cid: string; mid: str
               </div>
             </div>
             <div className="flex h-[40vh] w-full">
-              {moduleog?.concepturl ? <iframe src={moduleog?.concepturl} className="w-full h-full" title="Concept URL" /> : 'N/A'}
+              {safeConceptUrl ? (
+                <iframe
+                  src={safeConceptUrl}
+                  className="w-full h-full"
+                  title="Concept URL"
+                  sandbox="allow-scripts allow-same-origin allow-popups"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                'N/A'
+              )}
             </div>
           </div>
         </div>

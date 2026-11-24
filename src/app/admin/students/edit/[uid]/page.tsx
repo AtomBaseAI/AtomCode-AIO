@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { roleHome } from "@/routes";
 import BackBtn from "@/components/backbtn"
 import EditStudentForm from "@/components/student/student-edit-form"
 import ResetPasswordStudent from "@/components/student/student-reset-model"
@@ -6,6 +9,19 @@ import { getStudentById } from "@/data/students"
 import { TopbarBreadcrumb } from "@/components/topbar-title"
 
 const EditStudent = async ({ params }: { params: Promise<{ uid: string}> }) => {
+
+    // Server-side role re-check — defense in depth. The proxy and the admin
+    // layout already guard /admin/*, but this page mutates student data, so
+    // it re-verifies the role itself (admin or superadmin) rather than
+    // trusting route protection alone.
+    const session = await auth();
+    const callerRole = (session?.user as { role?: string } | undefined)?.role;
+    if (!session?.user) {
+        redirect("/login");
+    }
+    if (callerRole !== "admin" && callerRole !== "superadmin") {
+        redirect(roleHome(callerRole));
+    }
 
     const { uid } = await params
     const student = await getStudentById(uid)

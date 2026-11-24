@@ -1,6 +1,8 @@
 'use server';
 
 import OpenAI from "openai";
+import { requireUser } from "@/lib/action-guards";
+import { consumeQuota } from "@/lib/rate-limit";
 
 /**
  * Lazy OpenAI client: constructing this module eagerly (previous behavior)
@@ -15,6 +17,13 @@ function getOpenAI(): OpenAI {
   openai ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
   return openai;
 }
+
+/** Hard cap for user-controlled prompt text (question/code etc.). */
+const MAX_PROMPT_CHARS = 8000;
+const clampText = (value: string | null | undefined) =>
+  typeof value === "string" && value.length > MAX_PROMPT_CHARS
+    ? value.slice(0, MAX_PROMPT_CHARS)
+    : (value ?? "");
 
 interface AtomAIProps {
     question: string;
@@ -41,11 +50,27 @@ const AIAnalyze = async ({
     testcaseo2,
     code,
 }: AtomAIProps): Promise<string> => {
+    // The AI tutor is a signed-in-only surface (students use it from the
+    // practice code view). No session → no OpenAI spend.
+    const session = await requireUser();
+    if (!session) {
+        return "You must be signed in to use ATOM AI.";
+    }
+    const userId = session.user.id;
+
+    // Budget the tutor per user — it spends real API money.
+    const quota = consumeQuota("ai", userId, { perMinute: 5, perDay: 30 });
+    if (!quota.allowed) {
+        return "You've reached the ATOM AI limit for now — please try again a bit later.";
+    }
+
     if (!process.env.OPENAI_API_KEY) {
         return "ATOM AI tutor is not configured on this server (missing OPENAI_API_KEY).";
     }
     const completion = await getOpenAI().chat.completions.create({
         model: (process.env.OPENAI_MODEL || "gpt-4o-mini"),
+        // Bound the answer size so one request can never balloon the bill.
+        max_tokens: 700,
         messages: [
             {
                 role: "system",
@@ -54,16 +79,16 @@ const AIAnalyze = async ({
             {
                 role: "user",
                 content: `
-                    Question: ${question}
-                    Description: ${description}
-                    Input Constraints: ${inputconstraints || "None"}
-                    Blacklist: ${blacklist || "None"}
-                    Whitelist: ${whitelist || "None"}
-                    Test Case 1 Input: ${testcasei1}
-                    Test Case 1 Output: ${testcaseo1}
-                    Test Case 2 Input: ${testcasei2}
-                    Test Case 2 Output: ${testcaseo2}
-                    Code: ${code || "No code provided"}
+                    Question: ${clampText(question)}
+                    Description: ${clampText(description)}
+                    Input Constraints: ${clampText(inputconstraints) || "None"}
+                    Blacklist: ${clampText(blacklist) || "None"}
+                    Whitelist: ${clampText(whitelist) || "None"}
+                    Test Case 1 Input: ${clampText(testcasei1)}
+                    Test Case 1 Output: ${clampText(testcaseo1)}
+                    Test Case 2 Input: ${clampText(testcasei2)}
+                    Test Case 2 Output: ${clampText(testcaseo2)}
+                    Code: ${clampText(code) || "No code provided"}
                 `,
             },
         ],

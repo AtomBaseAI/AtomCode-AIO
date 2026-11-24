@@ -10,10 +10,12 @@
 // admins nor ever touch billing data — even by calling the action directly.
 
 import * as z from "zod";
+import { randomBytes } from "crypto";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { compareSync, genSaltSync, hashSync } from "bcrypt-ts";
 import { requireSuperAdmin } from "@/lib/action-guards";
+import { bumpTokenVersion } from "@/lib/auth-validate";
 import { unstable_update } from "@/auth";
 import { getSuperAdminAuthCode, setSuperAdminAuthCode } from "@/lib/superadmin-settings";
 import {
@@ -111,7 +113,11 @@ export const deleteadmin = async (values: z.infer<typeof DeleteAdminSecureSchema
     return { success: "Admin Deleted !" };
 };
 
-/** Reset an admin's password to the platform default (Admin@Atom). */
+/**
+ * Reset an admin's password — issues a RANDOM one-time password (returned
+ * once in the success message) instead of the old fixed "Admin@Atom"
+ * default, and revokes every session the admin still holds.
+ */
 export const resetpasswordadminmanage = async (
     values: z.infer<typeof DeleteAdminSchema>
 ) => {
@@ -125,10 +131,16 @@ export const resetpasswordadminmanage = async (
     const admin = await db.admin.findUnique({ where: { id }, select: { id: true } });
     if (!admin) return { error: "Admin not found." };
 
-    const hashedPassword = hashSync("Admin@Atom", genSaltSync(10));
+    const oneTimePassword = `Atom-${randomBytes(4).toString("base64url")}`;
+    const hashedPassword = hashSync(oneTimePassword, genSaltSync(10));
     await db.admin.update({ where: { id }, data: { password: hashedPassword } });
 
-    return { success: "Password reset to default (Admin@Atom) !" };
+    // Old admin sessions (JWT jv frozen at sign-in) must not survive a reset.
+    await bumpTokenVersion("admin", id);
+
+    return {
+        success: `One-time password: ${oneTimePassword} — share it with the admin now; it is not shown again.`,
+    };
 };
 
 /* ------------------------------------------------------------------ */

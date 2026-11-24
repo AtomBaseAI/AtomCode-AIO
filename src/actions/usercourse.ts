@@ -2,14 +2,24 @@
 import { db } from "@/lib/db"
 import * as z from 'zod'
 import { revalidatePath } from "next/cache"
-import { requireAdminOrCourseStaff } from "@/lib/action-guards"
+import { requireAdmin, requireAdminOrCourseStaff } from "@/lib/action-guards"
 export const addcoursestudents = async (
     courseId: string,
     studentIds: string[]
 ) => {
+    const session = await requireAdmin();
+    if (!session) {
+        return { error: "Only admins can manage course enrollments." };
+    }
+
+    const validIds = (studentIds ?? []).filter(
+        (id) => typeof id === "string" && id.trim().length > 0
+    );
+    if (validIds.length === 0) return { error: "No students selected." };
+
     try {
         await db.userCourse.createMany({
-            data: studentIds.map(userId => ({
+            data: validIds.map(userId => ({
                 userId,
                 courseId,
                 active: true,
@@ -88,10 +98,38 @@ export const deletecoursestudent = async (
 }
 
 export const getstudentsbycourseid = async (courseId: string) => {
+    // Admins always pass; staff only when assigned to the course.
+    // Unauthorized callers get the same `null` shape as "no data".
+    const session = await requireAdminOrCourseStaff(courseId);
+    if (!session) {
+        return null;
+    }
+
     try {
+        // Password hashes NEVER leave the server — explicit safe-field
+        // whitelist (the old include leaked bcrypt hashes to the UI). The
+        // fields mirror StudentTableSchema, which the UI parses these rows
+        // with.
         const courseStudents = await db.userCourse.findMany({
             where: { courseId },
-            include: { user: true }
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true,
+                        image: true,
+                        department: true,
+                        section: true,
+                        batch: true,
+                        rollnumber: true,
+                        github: true,
+                        linkedin: true,
+                        isActive: true,
+                    },
+                },
+            },
         });
 
         if (!courseStudents) {

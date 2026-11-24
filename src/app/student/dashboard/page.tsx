@@ -1,68 +1,112 @@
 
-import { Book, BookAIcon, Clock, Trophy } from 'lucide-react'
+import { Book, Flame, Code2, ClipboardCheck } from 'lucide-react'
 import CalenderLayout from '@/components/student-role/custom-calender'
+import DashboardStatCard from '@/components/student-role/dashboard-stat-card'
+import { WelcomeBanner } from '@/components/student-role/dashboard/welcome-banner'
+import { ActivityChart } from '@/components/student-role/dashboard/activity-chart'
+import { StreakPanel } from '@/components/student-role/dashboard/streak-panel'
+import { CourseProgressPanel } from '@/components/student-role/dashboard/course-progress-panel'
+import { UpcomingPanel } from '@/components/student-role/dashboard/upcoming-panel'
+import { DifficultyDonut } from '@/components/dashboard/dashboard-charts'
 import { TopbarTitle } from '@/components/topbar-title'
 import { auth } from '@/auth';
 import { getAllUserCourses } from '@/data/student/courses';
+import { getStudentDashboardData } from '@/data/student/dashboard';
 
-const getSessionUserID = async () => {
+const Dashboard = async () => {
   const session = await auth();
-  return session?.user?.id
-}
-const fetchUserCourse = async () => {
-  const uid = await getSessionUserID();
+  const uid = session?.user?.id;
   if (!uid) {
     throw new Error('Session Expired, Login again !');
   }
-  const courses = await getAllUserCourses(uid);
-  // console.log({ courses })
-  return courses
 
-}
-const Dashboard = async () => {
-  const userCourses = await fetchUserCourse();
-  // console.log(userCourses)
-  const courseCount = userCourses.length;
+  const [userCourses, data] = await Promise.all([
+    getAllUserCourses(uid),
+    getStudentDashboardData(uid),
+  ]);
+
+  const { stats, streak, activity30, activityMap, difficulty, upcoming } = data;
+
+  // First active course drives the "Resume learning" CTA.
+  const firstActive = userCourses.find((c) => c.courseStatus);
+  const resumeHref = firstActive
+    ? `/student/courses/${firstActive.courseId}/module`
+    : '/student/courses';
 
   return (
-    <>
+    // Same content-span spacing rule as the admin panel (/admin/dashboard):
+    // p-4 (mobile) / md:p-8 (desktop) padding from the top bar and sidebar,
+    // full-width column with a consistent gap-6 between sections.
+    <div className="flex h-full w-full flex-1 flex-col gap-6 p-4 pb-8 md:p-8">
       <TopbarTitle>Dashboard</TopbarTitle>
-      <div className="w-full flex flex-col gap-2 justify-center items-center">
-        <section className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 w-[92%]">
-          <div className="flex items-center p-8 shadow-md rounded-md border hover:border-purple-600">
-            <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-purple-600 bg-purple-100 dark:bg-purple-500/10 rounded-md mr-6">
-              <Book className='h-6 w-6' />
-            </div>
-            <div>
-              <span className="block text-2xl font-bold">{courseCount}</span>
-              <span className="block text-gray-500">Courses Enrolled</span>
-            </div>
-          </div>
-          <div className="flex items-center p-8 shadow-md rounded-md border hover:border-purple-600">
-            <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16  text-purple-600 bg-purple-100 dark:bg-purple-500/10 rounded-md mr-6">
-              <Clock className='h-6 w-6' />
-            </div>
-            <div>
-              <span className="block text-2xl font-bold">{courseCount}</span>
-              <span className="block text-gray-500">Courses Active</span>
-            </div>
-          </div>
-          <div className="flex items-center p-8 shadow-md rounded-md border hover:border-green-600">
-            <div className="inline-flex flex-shrink-0 items-center justify-center h-16 w-16 text-green-600 bg-green-100 dark:bg-green-600/10 rounded-md mr-6">
-              <Trophy className='h-6 w-6' />
-            </div>
-            <div>
-              <span className="inline-block text-2xl font-bold">0</span>
-              <span className="block text-gray-500">Courses Completed</span>
-            </div>
-          </div>
 
-        </section>
-        <section className='w-[92%]'>
+      <WelcomeBanner
+        name={session?.user?.name ?? ''}
+        activeCourses={stats.active}
+        streak={streak.current}
+        resumeHref={resumeHref}
+      />
+
+      {/* Key stats — full-width responsive grid, admin dashboard rhythm. */}
+      <section
+        aria-label="Key statistics"
+        className="grid w-full gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        <DashboardStatCard
+          icon={<Flame className="h-6 w-6" />}
+          value={streak.current}
+          label="Day Streak"
+          sub={streak.activeToday ? "Practised today" : "Practice today to keep it"}
+          tone="amber"
+          href="/student/courses"
+        />
+        <DashboardStatCard
+          icon={<Book className="h-6 w-6" />}
+          value={stats.active}
+          label="Courses Active"
+          sub={`${stats.enrolled} enrolled · ${stats.completed} completed`}
+          tone="purple"
+          href="/student/courses"
+        />
+        <DashboardStatCard
+          icon={<Code2 className="h-6 w-6" />}
+          value={stats.solvedCode}
+          label="Code Solved"
+          sub={`${stats.solvedMcq} MCQ correct`}
+          tone="teal"
+          href="/student/courses"
+        />
+        <DashboardStatCard
+          icon={<ClipboardCheck className="h-6 w-6" />}
+          value={stats.assessmentsCompleted}
+          label="Assessments Done"
+          tone="green"
+          href="/student/assessments"
+        />
+      </section>
+
+      {/* Calendar (preserved) + upcoming assessments. */}
+      <section aria-label="Course calendar and assessments" className="grid w-full gap-6 xl:grid-cols-3">
+        <div className="min-w-0 xl:col-span-2">
           <CalenderLayout Courses={userCourses} />
-        </section>
-      </div>
-    </>
+        </div>
+        <UpcomingPanel assessments={upcoming} />
+      </section>
+
+      {/* Practice activity + streak heatmap. */}
+      <section aria-label="Practice analytics" className="grid w-full gap-6 xl:grid-cols-3">
+        <div className="min-w-0 xl:col-span-2">
+          <ActivityChart data={activity30} />
+        </div>
+        <StreakPanel streak={streak} activityMap={activityMap} />
+      </section>
+
+      {/* Course progress + solved difficulty mix. */}
+      <section aria-label="Courses and difficulty" className="grid w-full gap-6 xl:grid-cols-2">
+        <CourseProgressPanel courses={userCourses} />
+        <DifficultyDonut data={difficulty} />
+      </section>
+    </div>
   )
 }
 

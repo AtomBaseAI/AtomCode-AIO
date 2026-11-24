@@ -1,5 +1,6 @@
 import { formatDate } from '@/lib/utils';
 import { unparse } from 'papaparse';
+import { csvSafeCell } from './csv-safe';
 
 export interface LeaderboardRow {
     Rank: number | undefined;
@@ -41,15 +42,15 @@ export const LeaderboardExport = (
 ): void => {
     const rows = data.map(leader => ({
         'Rank': leader.Rank ?? '',
-        'Rollnumber': leader.Rollnumber ?? '',
-        'StudentName': leader.StudentName ?? '',
+        'Rollnumber': csvSafeCell(leader.Rollnumber ?? ''),
+        'StudentName': csvSafeCell(leader.StudentName ?? ''),
         'Modules Completed': leader.TotalModules,
         'Total Score': leader.TotalScore,
         'MCQ Score': leader.McqScore,
         'Code Score': leader.CodeScore,
         'Compiles': leader.TotalCompiles,
         'Errors': leader.TotalErrors,
-        'Total Time': leader.TotalTime,
+        'Total Time': csvSafeCell(leader.TotalTime),
     }));
 
     const csv = unparse({ fields: HEADERS, data: rows });

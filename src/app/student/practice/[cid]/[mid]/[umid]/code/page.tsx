@@ -35,7 +35,20 @@ const CodeMain = async ({ params }: { params: Promise<{ mid: string, cid: string
     if (lock.found && lock.locked) {
         return <ModuleLockedScreen lock={lock} backHref={`/student/courses/${cid}/module`} />
     }
-    const ModuleQuestions = await getModuleQuestionsByModuleId(mid, uid) || [];
+    // Lean client payload — hidden test inputs, expected outputs and the
+    // reference solution never enter the RSC payload. Judging happens on
+    // the server (POST /api/execute/testcases) which fetches these fields
+    // itself by questionId.
+    const ModuleQuestions = ((await getModuleQuestionsByModuleId(mid, uid)) || []).map((question) => ({
+        ...question,
+        input1: "",
+        input2: "",
+        input3: "",
+        output1: "",
+        output2: "",
+        output3: "",
+        sourcecode: null,
+    }));
     const courseModule = await getCourseModuleByModuleID(mid)
     return (
         <>

@@ -1,6 +1,7 @@
 "use server"
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireAdminOrCourseStaff } from "@/lib/action-guards";
 
 export const resetModuleForStudent = async (
     uid: string,
@@ -8,6 +9,34 @@ export const resetModuleForStudent = async (
     mid: string,
     cid: string
 ) => {
+    // Admins always pass; staff only when assigned to the course (cid).
+    const session = await requireAdminOrCourseStaff(cid);
+    if (!session) {
+        return { error: "You are not allowed to reset results for this course." };
+    }
+
+    // The module must actually belong to the course — otherwise a forged
+    // (mid, cid) pair could reset rows of a different course.
+    const module_ = await db.module.findUnique({
+        where: { id: mid },
+        select: { courseId: true },
+    });
+    if (!module_ || module_.courseId !== cid) {
+        return { error: "Module does not belong to this course." };
+    }
+
+    // Staff (non-admin) may only reset students enrolled in THEIR course.
+    const role = (session.user as { role?: string } | undefined)?.role;
+    if (role === "staff") {
+        const enrollment = await db.userCourse.findFirst({
+            where: { userId: uid, courseId: cid },
+            select: { id: true },
+        });
+        if (!enrollment) {
+            return { error: "Student is not enrolled in this course." };
+        }
+    }
+
     const userCodeQuestionData = await db.userCodeQuestionData.findFirst({
         where: {
             userId: uid,

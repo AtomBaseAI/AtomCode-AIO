@@ -11,6 +11,8 @@ const MAX_REFERENCES_PER_MODULE = 100;
 const MAX_QUESTIONS_PER_MODULE = 500;
 /** Concurrent question attachments per chunk. */
 const ATTACH_CHUNK_SIZE = 20;
+/** Crude DoS guard: reject oversized uploads before parsing the body. */
+const MAX_BODY_BYTES = 25 * 1024 * 1024; // 25 MB
 
 interface ImportIssue {
     index: number;
@@ -169,6 +171,14 @@ function normalizeModule(item: unknown): unknown {
 export async function POST(req: Request) {
     const guard = await requireSuperAdminApi("courses");
     if (!guard.ok) return guard.response;
+
+    const contentLength = Number(req.headers.get("content-length") ?? 0);
+    if (contentLength > MAX_BODY_BYTES) {
+        return NextResponse.json(
+            { error: "File too large (max 25 MB)." },
+            { status: 413 }
+        );
+    }
 
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== "object" || Array.isArray(body)) {
@@ -336,13 +346,13 @@ export async function POST(req: Request) {
                 }
             }
         } catch (err) {
+            // Never surface raw driver/prisma text to the client (audit
+            // finding: error-message leaks) — log server-side instead.
+            console.error("[courses/import] module create failed:", err);
             errors.push({
                 index: i + 1,
                 name: mTitle,
-                error:
-                    err instanceof Error
-                        ? err.message
-                        : "Database error while creating the module",
+                error: "Import failed. Check the file format and try again.",
             });
         }
     }

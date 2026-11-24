@@ -30,10 +30,12 @@ interface AtomAIProps {
     inputconstraints: string | null;
     blacklist: string | null;
     whitelist: string | null;
-    testcasei1: string;
-    testcasei2: string;
-    testcaseo1: string;
-    testcaseo2: string;
+    /** Legacy hidden-testcase props — optional now that judging moved
+     *  server-side; callers must NOT pass hidden test data anymore. */
+    testcasei1?: string;
+    testcasei2?: string;
+    testcaseo1?: string;
+    testcaseo2?: string;
     code: string | null;
     theme: string,
     language: string
@@ -50,10 +52,10 @@ const AtomAI: React.FC<AtomAIProps> = ({
     inputconstraints,
     blacklist,
     whitelist,
-    testcasei1,
-    testcasei2,
-    testcaseo1,
-    testcaseo2,
+    testcasei1 = "",
+    testcasei2 = "",
+    testcaseo1 = "",
+    testcaseo2 = "",
     code,
     theme,
     language

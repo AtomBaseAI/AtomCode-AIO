@@ -27,6 +27,31 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
+/* ────────────────────────── concurrency gate ────────────────────────── */
+
+/**
+ * Global semaphore across EVERY native execution on this server process
+ * (web routes, desktop routes and the question judge share it). When the
+ * ceiling is hit the call is rejected immediately — never queued — with a
+ * structured RATE_LIMITED failure the routes map to HTTP 429.
+ */
+export const MAX_CONCURRENT_NATIVE_EXECUTIONS = 6;
+let activeNativeExecutions = 0;
+
+/** Seconds a 429 client is told to wait before retrying. */
+const CONCURRENCY_RETRY_AFTER_SEC = 5;
+
+function rateLimitedFailure(): NativeFailure {
+  return {
+    ok: false,
+    stage: "quota",
+    message:
+      "The server is at its concurrent execution capacity — please retry in a few seconds.",
+    code: "RATE_LIMITED",
+    retryAfterSec: CONCURRENCY_RETRY_AFTER_SEC,
+  };
+}
+
 /* ────────────────────────────── targets ─────────────────────────────── */
 
 export const NATIVE_LANGUAGES = ["c", "cpp", "java"] as const;
@@ -72,6 +97,68 @@ const COMPILE_TIMEOUT_MS = 30_000;
 const MIN_RUN_TIMEOUT_MS = 1_000;
 const MAX_RUN_TIMEOUT_MS = 60_000;
 
+/**
+ * rlimits applied through a bash wrapper (argv-array safe — the command
+ * and its arguments are passed as `$0`/`$@` and NEVER interpolated into
+ * the script string, so user source code can never touch the shell):
+ *   -t  CPU seconds (compile: 30s wall budget → 31s CPU; run: wall+1)
+ *   -v  2 GiB address space (C/C++ only — JVMs reserve huge virtual
+ *       address ranges and die instantly under -v, so Java is capped via
+ *       -Xmx instead)
+ *   -f  32 MiB max file size
+ *   -u  400 max user processes
+ */
+const RLIMIT_ADDRESS_SPACE_KB = 2_097_152; // 2 GiB
+const RLIMIT_FILE_SIZE_KB = 32_768; // 32 MiB
+const RLIMIT_NPROC = 400;
+
+function cpuSecondsFor(timeoutMs: number): number {
+  return Math.max(1, Math.ceil(timeoutMs / 1000) + 1);
+}
+
+function rlimitScript(opts: { cpuSec: number; addressSpaceKB?: number }): string {
+  const parts = [
+    `ulimit -t ${opts.cpuSec}`,
+    ...(opts.addressSpaceKB ? [`ulimit -v ${opts.addressSpaceKB}`] : []),
+    `ulimit -f ${RLIMIT_FILE_SIZE_KB}`,
+    `ulimit -u ${RLIMIT_NPROC}`,
+    'exec "$0" "$@"',
+  ];
+  return parts.join("; ");
+}
+
+/**
+ * Wrap (command, args) in the rlimit bash umbrella: spawn("bash",
+ * ["-c", script, command, ...args]) — argv-array safe, no interpolation.
+ */
+function withRlimits(
+  command: string,
+  args: string[],
+  opts: { cpuSec: number; addressSpaceKB?: number }
+): { command: string; args: string[] } {
+  return {
+    command: "bash",
+    args: ["-c", rlimitScript(opts), command, ...args],
+  };
+}
+
+/**
+ * Scrubbed environment for every child process. Children must NEVER
+ * inherit the server's secrets (DATABASE_URL, AUTH_SECRET, OPENAI_API_KEY,
+ * LAMBDA_JUDGE_TOKEN, …) — only these five keys are passed, nothing is
+ * spread from process.env except the explicitly re-shared PATH.
+ */
+function scrubbedEnv(cwd: string): NodeJS.ProcessEnv {
+  // (cast: Next.js' env typing demands NODE_ENV; children do not need it)
+  return {
+    PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
+    HOME: cwd,
+    TMPDIR: cwd,
+    LANG: "C.UTF-8",
+    LC_ALL: "C.UTF-8",
+  } as unknown as NodeJS.ProcessEnv;
+}
+
 /* ───────────────────────────── outcomes ─────────────────────────────── */
 
 export interface NativeSuccess {
@@ -85,9 +172,13 @@ export interface NativeSuccess {
 
 export interface NativeFailure {
   ok: false;
-  stage: "compile" | "execute" | "toolchain";
+  stage: "compile" | "execute" | "toolchain" | "quota";
   message: string;
   timedOut?: boolean;
+  /** Structured throttle marker — routes must map this to HTTP 429. */
+  code?: "RATE_LIMITED";
+  /** Suggested client back-off (only when code === "RATE_LIMITED"). */
+  retryAfterSec?: number;
 }
 
 export type NativeOutcome = NativeSuccess | NativeFailure;
@@ -105,7 +196,12 @@ interface ProcResult {
 function runProcess(
   command: string,
   args: string[],
-  opts: { cwd: string; input?: string; timeoutMs: number }
+  opts: {
+    cwd: string;
+    input?: string;
+    timeoutMs: number;
+    env: NodeJS.ProcessEnv;
+  }
 ): Promise<ProcResult> {
   return new Promise((resolve) => {
     let stdout = "";
@@ -120,6 +216,7 @@ function runProcess(
         cwd: opts.cwd,
         stdio: ["pipe", "pipe", "pipe"],
         detached: true,
+        env: opts.env, // explicit scrubbed env — children never inherit secrets
       });
     } catch {
       resolve({
@@ -271,6 +368,13 @@ export async function executeNative(params: {
     MAX_RUN_TIMEOUT_MS
   );
 
+  // Global concurrency ceiling — reject immediately when saturated
+  // (structured RATE_LIMITED failure → routes answer HTTP 429).
+  if (activeNativeExecutions >= MAX_CONCURRENT_NATIVE_EXECUTIONS) {
+    return rateLimitedFailure();
+  }
+  activeNativeExecutions += 1;
+
   const dir = await mkdtemp(path.join(tmpdir(), "atomcode-exec-"));
   try {
     if (language === "c" || language === "cpp") {
@@ -278,6 +382,7 @@ export async function executeNative(params: {
     }
     return await runJava(dir, spec, params, runTimeoutMs);
   } finally {
+    activeNativeExecutions -= 1;
     rm(dir, { recursive: true, force: true }).catch(() => {});
   }
 }
@@ -303,9 +408,14 @@ async function runClangFamily(
     sourceFile,
     ...(isC ? ["-lm"] : []),
   ];
-  const compile = await runProcess(compiler, compileArgs, {
+  const compileWrapped = withRlimits(compiler, compileArgs, {
+    cpuSec: cpuSecondsFor(COMPILE_TIMEOUT_MS),
+    addressSpaceKB: RLIMIT_ADDRESS_SPACE_KB,
+  });
+  const compile = await runProcess(compileWrapped.command, compileWrapped.args, {
     cwd: dir,
     timeoutMs: COMPILE_TIMEOUT_MS,
+    env: scrubbedEnv(dir),
   });
 
   if (compile.spawnError) {
@@ -327,10 +437,15 @@ async function runClangFamily(
   const compileTimeMs = performance.now() - compileStart;
 
   const runStart = performance.now();
-  const run = await runProcess("./program", [], {
+  const runWrapped = withRlimits("./program", [], {
+    cpuSec: cpuSecondsFor(runTimeoutMs),
+    addressSpaceKB: RLIMIT_ADDRESS_SPACE_KB,
+  });
+  const run = await runProcess(runWrapped.command, runWrapped.args, {
     cwd: dir,
     input: params.stdin ?? "",
     timeoutMs: runTimeoutMs,
+    env: scrubbedEnv(dir),
   });
 
   if (run.spawnError) {
@@ -372,9 +487,14 @@ async function runJava(
   await writeFile(path.join(dir, `${publicType}.java`), params.code, "utf8");
 
   const compileStart = performance.now();
-  const compile = await runProcess(
+  // JVM heap cap + perf-data off for the ECJ compile step itself (it IS a
+  // java process). NO ulimit -v here — the JVM reserves a huge virtual
+  // address space and dies instantly under RLIMIT_AS.
+  const compileWrapped = withRlimits(
     "java",
     [
+      "-Xmx512m",
+      "-XX:-UsePerfData",
       "-jar",
       ecjJarPath(spec.ecj ?? "ecj-3.33.0.jar"),
       "-nowarn",
@@ -387,8 +507,13 @@ async function runJava(
       "out",
       `${publicType}.java`,
     ],
-    { cwd: dir, timeoutMs: COMPILE_TIMEOUT_MS }
+    { cpuSec: cpuSecondsFor(COMPILE_TIMEOUT_MS) }
   );
+  const compile = await runProcess(compileWrapped.command, compileWrapped.args, {
+    cwd: dir,
+    timeoutMs: COMPILE_TIMEOUT_MS,
+    env: scrubbedEnv(dir),
+  });
 
   if (compile.spawnError) {
     return {
@@ -409,15 +534,29 @@ async function runJava(
   const compileTimeMs = performance.now() - compileStart;
 
   const runStart = performance.now();
-  const run = await runProcess(
+  // Heap-capped JVM run: -Xmx512m, no perf data, private tmpdir (the JVM
+  // also gets a per-run HOME/TMPDIR via the scrubbed env) — again WITHOUT
+  // ulimit -v (see the compile step above), but with CPU / file-size /
+  // process-count rlimits.
+  const runWrapped = withRlimits(
     "java",
-    ["-Dfile.encoding=UTF-8", "-cp", "out", mainClass],
-    {
-      cwd: dir,
-      input: params.stdin ?? "",
-      timeoutMs: runTimeoutMs,
-    }
+    [
+      "-Xmx512m",
+      "-XX:-UsePerfData",
+      `-Djava.io.tmpdir=${dir}`,
+      "-Dfile.encoding=UTF-8",
+      "-cp",
+      "out",
+      mainClass,
+    ],
+    { cpuSec: cpuSecondsFor(runTimeoutMs) }
   );
+  const run = await runProcess(runWrapped.command, runWrapped.args, {
+    cwd: dir,
+    input: params.stdin ?? "",
+    timeoutMs: runTimeoutMs,
+    env: scrubbedEnv(dir),
+  });
 
   if (run.spawnError) {
     return {

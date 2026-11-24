@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { eclipse } from '@uiw/codemirror-theme-eclipse';
@@ -31,6 +31,10 @@ const CodeEditor = ({ Code, readonly, lang }: CodeProps) => {
         return () => { cancelled = true; };
     }, [lang])
 
+    // Stable extension array — a fresh array literal per render forced
+    // CodeMirror to reconfigure its internal state on every render.
+    const extensions = useMemo<Extension[]>(() => (extension ? [extension] : []), [extension]);
+
     return (
         <>
             <div className='h-full w-full overflow-auto dark:bg-[#1e1e1e]'>
@@ -39,7 +43,7 @@ const CodeEditor = ({ Code, readonly, lang }: CodeProps) => {
                         Code
                     }
                     theme={theme === 'dark' ? vscodeDark : eclipse}
-                    extensions={extension ? [extension] : []}
+                    extensions={extensions}
                     style={{ fontSize: 16 }}
                     readOnly={readonly}
                 />

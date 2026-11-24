@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 
 import { db } from "@/lib/db";
 import { requireAdminApi } from "@/lib/api-admin-guard";
@@ -7,6 +8,8 @@ import { genSaltSync, hashSync } from "bcrypt-ts";
 
 /** Per-batch sanity cap so one import cannot flood the platform. */
 const MAX_STAFF_PER_IMPORT = 500;
+/** Crude DoS guard: reject oversized uploads before parsing the body. */
+const MAX_BODY_BYTES = 25 * 1024 * 1024; // 25 MB
 
 interface ImportIssue {
     index: number;
@@ -14,17 +17,39 @@ interface ImportIssue {
     error: string;
 }
 
+/** One-time password handed back per imported row (admin distributes it). */
+interface ImportedPassword {
+    index: number;
+    email: string;
+    name: string;
+    password: string;
+}
+
+/** "Atom-x7Kp2q" — 4 random bytes, URL-safe. */
+function generateOneTimePassword(): string {
+    return `Atom-${randomBytes(4).toString("base64url")}`;
+}
+
 /**
  * POST /api/staffs/import
  *
  * Body: the JSON produced by the staffs export (envelope with `staffs`)
  * or a bare array of staff objects. Every valid record is created as a NEW
- * staff member with the default password (Staff@Atom); invalid or
+ * staff member with a per-row RANDOM one-time password (returned in the
+ * `passwords` field so the admin can distribute it); invalid or
  * duplicate-email records are skipped and reported.
  */
 export async function POST(req: Request) {
     const guard = await requireAdminApi("staff data");
     if (!guard.ok) return guard.response;
+
+    const contentLength = Number(req.headers.get("content-length") ?? 0);
+    if (contentLength > MAX_BODY_BYTES) {
+        return NextResponse.json(
+            { error: "File too large (max 25 MB)." },
+            { status: 413 }
+        );
+    }
 
     const body = await req.json().catch(() => null);
     const raw = Array.isArray(body)
@@ -49,11 +74,11 @@ export async function POST(req: Request) {
     }
 
     const salt = genSaltSync(10);
-    const defaultPassword = hashSync("Staff@Atom", salt);
 
     // Duplicate emails inside the file itself would silently collide.
     const seenEmails = new Set<string>();
     const errors: ImportIssue[] = [];
+    const passwords: ImportedPassword[] = [];
     let created = 0;
 
     for (let i = 0; i < raw.length; i++) {
@@ -86,6 +111,10 @@ export async function POST(req: Request) {
         }
         seenEmails.add(normalizedEmail);
 
+        // Unique one-time password per imported staff member — never a
+        // shared default (audit finding).
+        const oneTimePassword = generateOneTimePassword();
+
         try {
             await db.staff.create({
                 data: {
@@ -94,24 +123,31 @@ export async function POST(req: Request) {
                     staffnumber: staff.staffnumber,
                     department: staff.department,
                     phone: staff.phone ?? null,
-                    password: defaultPassword,
+                    password: hashSync(oneTimePassword, salt),
                 },
             });
             created++;
+            passwords.push({
+                index: i + 1,
+                email: staff.email,
+                name: staff.name,
+                password: oneTimePassword,
+            });
         } catch (err) {
             // Unique constraint on email → friendlier copy than a raw Prisma error.
             const isUniqueViolation =
                 err instanceof Object &&
                 "code" in err &&
                 (err as { code?: string }).code === "P2002";
+            if (!isUniqueViolation) {
+                console.error("[staffs/import] create failed:", err);
+            }
             errors.push({
                 index: i + 1,
                 email: staff.email,
                 error: isUniqueViolation
                     ? "Email already exists"
-                    : err instanceof Error
-                      ? err.message
-                      : "Database error while creating the staff member",
+                    : "Database error while creating the staff member",
             });
         }
     }
@@ -123,6 +159,7 @@ export async function POST(req: Request) {
                 created,
                 failed: errors.length,
                 errors: errors.slice(0, 10),
+                passwords,
             },
             { status: 400 }
         );
@@ -135,5 +172,6 @@ export async function POST(req: Request) {
         created,
         failed: errors.length,
         errors: errors.slice(0, 10),
+        passwords,
     });
 }

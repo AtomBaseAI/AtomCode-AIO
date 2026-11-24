@@ -1,11 +1,33 @@
 /**
  * AtomCode unified seed — one demo dataset for all three roles.
  * Run: bun prisma/seed.ts
+ *
+ * Production guard: refuses to run when NODE_ENV=production unless
+ * ALLOW_SEED is explicitly set (it creates well-known test accounts).
+ * Passwords are overridable via env (SEED_ADMIN_PASSWORD / SEED_STAFF_PASSWORD /
+ * SEED_USER_PASSWORD); the defaults are the historical DEV-ONLY values.
  */
 import { PrismaClient } from "@prisma/client";
 import { genSaltSync, hashSync } from "bcrypt-ts";
 
 const db = new PrismaClient();
+
+// ── Production refusal guard ────────────────────────────────────────────
+// This seed creates accounts with known passwords. Never allow it against
+// a production database unless the operator explicitly opts in via ALLOW_SEED.
+if (process.env.NODE_ENV === "production" && !process.env.ALLOW_SEED) {
+  console.error(
+    "REFUSING to seed in production (NODE_ENV=production): this script creates " +
+      "well-known test accounts. Set ALLOW_SEED=1 to override deliberately, or " +
+      "run with NODE_ENV unset in a dev environment."
+  );
+  process.exit(1);
+}
+
+// ── Env-overridable seed passwords (DEV-ONLY defaults below are public) ─
+const SEED_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || "Admin@Atom";
+const SEED_STAFF_PASSWORD = process.env.SEED_STAFF_PASSWORD || "Staff@Atom";
+const SEED_USER_PASSWORD = process.env.SEED_USER_PASSWORD || "User@Atom";
 
 async function main() {
   const hash = (pw: string) => hashSync(pw, genSaltSync(10));
@@ -16,7 +38,7 @@ async function main() {
     create: {
       name: "Atom Admin",
       email: "admin@atom.com",
-      password: hash("Admin@Atom"),
+      password: hash(SEED_ADMIN_PASSWORD),
     },
   });
 
@@ -29,7 +51,7 @@ async function main() {
       department: "cse",
       staffnumber: "STF001",
       phone: "9876543210",
-      password: hash("Staff@Atom"),
+      password: hash(SEED_STAFF_PASSWORD),
     },
   });
 
@@ -43,7 +65,7 @@ async function main() {
       section: "a",
       batch: "2023-2027",
       rollnumber: "21CS001",
-      password: hash("User@Atom"),
+      password: hash(SEED_USER_PASSWORD),
     },
   });
 
@@ -54,7 +76,7 @@ async function main() {
     create: {
       name: "Backup Admin",
       email: "admin2@atom.com",
-      password: hash("Admin@Atom"),
+      password: hash(SEED_ADMIN_PASSWORD),
     },
   });
 
@@ -68,7 +90,7 @@ async function main() {
       department: "cse",
       staffnumber: "STF002",
       phone: "9876543211",
-      password: hash("Staff@Atom"),
+      password: hash(SEED_STAFF_PASSWORD),
     },
   });
 
@@ -83,7 +105,7 @@ async function main() {
       section: "a",
       batch: "2023-2027",
       rollnumber: "21CS002",
-      password: hash("User@Atom"),
+      password: hash(SEED_USER_PASSWORD),
     },
   });
 
@@ -98,7 +120,7 @@ async function main() {
       section: "b",
       batch: "2023-2027",
       rollnumber: "21IT001",
-      password: hash("User@Atom"),
+      password: hash(SEED_USER_PASSWORD),
     },
   });
 
@@ -382,13 +404,13 @@ async function main() {
   }).catch(() => {});
 
   console.log("Seed complete:");
-  console.log("  admin    → admin@atom.com / Admin@Atom");
-  console.log("  admin2   → admin2@atom.com / Admin@Atom");
-  console.log("  staff    → staff@atom.com / Staff@Atom");
-  console.log("  staff2   → staff2@atom.com / Staff@Atom");
-  console.log("  student  → student@atom.com / User@Atom");
-  console.log("  student2 → student2@atom.com / User@Atom");
-  console.log("  student3 → student3@atom.com / User@Atom");
+  console.log("  admin    → admin@atom.com / (SEED_ADMIN_PASSWORD or dev default)");
+  console.log("  admin2   → admin2@atom.com / (SEED_ADMIN_PASSWORD or dev default)");
+  console.log("  staff    → staff@atom.com / (SEED_STAFF_PASSWORD or dev default)");
+  console.log("  staff2   → staff2@atom.com / (SEED_STAFF_PASSWORD or dev default)");
+  console.log("  student  → student@atom.com / (SEED_USER_PASSWORD or dev default)");
+  console.log("  student2 → student2@atom.com / (SEED_USER_PASSWORD or dev default)");
+  console.log("  student3 → student3@atom.com / (SEED_USER_PASSWORD or dev default)");
   console.log(`  course   → ${course.title} (${course.id})`);
 }
 

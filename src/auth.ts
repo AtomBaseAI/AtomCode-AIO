@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { CredentialsSignin } from "next-auth";
-import { compare } from "bcrypt-ts";
+import { compare, hashSync } from "bcrypt-ts";
 import { LoginSchema } from "@/schemas/auth-schema";
 import { db } from "@/lib/db";
 import { authConfig } from "@/auth.config";
@@ -10,6 +10,10 @@ import {
   gateAttempt,
   registerFailure,
   clearFailures,
+  gateIp,
+  registerIpFailure,
+  clearIpFailures,
+  ipFromRequest,
   LOGIN_MAX_FAILURES,
   LOGIN_LOCKOUT_MINUTES,
 } from "@/lib/login-rate-limit";
@@ -55,17 +59,36 @@ export const LOGIN_ERRORS: Record<string, string> = {
   "invalid-auth-code": "Invalid auth code",
 };
 
+/**
+ * Timing-oracle defense: when no account row matches the email we must still
+ * burn one bcrypt compare before answering, otherwise "unknown email" is
+ * measurably faster than "known email + wrong password" and leaks which
+ * addresses are registered. The hash is computed ONCE at module load (its
+ * plaintext is random, so it never matches anything meaningful) and every
+ * unknown-email attempt compares against it — equal work, equal latency.
+ */
+const DUMMY_HASH = hashSync("atomcode-dummy-" + Math.random(), 10);
+
 export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
       credentials: { email: {}, password: {}, code: {} },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const parsed = LoginSchema.safeParse(credentials);
         if (!parsed.success) throw new InvalidCredentialsError();
         const { email, password, code } = parsed.data;
 
-        // 1. Lockout gate — rejected attempts never touch the DB or bcrypt.
+        // Best-effort client IP (x-forwarded-for first value or "unknown")
+        // for the per-IP brute-force throttle. Spoofable without a trusted
+        // proxy stack — a throttle key, not an identity (see ipFromRequest).
+        const ip = ipFromRequest(request);
+
+        // 1. Lockout gates — rejected attempts never touch the DB or bcrypt.
+        //    Per-account budget (email) + per-source budget (IP, 30 failures
+        //    in 15 min) — the IP gate blunts distributed/rotating attacks.
+        const ipGate = gateIp(ip);
+        if (!ipGate.allowed) throw new RateLimitedError();
         const gate = gateAttempt(email);
         if (!gate.allowed) throw new RateLimitedError();
 
@@ -84,6 +107,10 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
 
         if (!candidate) {
           registerFailure(email);
+          registerIpFailure(ip);
+          // Equalize timing with the wrong-password path (see DUMMY_HASH) so
+          // the response latency cannot reveal registered vs unknown emails.
+          await compare(password, DUMMY_HASH);
           throw new InvalidCredentialsError();
         }
 
@@ -91,6 +118,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         const match = await compare(password, candidate.password);
         if (!match) {
           registerFailure(email);
+          registerIpFailure(ip);
           throw new InvalidCredentialsError();
         }
 
@@ -101,6 +129,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
           const expected = await getSuperAdminAuthCode();
           if (!code || code !== expected) {
             registerFailure(email);
+            registerIpFailure(ip);
             throw new InvalidAuthCodeError();
           }
         }
@@ -108,11 +137,13 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         // 5. Student activation policy (Admin/Staff have no isActive flag).
         if ("isActive" in candidate && candidate.isActive === false) {
           registerFailure(email);
+          registerIpFailure(ip);
           throw new AccountDisabledError();
         }
 
-        // 6. Success — clear the failure budget and issue the session.
+        // 6. Success — clear both failure budgets and issue the session.
         clearFailures(email);
+        clearIpFailures(ip);
 
         const role = admin
           ? "admin"
@@ -127,6 +158,10 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
           email: candidate.email,
           image: candidate.image,
           role,
+          // Revocation seed: the jwt callback stamps this as token.jv so the
+          // guards can later compare it against the live row
+          // (assertSessionValid in src/lib/auth-validate.ts).
+          tokenVersion: (candidate as { tokenVersion?: number }).tokenVersion ?? 0,
         };
       },
     }),

@@ -1,6 +1,7 @@
 import { ResultTableStudentType } from '@/schemas/result-matrix-schema';
 import { formatDate } from '@/lib/utils';
 import { unparse } from 'papaparse';
+import { csvSafeCell } from './csv-safe';
 
 const transformData = (data: ResultTableStudentType[]) => {
     // console.log(JSON.stringify(data))
@@ -9,12 +10,12 @@ const transformData = (data: ResultTableStudentType[]) => {
 
     data.forEach(student => {
         const row: Record<string, any> = {
-            studentname: student.studentname,
-            rollnumber: student.rollnumber,
-            batch: student.batch,
-            department: student.department,
-            section: student.section,
-            email: student.email
+            studentname: csvSafeCell(student.studentname),
+            rollnumber: csvSafeCell(student.rollnumber),
+            batch: csvSafeCell(student.batch),
+            department: csvSafeCell(student.department),
+            section: csvSafeCell(student.section),
+            email: csvSafeCell(student.email)
         };
 
         student.moduledata.forEach((module, index) => {
@@ -57,4 +58,7 @@ export const CompletionExport = (data: ResultTableStudentType[], courseName: str
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    // Mirror LeaderboardExport: release the blob URL after the download
+    // click so long sessions don't accumulate object URLs.
+    URL.revokeObjectURL(url);
 };

@@ -1,5 +1,25 @@
 # AtomCode (unified app) — Test Credentials
 
+> ## ⚠️ DEV-ONLY CREDENTIALS — NEVER USE IN PRODUCTION
+>
+> **Every** credential in this document is a PUBLIC repo default, including:
+> - `superadmin@atomcode.dev` / `Mr@1811321` (super admin)
+> - auth code `1997` (super-admin second factor)
+> - `admin@atom.com` / `Admin@Atom`, `staff@atom.com` / `Staff@Atom`, `student@atom.com` / `User@Atom`, and all other rows in the matrix below
+>
+> Anyone who can read this repository can log into any account created with
+> these defaults. **All of them MUST be rotated before production** (real
+> passwords, a real super-admin auth code, and a generated `AUTH_SECRET` via
+> `openssl rand -base64 32`).
+>
+> Guards added for this: the seed scripts **refuse to run in production**
+> (`scripts/seed-superadmin.ts` requires SUPERADMIN_EMAIL / SUPERADMIN_PASSWORD /
+> AUTHCODE to be set; `prisma/seed.ts` requires NODE_ENV ≠ production or
+> `ALLOW_SEED=1`), and the app refuses to boot in production without
+> `AUTH_SECRET`. Override seed passwords via `SEED_ADMIN_PASSWORD` /
+> `SEED_STAFF_PASSWORD` / `SEED_USER_PASSWORD` and the super-admin second
+> factor via `SUPERADMIN_AUTHCODE`.
+
 Sample accounts seeded by `prisma/seed.ts` (idempotent — safe to re-run).
 All passwords are plain values below; the DB stores bcrypt hashes.
 

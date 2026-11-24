@@ -5,6 +5,7 @@
 // missing row falls back to that default, so fresh databases work as-is.
 
 import { db } from "@/lib/db";
+import { createServerTtlCache } from "@/lib/ui-cache";
 import {
   CLIENT_BANNER,
   CLIENT_NAME,
@@ -58,25 +59,41 @@ const pick = (map: Map<string, string>, key: string, fallback: string) => {
   return v && v.trim() !== "" ? v : fallback;
 };
 
+/**
+ * Hot-path TTL cache (30s) — branding is read on the login page, register
+ * page, root metadata and layouts, but edited rarely. Failed queries are
+ * not cached (the cache layer rethrows), so a transient DB hiccup falls
+ * through to the env defaults below instead of being pinned for 30s.
+ */
+const brandingCache = createServerTtlCache<BrandingSettings>(async () => {
+  const defaults = getBrandingDefaults();
+  const rows = await db.setting.findMany({
+    where: { key: { in: Object.values(BRANDING_KEYS) } },
+  });
+  const map = new Map(rows.map((r) => [r.key, r.value]));
+  return {
+    clientName: pick(map, BRANDING_KEYS.clientName, defaults.clientName),
+    clientBanner: pick(map, BRANDING_KEYS.clientBanner, defaults.clientBanner),
+    vendorName: pick(map, BRANDING_KEYS.vendorName, defaults.vendorName),
+    vendorLogo: pick(map, BRANDING_KEYS.vendorLogo, defaults.vendorLogo),
+    poweredbyStatus: map.has(BRANDING_KEYS.poweredbyStatus)
+      ? map.get(BRANDING_KEYS.poweredbyStatus) === "true"
+      : defaults.poweredbyStatus,
+    poweredbyName: pick(map, BRANDING_KEYS.poweredbyName, defaults.poweredbyName),
+    poweredbyUrl: pick(map, BRANDING_KEYS.poweredbyUrl, defaults.poweredbyUrl),
+  };
+});
+
+/** Drop the cached branding entry (exported for the admin settings action). */
+export function invalidateBrandingSettingsCache() {
+  brandingCache.invalidate();
+}
+
 /** Read branding from the DB (fault-tolerant → env defaults). */
 export async function getBrandingSettings(): Promise<BrandingSettings> {
   const defaults = getBrandingDefaults();
   try {
-    const rows = await db.setting.findMany({
-      where: { key: { in: Object.values(BRANDING_KEYS) } },
-    });
-    const map = new Map(rows.map((r) => [r.key, r.value]));
-    return {
-      clientName: pick(map, BRANDING_KEYS.clientName, defaults.clientName),
-      clientBanner: pick(map, BRANDING_KEYS.clientBanner, defaults.clientBanner),
-      vendorName: pick(map, BRANDING_KEYS.vendorName, defaults.vendorName),
-      vendorLogo: pick(map, BRANDING_KEYS.vendorLogo, defaults.vendorLogo),
-      poweredbyStatus: map.has(BRANDING_KEYS.poweredbyStatus)
-        ? map.get(BRANDING_KEYS.poweredbyStatus) === "true"
-        : defaults.poweredbyStatus,
-      poweredbyName: pick(map, BRANDING_KEYS.poweredbyName, defaults.poweredbyName),
-      poweredbyUrl: pick(map, BRANDING_KEYS.poweredbyUrl, defaults.poweredbyUrl),
-    };
+    return await brandingCache.get();
   } catch {
     return defaults;
   }
@@ -107,6 +124,8 @@ export async function setBrandingSettings(
     }
   }
   await Promise.all(ops);
+  // Writes must be visible on the very next read — drop the cache entry.
+  brandingCache.invalidate();
 }
 
 /** Clear every branding override → back to the env defaults. */
@@ -114,4 +133,6 @@ export async function resetBrandingRows() {
   await db.setting.deleteMany({
     where: { key: { in: Object.values(BRANDING_KEYS) } },
   });
+  // Writes must be visible on the very next read — drop the cache entry.
+  brandingCache.invalidate();
 }

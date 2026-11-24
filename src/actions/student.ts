@@ -1,4 +1,5 @@
 "use server"
+import { randomBytes } from "crypto"
 import { db } from "@/lib/db"
 import type { Prisma } from "@prisma/client"
 // import bcrypt from 'bcryptjs'
@@ -7,8 +8,19 @@ import { revalidatePath } from "next/cache"
 import { AddStudentSchema, DeleteStudentSchema, StudentPasswordResetSchema, StudentUpdateSchema } from "@/schemas/student-schema"
 import { genSaltSync, hashSync } from 'bcrypt-ts';
 import { requireAdmin } from "@/lib/action-guards";
+import { bumpTokenVersion } from "@/lib/auth-validate";
+
+/**
+ * One-time reset password: "Atom-" + 6 base64url chars. Returned ONCE in
+ * the success message and hashed at rest — no shared default passwords.
+ */
+const generateOneTimePassword = () =>
+    `Atom-${randomBytes(4).toString("base64url")}`;
 
 export const addstudent = async (values: z.infer<typeof AddStudentSchema>) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can add students." };
+
     const validatedFields = AddStudentSchema.safeParse(values)
     if (!validatedFields.success) {
         return { error: "Invalid email/password" }
@@ -95,15 +107,23 @@ export const deletestudent = async (
 export const updatestudent = async (
     values: z.infer<typeof StudentUpdateSchema>
 ) => {
-    const uid = values.id;
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can update students." };
+
+    // Strip the id from the written data — it is only the where-key.
+    const { id: uid, ...data } = values;
     await db.user.update({
         where: {
             id: uid
         },
-        data: {
-            ...values,
-        }
+        data,
     })
+
+    // Deactivating a student must revoke their live sessions immediately
+    // (the JWT is frozen for 30 days — tokenVersion bump invalidates it).
+    if (values.isActive === false) {
+        await bumpTokenVersion("user", uid);
+    }
 
     revalidatePath("/admin/students")
     // revalidatePath("student")
@@ -112,9 +132,10 @@ export const updatestudent = async (
 
 
 /**
- * Admin-side reset — sets a student account back to the default password.
- * No current password needed (the admin is acting on someone else's
- * account), but the caller must be an authenticated admin.
+ * Admin-side reset — issues a RANDOM one-time password instead of a shared
+ * default. No current password needed (the admin is acting on someone
+ * else's account), but the caller must be an authenticated admin. The OTP
+ * is returned once in the success message and old sessions are revoked.
  */
 export const resetpasswordstudent = async (
     values: z.infer<typeof StudentPasswordResetSchema>
@@ -123,9 +144,15 @@ export const resetpasswordstudent = async (
     if (!session) return { error: "Only admins can reset student passwords." };
 
     const uid = values.id;
-    const password = "User@Atom"
+    const student = await db.user.findUnique({
+        where: { id: uid },
+        select: { id: true },
+    });
+    if (!student) return { error: "Student not found." };
+
+    const oneTimePassword = generateOneTimePassword();
     const salt = genSaltSync(10);
-    const hashedPassword = hashSync(password, salt);
+    const hashedPassword = hashSync(oneTimePassword, salt);
     // const hashedPassword = await bcrypt.hash(password, 10)
     await db.user.update({
         where: {
@@ -135,7 +162,12 @@ export const resetpasswordstudent = async (
             password: hashedPassword
         }
     })
-    return { success: "Default Password Updated !" }
+    // Old sessions (JWT jv frozen at sign-in) must not survive a reset.
+    await bumpTokenVersion("user", uid);
+
+    return {
+        success: `One-time password: ${oneTimePassword} — share it with the student now; it is not shown again.`,
+    }
 }
 
 

@@ -6,17 +6,34 @@ import * as z from 'zod'
 import { revalidatePath } from "next/cache"
 import { StudentPasswordResetSchema, StudentUpdateSchema } from "@/schemas/student/user-schema"
 import { compareSync, genSaltSync, hashSync } from 'bcrypt-ts';
+import { requireUser } from "@/lib/action-guards";
+
+/**
+ * Student self-profile update (student settings page).
+ * Only profile fields (name/phone/github/linkedin) are accepted — identity
+ * fields (rollnumber, batch, department, section) and account flags
+ * (isActive, email) are admin-managed and ignored from the client here.
+ */
+
 export const updatestudent = async (
     values: z.infer<typeof StudentUpdateSchema>
 ) => {
-    const uid = values.id;
+    const session = await requireUser();
+    if (!session) return { error: "Unauthorized" };
+
+    // The row id ALWAYS comes from the session — values.id is ignored so a
+    // forged payload cannot touch another student's row.
+    const data: { name?: string; phone?: string; github?: string; linkedin?: string } = {};
+    if (typeof values.name === "string") data.name = values.name;
+    if (typeof values.phone === "string") data.phone = values.phone;
+    if (typeof values.github === "string") data.github = values.github;
+    if (typeof values.linkedin === "string") data.linkedin = values.linkedin;
+
     await db.user.update({
         where: {
-            id: uid
+            id: session.user.id
         },
-        data: {
-            ...values,
-        }
+        data,
     })
 
     revalidatePath("/")

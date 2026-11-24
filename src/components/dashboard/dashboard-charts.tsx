@@ -139,7 +139,7 @@ export function DifficultyDonut({ data }: { data: NameCount[] }) {
   }));
   const total = colored.reduce((sum, d) => sum + d.count, 0);
   return (
-    <Card className="w-full flex flex-col">
+    <Card className="w-full min-w-0 flex flex-col overflow-hidden">
       <CardHeader className="pb-0">
         <CardTitle>Difficulty Mix</CardTitle>
         <CardDescription>Code questions per difficulty</CardDescription>
@@ -333,7 +333,7 @@ export function SubmissionStatusDonut({ data }: { data: NameCount[] }) {
   }));
   const total = colored.reduce((sum, d) => sum + d.count, 0);
   return (
-    <Card className="w-full flex flex-col">
+    <Card className="w-full min-w-0 flex flex-col overflow-hidden">
       <CardHeader className="pb-0">
         <CardTitle>Practice Outcomes</CardTitle>
         <CardDescription>Code submission results</CardDescription>

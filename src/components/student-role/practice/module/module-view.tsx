@@ -46,6 +46,15 @@ interface CourseFeedback {
     link: string,
     date: Date;
 }
+
+/**
+ * Feedback links render as <a href> — only http(s) URLs get a real anchor;
+ * anything else (javascript:, data:, …) renders as plain text (audit
+ * finding: XSS chain via unguarded feedback links).
+ */
+const safeHttpUrl = (url: string): string | null => {
+    return /^https?:\/\/\S+$/i.test(url) ? url : null;
+};
 interface MergedModuleType extends ModuleDataType {
     userId: string | null;
     courseId: string | null;
@@ -134,6 +143,7 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, lockState
                                     <div className='flex flex-col gap-3 w-full'>
                                         {CourseFeedbackData.map((feedback, index) => {
                                             const { status, statusClass, statusClassPointer } = determineFeedbackStatus(new Date(feedback.date));
+                                            const safeFeedbackLink = safeHttpUrl(feedback.link);
                                             return (
                                                 <div key={index} className={`w-full flex flex-row items-center p-1 gap-2 border-2 h-10 rounded-md hover:border-primary hover:transition-colors duration-1000 ease-in-out ${statusClassPointer}`}>
                                                     {
@@ -163,11 +173,20 @@ const ModuleView = ({ ModulesData, CourseFeedbackData, ModulesResults, lockState
                                                                             </AlertDialogHeader>
                                                                             <AlertDialogFooter className="flex flex-row gap-2">
                                                                                 <AlertDialogCancel className='bg-red-500 hover:bg-red-400 text-white flex-1 hover:text-white'>Cancel</AlertDialogCancel>
-                                                                                <AlertDialogAction className='flex-1'>
-                                                                                    <a href={feedback.link} target="_blank" rel="noopener noreferrer" className="w-full h-full">
-                                                                                        Open
-                                                                                    </a>
-                                                                                </AlertDialogAction>
+                                                                                {safeFeedbackLink ? (
+                                                                                    <AlertDialogAction className='flex-1'>
+                                                                                        <a href={safeFeedbackLink} target="_blank" rel="noopener noreferrer" className="w-full h-full">
+                                                                                            Open
+                                                                                        </a>
+                                                                                    </AlertDialogAction>
+                                                                                ) : (
+                                                                                    // Unsafe scheme → no anchor, inert label.
+                                                                                    <AlertDialogAction className='flex-1 pointer-events-none opacity-60' asChild>
+                                                                                        <span className="w-full h-full flex items-center justify-center">
+                                                                                            Link unavailable
+                                                                                        </span>
+                                                                                    </AlertDialogAction>
+                                                                                )}
                                                                             </AlertDialogFooter>
                                                                         </AlertDialogContent>
                                                                     </AlertDialog>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { assertSessionValid } from "@/lib/auth-validate";
 
 /**
  * Admin guard for admin-only API routes (question groups, students …).
@@ -9,6 +10,12 @@ import { db } from "@/lib/db";
  * The super admin role also passes — it has every admin capability
  * (judge endpoint tests, question testing, imports, exports …).
  * `subject` only customizes the error copy.
+ *
+ * On top of the role check the guard re-validates the session against the
+ * DB (assertSessionValid): the JWT stays signed for 30 days even after the
+ * account row is deleted/revoked, so the DB is the source of truth.
+ * A revoked session is answered with the same 401 an anonymous caller gets
+ * (identical response shapes — callers only branch on `ok`).
  */
 export async function requireAdminApi(subject = "question groups") {
     const session = await auth();
@@ -28,6 +35,21 @@ export async function requireAdminApi(subject = "question groups") {
             response: NextResponse.json(
                 { error: `Only admins can manage ${subject}.` },
                 { status: 403 }
+            ),
+        };
+    }
+    // Revocation re-check (jv vs live row) — revoked session ⇒ 401.
+    const valid = await assertSessionValid(
+        role as string,
+        session.user.id,
+        (session.user as { jv?: number }).jv
+    );
+    if (!valid) {
+        return {
+            ok: false as const,
+            response: NextResponse.json(
+                { error: `You must be signed in to manage ${subject}.` },
+                { status: 401 }
             ),
         };
     }
@@ -59,6 +81,21 @@ export async function requireSuperAdminApi(subject = "import / export") {
             response: NextResponse.json(
                 { error: `Only the super admin can use ${subject}.` },
                 { status: 403 }
+            ),
+        };
+    }
+    // Revocation re-check (jv vs live row) — revoked session ⇒ 401.
+    const valid = await assertSessionValid(
+        "superadmin",
+        session.user.id,
+        (session.user as { jv?: number }).jv
+    );
+    if (!valid) {
+        return {
+            ok: false as const,
+            response: NextResponse.json(
+                { error: `You must be signed in to use ${subject}.` },
+                { status: 401 }
             ),
         };
     }

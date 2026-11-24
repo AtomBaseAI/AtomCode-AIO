@@ -74,6 +74,11 @@ const MIN_RUN_TIMEOUT_MS = 1_000;
 const MAX_RUN_TIMEOUT_MS = 60_000;
 const MAX_LAMBDA_RUNTIME_MS = 110_000; // stays under the 120 s function timeout
 
+/* SQL branch guards — sql.js runs IN-PROCESS (no child OS process to
+ * rlimit), so the only OOM defenses are explicit caps: */
+const MAX_SQL_CODE_CHARS = 50_000; // source size
+const MAX_SQL_ROWS = 5_000; // rendered result rows
+
 /* ─────────────────────────── langspec loading ─────────────────────────── */
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -343,27 +348,97 @@ function renderSqlGrid(payload) {
 
 let sqlJsPromise = null;
 async function getSqlJs() {
-  // sql.js is CJS: the init function may sit on .default, .default.initSqlJs
-  // or .initSqlJs depending on the Node/ESM interop mode.
-  sqlJsPromise ??= import("sql.js").then((mod) => {
-    const init = mod.default?.initSqlJs ?? mod.initSqlJs ?? mod.default;
-    return init();
-  });
-  return sqlJsPromise;
+  if (!sqlJsPromise) {
+    sqlJsPromise = (async () => {
+      try {
+        // sql.js is CJS: the init function may sit on .default,
+        // .default.initSqlJs or .initSqlJs depending on the interop mode.
+        const mod = await import("sql.js");
+        const init = mod.default?.initSqlJs ?? mod.initSqlJs ?? mod.default;
+        return init();
+      } catch (primaryError) {
+        // Resolution fallback for local runs (emulator smoke tests): sql.js
+        // is installed in mini-services/lambda-emulator rather than the repo
+        // root, and bare-specifier resolution starts from THIS file. On the
+        // deployed Lambda images the primary import always succeeds.
+        const fallback = path.join(
+          __dirname,
+          "../../../mini-services/lambda-emulator/node_modules/sql.js"
+        );
+        try {
+          const mod = await import(fallback);
+          const init = mod.default?.initSqlJs ?? mod.initSqlJs ?? mod.default;
+          return init();
+        } catch {
+          throw primaryError;
+        }
+      }
+    })();
+  }
+  try {
+    return await sqlJsPromise;
+  } catch (err) {
+    sqlJsPromise = null; // allow recovery once the package is resolvable
+    throw err;
+  }
 }
 
 async function runSql(spec, params) {
   const started = performance.now();
-  const SQL = await getSqlJs();
+
+  // Source cap — db.exec() is unbounded in-process, so refuse oversized
+  // scripts up front with a clean, judge-shaped error.
+  if (typeof params.code === "string" && params.code.length > MAX_SQL_CODE_CHARS) {
+    return {
+      type: "error",
+      executionId: params.executionId ?? "",
+      message: `SQL source too large (limit ${MAX_SQL_CODE_CHARS} characters).`,
+      stage: "bad-request",
+    };
+  }
+
+  const SQL = await getSqlJs().catch(() => null);
+  if (!SQL) {
+    // Clean judge-shaped failure instead of a 500 when the SQLite engine
+    // cannot be loaded on this image.
+    return {
+      type: "error",
+      executionId: params.executionId ?? "",
+      message: "The SQL runtime (sql.js) is not available on this image.",
+      stage: "toolchain",
+    };
+  }
   const db = new SQL.Database();
 
   try {
-    const results = db.exec(params.code); // [{ columns, values }]
+    let results;
+    try {
+      results = db.exec(params.code); // [{ columns, values }]
+    } catch (error) {
+      // Clean error shape — SQL error text only, no internal stack noise.
+      return {
+        type: "error",
+        executionId: params.executionId ?? "",
+        message:
+          error instanceof Error
+            ? error.message
+            : String(error) || "SQL error.",
+        stage: "execute",
+      };
+    }
+
     const rows = [];
     let columns = [];
+    let totalRowCount = 0;
+    let truncated = false;
     for (const r of results) {
       columns = r.columns;
-      for (const row of r.values) rows.push(row);
+      for (const row of r.values) {
+        totalRowCount += 1;
+        // Render cap: keep at most MAX_SQL_ROWS rows, remember the rest.
+        if (rows.length < MAX_SQL_ROWS) rows.push(row);
+        else truncated = true;
+      }
     }
     const hasResultSet = columns.length > 0;
     const payload = {
@@ -378,12 +453,19 @@ async function runSql(spec, params) {
           )
         : [],
       changes: db.getRowsModified(),
+      truncated,
+      totalRowCount,
     };
+
+    let stdout = renderSqlGrid(payload);
+    if (truncated) {
+      stdout += `\n… [output truncated — showing first ${MAX_SQL_ROWS} of ${totalRowCount} rows]`;
+    }
 
     return {
       type: "result",
       executionId: params.executionId,
-      stdout: renderSqlGrid(payload),
+      stdout,
       stderr: "",
       exitCode: 0,
       compileTimeMs: 0,
@@ -393,7 +475,7 @@ async function runSql(spec, params) {
   } catch (error) {
     return {
       type: "error",
-      executionId: params.executionId,
+      executionId: params.executionId ?? "",
       message: error instanceof Error ? error.message : String(error) || "SQL error.",
       stage: "execute",
     };

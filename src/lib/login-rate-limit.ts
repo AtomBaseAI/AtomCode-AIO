@@ -1,10 +1,13 @@
 /**
  * Login rate limiting — brute-force protection for credentials sign-in.
  *
- * Design: fixed-window failure counter keyed by lowercased email, held in
- * process memory (Map). One choke point inside the Credentials authorize()
- * callback covers BOTH entry paths — the login server action and direct
- * POSTs to /api/auth/callback/credentials — and, crucially, short-circuits
+ * Design: fixed-window failure counters held in process memory (Map), keyed
+ * two ways off the SAME store:
+ *   - per-account: lowercased email (gateAttempt/registerFailure/clearFailures)
+ *   - per-source : "ip:<ip>" (gateIp/registerIpFailure/clearIpFailures)
+ *
+ * One choke point inside the Credentials authorize() callback and the
+ * desktop login route covers BOTH entry paths, and crucially short-circuits
  * BEFORE any DB lookup or bcrypt compare, so a lockout costs ~0 CPU.
  *
  * Deliberately in-memory: no external store, survives per server instance,
@@ -12,10 +15,12 @@
  * not forensic accounting). Sweeps itself lazily on write; no timers.
  */
 
-const MAX_FAILURES = 5; // attempts before lockout
+const MAX_FAILURES = 5; // per-account attempts before lockout
+const IP_MAX_FAILURES = 30; // per-IP failures before the IP is locked
 const WINDOW_MS = 15 * 60 * 1000; // failure window (15 min)
 const LOCKOUT_MS = 15 * 60 * 1000; // lockout duration once locked
 const SWEEP_THRESHOLD = 512; // lazy sweep trigger (Map size)
+const IP_KEY_PREFIX = "ip:"; // namespaces IP keys inside the shared store
 
 interface Entry {
   failures: number;
@@ -40,6 +45,10 @@ function keyOf(email: string): string {
   return email.trim().toLowerCase();
 }
 
+function ipKeyOf(ip: string): string {
+  return IP_KEY_PREFIX + ip;
+}
+
 export interface AttemptGate {
   /** false → the attempt is rejected before authentication runs. */
   allowed: boolean;
@@ -52,7 +61,19 @@ export interface AttemptGate {
  * locked out from prior failures.
  */
 export function gateAttempt(email: string): AttemptGate {
-  const key = keyOf(email);
+  return gateKey(keyOf(email));
+}
+
+/**
+ * Per-IP gate — mirrors gateAttempt for source addresses. Use BEFORE any
+ * DB/bcrypt work so a distributed attack pays (almost) nothing per attempt.
+ * The lockout is 15 minutes after 30 failures inside a 15-minute window.
+ */
+export function gateIp(ip: string): AttemptGate {
+  return gateKey(ipKeyOf(ip));
+}
+
+function gateKey(key: string): AttemptGate {
   const entry = store.get(key);
   if (!entry) return { allowed: true, retryAfterSec: 0 };
 
@@ -71,7 +92,18 @@ export function gateAttempt(email: string): AttemptGate {
  * (MAX_FAILURES within WINDOW_MS) is exhausted.
  */
 export function registerFailure(email: string): void {
-  const key = keyOf(email);
+  recordKeyFailure(keyOf(email), MAX_FAILURES);
+}
+
+/**
+ * Record a failed authentication for a source IP. Locks the IP when
+ * IP_MAX_FAILURES failures accumulate within WINDOW_MS.
+ */
+export function registerIpFailure(ip: string): void {
+  recordKeyFailure(ipKeyOf(ip), IP_MAX_FAILURES);
+}
+
+function recordKeyFailure(key: string, maxFailures: number): void {
   const now = Date.now();
 
   if (store.size >= SWEEP_THRESHOLD) sweep(now);
@@ -88,7 +120,7 @@ export function registerFailure(email: string): void {
   }
 
   entry.failures += 1;
-  if (entry.failures >= MAX_FAILURES) {
+  if (entry.failures >= maxFailures) {
     entry.lockedUntil = now + LOCKOUT_MS;
   }
 }
@@ -96,6 +128,26 @@ export function registerFailure(email: string): void {
 /** Clear all failures for the email — called on successful sign-in. */
 export function clearFailures(email: string): void {
   store.delete(keyOf(email));
+}
+
+/** Clear the failure budget for a source IP — called on successful sign-in. */
+export function clearIpFailures(ip: string): void {
+  store.delete(ipKeyOf(ip));
+}
+
+/**
+ * Best-effort client IP from proxy headers — first value of
+ * x-forwarded-for (the originating client, per de-facto proxy convention),
+ * or "unknown" when the header is absent. Multi-hop chains ("client, proxy1,
+ * proxy2") deliberately use the FIRST entry; without a trusted-proxy stack
+ * this is spoofable, so treat it as a throttle key, not an identity.
+ */
+export function ipFromRequest(
+  req?: Request | { headers?: Headers } | null
+): string {
+  const forwarded = req?.headers?.get("x-forwarded-for");
+  const first = forwarded?.split(",")[0]?.trim();
+  return first || "unknown";
 }
 
 /** Max failures that trigger a lockout — exported for message copy. */

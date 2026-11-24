@@ -7,10 +7,10 @@ import { createTopicWithGeneral, ensureGeneralTopic } from "@/lib/topics";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-/**
- * No per-import size cap — admins may import as many topics as they want.
- * Topics merge by name, so imports stay sequential (race-free) but uncapped.
- */
+/** Per-batch sanity cap so one import cannot flood the database. */
+const MAX_ROWS_PER_IMPORT = 1000;
+/** Crude DoS guard: reject oversized uploads before parsing the body. */
+const MAX_BODY_BYTES = 25 * 1024 * 1024; // 25 MB
 
 interface ImportIssue {
     index: number;
@@ -30,6 +30,14 @@ export async function POST(req: Request, ctx: RouteContext) {
     const guard = await requireSuperAdminApi();
     if (!guard.ok) return guard.response;
 
+    const contentLength = Number(req.headers.get("content-length") ?? 0);
+    if (contentLength > MAX_BODY_BYTES) {
+        return NextResponse.json(
+            { error: "File too large (max 25 MB)." },
+            { status: 413 }
+        );
+    }
+
     const { id } = await ctx.params;
     const group = await db.questionGroup.findUnique({ where: { id } });
     if (!group) {
@@ -46,6 +54,12 @@ export async function POST(req: Request, ctx: RouteContext) {
     if (!raw || raw.length === 0) {
         return NextResponse.json(
             { error: "No topics found in the file." },
+            { status: 400 }
+        );
+    }
+    if (raw.length > MAX_ROWS_PER_IMPORT) {
+        return NextResponse.json(
+            { error: "Too many rows (max 1000)" },
             { status: 400 }
         );
     }
@@ -81,13 +95,12 @@ export async function POST(req: Request, ctx: RouteContext) {
                 if (r.topics === 0) skippedTopics++;
             });
         } catch (err) {
+            // Never surface raw driver/prisma text to the client.
+            console.error(`[question-groups/${id}/topics/import] failed:`, err);
             errors.push({
                 index: i + 1,
                 name,
-                error:
-                    err instanceof Error
-                        ? err.message
-                        : "Database error while creating the topic",
+                error: "Import failed. Check the file format and try again.",
             });
         }
     }

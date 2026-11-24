@@ -95,7 +95,11 @@ const PrepareAssessment = ({ data, aid, cid, uid }: PrepareAssessmentProps) => {
             localStorage.removeItem("tabSwitchCount")
             localStorage.removeItem("testInProgress")
             if (!permissionsStatus.camera) {
-                await navigator.mediaDevices.getUserMedia({ video: true })
+                // Probe + immediately release the MediaStream — the old code
+                // leaked it, keeping the camera indicator lit after the modal
+                // closed (audit finding).
+                const probe = await navigator.mediaDevices.getUserMedia({ video: true })
+                probe.getTracks().forEach((t) => t.stop())
             }
 
             if (!permissionsStatus.clipboard) {

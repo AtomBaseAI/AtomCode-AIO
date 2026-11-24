@@ -11,6 +11,11 @@ import {
 
 type RouteContext = { params: Promise<{ id: string }> };
 
+/** Per-batch sanity cap so one import cannot flood the database. */
+const MAX_ROWS_PER_IMPORT = 1000;
+/** Crude DoS guard: reject oversized uploads before parsing the body. */
+const MAX_BODY_BYTES = 25 * 1024 * 1024; // 25 MB
+
 interface ImportIssue {
     index: number;
     title: string;
@@ -28,6 +33,14 @@ export async function POST(req: Request, ctx: RouteContext) {
     const guard = await requireSuperAdminApi();
     if (!guard.ok) return guard.response;
 
+    const contentLength = Number(req.headers.get("content-length") ?? 0);
+    if (contentLength > MAX_BODY_BYTES) {
+        return NextResponse.json(
+            { error: "File too large (max 25 MB)." },
+            { status: 413 }
+        );
+    }
+
     const { id } = await ctx.params;
     const group = await db.questionGroup.findUnique({ where: { id } });
     if (!group) {
@@ -44,6 +57,12 @@ export async function POST(req: Request, ctx: RouteContext) {
     if (!raw || raw.length === 0) {
         return NextResponse.json(
             { error: "No questions found in the file." },
+            { status: 400 }
+        );
+    }
+    if (raw.length > MAX_ROWS_PER_IMPORT) {
+        return NextResponse.json(
+            { error: "Too many rows (max 1000)" },
             { status: 400 }
         );
     }
@@ -93,13 +112,15 @@ export async function POST(req: Request, ctx: RouteContext) {
             if (r.status === "fulfilled") {
                 created++;
             } else {
+                // Never surface raw driver/prisma text to the client.
+                console.error(
+                    `[question-groups/${id}/questions/import] create failed:`,
+                    r.reason
+                );
                 errors.push({
                     index: q.index,
                     title: q.title,
-                    error:
-                        r.reason instanceof Error
-                            ? r.reason.message
-                            : "Database error while creating the question",
+                    error: "Import failed. Check the file format and try again.",
                 });
             }
         });

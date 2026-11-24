@@ -17,6 +17,9 @@ export const addMCQ = async (
     values: z.infer<typeof AddMCQSchema>,
     mcqtype: string
 ) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can add MCQs." };
+
     const parsedData = {
         title: values.title,
         description: values.description,
@@ -82,13 +85,17 @@ export const deleteMCQ = async (
 export const updateMCQ = async (
     values: z.infer<typeof MCQUpdateSchema>
 ) => {
-    const mcqId = values.id;
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can update MCQs." };
+
+    // Strip the id from the written data — it is only the where-key.
+    const { id: mcqId, ...data } = values;
     await db.mCQQuestion.update({
         where: {
             id: mcqId
         },
         data: {
-            ...values,
+            ...data,
             // undefined stays undefined (prisma ignores it) — only a
             // provided value is normalized into easy/medium/hard.
             difficulty: values.difficulty
@@ -151,14 +158,56 @@ export const importmcqs = async (
     mcqtype: string,
     questionGroupId?: string
 ) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can import MCQs." };
+
     if (!questionGroupId) {
         return { error: "Select the question group the imported MCQs belong to" };
     }
+
+    // Target validation BEFORE any parsing — the question group and the
+    // target module/assessment must exist and match the selected type, so
+    // a forged mid/aid pair can never attach rows to the wrong parent.
+    if (mcqtype !== "module" && mcqtype !== "assessment") {
+        return { error: "Invalid MCQ type — must be 'module' or 'assessment'." };
+    }
+    const [group, targetModule, targetAssessment] = await Promise.all([
+        db.questionGroup.findUnique({
+            where: { id: questionGroupId },
+            select: { id: true },
+        }),
+        mcqtype === "module"
+            ? db.module.findUnique({ where: { id: mid }, select: { id: true } })
+            : Promise.resolve(null),
+        mcqtype === "assessment"
+            ? db.assessments.findUnique({ where: { id: aid }, select: { id: true } })
+            : Promise.resolve(null),
+    ]);
+    if (!group) {
+        return { error: "The selected question group does not exist." };
+    }
+    if (mcqtype === "module" && !targetModule) {
+        return { error: "The target module for this import does not exist." };
+    }
+    if (mcqtype === "assessment" && !targetAssessment) {
+        return { error: "The target assessment for this import does not exist." };
+    }
+
     const parsedData = Papa.parse(csvData, {
         header: true,
         skipEmptyLines: true,
     });
     const rawData = parsedData.data;
+
+    if (rawData.length === 0) {
+        return { error: "The CSV file contains no MCQ rows." };
+    }
+    // Hard cap: one import may never create more than 1000 MCQs.
+    if (rawData.length > 1000) {
+        return {
+            error: `CSV too large — import is limited to 1000 MCQs per batch (got ${rawData.length}).`,
+        };
+    }
 
     const mcqdata = rawData.map((row: any) => ({
         title: row.title?.trim(),
@@ -188,32 +237,35 @@ export const importmcqs = async (
     const mcqs = validationResult.data;
 
     try {
-        for (const mcq of mcqs) {
-            const data: any = {
-                title: mcq.title,
-                description: mcq.description,
-                difficulty: mcq.difficulty,
-                Option1: mcq.Option1,
-                Option2: mcq.Option2,
-                Option3: mcq.Option3,
-                Option4: mcq.Option4,
-                CorrectOption: mcq.CorrectOption,
-                referenceimg: mcq.referenceimg,
-                codesnippet: mcq.codesnippet,
-                iscodesnippet: mcq.iscodesnippet,
-                topic: mcq.topic,
-                subtopic: mcq.subtopic,
-                questionGroupId,
-            };
+        // One transaction — a failing row rolls back the whole batch so the
+        // question bank never ends up half-imported.
+        await db.$transaction(async (tx) => {
+            for (const mcq of mcqs) {
+                const data: any = {
+                    title: mcq.title,
+                    description: mcq.description,
+                    difficulty: mcq.difficulty,
+                    Option1: mcq.Option1,
+                    Option2: mcq.Option2,
+                    Option3: mcq.Option3,
+                    Option4: mcq.Option4,
+                    CorrectOption: mcq.CorrectOption,
+                    referenceimg: mcq.referenceimg,
+                    codesnippet: mcq.codesnippet,
+                    iscodesnippet: mcq.iscodesnippet,
+                    topic: mcq.topic,
+                    subtopic: mcq.subtopic,
+                    questionGroupId,
+                };
 
-            if (mcqtype === "module") {
-                data.module = { connect: { id: mid } };
-            } else if (mcqtype === "assessment") {
-                data.Assessments = { connect: { id: aid} };
+                if (mcqtype === "module") {
+                    data.module = { connect: { id: mid } };
+                } else if (mcqtype === "assessment") {
+                    data.Assessments = { connect: { id: aid} };
+                }
+                await tx.mCQQuestion.create({ data });
             }
-            // console.log(data)
-            await db.mCQQuestion.create({ data });
-        }
+        });
 
         await revalidatePath("/admin/courses");
         return { success: "All MCQs imported successfully!" };

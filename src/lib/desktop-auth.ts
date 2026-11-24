@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { compare } from "bcrypt-ts";
 import { db } from "@/lib/db";
 import { resolveAuthSecret } from "@/lib/auth-secret";
 
@@ -20,11 +19,17 @@ export type DesktopSession = {
   email: string;
   name: string | null;
   role: "user";
+  /** Row tokenVersion at mint time — re-checked against the DB on every verify. */
+  jv: number;
   iat: number;
   exp: number;
 };
 
-const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
+// 24 hours — was 7 days. Shortened as part of the revocation hardening: the
+// token carries the row's tokenVersion, and a shorter lifetime bounds the
+// window an attacker holds a stolen token (revocation still happens on every
+// request via the tokenVersion check below + password-change bumps).
+const TOKEN_TTL_SECONDS = 60 * 60 * 24;
 
 const getSecret = () => resolveAuthSecret();
 
@@ -38,6 +43,7 @@ export function createDesktopToken(payload: {
   sub: string;
   email: string;
   name: string | null;
+  jv: number;
 }): string {
   const now = Math.floor(Date.now() / 1000);
   const body: DesktopSession = {
@@ -65,6 +71,9 @@ export function verifyDesktopToken(token: string | null): DesktopSession | null 
       Buffer.from(payloadB64, "base64url").toString("utf8")
     ) as DesktopSession;
     if (!session?.sub || session.role !== "user") return null;
+    // Tokens minted before the revocation hardening carry no jv — reject
+    // them here so the DB check below can never be skipped by an old token.
+    if (typeof session.jv !== "number") return null;
     if (typeof session.exp !== "number" || session.exp * 1000 < Date.now())
       return null;
     return session;
@@ -81,7 +90,10 @@ export function extractToken(req: Request): string | null {
 
 /**
  * Verifies the Bearer token AND loads the student row from the DB,
- * making sure the account still exists and is active.
+ * making sure the account still exists, is active, AND that the row's
+ * tokenVersion still matches the jv frozen in the token — a password change
+ * (bumpTokenVersion) or any other revocation invalidates outstanding tokens
+ * immediately, even though the HMAC signature is still valid.
  * Returns null when unauthorized — routes respond with 401/403.
  */
 export async function requireDesktopStudent(req: Request) {
@@ -90,6 +102,11 @@ export async function requireDesktopStudent(req: Request) {
 
   const user = await db.user.findUnique({ where: { id: session.sub } });
   if (!user || !user.isActive) return null;
+
+  // Revocation: the token is bound to the tokenVersion at mint time. Legacy
+  // rows default to 0, and verifyDesktopToken already rejects tokens without
+  // a numeric jv — so a mismatch here is always a genuine revocation.
+  if ((user.tokenVersion ?? 0) !== session.jv) return null;
 
   return { session, user };
 }
@@ -126,4 +143,5 @@ export async function authGuard(req: Request) {
   return { ctx, response: null };
 }
 
-export { compare as comparePasswords };
+// comparePasswords was previously re-exported for the desktop routes; the
+// login route now imports compare directly from bcrypt-ts.

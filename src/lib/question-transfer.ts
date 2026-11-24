@@ -10,6 +10,7 @@
  */
 
 import { unparse } from "papaparse";
+import { csvSafeCell } from "@/export/result-export/csv-safe";
 
 /** Languages the judge supports — keep in sync with runtime-registry. */
 export const TRANSFER_LANG_IDS = [
@@ -118,12 +119,16 @@ const CSV_HEADERS: Record<QuestionTransferField, string> = {
 /**
  * Build the CSV download for a set of questions (RFC-4180 quoting via
  * papaparse — multi-line server code and test cases are quoted correctly).
+ * String cells are passed through csvSafeCell so spreadsheet apps cannot
+ * interpret =/+/-/@-prefixed content as formulas (column count untouched).
  */
 export function buildQuestionsCsv(questions: QuestionTransferRow[]): string {
     const rows = questions.map((q) => {
         const row: Record<string, unknown> = {};
         for (const field of QUESTION_TRANSFER_FIELDS) {
-            row[CSV_HEADERS[field]] = q[field] ?? "";
+            const value = q[field] ?? "";
+            row[CSV_HEADERS[field]] =
+                typeof value === "string" ? csvSafeCell(value) : value;
         }
         return row;
     });

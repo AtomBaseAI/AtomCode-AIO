@@ -4,9 +4,15 @@ import { requireSuperAdminApi } from "@/lib/api-admin-guard";
 import {
     runGroupImport,
     runGroupImportToJson,
+    parseGroupImportEnvelope,
     GROUP_IMPORT_CHUNK_SIZE,
     type GroupImportEvent,
 } from "@/lib/question-group-import";
+
+/** Total-record cap across topics + questions + MCQs in one import. */
+const MAX_RECORDS_PER_IMPORT = 5000;
+/** Crude DoS guard: reject oversized uploads before parsing the body. */
+const MAX_BODY_BYTES = 25 * 1024 * 1024; // 25 MB
 
 /**
  * POST /api/question-groups/import
@@ -40,7 +46,32 @@ export async function POST(req: Request) {
     const guard = await requireSuperAdminApi();
     if (!guard.ok) return guard.response;
 
+    const contentLength = Number(req.headers.get("content-length") ?? 0);
+    if (contentLength > MAX_BODY_BYTES) {
+        return NextResponse.json(
+            { error: "File too large (max 25 MB)." },
+            { status: 413 }
+        );
+    }
+
     const body = await req.json().catch(() => null);
+
+    // Record-count cap (topics + code questions + MCQs). If the envelope
+    // itself is invalid, skip the count and let the import report the
+    // original parse error unchanged.
+    const parsedForCount = parseGroupImportEnvelope(body);
+    if (parsedForCount.ok) {
+        const totalRecords =
+            parsedForCount.rawTopics.length +
+            parsedForCount.rawQuestions.length +
+            parsedForCount.rawMcqs.length;
+        if (totalRecords > MAX_RECORDS_PER_IMPORT) {
+            return NextResponse.json(
+                { error: "Too many rows (max 5000)" },
+                { status: 400 }
+            );
+        }
+    }
 
     const url = new URL(req.url);
     const wantsStream =
@@ -72,14 +103,17 @@ export async function POST(req: Request) {
                     send(event);
                 }
             } catch (err) {
+                // Never leak raw error text through the stream (audit
+                // finding) — log server-side, send a generic message.
+                // Status 400 matches the done-event contract (201 | 400);
+                // the wizard only distinguishes 201 (success) from failure.
+                console.error("[question-groups/import] stream failed:", err);
                 send({
                     t: "done",
-                    status: 500,
+                    status: 400,
                     result: {
                         error:
-                            err instanceof Error
-                                ? `Import failed unexpectedly: ${err.message}`
-                                : "Import failed unexpectedly.",
+                            "Import failed. Check the file format and try again.",
                     },
                 });
             } finally {

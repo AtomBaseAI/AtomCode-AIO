@@ -1,5 +1,70 @@
 import type { NextConfig } from "next";
 
+/**
+ * Server Actions origin allow-list.
+ *
+ * - Development keeps the sandbox/preview wildcard list EXACTLY as before —
+ *   the live preview gateway (space-z.ai / fcapp.run hosts) depends on it.
+ * - Production is strict: ONLY hosts from ALLOWED_ORIGINS (comma-separated
+ *   exact hostnames, no wildcards). Empty/unset → Next's same-origin default
+ *   (empty array), so a forgotten env var cannot widen the attack surface.
+ */
+const devAllowedOrigins = [
+  "*.space-z.ai",
+  "preview-chat-1945cbd9-55db-4b00-b567-bac737eb3797.space-z.ai",
+  "localhost:3000",
+  "127.0.0.1:3000",
+  "ws-fa-ebff-ceda-mdomjldeyy.cn-hongkong-vpc.fcapp.run",
+  "*.cn-hongkong-vpc.fcapp.run",
+  "*.vercel.app",
+  "*.atomcode.dev",
+  "*.atomapps.space",
+];
+
+const prodAllowedOrigins = (process.env.ALLOWED_ORIGINS ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter((origin) => {
+    if (origin === "") return false;
+    // Exact hostnames only — reject anything with a wildcard or protocol.
+    return !origin.includes("*") && !origin.includes("://");
+  });
+
+const serverActionsAllowedOrigins =
+  process.env.NODE_ENV === "production" ? prodAllowedOrigins : devAllowedOrigins;
+
+/**
+ * Pragmatic CSP: Next dev/turbopack and CodeMirror need 'unsafe-eval'/'unsafe-inline';
+ * img-src allows arbitrary https because custom course branding embeds logos
+ * from arbitrary CDN hosts (same trade-off as images.remotePatterns below);
+ * frame-src https: is needed because module concept URLs embed external
+ * https iframes; frame-ancestors 'none' pairs with X-Frame-Options: DENY.
+ */
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' https: data: blob:",
+  "font-src 'self' data:",
+  "connect-src 'self' https:",
+  "frame-src https:",
+  "worker-src 'self' blob:",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "object-src 'none'",
+].join("; ");
+
+const securityHeaders = [
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(self), microphone=(), geolocation=(self), payment=(), usb=()",
+  },
+  { key: "Content-Security-Policy", value: contentSecurityPolicy },
+];
+
 const nextConfig: NextConfig = {
   // Standalone output is opt-in for self-hosting (Docker / bare node server):
   //   bun run build:standalone && node .next/standalone/server.js
@@ -26,9 +91,19 @@ const nextConfig: NextConfig = {
   // static chunks) — Next 16 blocks unknown cross-origin dev requests.
   allowedDevOrigins: ["*.space-z.ai", "*.cn-hongkong-vpc.fcapp.run"],
   typescript: {
-    ignoreBuildErrors: true,
+    // Type errors must never be silently swallowed in production builds.
+    ignoreBuildErrors: process.env.NODE_ENV !== "production",
   },
   reactStrictMode: false,
+  poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ];
+  },
   // Dev-only overlay: keep the indicator out of the sidebar's bottom-left
   // corner, where it covered the settings gear icon.
   devIndicators: {
@@ -39,18 +114,14 @@ const nextConfig: NextConfig = {
   // Actions reject that mismatch unless the origin is explicitly allowed.
   experimental: {
     serverActions: {
-      allowedOrigins: [
-        "*.space-z.ai",
-        "preview-chat-1945cbd9-55db-4b00-b567-bac737eb3797.space-z.ai",
-        "localhost:3000",
-        "127.0.0.1:3000",
-        "ws-fa-ebff-ceda-mdomjldeyy.cn-hongkong-vpc.fcapp.run",
-        "*.cn-hongkong-vpc.fcapp.run",
-        "*.vercel.app",
-        "*.atomcode.dev",
-        "*.atomapps.space",
-      ],
+      allowedOrigins: serverActionsAllowedOrigins,
     },
+    // Client router cache: keep back/forward navigations client-side for 30s
+    // instead of re-requesting server components on every navigation.
+    staleTimes: {
+      dynamic: 30,
+    },
+    optimizePackageImports: ["lucide-react", "framer-motion", "recharts"],
   },
   images: {
     remotePatterns: [
@@ -60,8 +131,10 @@ const nextConfig: NextConfig = {
         pathname: "**",
       },
       {
-        // Wildcard: original student app allowed any https CDN (branding logos
-        // may point at arbitrary hosts). Prevents next/image crashes.
+        // TRADE-OFF (audit): wildcard hostname means next/image will proxy
+        // images from ANY https host. Custom course branding needs arbitrary
+        // CDN hosts, so we keep it — but that widens the SSRF/image-flood
+        // surface. Tighten to an allow-list if branding moves to fixed hosts.
         protocol: "https",
         hostname: "**",
       },

@@ -3,12 +3,22 @@
  * Run: bun scripts/seed-superadmin.ts
  *
  * Creates:
- *   1. The SuperAdmin account  (superadmin@atomcode.dev / Mr@1811321)
- *   2. The static auth code    (Setting "superadmin.authcode" = "1997")
+ *   1. The SuperAdmin account  (default superadmin@atomcode.dev / Mr@1811321)
+ *   2. The static auth code    (Setting "superadmin.authcode", default "1997")
  *   3. Demo students (if missing) so the revenue dashboard has data
  *   4. Batch-wise ANNUAL billing rows — two premium batches (2024 + 2025
  *      collected, current year pending) and one free batch. INR, cash
  *      collected by the institution; never per-student bills.
+ *
+ * Credentials come from the environment and override the historical dev
+ * defaults:
+ *   SUPERADMIN_EMAIL        (default: superadmin@atomcode.dev)
+ *   SUPERADMIN_PASSWORD     (default: Mr@1811321)
+ *   AUTHCODE | SUPERADMIN_AUTHCODE  (default: 1997)
+ *
+ * ⚠️ Those defaults are PUBLIC in this repository. In production the seed
+ * REFUSES to run with any of them unset (exit 1); in dev it proceeds but
+ * logs a loud warning.
  *
  * Idempotent: upserts by unique keys, skips existing records.
  */
@@ -17,9 +27,55 @@ import { genSaltSync, hashSync } from "bcrypt-ts";
 
 const db = new PrismaClient();
 
-const SUPERADMIN_EMAIL = "superadmin@atomcode.dev";
-const SUPERADMIN_PASSWORD = "Mr@1811321";
-const AUTHCODE = "1997";
+const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL?.trim() || "superadmin@atomcode.dev";
+const SUPERADMIN_PASSWORD =
+  process.env.SUPERADMIN_PASSWORD || "Mr@1811321";
+const AUTHCODE =
+  process.env.AUTHCODE?.trim() ||
+  process.env.SUPERADMIN_AUTHCODE?.trim() ||
+  "1997";
+
+/** Historical dev defaults — public in the repo, never acceptable in prod. */
+const PUBLIC_DEFAULTS = {
+  email: "superadmin@atomcode.dev",
+  password: "Mr@1811321",
+  code: "1997",
+};
+
+function refusePublicDefaultsInProduction() {
+  if (process.env.NODE_ENV !== "production") {
+    if (
+      SUPERADMIN_EMAIL === PUBLIC_DEFAULTS.email ||
+      SUPERADMIN_PASSWORD === PUBLIC_DEFAULTS.password ||
+      AUTHCODE === PUBLIC_DEFAULTS.code
+    ) {
+      console.warn(
+        "⚠️  SEED SECURITY WARNING (dev only): the super-admin credentials in use are the PUBLIC " +
+          "repo defaults (superadmin@atomcode.dev / Mr@1811321 / code 1997). They exist purely for " +
+          "local development. Override them via SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD and " +
+          "AUTHCODE/SUPERADMIN_AUTHCODE — and rotate them before any real deployment."
+      );
+    }
+    return;
+  }
+
+  const unset: string[] = [];
+  if (SUPERADMIN_EMAIL === PUBLIC_DEFAULTS.email) unset.push("SUPERADMIN_EMAIL");
+  if (SUPERADMIN_PASSWORD === PUBLIC_DEFAULTS.password) unset.push("SUPERADMIN_PASSWORD");
+  if (AUTHCODE === PUBLIC_DEFAULTS.code) unset.push("AUTHCODE/SUPERADMIN_AUTHCODE");
+
+  if (unset.length > 0) {
+    console.error(
+      "REFUSING to seed in production: " + unset.join(", ") +
+        " not set — the fallback super-admin credentials are PUBLIC in the repository " +
+        "and would leave a trivially-guessable super admin account. Set SUPERADMIN_EMAIL, " +
+        "SUPERADMIN_PASSWORD and AUTHCODE (or SUPERADMIN_AUTHCODE) to strong values and re-run."
+    );
+    process.exit(1);
+  }
+}
+
+refusePublicDefaultsInProduction();
 
 type DemoUser = {
   name: string;
@@ -58,7 +114,7 @@ async function main() {
       password: hash(SUPERADMIN_PASSWORD),
     },
   });
-  console.log("superadmin →", `${sa.email} / ${SUPERADMIN_PASSWORD}`);
+  console.log("superadmin →", `${sa.email} / (password from env or dev default — never printed)`);
 
   // 2. Auth code
   await db.setting.upsert({
@@ -66,7 +122,8 @@ async function main() {
     update: { value: AUTHCODE },
     create: { key: "superadmin.authcode", value: AUTHCODE },
   });
-  console.log("authcode  →", AUTHCODE);
+  // Never echo the code back — it lands in CI/deploy logs otherwise.
+  console.log("authcode  → set (from env or dev default; value not printed)");
 
   // 3. Demo students (upsert — safe to re-run)
   const password = hash("User@Atom");

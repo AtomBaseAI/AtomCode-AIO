@@ -9,7 +9,7 @@ import {
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import CodeQuestion from '@/components/student-role/practice/code/code-question';
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { eclipse } from '@uiw/codemirror-theme-eclipse';
@@ -27,6 +27,7 @@ import {
 import { usePageEnter } from '@/hooks/MouseEnter';
 import { submitcode, submitquestion } from '@/actions/submitquestion';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { codedataUpdateModule } from '@/actions/submitmodule';
 import { autocompletion } from "@codemirror/autocomplete";
 import type { Extension } from "@codemirror/state";
@@ -43,7 +44,9 @@ import {
     setStoredVersionForLang,
     LANGUAGES,
 } from '@/lib/runtime-registry';
-import { judgeRunSingle, judgeRunTestCases } from '@/lib/judge';
+// Judge execution is server-side: /api/execute/testcases judges the
+// question's cases and never returns expected outputs.
+import { runQuestionTestcases, runErrorMessage, type TestCaseResult, type RunTestcasesSuccess } from '@/components/student-role/execute-api';
 
 interface CodeQuestion {
     id: string;
@@ -54,13 +57,6 @@ interface CodeQuestion {
     sampleinput2: string;
     sampleoutput1: string;
     sampleoutput2: string;
-    input1: string;
-    input2: string;
-    input3: string;
-    output1: string;
-    output2: string;
-    output3: string;
-    sourcecode: string | null;
     referenceimg: string | null;
     maxscore: number;
     difficulty: string;
@@ -92,9 +88,8 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
         setSamplesuccess(false);
         setShowSubmit(false);
         setisSubmitted(false);
-        setTestcase1Status("");
-        setTestcase2Status("");
-        setTestcase3Status("");
+        setTestResults(null);
+        setServerScore(null);
         setCompileCount(0);
         setErrorCount(0);
         setExecuting(false);
@@ -119,9 +114,14 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
     const [userCode, setUserCode] = useState(`// code here ! \n\n`)
     const [showSubmit, setShowSubmit] = useState(false)
     const [isSubmitted, setisSubmitted] = useState(false)
-    const [testcase1Status, setTestcase1Status] = useState<string>("")
-    const [testcase2Status, setTestcase2Status] = useState<string>("")
-    const [testcase3Status, setTestcase3Status] = useState<string>("")
+    // Server-judged results for the current question (Test 1..N). Each entry
+    // exposes pass + actual output only — the endpoint NEVER returns the
+    // expected outputs, so nothing here can leak them to the student.
+    const [testResults, setTestResults] = useState<TestCaseResult[] | null>(null)
+    // Score computed server-side for the last judged run. Null until the
+    // endpoint answers; the legacy client-side mirror below is used as the
+    // submit-time fallback ONLY when judging failed.
+    const [serverScore, setServerScore] = useState<number | null>(null)
     const [compileCount, setCompileCount] = useState<number>(0)
     const [errorCount, setErrorCount] = useState<number>(0)
     const [testDuration, setTestDuration] = useState<number>(0);
@@ -168,35 +168,36 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
         try {
             setShowModal(true);
             setExecuting(true);
-            // Judge execution — Lambda judge, server toolchain fallback for C/C++/Java.
-            // SQL questions prepend their optional header (setup) code: it
-            // executes first, then the student's query.
-            const res = await judgeRunSingle({
-                lang: activeLang,
-                versionProfileId,
+            // ONE server-judged call — the endpoint runs the question's test
+            // cases and returns pass/actual only (never expected outputs).
+            const outcome = await runQuestionTestcases({
+                questionId: currentQuestion.id,
                 code: userCode,
-                headerCode: activeLang === "sql" ? currentQuestion.headerCode : undefined,
-                input: currentQuestion.sampleinput1,
-                expectedOutput: currentQuestion.sampleoutput1,
+                language: activeLang,
             });
-            if (res.compileMessage === "Success") {
+            if (!outcome.ok) {
+                toast.error(runErrorMessage(outcome));
+                setShowModal(false);
+                setExecuting(false);
+                return;
+            }
+            const first = outcome.results[0];
+            applyJudgeOutcome(outcome);
+            if (first?.error) {
+                toast.error("Compilation / runtime error!");
+                setError(true);
+                setErrorCount((c) => c + 1);
+                setOutputData(first.error);
+                setShowSubmit(false)
+            } else if (first?.pass) {
                 toast.success("Sample Testcase Passed");
-                setOutputData(res.output);
+                setOutputData(first.actual);
                 setSamplesuccess(true);
-                if (score === 0) {
-                    setScore(score + 1);
-                }
-            } else if (res.compileMessage === "Failed") {
+            } else {
                 toast.error("Sample Testcase Failed!");
                 setSamplesuccess(false);
-                setErrorCount(errorCount + 1);
-                setOutputData(res.output);
-                setShowSubmit(false)
-            } else {
-                toast.error(res.timedOut ? "Execution timed out!" : "Compilation Error!");
-                setError(true);
-                setOutputData(res.output || res.stderr);
-                setErrorCount(errorCount + 1);
+                setErrorCount((c) => c + 1);
+                setOutputData(first?.actual ?? "");
                 setShowSubmit(false)
             }
 
@@ -208,54 +209,39 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
         }
     };
 
+    /** Store a successful judge outcome: server score first; the legacy
+     *  per-case mirror (1 pt sample + 3 pts/case) only feeds the submit-time
+     *  fallback used when the endpoint was unavailable. */
+    const applyJudgeOutcome = (outcome: RunTestcasesSuccess) => {
+        setTestResults(outcome.results);
+        setServerScore(outcome.score);
+        setScore(outcome.results[0]?.pass ? 1 : 0);
+        setScore1(outcome.results[0]?.pass ? 3 : 0);
+        setScore2(outcome.results[1]?.pass ? 3 : 0);
+        setScore3(outcome.results[2]?.pass ? 3 : 0);
+    };
+
     const RunTestCases = async () => {
         setExecutingTestcases(true);
-        setTestcase1Status("")
-        setTestcase2Status("")
-        setTestcase3Status("")
+        setTestResults(null);
         setRunTestModel(true);
         try {
-            // Judge execution — Lambda judge, server toolchain fallback for C/C++/Java.
-            const outcomes = await judgeRunTestCases({
-                lang: activeLang,
-                versionProfileId,
+            // ONE server-judged call — replaces the old client loop that
+            // shipped hidden test inputs/expected outputs to the judge.
+            const outcome = await runQuestionTestcases({
+                questionId: currentQuestion.id,
                 code: userCode,
-                headerCode: activeLang === "sql" ? currentQuestion.headerCode : undefined,
-                cases: [
-                    { input: currentQuestion.input1, expectedOutput: currentQuestion.output1 },
-                    { input: currentQuestion.input2, expectedOutput: currentQuestion.output2 },
-                    { input: currentQuestion.input3, expectedOutput: currentQuestion.output3 },
-                ],
+                language: activeLang,
             });
-            const [case1, case2, case3] = outcomes;
-
-            setTestcase1Status(case1.status === "Success" ? "pass" : "fail");
-            setTestcase2Status(case2.status === "Success" ? "pass" : "fail");
-            setTestcase3Status(case3.status === "Success" ? "pass" : "fail");
-
-            if (case1.status === "Success") {
-                if (score1 === 0) {
-                    setScore1(score1 + 3);
-                }
+            if (!outcome.ok) {
+                toast.error(runErrorMessage(outcome));
+                setExecutingTestcases(false);
+                setRunTestModel(false);
+                return;
             }
-            else if (case1.status === "Error") {
-                setErrorCount(errorCount + 1);
-            }
-            if (case2.status === "Success") {
-                if (score2 === 0) {
-                    setScore2(score2 + 3);
-                }
-            }
-            else if (case2.status === "Error") {
-                setErrorCount(errorCount + 1);
-            }
-            if (case3.status === "Success") {
-                if (score3 === 0) {
-                    setScore3(score3 + 3);
-                }
-            }
-            else if (case3.status === "Error") {
-                setErrorCount(errorCount + 1);
+            applyJudgeOutcome(outcome);
+            for (const r of outcome.results) {
+                if (r.error) setErrorCount((c) => c + 1);
             }
             setExecutingTestcases(false);
             setShowSubmit(true);
@@ -317,11 +303,15 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
         }
     };
     const submitQuestion = () => {
+        const testcaseStatus = (index: number) =>
+            testResults?.[index] ? (testResults[index].pass ? "pass" : "fail") : "";
         const submitData = {
             "userId": uid,
             "questionId": currentQuestion.id,
             "moduleId": mid,
-            "score": score + score1 + score2 + score3,
+            // Trust the server-computed score when judging succeeded; the
+            // legacy client mirror is only a fallback for endpoint failures.
+            "score": serverScore ?? (score + score1 + score2 + score3),
             "compiles": compileCount,
             "errors": errorCount,
             "submissiontype": "usersubmit",
@@ -329,9 +319,9 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
             "status": "submitted",
             "usercode": userCode,
             "duration": testDuration.toString(),
-            "testcase1status": testcase1Status,
-            "testcase2status": testcase2Status,
-            "testcase3status": testcase3Status,
+            "testcase1status": testcaseStatus(0),
+            "testcase2status": testcaseStatus(1),
+            "testcase3status": testcaseStatus(2),
         }
         // console.log(submitData)
         startTransition(() => {
@@ -402,6 +392,20 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
         completion: ReturnType<typeof getCustomCompletionSource>;
     } | null>(null);
 
+    // Stable per-language extension array — rebuilding the array (and the
+    // autocompletion() extension) on every render recreated CodeMirror's
+    // internal state each render (the audit's memory leak).
+    const codeMirrorExtensions = useMemo<Extension[]>(() => {
+        const exts: Extension[] = [];
+        if (languageExtension?.extension) {
+            exts.push(languageExtension.extension as Extension);
+        }
+        if (languageExtension?.completion) {
+            exts.push(autocompletion({ override: [languageExtension.completion] }));
+        }
+        return exts;
+    }, [languageExtension]);
+
     useEffect(() => {
         if (
             activeLang &&
@@ -471,9 +475,11 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
                 <p className="text-sm text-muted-foreground text-center max-w-sm">
                     Questions have not been added to this module, so there is nothing to practice here.
                 </p>
-                <Button onClick={() => router.push(`/student/courses/${cid}`)} className="gap-2">
-                    <ArrowLeft className="h-4 w-4" />
-                    Back to Course
+                <Button asChild className="gap-2">
+                    <Link href={`/student/courses/${cid}`}>
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Course
+                    </Link>
                 </Button>
             </main>
         )
@@ -540,10 +546,10 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
                                                 inputconstraints={currentQuestion.inputconstrains}
                                                 blacklist={currentQuestion.blacklist}
                                                 whitelist={currentQuestion.whitelist}
-                                                testcasei1={currentQuestion.input1}
-                                                testcasei2={currentQuestion.input2}
-                                                testcaseo1={currentQuestion.output1}
-                                                testcaseo2={currentQuestion.output2}
+                                                testcasei1=""
+                                                testcasei2=""
+                                                testcaseo1=""
+                                                testcaseo2=""
                                                 code={userCode}
                                                 language={currentQuestion.lang}
                                                 theme={theme || ''}
@@ -559,11 +565,7 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
                                             <CodeMirror
                                                 value={userCode}
                                                 theme={theme === "dark" ? vscodeDark : eclipse}
-                                                extensions={[
-                                                    languageExtension?.extension,
-                                                    languageExtension?.completion &&
-                                                    autocompletion({ override: [languageExtension.completion] }),
-                                                ].filter(Boolean) as Extension[]}
+                                                extensions={codeMirrorExtensions}
                                                 style={{ fontSize: 16, minHeight: "95%", }}
                                                 onChange={setUserCode}
                                             />
@@ -695,65 +697,34 @@ const CodeView = ({ questions, mid, uid, cid, umid, anyLanguage = false, default
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <div className='flex flex-grow flex-col justify-around items-center w-full py-2 gap-2'>
-                            <div className='w-full h-1/3 flex flex-row flex-grow justify-center items-center p-2 border border-gray-200 rounded-md'>
-                                <div className='w-1/2 flex justify-center items-center'>
-                                    Test Case 1
+                            {testResults === null ? (
+                                <div className='w-full flex justify-center items-center p-6'>
+                                    <LoaderIcon className="h-6 w-6 animate-spin" />
                                 </div>
-
-                                <div className='w-1/2 flex justify-center items-center'>
-                                    {testcase1Status === "" ? (
-                                        <LoaderIcon className="h-6 w-6 animate-spin" />
-                                    ) : testcase1Status === "pass" ? (
-                                        <>
-                                            <Check className='h-6 w-6 mr-2 bg-green-400 rounded-full' /> Passed
-                                        </>
-                                    ) : (
-                                        <>
-                                            <X className='h-6 w-6 mr-2 bg-red-500 rounded-full' /> Failed
-                                        </>
-                                    )
-                                    }
-                                </div>
-                            </div>
-                            <div className='w-full h-1/3 flex flex-row flex-grow justify-center items-center p-2 border border-gray-200 rounded-md'>
-                                <div className='w-1/2 flex justify-center items-center'>
-                                    Test Case 2
-                                </div>
-
-                                <div className='w-1/2 flex justify-center items-center'>
-                                    {testcase2Status === "" ? (
-                                        <LoaderIcon className="h-6 w-6 animate-spin" />
-                                    ) : testcase2Status === "pass" ? (
-                                        <>
-                                            <Check className='h-6 w-6 mr-2 bg-green-400 rounded-full' /> Passed
-                                        </>
-                                    ) : (
-                                        <>
-                                            <X className='h-6 w-6 mr-2 bg-red-500 rounded-full' /> Failed
-                                        </>
-                                    )
-                                    }
-                                </div>
-                            </div>
-                            <div className='w-full h-1/3 flex flex-row flex-grow justify-center items-center p-2 border border-gray-200 rounded-md'>
-                                <div className='w-1/2 flex justify-center items-center'>
-                                    Test Case 3
-                                </div>
-                                <div className='w-1/2 flex justify-center items-center'>
-                                    {testcase3Status === "" ? (
-                                        <LoaderIcon className="h-6 w-6 animate-spin" />
-                                    ) : testcase3Status === "pass" ? (
-                                        <>
-                                            <Check className='h-6 w-6 mr-2 bg-green-400 rounded-full' /> Passed
-                                        </>
-                                    ) : (
-                                        <>
-                                            <X className='h-6 w-6 mr-2 bg-red-500 rounded-full' /> Failed
-                                        </>
-                                    )
-                                    }
-                                </div>
-                            </div>
+                            ) : (
+                                testResults.map((result, index) => (
+                                    <div key={index} className='w-full flex flex-row flex-grow justify-center items-center gap-2 p-2 border border-gray-200 rounded-md'>
+                                        <div className='w-1/4 flex justify-center items-center font-semibold'>
+                                            Test {index + 1}
+                                        </div>
+                                        <div className='w-1/4 flex justify-center items-center'>
+                                            {result.pass ? (
+                                                <>
+                                                    <Check className='h-6 w-6 mr-2 bg-green-400 rounded-full' /> Passed
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <X className='h-6 w-6 mr-2 bg-red-500 rounded-full' /> Failed
+                                                </>
+                                            )}
+                                        </div>
+                                        {/* Actual program output only — expected outputs never leave the server. */}
+                                        <pre className='w-1/2 max-h-24 overflow-auto whitespace-pre-wrap break-words bg-gray-700/30 rounded-md p-2 text-xs font-bold'>
+                                            {result.error ? result.error : result.actual}
+                                        </pre>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </AlertDialogHeader>
                     {!executingTestcases && (

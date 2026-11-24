@@ -4,6 +4,7 @@
 // A missing row falls back to its default, so fresh databases work as-is.
 
 import { db } from "@/lib/db";
+import { createServerTtlCache } from "@/lib/ui-cache";
 import { APP_STATUS } from "@/config/branding";
 
 export const SETTING_KEYS = {
@@ -31,20 +32,35 @@ const DEFAULTS: PlatformSettings = {
 
 const toBool = (v: string | undefined | null) => v === "true";
 
+/**
+ * Hot-path TTL cache (30s) — platform settings are read on the login page
+ * (maintenance mode) and register actions, but edited rarely. Failed
+ * queries are not cached (the cache layer rethrows), so a transient DB
+ * hiccup falls through to the defaults below instead of being pinned.
+ */
+const platformCache = createServerTtlCache<PlatformSettings>(async () => {
+  const rows = await db.setting.findMany({
+    where: { key: { in: Object.values(SETTING_KEYS) } },
+  });
+  const map = new Map(rows.map((r) => [r.key, r.value]));
+  return {
+    maintenanceMode: toBool(map.get(SETTING_KEYS.maintenanceMode)),
+    allowStudentRegister: toBool(
+      map.get(SETTING_KEYS.allowStudentRegister) ?? "true"
+    ),
+    allowStaffRegister: toBool(map.get(SETTING_KEYS.allowStaffRegister) ?? "true"),
+  };
+});
+
+/** Drop the cached platform entry (exported for the admin settings action). */
+export function invalidatePlatformSettingsCache() {
+  platformCache.invalidate();
+}
+
 /** Read all platform settings in one query (fault-tolerant → defaults). */
 export async function getPlatformSettings(): Promise<PlatformSettings> {
   try {
-    const rows = await db.setting.findMany({
-      where: { key: { in: Object.values(SETTING_KEYS) } },
-    });
-    const map = new Map(rows.map((r) => [r.key, r.value]));
-    return {
-      maintenanceMode: toBool(map.get(SETTING_KEYS.maintenanceMode)),
-      allowStudentRegister: toBool(
-        map.get(SETTING_KEYS.allowStudentRegister) ?? "true"
-      ),
-      allowStaffRegister: toBool(map.get(SETTING_KEYS.allowStaffRegister) ?? "true"),
-    };
+    return await platformCache.get();
   } catch {
     return DEFAULTS;
   }
@@ -52,11 +68,14 @@ export async function getPlatformSettings(): Promise<PlatformSettings> {
 
 /** Upsert a single setting key. Returns the row. */
 export async function setPlatformSetting(key: string, value: string) {
-  return db.setting.upsert({
+  const row = await db.setting.upsert({
     where: { key },
     update: { value },
     create: { key, value },
   });
+  // Writes must be visible on the very next read — drop the cache entry.
+  platformCache.invalidate();
+  return row;
 }
 
 /**
@@ -106,11 +125,14 @@ export async function getRegistrationCode(
 
 /** Store (or replace) the access code for a role. */
 export async function setRegistrationCode(role: RegisterRole, code: string) {
-  return db.setting.upsert({
+  const row = await db.setting.upsert({
     where: { key: CODE_KEYS[role] },
     update: { value: code },
     create: { key: CODE_KEYS[role], value: code },
   });
+  // Codes gate registration visibility — keep the cached settings fresh.
+  platformCache.invalidate();
+  return row;
 }
 
 /**
@@ -143,7 +165,10 @@ export async function findRoleByCode(
 
 /** Invalidate the access code for a role (used when registration closes). */
 export async function deleteRegistrationCode(role: RegisterRole) {
-  return db.setting.deleteMany({ where: { key: CODE_KEYS[role] } });
+  const res = await db.setting.deleteMany({ where: { key: CODE_KEYS[role] } });
+  // Codes gate registration visibility — keep the cached settings fresh.
+  platformCache.invalidate();
+  return res;
 }
 
 /**

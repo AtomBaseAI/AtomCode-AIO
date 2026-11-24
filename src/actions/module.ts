@@ -6,6 +6,9 @@ import { requireAdmin } from "@/lib/action-guards"
 import { AddModuleSchema, DeleteModuleSchema, ModuleUpdateSchema } from "@/schemas/module-schema"
 
 export const addmodule = async (values: z.infer<typeof AddModuleSchema>) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can add modules." };
+
     const cid = values.courseId;
     await db.module.create({
         data: {
@@ -64,14 +67,16 @@ export const deletemodule = async (
 export const updatemodule = async (
     values: z.infer<typeof ModuleUpdateSchema>
 ) => {
-    const mid = values.id;
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can update modules." };
+
+    // Strip the id from the written data — it is only the where-key.
+    const { id: mid, ...data } = values;
     await db.module.update({
         where: {
             id: mid
         },
-        data: {
-            ...values,
-        }
+        data,
     })
     revalidatePath(`/admin/courses`)
     return { success: "Module Updated !" }
@@ -81,13 +86,21 @@ export const addmodulequestions = async (
     moduleId: string,
     questionIds: string[]
 ) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can manage module questions." };
+
+    const validIds = (questionIds ?? []).filter(
+        (id) => typeof id === "string" && id.trim().length > 0
+    );
+    if (validIds.length === 0) return { error: "No questions selected." };
+
     await db.module.update({
         where: {
             id: moduleId
         },
         data: {
             codeQuestions: {
-                connect: questionIds.map(id => ({ id }))
+                connect: validIds.map(id => ({ id }))
             }
         }
     });
@@ -104,6 +117,9 @@ export const removemodulequestion = async (
     id: string,
     mid: string
 ) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can manage module questions." };
+
     const module_ = await db.module.findUnique({
         where: { id: mid },
         select: { codeQuestions: { select: { id: true } } },

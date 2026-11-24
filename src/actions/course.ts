@@ -6,6 +6,9 @@ import { AddCourseSchema, CourseUpdateSchema, DeleteCourseSchema } from "@/schem
 import { requireAdmin } from "@/lib/action-guards";
 
 export const addcourse = async (values: z.infer<typeof AddCourseSchema>) => {
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can add courses." };
+
     await db.course.create({
         data: {
             ...values,
@@ -80,14 +83,16 @@ export const deletecourse = async (
 export const updatecourse = async (
     values: z.infer<typeof CourseUpdateSchema>
 ) => {
-    const cid = values.id;
+    const session = await requireAdmin();
+    if (!session) return { error: "Only admins can update courses." };
+
+    // Strip the id from the written data — it is only the where-key.
+    const { id: cid, ...data } = values;
     await db.course.update({
         where: {
             id: cid
         },
-        data: {
-            ...values,
-        }
+        data,
     })
     revalidatePath("/admin/courses")
     return { success: "Course Updated !" }

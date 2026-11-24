@@ -35,6 +35,10 @@ model Admin {
   email    String  @unique
   image    String?
   password String
+  // Session revocation counter — bumped on password change / forced logout.
+  // JWTs freeze the value at sign-in (token.jv); guards compare it against
+  // this row (assertSessionValid) so stale sessions stop working.
+  tokenVersion Int @default(0)
 }
 
 /**
@@ -51,6 +55,8 @@ model SuperAdmin {
   email    String  @unique
   image    String?
   password String
+  // Session revocation counter — see Admin.tokenVersion.
+  tokenVersion Int @default(0)
 }
 
 /**
@@ -123,15 +129,17 @@ model Department {
 }
 
 model Staff {
-  id          String        @id @default(cuid())
-  name        String?
-  email       String        @unique
-  phone       String?
-  image       String?
-  department  String?
-  staffnumber String?
-  password    String
-  StaffCourse StaffCourse[]
+  id           String        @id @default(cuid())
+  name         String?
+  email        String        @unique
+  phone        String?
+  image        String?
+  department   String?
+  staffnumber  String?
+  password     String
+  // Session revocation counter — see Admin.tokenVersion.
+  tokenVersion Int           @default(0)
+  StaffCourse  StaffCourse[]
 }
 
 model User {
@@ -150,6 +158,9 @@ model User {
   password               String
   isActive               Boolean                  @default(true)
   isTwoFactorEnabled     Boolean                  @default(false)
+  // Session revocation counter — see Admin.tokenVersion. Checked together
+  // with isActive by assertSessionValid (deactivation also kills sessions).
+  tokenVersion           Int                      @default(0)
   userCourses            UserCourse[]
   userModuleData         UserModuleData[]
   userMCQData            UserMCQData[]
@@ -157,6 +168,27 @@ model User {
   userAssessmentMCQData  userAssessmentMCQData[]
   userAssessmentCodeData userAssessmentCodeData[]
   UserAssessmentData     UserAssessmentData[]
+  activityDays           UserActivityDay[]
+}
+
+/**
+ * Daily activity log powering the student dashboard streaks / heatmap /
+ * activity chart. One row per user per app-timezone calendar day
+ * ("YYYY-MM-DD" dayKey); `count` increments on every submission event
+ * (practice code, practice MCQ, module submit, assessment submit).
+ * The submission tables carry no timestamps, so this lightweight counter
+ * table is the single source of truth for "active on day X".
+ */
+model UserActivityDay {
+  id        String   @id @default(uuid())
+  userId    String
+  dayKey    String // "YYYY-MM-DD" in APP_TIMEZONE (Asia/Kolkata)
+  count     Int      @default(1)
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayKey])
+  @@index([userId])
 }
 
 model Course {

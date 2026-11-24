@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 import { autocompletion } from "@codemirror/autocomplete";
 import type { Extension } from "@codemirror/state";
@@ -105,6 +105,20 @@ const OpenIDE = () => {
 
     const languageExtension = isCodeMirrorLanguage(lang) ? codeMirrorExtension : null;
 
+    // Stable per-language extension array — rebuilding the array (and the
+    // autocompletion() extension) on every render recreated CodeMirror's
+    // internal state each render (the audit's memory leak).
+    const codeMirrorExtensions = useMemo<Extension[]>(() => {
+        const exts: Extension[] = [];
+        if (languageExtension?.extension) {
+            exts.push(languageExtension.extension as Extension);
+        }
+        if (languageExtension?.completion) {
+            exts.push(autocompletion({ override: [languageExtension.completion] }));
+        }
+        return exts;
+    }, [languageExtension]);
+
     const applyLanguage = useCallback((nextLang: LanguageId) => {
         setLang(nextLang);
         setUserCode(STARTER_TEMPLATES[nextLang] ?? "");
@@ -176,11 +190,7 @@ const OpenIDE = () => {
                             <CodeMirror
                                 value={userCode}
                                 theme={theme === "dark" ? vscodeDark : eclipse}
-                                extensions={[
-                                    languageExtension?.extension as Extension | undefined,
-                                    languageExtension?.completion &&
-                                    autocompletion({ override: [languageExtension.completion] }),
-                                ].filter(Boolean) as Extension[]}
+                                extensions={codeMirrorExtensions}
                                 style={{ fontSize: 16, minHeight: "95%" }}
                                 onChange={setUserCode}
                             />

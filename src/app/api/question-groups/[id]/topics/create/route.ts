@@ -51,13 +51,11 @@ export async function POST(req: Request, ctx: RouteContext) {
             { status: 201 }
         );
     } catch (err) {
+        // Never surface raw driver/prisma text to the client (audit finding:
+        // error-message leaks) — log server-side instead.
+        console.error("[question-groups/topics/create] failed:", err);
         return NextResponse.json(
-            {
-                error:
-                    err instanceof Error
-                        ? err.message
-                        : "Database error while creating the topic",
-            },
+            { error: "Failed to create the topic. Please try again." },
             { status: 500 }
         );
     }

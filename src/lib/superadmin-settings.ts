@@ -9,18 +9,37 @@ import { db } from "@/lib/db";
 
 export const SUPERADMIN_CODE_KEY = "superadmin.authcode";
 
-/** Built-in fallback — "1997" — used until the code is changed in settings. */
+/**
+ * Built-in fallback — "1997". ⚠️ SECURITY NOTE: this value is PUBLIC in the
+ * repository and MUST be rotated before any real deployment (set it in the
+ * super-admin settings UI, or deploy with SUPERADMIN_AUTHCODE so the default
+ * below is overridden). It is kept as-is only for dev-environment
+ * compatibility with existing seeds/docs.
+ */
 export const DEFAULT_SUPERADMIN_CODE = "1997";
 
-/** Current super admin auth code (Setting row, falling back to the default). */
+/**
+ * Default-code resolution order:
+ *   1. process.env.SUPERADMIN_AUTHCODE  (deployment override — rotate here)
+ *   2. "1997"                            (public repo default, dev compat)
+ */
+export function resolveDefaultSuperAdminCode(): string {
+  const fromEnv = process.env.SUPERADMIN_AUTHCODE?.trim();
+  return fromEnv ? fromEnv : DEFAULT_SUPERADMIN_CODE;
+}
+
+/**
+ * Current super admin auth code: the Setting row wins (rotatable at runtime
+ * from the settings UI), then the env-overridden default, then "1997".
+ */
 export async function getSuperAdminAuthCode(): Promise<string> {
   try {
     const row = await db.setting.findUnique({
       where: { key: SUPERADMIN_CODE_KEY },
     });
-    return row?.value ?? DEFAULT_SUPERADMIN_CODE;
+    return row?.value ?? resolveDefaultSuperAdminCode();
   } catch {
-    return DEFAULT_SUPERADMIN_CODE;
+    return resolveDefaultSuperAdminCode();
   }
 }
 

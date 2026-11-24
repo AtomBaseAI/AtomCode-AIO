@@ -1,16 +1,15 @@
 import { Laptop } from "lucide-react"
 import { TopbarTitle } from "@/components/topbar-title"
 
-
 const Lab = () => {
   return (
-    <div className="w-full h-[75vh] flex flex-col gap-2 justify-center items-center">
+    // Same content-span spacing rule as the admin panel: p-4 / md:p-8 from
+    // the top bar and sidebar, full-width column.
+    <div className="flex h-full w-full flex-1 flex-col gap-6 p-4 pb-8 md:p-8">
       <TopbarTitle>Labs</TopbarTitle>
-      <div className=" shadow-lg rounded-md overflow-hidden w-[20rem] order-first lg:order-none border hover:border-primary" >
-        <div className="py-5 px-6 sm:px-8 flex flex-col justify-center items-center gap-5">
-          <Laptop className="h-10 w-10 text-yellow-400"/>
-          No Labs Enrolled !
-        </div>
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-10 text-center">
+        <Laptop className="size-8 text-muted-foreground" />
+        <p className="text-muted-foreground">No labs enrolled.</p>
       </div>
     </div>
   )

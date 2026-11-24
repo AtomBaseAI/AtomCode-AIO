@@ -7,7 +7,24 @@ import React from 'react'
 
 const getAssessmentData = async (uaid: string, aid: string, uid: string) => {
   const assessmentData = await getAssessmentDataByUAID(uaid, aid, uid);
-  return UserAssessmentLiveData.parse(assessmentData)
+  const liveRecord = UserAssessmentLiveData.parse(assessmentData)
+  // Lean client payload — hidden test inputs, expected outputs and the
+  // reference solution never reach the browser. Judging happens on the
+  // server (POST /api/execute/testcases with uaid) which fetches these
+  // fields itself by questionId.
+  return {
+    ...liveRecord,
+    code: liveRecord.code?.map((question) => ({
+      ...question,
+      input1: "",
+      input2: "",
+      input3: "",
+      output1: "",
+      output2: "",
+      output3: "",
+      sourcecode: null,
+    })),
+  }
 }
 const getSessionUserID = async () => {
   const session = await auth();

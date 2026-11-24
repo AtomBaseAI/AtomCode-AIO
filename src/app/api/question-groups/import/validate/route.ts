@@ -8,6 +8,9 @@ import {
     uniqueGroupTitle,
 } from "@/lib/question-group-import";
 
+/** Crude DoS guard: reject oversized uploads before parsing the body. */
+const MAX_BODY_BYTES = 25 * 1024 * 1024; // 25 MB
+
 /**
  * POST /api/question-groups/import/validate
  *
@@ -26,6 +29,14 @@ import {
 export async function POST(req: Request) {
     const guard = await requireSuperAdminApi();
     if (!guard.ok) return guard.response;
+
+    const contentLength = Number(req.headers.get("content-length") ?? 0);
+    if (contentLength > MAX_BODY_BYTES) {
+        return NextResponse.json(
+            { error: "File too large (max 25 MB)." },
+            { status: 413 }
+        );
+    }
 
     const body = await req.json().catch(() => null);
     const parsed = parseGroupImportEnvelope(body);

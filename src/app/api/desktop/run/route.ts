@@ -5,7 +5,9 @@ import {
   executeNative,
   NATIVE_LANGUAGES,
   normalizeOutput,
+  type NativeOutcome,
 } from "@/lib/native-executor";
+import { consumeQuota } from "@/lib/rate-limit";
 
 /**
  * POST /api/desktop/run — built-in server-side code execution for the
@@ -23,11 +25,41 @@ import {
  *           output is returned, never the expected output)
  */
 const NATIVE_RUN_TIMEOUT_MS = 15_000;
+/** Per-student execution budget — same as the web execute endpoints. */
+const EXEC_QUOTA = { perMinute: 10, perDay: 150 };
+
+function tooManyRequests(retryAfterSec: number, message: string) {
+  return json(
+    { error: message },
+    {
+      status: 429,
+      headers: { "Retry-After": String(Math.max(1, retryAfterSec)) },
+    }
+  );
+}
+
+/** Executor-level concurrency throttle → HTTP 429 (type guard). */
+function isRateLimited(
+  outcome: NativeOutcome
+): outcome is Extract<NativeOutcome, { ok: false }> & {
+  code: "RATE_LIMITED";
+} {
+  return !outcome.ok && outcome.code === "RATE_LIMITED";
+}
 
 export async function POST(req: Request) {
   const { ctx, response } = await authGuard(req);
   if (!ctx) return response;
   const uid = ctx.user.id;
+
+  // Per-student execution budget (token-authenticated desktop client).
+  const quota = consumeQuota("exec", uid, EXEC_QUOTA);
+  if (!quota.allowed) {
+    return tooManyRequests(
+      quota.retryAfterSec,
+      "Execution quota exceeded — try again later."
+    );
+  }
 
   const body = await req.json().catch(() => null);
   const questionId = String(body?.questionId ?? "");
@@ -98,6 +130,9 @@ export async function POST(req: Request) {
   try {
     if (mode === "sample") {
       const outcome = await runOnce(question.sampleinput1);
+      if (isRateLimited(outcome)) {
+        return tooManyRequests(outcome.retryAfterSec ?? 5, outcome.message);
+      }
       if (!outcome.ok) {
         return json({
           mode,
@@ -138,6 +173,9 @@ export async function POST(req: Request) {
         continue;
       }
       const outcome = await runOnce(testCase.input ?? "");
+      if (isRateLimited(outcome)) {
+        return tooManyRequests(outcome.retryAfterSec ?? 5, outcome.message);
+      }
       if (!outcome.ok) {
         results.push({ status: "error", output: outcome.message });
         continue;
