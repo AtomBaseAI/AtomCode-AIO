@@ -38,8 +38,11 @@
   ],
   "exclude": [
     "node_modules",
-    "Core_SRC",
-    "examples",
-    "skills"
+    "skills",
+    "scripts",
+    "ai-documentation",
+    "compilers",
+    "Desktop_Clients",
+    "mini-services"
   ]
 }
