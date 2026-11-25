@@ -1,0 +1,541 @@
+DAY 9 — 20 questions
+
+===== Q1: Search Value Position [easy/10] topic=Singly Linked Lists sub=Traversal type=practice
+DESC: Finding a value in a linked list means following next pointers until the value appears. The class Main and its main method are already provided. Write only the required static method:
+
+    static int find(Node head, int target)
+
+It must return the 0-based index of the FIRST node holding target, or -1 when the value is absent.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the node values in order. Line 3: the target.
+
+Output Format:
+One line with the index or -1.
+
+Constraints:
+1 <= n <= 10000, -1000 <= value, target <= 1000
+BL:  | WL: 
+  sampleinput1="5\n4 9 2 7 1\n7"
+  => sampleoutput1="3"
+  sampleinput2="1\n42\n42"
+  => sampleoutput2="0"
+  input1="4\n1 2 3 4\n5"
+  => output1="-1"
+  input2="6\n3 1 4 1 5 9\n1"
+  => output2="1"
+  input3="3\n-5 0 5\n-5"
+  => output3="0"
+
+===== Q2: Count Value Occurrences [easy/10] topic=Singly Linked Lists sub=Traversal type=practice
+DESC: A linked list can hold duplicates; counting them still needs a full walk. The class Main and its main method are already provided. Write only the required static method:
+
+    static int count(Node head, int target)
+
+It must return how many nodes in the list hold target.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the node values in order. Line 3: the target.
+
+Output Format:
+One line with the occurrence count.
+
+Constraints:
+1 <= n <= 10000, -1000 <= value, target <= 1000
+BL:  | WL: 
+  sampleinput1="6\n3 1 3 2 3 9\n3"
+  => sampleoutput1="3"
+  sampleinput2="1\n7\n7"
+  => sampleoutput2="1"
+  input1="5\n1 2 3 4 5\n6"
+  => output1="0"
+  input2="7\n5 5 5 5 5 5 5\n5"
+  => output2="7"
+  input3="4\n-1 -1 2 -1\n-1"
+  => output3="3"
+
+===== Q3: Reverse the List [easy/10] topic=Singly Linked Lists sub=Reversing a List type=practice
+DESC: Reversing pointers turns the whole list around in a single pass — the heart of linked-list manipulation. The class Main and its main method are already provided. Write only the required static method:
+
+    static Node reverse(Node head)
+
+It must reverse the list by rewiring the next pointers in place and return the new head. The harness prints the reversed values space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the node values in order.
+
+Output Format:
+One line with the values of the reversed list space-separated.
+
+Constraints:
+1 <= n <= 10000, -1000 <= value <= 1000
+BL:  | WL: 
+  sampleinput1="5\n4 9 2 7 1"
+  => sampleoutput1="1 7 2 9 4"
+  sampleinput2="1\n42"
+  => sampleoutput2="42"
+  input1="4\n1 2 3 4"
+  => output1="4 3 2 1"
+  input2="6\n3 1 4 1 5 9"
+  => output2="9 5 1 4 1 3"
+  input3="3\n7 7 7"
+  => output3="7 7 7"
+
+===== Q4: Nth Node from the Start [easy/10] topic=Singly Linked Lists sub=Node Structures type=practice
+DESC: Access by position in a linked list means stepping over k-1 nodes — there is no index arithmetic. The class Main and its main method are already provided. Write only the required static method:
+
+    static int nthNode(Node head, int k)
+
+It must return the value of the k-th node counting from the head (1-based). k is guaranteed to lie within the list.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the node values in order. Line 3: k.
+
+Output Format:
+One line with the value of the k-th node.
+
+Constraints:
+1 <= n <= 10000, 1 <= k <= n, -1000 <= value <= 1000
+BL:  | WL: 
+  sampleinput1="5\n4 9 2 7 1\n3"
+  => sampleoutput1="2"
+  sampleinput2="1\n42\n1"
+  => sampleoutput2="42"
+  input1="4\n1 2 3 4\n4"
+  => output1="4"
+  input2="6\n3 1 4 1 5 9\n1"
+  => output2="3"
+  input3="3\n-5 0 5\n2"
+  => output3="0"
+
+===== Q5: First Node of the Loop [hard/30] topic=Singly Linked Lists sub=Traversal type=practice
+DESC: A ticket-routing chain points back mid-chain; fixing it needs the exact node where the cycle begins — still with constant memory (Floyd's algorithm, phase two). The class Main and its main method are already provided. Write only the required static method:
+
+    static int cycleStart(Node head)
+
+It must return the data of the node where the cycle starts, or -1 when there is no cycle.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the node values in order. Line 3: pos, the index the tail links back to (-1 means no cycle).
+
+Output Format:
+One line with the data of the cycle's first node, or -1.
+
+Constraints:
+1 <= n <= 10000, -1 <= pos < n, -1000 <= value <= 1000
+BL: HashSet | WL: slow
+  sampleinput1="4\n10 20 30 40\n1"
+  => sampleoutput1="20"
+  sampleinput2="3\n5 6 7\n-1"
+  => sampleoutput2="-1"
+  input1="1\n9\n0"
+  => output1="9"
+  input2="5\n1 2 3 4 5\n0"
+  => output2="1"
+  input3="6\n8 2 4 6 8 10\n3"
+  => output3="6"
+
+===== Q6: Sorted Insert Position [medium/20] topic=Singly Linked Lists sub=Insertion and Deletion type=practice
+DESC: A maintenance queue is kept sorted ascending; each new job must slide into its slot with a freshly linked node. The class Main and its main method are already provided. Write only the required static method:
+
+    static Node insertSorted(Node head, int value)
+
+It must insert value so the list stays ascending (after any equal values) and return the (possibly new) head. The harness prints the resulting list space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the sorted values. Line 3: the value to insert.
+
+Output Format:
+One line with the resulting list space-separated.
+
+Constraints:
+1 <= n <= 10000, -1000 <= value <= 1000
+BL: System.out.print | WL: while
+  sampleinput1="5\n1 3 5 7 9\n4"
+  => sampleoutput1="1 3 4 5 7 9"
+  sampleinput2="1\n10\n5"
+  => sampleoutput2="5 10"
+  input1="4\n2 4 6 8\n9"
+  => output1="2 4 6 8 9"
+  input2="5\n1 1 3 3 5\n2"
+  => output2="1 1 2 3 3 5"
+  input3="3\n-9 -4 7\n0"
+  => output3="-9 -4 0 7"
+
+===== Q7: Detecting a Loop [medium/20] topic=Singly Linked Lists sub=Traversal type=practice
+DESC: A bug made a ride's queue point back on itself, so visitors loop forever. Detect the cycle with slow/fast pointers — constant extra memory, no hashing. The class Main and its main method are already provided. Write only the required static method:
+
+    static int hasCycle(Node head)
+
+It must return 1 when the chain contains a cycle (Floyd's tortoise and hare) and 0 otherwise.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the node values in order. Line 3: pos, the index the tail links back to (-1 means no cycle).
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= n <= 10000, -1 <= pos < n, -1000 <= value <= 1000
+BL: HashSet | WL: slow
+  sampleinput1="4\n10 20 30 40\n1"
+  => sampleoutput1="1"
+  sampleinput2="3\n5 6 7\n-1"
+  => sampleoutput2="0"
+  input1="1\n9\n0"
+  => output1="1"
+  input2="5\n1 2 3 4 5\n4"
+  => output2="1"
+  input3="6\n8 2 4 6 8 10\n-1"
+  => output3="0"
+
+===== Q8: Count List Nodes [easy/10] topic=Singly Linked Lists sub=Node Structures type=practice
+DESC: A singly linked list hides its size — the only way to count is to walk it. The class Main and its main method are already provided. Write only the required static method:
+
+    static int length(Node head)
+
+It must return the number of nodes reachable from head.
+
+Input Format:
+Line 1: n, the number of nodes. Line 2: n space-separated integers — the node values in order.
+
+Output Format:
+One line with the node count.
+
+Constraints:
+1 <= n <= 10000, -1000 <= value <= 1000
+BL:  | WL: 
+  sampleinput1="5\n4 9 2 7 1"
+  => sampleoutput1="5"
+  sampleinput2="1\n42"
+  => sampleoutput2="1"
+  input1="4\n1 2 3 4"
+  => output1="4"
+  input2="6\n3 1 4 1 5 9"
+  => output2="6"
+  input3="3\n-5 0 5"
+  => output3="3"
+
+===== Q9: Sum of Node Values [easy/10] topic=Singly Linked Lists sub=Traversal type=practice
+DESC: Accumulating a total across a linked list is the classic traversal drill. The class Main and its main method are already provided. Write only the required static method:
+
+    static int sum(Node head)
+
+It must return the sum of all node values from head to the end of the list.
+
+Input Format:
+Line 1: n, the number of nodes. Line 2: n space-separated integers — the node values in order.
+
+Output Format:
+One line with the sum.
+
+Constraints:
+1 <= n <= 10000, -1000 <= value <= 1000
+BL:  | WL: 
+  sampleinput1="5\n4 9 2 7 1"
+  => sampleoutput1="23"
+  sampleinput2="1\n42"
+  => sampleoutput2="42"
+  input1="4\n-1 -2 -3 -4"
+  => output1="-10"
+  input2="6\n3 1 4 1 5 9"
+  => output2="23"
+  input3="3\n7 7 7"
+  => output3="21"
+
+===== Q10: Playlist Song Count [easy/10] topic=Singly Linked Lists sub=Dynamic Allocation type=practice
+DESC: A streaming queue stores songs as nodes appended one by one — count them by walking the chain. The class Main and its main method are already provided. Write only the required static method:
+
+    static int length(Node head)
+
+It must return the number of songs (nodes) in the queue.
+
+Input Format:
+Line 1: n, the number of songs. Line 2: n space-separated integers — the song IDs in queue order.
+
+Output Format:
+One line with the number of songs.
+
+Constraints:
+1 <= n <= 10000, 1 <= id <= 100000
+BL:  | WL: 
+  sampleinput1="6\n101 203 305 407 509 611"
+  => sampleoutput1="6"
+  sampleinput2="2\n11 22"
+  => sampleoutput2="2"
+  input1="4\n5 10 15 20"
+  => output1="4"
+  input2="7\n1 1 1 1 1 1 1"
+  => output2="7"
+  input3="3\n9 8 7"
+  => output3="3"
+
+===== Q11: Shopping Cart Total [easy/10] topic=Singly Linked Lists sub=Traversal type=practice
+DESC: A checkout cart keeps item prices in a linked list; total them before payment. The class Main and its main method are already provided. Write only the required static method:
+
+    static int sum(Node head)
+
+It must return the total of all prices in the cart.
+
+Input Format:
+Line 1: n, the number of items. Line 2: n space-separated integers — the prices in cart order.
+
+Output Format:
+One line with the cart total.
+
+Constraints:
+1 <= n <= 10000, -1000 <= price <= 1000
+BL:  | WL: 
+  sampleinput1="5\n100 -50 200 -25 75"
+  => sampleoutput1="300"
+  sampleinput2="1\n500"
+  => sampleoutput2="500"
+  input1="3\n-10 -20 -30"
+  => output1="-60"
+  input2="4\n250 250 250 250"
+  => output2="1000"
+  input3="6\n1 2 3 4 5 6"
+  => output3="21"
+
+===== Q12: Undo History Replay [easy/10] topic=Singly Linked Lists sub=Reversing a List type=practice
+DESC: An undo buffer stores actions newest-first; replaying them in submission order means walking the chain backwards — reverse it first. The class Main and its main method are already provided. Write only the required static method:
+
+    static Node reverse(Node head)
+
+It must rewire the next pointers in place and return the new head. The harness prints the replay order space-separated.
+
+Input Format:
+Line 1: n, the number of stored actions. Line 2: n space-separated integers — the action codes newest-first.
+
+Output Format:
+One line with the replay order space-separated.
+
+Constraints:
+1 <= n <= 10000, -1000 <= code <= 1000
+BL:  | WL: 
+  sampleinput1="5\n3 1 4 1 5"
+  => sampleoutput1="5 1 4 1 3"
+  sampleinput2="1\n9"
+  => sampleoutput2="9"
+  input1="4\n10 20 30 40"
+  => output1="40 30 20 10"
+  input2="6\n2 4 6 8 10 12"
+  => output2="12 10 8 6 4 2"
+  input3="3\n-1 0 1"
+  => output3="1 0 -1"
+
+===== Q13: Train Carriage Lookup [easy/10] topic=Singly Linked Lists sub=Traversal type=practice
+DESC: A shunting yard lists carriage numbers in order; dispatch needs the position of one carriage. The class Main and its main method are already provided. Write only the required static method:
+
+    static int find(Node head, int target)
+
+It must return the 0-based position of the first carriage numbered target, or -1 when it is not coupled in.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the carriage numbers in order. Line 3: the queried carriage number.
+
+Output Format:
+One line with the position or -1.
+
+Constraints:
+1 <= n <= 10000, 1 <= number, target <= 100000
+BL:  | WL: 
+  sampleinput1="6\n101 202 303 404 505 606\n303"
+  => sampleoutput1="2"
+  sampleinput2="3\n7 8 9\n9"
+  => sampleoutput2="2"
+  input1="2\n5 15\n7"
+  => output1="-1"
+  input2="5\n2 4 6 8 10\n10"
+  => output2="4"
+  input3="4\n-3 -1 1 3\n-3"
+  => output3="0"
+
+===== Q14: Middle of the Queue [medium/20] topic=Singly Linked Lists sub=Traversal type=practice
+DESC: A support counter serves whoever stands in the middle of a queue stored as a linked list — without knowing n in advance. Send a fast pointer two steps for every one step of a slow pointer. The class Main and its main method are already provided. Write only the required static method:
+
+    static int middle(Node head)
+
+It must return the value of the middle node; when the list holds an even number of nodes, return the SECOND of the two middle nodes.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the queue values in order.
+
+Output Format:
+One line with the middle value.
+
+Constraints:
+1 <= n <= 10000, -1000 <= value <= 1000
+BL: System.out.print | WL: while
+  sampleinput1="5\n4 9 2 7 1"
+  => sampleoutput1="2"
+  sampleinput2="1\n42"
+  => sampleoutput2="42"
+  input1="6\n1 2 3 4 5 6"
+  => output1="4"
+  input2="7\n3 1 4 1 5 9 2"
+  => output2="1"
+  input3="4\n10 20 30 40"
+  => output3="30"
+
+===== Q15: Remove One Faulty Record [medium/20] topic=Singly Linked Lists sub=Insertion and Deletion type=practice
+DESC: One sensor log entry is corrupted; unlink its first occurrence and repair the chain around it. The class Main and its main method are already provided. Write only the required static method:
+
+    static Node deleteFirst(Node head, int target)
+
+It must unlink the FIRST node holding target (do nothing when absent) and return the head. The harness prints the resulting list space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the log values in order. Line 3: the value to remove.
+
+Output Format:
+One line with the resulting list space-separated (at least one node always survives).
+
+Constraints:
+1 <= n <= 10000, -1000 <= value, target <= 1000
+BL: System.out.print | WL: return
+  sampleinput1="5\n10 20 30 40 50\n20"
+  => sampleoutput1="10 30 40 50"
+  sampleinput2="2\n7 7\n7"
+  => sampleoutput2="7"
+  input1="4\n1 2 3 4\n4"
+  => output1="1 2 3"
+  input2="5\n3 1 4 1 5\n1"
+  => output2="3 4 1 5"
+  input3="3\n9 8 9\n9"
+  => output3="8 9"
+
+===== Q16: Distance from the End [medium/20] topic=Singly Linked Lists sub=Traversal type=practice
+DESC: A call centre reports the k-th last ticket without storing the length: a fast runner advances k nodes first, then both pointers walk together until the runner falls off the end. The class Main and its main method are already provided. Write only the required static method:
+
+    static int kthFromEnd(Node head, int k)
+
+It must return the value of the k-th node from the end (1-based). k is guaranteed valid.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the ticket values in order. Line 3: k.
+
+Output Format:
+One line with the k-th value from the end.
+
+Constraints:
+1 <= n <= 10000, 1 <= k <= n, -1000 <= value <= 1000
+BL: ArrayList | WL: while
+  sampleinput1="5\n4 9 2 7 1\n1"
+  => sampleoutput1="1"
+  sampleinput2="5\n4 9 2 7 1\n5"
+  => sampleoutput2="4"
+  input1="1\n42\n1"
+  => output1="42"
+  input2="6\n3 1 4 1 5 9\n3"
+  => output2="1"
+  input3="4\n10 20 30 40\n2"
+  => output3="30"
+
+===== Q17: Insert into the Roster [medium/20] topic=Singly Linked Lists sub=Insertion and Deletion type=practice
+DESC: A tournament roster inserts players at any slot; splice a fresh node in without disturbing the rest of the chain. The class Main and its main method are already provided. Write only the required static method:
+
+    static Node insertAt(Node head, int pos, int value)
+
+It must insert a node holding value at 0-based position pos (0 <= pos <= n; pos 0 replaces the head, pos n appends) and return the head. The harness prints the resulting list space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the roster values in order. Line 3: pos. Line 4: the value to insert.
+
+Output Format:
+One line with the resulting list space-separated.
+
+Constraints:
+1 <= n <= 10000, 0 <= pos <= n, -1000 <= value <= 1000
+BL: System.out.print | WL: return
+  sampleinput1="4\n1 2 3 4\n0\n99"
+  => sampleoutput1="99 1 2 3 4"
+  sampleinput2="3\n5 6 7\n1\n55"
+  => sampleoutput2="5 55 6 7"
+  input1="2\n8 9\n2\n10"
+  => output1="8 9 10"
+  input2="5\n1 2 3 4 5\n3\n33"
+  => output2="1 2 3 33 4 5"
+  input3="1\n42\n1\n7"
+  => output3="42 7"
+
+===== Q18: Purge Faulty Sensors [hard/30] topic=Singly Linked Lists sub=Insertion and Deletion type=practice
+DESC: Every reading coming from one faulty sensor must be unlinked — not just the first. Sweep the whole chain and repair around each victim. The class Main and its main method are already provided. Write only the required static method:
+
+    static Node deleteAll(Node head, int target)
+
+It must unlink EVERY node holding target and return the head. The harness prints the surviving list space-separated; at least one node survives in every test.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers — the readings in order. Line 3: the value to purge.
+
+Output Format:
+One line with the surviving list space-separated.
+
+Constraints:
+1 <= n <= 10000, -1000 <= value, target <= 1000
+BL: System.out.print | WL: while
+  sampleinput1="6\n3 1 3 2 3 9\n3"
+  => sampleoutput1="1 2 9"
+  sampleinput2="4\n5 5 2 5\n5"
+  => sampleoutput2="2"
+  input1="5\n1 2 3 4 5\n6"
+  => output1="1 2 3 4 5"
+  input2="7\n1 1 2 1 3 1 4\n1"
+  => output2="2 3 4"
+  input3="5\n9 8 9 8 7\n8"
+  => output3="9 9 7"
+
+===== Q19: Merge Two Sorted Queues [hard/30] topic=Singly Linked Lists sub=Traversal type=practice
+DESC: Two sorted dispatch queues must become one sorted queue by relinking the existing nodes — no fresh nodes, no copying values. The class Main and its main method are already provided. Write only the required static method:
+
+    static Node mergeTwoSorted(Node a, Node b)
+
+a and b are ascending lists; it must return the head of the merged ascending list built from the same nodes (the left list a wins ties). The harness prints the merged values space-separated.
+
+Input Format:
+Line 1: n. Line 2: n sorted integers for list a. Line 3: m. Line 4: m sorted integers for list b.
+
+Output Format:
+One line with the merged values space-separated.
+
+Constraints:
+1 <= n, m <= 5000, -1000 <= value <= 1000
+BL: ArrayList | WL: next
+  sampleinput1="3 3\n1 3 5\n2 4 6"
+  => sampleoutput1="1 2 3 4 5 6"
+  sampleinput2="1 1\n10\n10"
+  => sampleoutput2="10 10"
+  input1="2 2\n1 2\n3 4"
+  => output1="1 2 3 4"
+  input2="4 1\n-5 0 5 10\n-1"
+  => output2="-5 -1 0 5 10"
+  input3="3 4\n1 2 3\n1 2 2 4"
+  => output3="1 1 2 2 2 3 4"
+
+===== Q20: Reverse in K Groups [hard/30] topic=Singly Linked Lists sub=Reversing a List type=practice
+DESC: A scheduler replays log batches in reverse block order: every consecutive group of exactly k nodes is flipped while groups stay in place. The class Main and its main method are already provided. Write only the required static method:
+
+    static Node reverseKGroup(Node head, int k)
+
+It must reverse the nodes in consecutive groups of exactly k and return the new head. n is guaranteed to be a multiple of k. The harness prints the result space-separated.
+
+Input Format:
+Line 1: n (a multiple of k). Line 2: n space-separated integers — the log values in order. Line 3: k.
+
+Output Format:
+One line with the regrouped values space-separated.
+
+Constraints:
+1 <= n <= 10000, 1 <= k <= n, n % k == 0, -1000 <= value <= 1000
+BL: ArrayList | WL: while
+  sampleinput1="4\n1 2 3 4\n2"
+  => sampleoutput1="2 1 4 3"
+  sampleinput2="6\n1 2 3 4 5 6\n3"
+  => sampleoutput2="3 2 1 6 5 4"
+  input1="3\n1 2 3\n3"
+  => output1="3 2 1"
+  input2="4\n9 8 7 6\n1"
+  => output2="9 8 7 6"
+  input3="6\n10 20 30 40 50 60\n2"
+  => output3="20 10 40 30 60 50"

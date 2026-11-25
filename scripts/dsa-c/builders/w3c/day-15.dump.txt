@@ -1,0 +1,896 @@
+===== Q0 [easy/10] BST Insert Keys | topic=Binary Search Trees and Heaps sub=BST Insertion and Deletion type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness reads a sequence of keys and inserts each one into an initially empty BST by calling your function.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    BNode *bst_insert(BNode *root, int key)
+
+It must insert key into the search tree (smaller keys go left, larger go right) and return the (possibly new) root. If key is already present, do NOT insert a duplicate — just return the root. The harness prints the inorder traversal of the result.
+
+Input Format:
+Line 1: k. Line 2: k space-separated keys (inserted in the given order).
+
+Output Format:
+One line with the sorted inorder sequence of distinct keys, space-separated.
+
+Constraints:
+1 <= k <= 1000, |key| <= 1000000000
+TC s1 IN<6
+50 30 70 20 40 60> EXP<20 30 40 50 60 70>
+TC s2 IN<1
+42> EXP<42>
+TC t1 IN<5
+50 30 50 70 30> EXP<30 50 70>
+TC t2 IN<4
+10 20 30 40> EXP<10 20 30 40>
+TC t3 IN<6
+0 -5 9 -8 4 12> EXP<-8 -5 0 4 9 12>
+SRC:
+BNode *bst_insert(BNode *root, int key) {
+    if (root == NULL) {
+        BNode *nd = (BNode *)malloc(sizeof(BNode));
+        nd->key = key;
+        nd->left = nd->right = NULL;
+        return nd;
+    }
+    if (key < root->key) root->left = bst_insert(root->left, key);
+    else if (key > root->key) root->right = bst_insert(root->right, key);
+    return root;
+}
+===== Q1 [easy/10] BST Search Hit or Miss | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds a BST from the input keys (line 1: k; line 2: k keys) and then reads one query key (line 3).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_search(BNode *root, int key)
+
+It must return 1 when key exists in the tree, 0 otherwise. Walk down the tree using the BST property.
+
+Input Format:
+Line 1: k. Line 2: k space-separated keys. Line 3: the query key.
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= k <= 1000, |key| <= 1000000000
+TC s1 IN<7
+50 30 70 20 40 60 80
+60> EXP<1>
+TC s2 IN<7
+50 30 70 20 40 60 80
+65> EXP<0>
+TC t1 IN<1
+42
+42> EXP<1>
+TC t2 IN<4
+10 20 30 40
+15> EXP<0>
+TC t3 IN<6
+0 -5 9 -8 4 12
+-8> EXP<1>
+SRC:
+int bst_search(BNode *root, int key) {
+    BNode *cur = root;
+    while (cur != NULL) {
+        if (key == cur->key) return 1;
+        cur = (key < cur->key) ? cur->left : cur->right;
+    }
+    return 0;
+}
+===== Q2 [easy/10] Smallest Key in BST | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds a BST from the input keys (line 1: k; line 2: k keys).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_min(BNode *root)
+
+It must return the smallest key in the tree — in a BST that is the leftmost node. The tree is non-empty.
+
+Input Format:
+Line 1: k. Line 2: k space-separated keys.
+
+Output Format:
+One line with the smallest key.
+
+Constraints:
+1 <= k <= 1000, |key| <= 1000000000
+TC s1 IN<7
+50 30 70 20 40 60 80> EXP<20>
+TC s2 IN<4
+10 20 30 40> EXP<10>
+TC t1 IN<1
+42> EXP<42>
+TC t2 IN<6
+0 -5 9 -8 4 12> EXP<-8>
+TC t3 IN<8
+50 30 70 20 40 60 80 35> EXP<20>
+SRC:
+int bst_min(BNode *root) {
+    BNode *cur = root;
+    while (cur->left != NULL) cur = cur->left;
+    return cur->key;
+}
+===== Q3 [easy/10] Largest Key in BST | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds a BST from the input keys (line 1: k; line 2: k keys).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_max(BNode *root)
+
+It must return the largest key in the tree — in a BST that is the rightmost node. The tree is non-empty.
+
+Input Format:
+Line 1: k. Line 2: k space-separated keys.
+
+Output Format:
+One line with the largest key.
+
+Constraints:
+1 <= k <= 1000, |key| <= 1000000000
+TC s1 IN<7
+50 30 70 20 40 60 80> EXP<80>
+TC s2 IN<4
+10 20 30 40> EXP<40>
+TC t1 IN<1
+42> EXP<42>
+TC t2 IN<6
+0 -5 9 -8 4 12> EXP<12>
+TC t3 IN<8
+50 30 70 20 40 60 80 35> EXP<80>
+SRC:
+int bst_max(BNode *root) {
+    BNode *cur = root;
+    while (cur->right != NULL) cur = cur->right;
+    return cur->key;
+}
+===== Q4 [easy/10] Count BST Nodes | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds a BST from the input keys (line 1: k; line 2: k keys).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_count(BNode *root)
+
+It must return the number of nodes currently in the tree by walking the node links (do not just return k).
+
+Input Format:
+Line 1: k. Line 2: k space-separated keys.
+
+Output Format:
+One line with the node count.
+
+Constraints:
+1 <= k <= 1000, |key| <= 1000000000
+TC s1 IN<7
+50 30 70 20 40 60 80> EXP<7>
+TC s2 IN<1
+42> EXP<1>
+TC t1 IN<8
+50 30 70 20 40 60 80 35> EXP<8>
+TC t2 IN<5
+90 80 70 60 50> EXP<5>
+TC t3 IN<6
+0 -5 9 -8 4 12> EXP<6>
+SRC:
+int bst_count(BNode *root) {
+    if (root == NULL) return 0;
+    return 1 + bst_count(root->left) + bst_count(root->right);
+}
+===== Q5 [easy/10] Sum of BST Keys | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds a BST from the input keys (line 1: k; line 2: k keys).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_sum(BNode *root)
+
+It must return the sum of all keys stored in the tree.
+
+Input Format:
+Line 1: k. Line 2: k space-separated keys.
+
+Output Format:
+One line with the sum.
+
+Constraints:
+1 <= k <= 1000, |key| <= 1000000000
+TC s1 IN<7
+50 30 70 20 40 60 80> EXP<350>
+TC s2 IN<1
+42> EXP<42>
+TC t1 IN<6
+0 -5 9 -8 4 12> EXP<12>
+TC t2 IN<4
+10 20 30 40> EXP<100>
+TC t3 IN<8
+50 30 70 20 40 60 80 35> EXP<385>
+SRC:
+int bst_sum(BNode *root) {
+    if (root == NULL) return 0;
+    return root->key + bst_sum(root->left) + bst_sum(root->right);
+}
+===== Q6 [easy/10] Ticket Priority Ordering | topic=Binary Search Trees and Heaps sub=BST Insertion and Deletion type=practice
+BL:"" WL:""
+DESC:
+A help desk feeds ticket priorities into a BST so an inorder walk lists them in processing order. Duplicate priorities are ignored (one ticket slot per priority). The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness inserts every read priority by calling your function.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    BNode *bst_insert(BNode *root, int key)
+
+It must insert key into the search tree (smaller left, larger right), skip duplicates, and return the (possibly new) root. The harness prints the inorder traversal.
+
+Input Format:
+Line 1: k. Line 2: k space-separated priorities (inserted in the given order).
+
+Output Format:
+One line with the sorted distinct priorities, space-separated.
+
+Constraints:
+1 <= k <= 1000, |priority| <= 1000000000
+TC s1 IN<7
+8 3 10 1 6 14 4> EXP<1 3 4 6 8 10 14>
+TC s2 IN<6
+100 50 150 25 75 125> EXP<25 50 75 100 125 150>
+TC t1 IN<6
+100 50 150 50 25 175> EXP<25 50 100 150 175>
+TC t2 IN<1
+7> EXP<7>
+TC t3 IN<5
+90 80 70 60 50> EXP<50 60 70 80 90>
+SRC:
+BNode *bst_insert(BNode *root, int key) {
+    if (root == NULL) {
+        BNode *nd = (BNode *)malloc(sizeof(BNode));
+        nd->key = key;
+        nd->left = nd->right = NULL;
+        return nd;
+    }
+    if (key < root->key) root->left = bst_insert(root->left, key);
+    else if (key > root->key) root->right = bst_insert(root->right, key);
+    return root;
+}
+===== Q7 [easy/10] Access Code Verification | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"" WL:""
+DESC:
+A vault stores its valid access codes in a BST built from the input. For each attempt, report whether the code matches a stored one. The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds the BST (line 1: k; line 2: k codes), then reads m attempts (line 3: m; line 4: m codes), calling your function for each.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_search(BNode *root, int key)
+
+It must return 1 when key exists in the tree, 0 otherwise. The harness prints one result per attempt on its own line.
+
+Input Format:
+Line 1: k. Line 2: k codes. Line 3: m. Line 4: m attempt codes.
+
+Output Format:
+m lines, each 1 (valid) or 0 (invalid), in attempt order.
+
+Constraints:
+1 <= k, m <= 1000, |code| <= 1000000000
+TC s1 IN<7
+50 30 70 20 40 60 80
+3
+60 65 40> EXP<1
+0
+1>
+TC s2 IN<7
+50 30 70 20 40 60 80
+2
+20 80> EXP<1
+1>
+TC t1 IN<1
+42
+1
+43> EXP<0>
+TC t2 IN<4
+10 20 30 40
+3
+10 40 25> EXP<1
+1
+0>
+TC t3 IN<6
+0 -5 9 -8 4 12
+4
+-8 12 13 -5> EXP<1
+1
+0
+1>
+SRC:
+int bst_search(BNode *root, int key) {
+    BNode *cur = root;
+    while (cur != NULL) {
+        if (key == cur->key) return 1;
+        cur = (key < cur->key) ? cur->left : cur->right;
+    }
+    return 0;
+}
+===== Q8 [easy/10] Oldest Log Timestamp | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"" WL:""
+DESC:
+A log shipper indexes timestamps in a BST; the OLDEST entry is the leftmost node. The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds the BST from the input (line 1: k; line 2: k timestamps).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_min(BNode *root)
+
+It must return the smallest timestamp in the tree (leftmost node). The tree is non-empty.
+
+Input Format:
+Line 1: k. Line 2: k space-separated timestamps.
+
+Output Format:
+One line with the oldest timestamp.
+
+Constraints:
+1 <= k <= 1000, |timestamp| <= 1000000000
+TC s1 IN<7
+100 60 140 55 75 130 160> EXP<55>
+TC s2 IN<4
+10 20 30 40> EXP<10>
+TC t1 IN<1
+5> EXP<5>
+TC t2 IN<5
+0 -10 20 -15 25> EXP<-15>
+TC t3 IN<9
+500 300 700 250 350 650 750 200 320> EXP<200>
+SRC:
+int bst_min(BNode *root) {
+    BNode *cur = root;
+    while (cur->left != NULL) cur = cur->left;
+    return cur->key;
+}
+===== Q9 [easy/10] Priciest Item Lookup | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"" WL:""
+DESC:
+A marketplace catalog indexes item prices in a BST; the priciest item sits at the rightmost node. The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds the BST from the input (line 1: k; line 2: k prices).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_max(BNode *root)
+
+It must return the largest price in the tree (rightmost node). The tree is non-empty.
+
+Input Format:
+Line 1: k. Line 2: k space-separated prices.
+
+Output Format:
+One line with the largest price.
+
+Constraints:
+1 <= k <= 1000, |price| <= 1000000000
+TC s1 IN<7
+100 60 140 55 75 130 160> EXP<160>
+TC s2 IN<4
+10 20 30 40> EXP<40>
+TC t1 IN<1
+5> EXP<5>
+TC t2 IN<5
+0 -10 20 -15 25> EXP<25>
+TC t3 IN<9
+500 300 700 250 350 650 750 200 320> EXP<750>
+SRC:
+int bst_max(BNode *root) {
+    BNode *cur = root;
+    while (cur->right != NULL) cur = cur->right;
+    return cur->key;
+}
+===== Q10 [medium/20] Build the Min-Heap | topic=Binary Search Trees and Heaps sub=Heap Representation type=practice
+BL:"qsort" WL:"2 * i"
+DESC:
+A cache server converts an array of task costs into a MIN-HEAP (array form: children of i are 2*i+1 and 2*i+2, parent never larger than a child). The conversion MUST use Floyd's bottom-up heapify: for i from n/2 - 1 down to 0, sift a[i] down; on each sift step swap the node with its SMALLER child (the left child if both are equal) and continue sifting from that slot.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void build_min_heap(int a[], int n)
+
+It must rearrange a[0..n-1] IN PLACE into the heap produced by that exact procedure. The harness prints the resulting array space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated distinct integers.
+
+Output Format:
+One line with the heap array, space-separated.
+
+Constraints:
+1 <= n <= 1000, |value| <= 1000000000 (values distinct)
+TC s1 IN<6
+12 5 9 3 17 1> EXP<1 3 9 5 17 12>
+TC s2 IN<5
+10 7 8 2 1> EXP<1 2 8 10 7>
+TC t1 IN<1
+9> EXP<9>
+TC t2 IN<7
+15 3 8 20 1 9 4> EXP<1 3 4 20 15 9 8>
+TC t3 IN<8
+6 14 2 9 5 3 12 1> EXP<1 5 2 9 6 3 12 14>
+SRC:
+void sift_down(int a[], int n, int i) {
+    while (1) {
+        int smallest = i;
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+        if (l < n && a[l] < a[smallest]) smallest = l;
+        if (r < n && a[r] < a[smallest]) smallest = r;
+        if (smallest == i) break;
+        int t = a[i];
+        a[i] = a[smallest];
+        a[smallest] = t;
+        i = smallest;
+    }
+}
+
+void build_min_heap(int a[], int n) {
+    for (int i = n / 2 - 1; i >= 0; i--) sift_down(a, n, i);
+}
+===== Q11 [medium/20] Emergency Room Triage | topic=Binary Search Trees and Heaps sub=Priority Operations type=practice
+BL:"qsort" WL:"while"
+DESC:
+An ER pushes patient severities into a MIN-HEAP as they arrive, then calls patients in severity order by repeated pop-minimum. The program scaffolding (includes and main) is already set up for you.
+
+Implement these two functions:
+
+    void heap_push(int heap[], int *size, int v)
+    int heap_pop(int heap[], int *size)
+
+heap_push must insert v at the end and sift it up while it is smaller than its parent (parent of i is (i-1)/2). heap_pop must remove and return heap[0]: move the last element to the root, shrink the size, and sift down by swapping with the smaller child until the heap property holds. The harness pushes all values, then pops until the heap is empty, printing each popped value.
+
+Input Format:
+Line 1: n. Line 2: n space-separated severities (arrival order).
+
+Output Format:
+One line with the pop order (ascending severities), space-separated.
+
+Constraints:
+1 <= n <= 1000, |severity| <= 1000000000
+TC s1 IN<7
+5 9 2 8 1 7 3> EXP<1 2 3 5 7 8 9>
+TC s2 IN<1
+42> EXP<42>
+TC t1 IN<5
+3 3 3 3 3> EXP<3 3 3 3 3>
+TC t2 IN<6
+-1 5 -9 0 5 2> EXP<-9 -1 0 2 5 5>
+TC t3 IN<4
+100 20 50 1> EXP<1 20 50 100>
+SRC:
+void heap_push(int heap[], int *size, int v) {
+    int i = (*size)++;
+    heap[i] = v;
+    while (i > 0) {
+        int p = (i - 1) / 2;
+        if (heap[p] <= heap[i]) break;
+        int t = heap[p];
+        heap[p] = heap[i];
+        heap[i] = t;
+        i = p;
+    }
+}
+
+int heap_pop(int heap[], int *size) {
+    int top = heap[0];
+    (*size)--;
+    heap[0] = heap[*size];
+    int i = 0;
+    while (1) {
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+        int smallest = i;
+        if (l < *size && heap[l] < heap[smallest]) smallest = l;
+        if (r < *size && heap[r] < heap[smallest]) smallest = r;
+        if (smallest == i) break;
+        int t = heap[i];
+        heap[i] = heap[smallest];
+        heap[smallest] = t;
+        i = smallest;
+    }
+    return top;
+}
+===== Q12 [medium/20] Keys in the Range | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"qsort" WL:"->right"
+DESC:
+A rating service keeps scores in a BST and counts how many fall inside a closed range [lo, hi]. The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds the BST from the input (line 1: k; line 2: k distinct keys; line 3: lo hi).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_range_count(BNode *root, int lo, int hi)
+
+It must return the number of keys x with lo <= x <= hi, pruning subtrees the range cannot reach (use the BST property instead of visiting everything).
+
+Input Format:
+Line 1: k. Line 2: k space-separated distinct keys. Line 3: lo and hi.
+
+Output Format:
+One line with the count.
+
+Constraints:
+1 <= k <= 1000, |key| <= 1000000000, lo <= hi
+TC s1 IN<7
+50 30 70 20 40 60 80
+3 60> EXP<5>
+TC s2 IN<7
+50 30 70 20 40 60 80
+80 80> EXP<1>
+TC t1 IN<7
+50 30 70 20 40 60 80
+-100 25> EXP<1>
+TC t2 IN<7
+50 30 70 20 40 60 80
+35 65> EXP<3>
+TC t3 IN<7
+50 30 70 20 40 60 80
+0 100> EXP<7>
+SRC:
+int bst_range_count(BNode *root, int lo, int hi) {
+    if (root == NULL) return 0;
+    if (root->key < lo) return bst_range_count(root->right, lo, hi);
+    if (root->key > hi) return bst_range_count(root->left, lo, hi);
+    return 1 + bst_range_count(root->left, lo, hi) + bst_range_count(root->right, lo, hi);
+}
+===== Q13 [medium/20] Min-Heap Property Check | topic=Binary Search Trees and Heaps sub=Heap Representation type=practice
+BL:"qsort" WL:"2 * i"
+DESC:
+Before trusting a stored heap, a scheduler verifies the array really satisfies the MIN-HEAP property: for every index i with children, the parent value must not exceed any child (children of i are 2*i+1 and 2*i+2).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int is_min_heap(int a[], int n)
+
+It must return 1 when a[0..n-1] is a valid min-heap, 0 otherwise. Inspect each child against its parent.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= n <= 1000, |value| <= 1000000000
+TC s1 IN<6
+5 8 6 9 12 11> EXP<1>
+TC s2 IN<4
+3 10 5 2> EXP<0>
+TC t1 IN<1
+7> EXP<1>
+TC t2 IN<7
+2 4 3 9 8 10 5> EXP<1>
+TC t3 IN<5
+1 2 3 0 9> EXP<0>
+SRC:
+int is_min_heap(int a[], int n) {
+    for (int i = 0; i < n; i++) {
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+        if (l < n && a[l] < a[i]) return 0;
+        if (r < n && a[r] < a[i]) return 0;
+    }
+    return 1;
+}
+===== Q14 [medium/20] Kth Smallest Key | topic=Binary Search Trees and Heaps sub=Kth Largest Element type=practice
+BL:"qsort" WL:"->left"
+DESC:
+A cache warms the k smallest keys of a BST. The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds the BST from the input (line 1: k; line 2: k distinct keys; line 3: the rank r, 1-based and guaranteed valid).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_kth_smallest(BNode *root, int r)
+
+It must return the r-th smallest key by walking an INORDER traversal and counting visited nodes (stop early once found).
+
+Input Format:
+Line 1: k. Line 2: k space-separated distinct keys. Line 3: r (1 <= r <= number of keys).
+
+Output Format:
+One line with the r-th smallest key.
+
+Constraints:
+1 <= k <= 1000, |key| <= 1000000000, values distinct
+TC s1 IN<7
+50 30 70 20 40 60 80
+3> EXP<40>
+TC s2 IN<7
+50 30 70 20 40 60 80
+1> EXP<20>
+TC t1 IN<7
+50 30 70 20 40 60 80
+7> EXP<80>
+TC t2 IN<8
+50 30 70 20 40 60 80 35
+5> EXP<50>
+TC t3 IN<1
+42
+1> EXP<42>
+SRC:
+int kth_visit(BNode *root, int *cnt, int r) {
+    if (root == NULL) return -1;
+    int res = kth_visit(root->left, cnt, r);
+    if (res != -1) return res;
+    (*cnt)++;
+    if (*cnt == r) return root->key;
+    return kth_visit(root->right, cnt, r);
+}
+
+int bst_kth_smallest(BNode *root, int r) {
+    int cnt = 0;
+    return kth_visit(root, &cnt, r);
+}
+===== Q15 [medium/20] Users Below Threshold | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"qsort" WL:"->left"
+DESC:
+A quota service counts BST-stored user scores strictly below a threshold. The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds the BST from the input (line 1: k; line 2: k keys; line 3: the threshold x).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_count_less(BNode *root, int x)
+
+It must return the number of keys strictly smaller than x, pruning the right subtrees that cannot qualify.
+
+Input Format:
+Line 1: k. Line 2: k space-separated keys. Line 3: x.
+
+Output Format:
+One line with the count.
+
+Constraints:
+1 <= k <= 1000, |key| <= 1000000000
+TC s1 IN<7
+50 30 70 20 40 60 80
+60> EXP<4>
+TC s2 IN<7
+50 30 70 20 40 60 80
+20> EXP<0>
+TC t1 IN<7
+50 30 70 20 40 60 80
+100> EXP<7>
+TC t2 IN<1
+42
+42> EXP<0>
+TC t3 IN<6
+0 -5 9 -8 4 12
+4> EXP<3>
+SRC:
+int bst_count_less(BNode *root, int x) {
+    if (root == NULL) return 0;
+    if (root->key >= x) return bst_count_less(root->left, x);
+    return 1 + bst_count_less(root->left, x) + bst_count_less(root->right, x);
+}
+===== Q16 [hard/30] Expire a BST Key | topic=Binary Search Trees and Heaps sub=BST Insertion and Deletion type=practice
+BL:"qsort" WL:"->right"
+DESC:
+A session store removes an expired key from its BST, keeping the BST property: a node with two children is replaced by its INORDER SUCCESSOR (the smallest key of the right subtree); a node with one child is replaced by that child; a leaf is simply removed. The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds the BST (line 1: k; line 2: k distinct keys; line 3: the key to delete, guaranteed present).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    BNode *bst_delete(BNode *root, int key)
+
+It must delete the node holding key (free it) and return the (possibly new) root. The harness prints the inorder traversal afterwards.
+
+Input Format:
+Line 1: k. Line 2: k space-separated distinct keys. Line 3: the key to delete (present).
+
+Output Format:
+One line with the remaining keys in inorder, space-separated.
+
+Constraints:
+2 <= k <= 1000, |key| <= 1000000000, values distinct
+TC s1 IN<7
+50 30 70 20 40 60 80
+50> EXP<20 30 40 60 70 80>
+TC s2 IN<7
+50 30 70 20 40 60 80
+20> EXP<30 40 50 60 70 80>
+TC t1 IN<5
+50 30 70 20 10
+30> EXP<10 20 50 70>
+TC t2 IN<7
+50 30 70 20 40 60 80
+30> EXP<20 40 50 60 70 80>
+TC t3 IN<8
+50 30 70 20 40 60 80 35
+35> EXP<20 30 40 50 60 70 80>
+SRC:
+BNode *bst_delete(BNode *root, int key) {
+    if (root == NULL) return NULL;
+    if (key < root->key) {
+        root->left = bst_delete(root->left, key);
+        return root;
+    }
+    if (key > root->key) {
+        root->right = bst_delete(root->right, key);
+        return root;
+    }
+    if (root->left == NULL) {
+        BNode *r = root->right;
+        free(root);
+        return r;
+    }
+    if (root->right == NULL) {
+        BNode *l = root->left;
+        free(root);
+        return l;
+    }
+    BNode *s = root->right;
+    while (s->left != NULL) s = s->left;
+    root->key = s->key;
+    root->right = bst_delete(root->right, s->key);
+    return root;
+}
+===== Q17 [hard/30] Validate the BST | topic=Binary Search Trees and Heaps sub=Validating a BST type=practice
+BL:"qsort" WL:"->key"
+DESC:
+A corrupted import may have violated the BST contract, so the store re-validates: every node's key must lie strictly inside the (min, max) bounds inherited from its ancestors — left subtrees get an updated upper bound, right subtrees an updated lower bound. The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds a PLAIN binary tree from level-order input (line 1: n; line 2: n values, -1 marks a missing child), which may or may not be a BST, then calls your function with wide bounds.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int is_bst(BNode *root, long long lo, long long hi)
+
+It must return 1 when every key satisfies lo < key < hi recursively (updating bounds on the way down), 0 otherwise. An empty tree is a valid BST.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= n <= 1000, |value| <= 1000000000, values distinct, first value not -1
+TC s1 IN<3
+10 5 15> EXP<1>
+TC s2 IN<5
+10 5 15 3 12> EXP<0>
+TC t1 IN<1
+7> EXP<1>
+TC t2 IN<7
+50 30 70 20 40 60 80> EXP<1>
+TC t3 IN<7
+50 30 70 20 40 45 80> EXP<0>
+SRC:
+int is_bst(BNode *root, long long lo, long long hi) {
+    if (root == NULL) return 1;
+    if (root->key <= lo || root->key >= hi) return 0;
+    return is_bst(root->left, lo, root->key) && is_bst(root->right, root->key, hi);
+}
+===== Q18 [hard/30] Kth Largest Key | topic=Binary Search Trees and Heaps sub=Kth Largest Element type=practice
+BL:"qsort" WL:"->right"
+DESC:
+A leaderboard keeps scores in a BST; the k-th largest score is found by walking the tree in REVERSE inorder (right subtree, node, left subtree) while counting visited nodes. The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds the BST (line 1: k; line 2: k distinct keys; line 3: the rank r, 1-based and guaranteed valid).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_kth_largest(BNode *root, int r)
+
+It must return the r-th largest key using a reverse inorder walk (stop early once found).
+
+Input Format:
+Line 1: k. Line 2: k space-separated distinct keys. Line 3: r (1 <= r <= number of keys).
+
+Output Format:
+One line with the r-th largest key.
+
+Constraints:
+1 <= k <= 1000, |key| <= 1000000000, values distinct
+TC s1 IN<7
+50 30 70 20 40 60 80
+2> EXP<70>
+TC s2 IN<7
+50 30 70 20 40 60 80
+1> EXP<80>
+TC t1 IN<7
+50 30 70 20 40 60 80
+7> EXP<20>
+TC t2 IN<8
+50 30 70 20 40 60 80 35
+3> EXP<60>
+TC t3 IN<1
+42
+1> EXP<42>
+SRC:
+int kth_rev(BNode *root, int *cnt, int r) {
+    if (root == NULL) return -1;
+    int res = kth_rev(root->right, cnt, r);
+    if (res != -1) return res;
+    (*cnt)++;
+    if (*cnt == r) return root->key;
+    return kth_rev(root->left, cnt, r);
+}
+
+int bst_kth_largest(BNode *root, int r) {
+    int cnt = 0;
+    return kth_rev(root, &cnt, r);
+}
+===== Q19 [hard/30] Nearest Sensor Reading | topic=Binary Search Trees and Heaps sub=BST Search type=practice
+BL:"qsort" WL:"while"
+DESC:
+A calibration probe finds the BST-stored reading CLOSEST to a target temperature (test data guarantees the closest key is unique). The node type is defined for you as typedef struct BNode { int key; struct BNode *left, *right; } BNode; and the harness builds the BST (line 1: k; line 2: k distinct keys; line 3: the target).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bst_closest(BNode *root, int target)
+
+It must return the key minimizing |key - target| by walking down the tree from the root: track the best candidate seen, and descend left or right by the BST property (stop early on an exact match).
+
+Input Format:
+Line 1: k. Line 2: k space-separated distinct keys. Line 3: the target.
+
+Output Format:
+One line with the closest key.
+
+Constraints:
+1 <= k <= 1000, |key|, |target| <= 1000000000 (closest key unique)
+TC s1 IN<7
+50 30 70 20 40 60 80
+64> EXP<60>
+TC s2 IN<7
+50 30 70 20 40 60 80
+49> EXP<50>
+TC t1 IN<7
+50 30 70 20 40 60 80
+81> EXP<80>
+TC t2 IN<7
+50 30 70 20 40 60 80
+19> EXP<20>
+TC t3 IN<6
+0 -5 9 -8 4 12
+3> EXP<4>
+SRC:
+int bst_closest(BNode *root, int target) {
+    int best = root->key;
+    BNode *cur = root;
+    while (cur != NULL) {
+        if (abs(cur->key - target) < abs(best - target)) best = cur->key;
+        if (target < cur->key) cur = cur->left;
+        else if (target > cur->key) cur = cur->right;
+        else break;
+    }
+    return best;
+}

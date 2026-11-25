@@ -1,0 +1,847 @@
+===== Q0 [easy/10] String Hash to a Slot | topic=Hashing and Hash Tables sub=Hash Functions type=practice
+BL:"" WL:""
+DESC:
+A simple hash function for keys is the sum of character codes modulo the table size.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int hash_key(const char *key)
+
+It must return (sum of the character codes of key) % 101.
+
+Input Format:
+One token (the key).
+
+Output Format:
+One line with the slot number 0..100.
+
+Constraints:
+1 <= length of key <= 99, key contains only lowercase letters
+TC s1 IN<atom> EXP<29>
+TC s2 IN<code> EXP<7>
+TC t1 IN<a> EXP<97>
+TC t2 IN<zzz> EXP<63>
+TC t3 IN<hello> EXP<27>
+SRC:
+int hash_key(const char *key) {
+    int sum = 0;
+    for (int i = 0; key[i]; i++) {
+        sum += key[i];
+    }
+    return sum % 101;
+}
+===== Q1 [easy/10] Integer Hash to a Slot | topic=Hashing and Hash Tables sub=Hash Functions type=practice
+BL:"" WL:""
+DESC:
+Integer keys usually hash straight into the table with the modulo operator.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int hash_int(int v)
+
+It must return v % 101.
+
+Input Format:
+One line with the integer key.
+
+Output Format:
+One line with the slot number 0..100.
+
+Constraints:
+0 <= v <= 1000000
+TC s1 IN<5> EXP<5>
+TC s2 IN<106> EXP<5>
+TC t1 IN<0> EXP<0>
+TC t2 IN<1000> EXP<91>
+TC t3 IN<250> EXP<48>
+SRC:
+int hash_int(int v) {
+    return v % 101;
+}
+===== Q2 [easy/10] Frequency of a Target Value | topic=Hashing and Hash Tables sub=Frequency Counting type=practice
+BL:"" WL:""
+DESC:
+Counting occurrences of a value is the bread and butter of frequency tables.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int count_target(const int *arr, int n, int target)
+
+It must return how many times target appears in arr.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated integers.
+Line 3: target.
+
+Output Format:
+One line with the count.
+
+Constraints:
+1 <= n <= 2000, -1000 <= values <= 1000
+TC s1 IN<6
+2 3 2 5 2 7
+2> EXP<3>
+TC s2 IN<4
+1 2 3 4
+9> EXP<0>
+TC t1 IN<5
+7 7 7 7 7
+7> EXP<5>
+TC t2 IN<6
+-1 2 -1 3 -1 4
+-1> EXP<3>
+TC t3 IN<3
+10 20 30
+5> EXP<0>
+SRC:
+int count_target(const int *arr, int n, int target) {
+    int count = 0;
+    for (int i = 0; i < n; i++) {
+        if (arr[i] == target) count++;
+    }
+    return count;
+}
+===== Q3 [easy/10] Lookup: Is the Key Present | topic=Hashing and Hash Tables sub=Hash Table Implementation type=practice
+BL:"" WL:""
+DESC:
+A hash table answers membership queries; here you do the direct scan version.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int contains(const int *arr, int n, int target)
+
+It must return 1 if target appears in arr, and 0 otherwise. The harness prints YES or NO.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated integers.
+Line 3: target.
+
+Output Format:
+One line with YES or NO.
+
+Constraints:
+1 <= n <= 2000, -1000 <= values <= 1000
+TC s1 IN<5
+4 8 15 16 23
+15> EXP<YES>
+TC s2 IN<3
+1 2 3
+7> EXP<NO>
+TC t1 IN<4
+-5 0 5 10
+0> EXP<YES>
+TC t2 IN<6
+9 1 8 2 7 3
+3> EXP<YES>
+TC t3 IN<2
+100 200
+100> EXP<YES>
+SRC:
+int contains(const int *arr, int n, int target) {
+    for (int i = 0; i < n; i++) {
+        if (arr[i] == target) return 1;
+    }
+    return 0;
+}
+===== Q4 [easy/10] Any Duplicate Present | topic=Hashing and Hash Tables sub=Duplicate Detection type=practice
+BL:"" WL:""
+DESC:
+The first thing a duplicate detector asks: does this collection contain any repeated value at all?
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int has_duplicate(const int *arr, int n)
+
+It must return 1 if some value appears at least twice, and 0 otherwise. The harness prints YES or NO.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated integers.
+
+Output Format:
+One line with YES or NO.
+
+Constraints:
+1 <= n <= 500, -1000 <= values <= 1000
+TC s1 IN<4
+1 2 3 4> EXP<NO>
+TC s2 IN<5
+1 2 2 3 4> EXP<YES>
+TC t1 IN<3
+7 7 7> EXP<YES>
+TC t2 IN<6
+1 2 3 4 5 6> EXP<NO>
+TC t3 IN<4
+-1 -1 2 3> EXP<YES>
+SRC:
+int has_duplicate(const int *arr, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (arr[i] == arr[j]) return 1;
+        }
+    }
+    return 0;
+}
+===== Q5 [easy/10] Collision Slot Check | topic=Hashing and Hash Tables sub=Collisions type=practice
+BL:"" WL:""
+DESC:
+Two keys collide when they hash into the same slot of a 101-slot table.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int same_slot(int a, int b)
+
+It must return 1 when a % 101 equals b % 101, and 0 otherwise. The harness prints YES or NO.
+
+Input Format:
+One line with two integer keys.
+
+Output Format:
+One line with YES or NO.
+
+Constraints:
+0 <= a, b <= 1000000
+TC s1 IN<204 2> EXP<YES>
+TC s2 IN<101 5> EXP<NO>
+TC t1 IN<50 151> EXP<YES>
+TC t2 IN<99 100> EXP<NO>
+TC t3 IN<7 108> EXP<YES>
+SRC:
+int same_slot(int a, int b) {
+    return (a % 101) == (b % 101);
+}
+===== Q6 [easy/10] Playlist Replay Count | topic=Hashing and Hash Tables sub=Frequency Counting type=practice
+BL:"" WL:""
+DESC:
+A music app logs every played track id. For royalties it needs the play count of one track.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int play_count(const int *log, int n, int track)
+
+It must return the number of times track appears in the play log.
+
+Input Format:
+Line 1: n, the number of log entries.
+Line 2: n space-separated track ids.
+Line 3: track.
+
+Output Format:
+One line with the play count.
+
+Constraints:
+1 <= n <= 2000, 1 <= track ids <= 100000
+TC s1 IN<7
+3 5 3 9 3 1 5
+3> EXP<3>
+TC s2 IN<4
+2 2 2 2
+2> EXP<4>
+TC t1 IN<6
+1 2 3 4 5 6
+7> EXP<0>
+TC t2 IN<5
+10 20 10 30 10
+10> EXP<3>
+TC t3 IN<3
+4 5 6
+5> EXP<1>
+SRC:
+int play_count(const int *log, int n, int track) {
+    int count = 0;
+    for (int i = 0; i < n; i++) {
+        if (log[i] == track) count++;
+    }
+    return count;
+}
+===== Q7 [easy/10] Duplicate Receipt Numbers | topic=Hashing and Hash Tables sub=Duplicate Detection type=practice
+BL:"" WL:""
+DESC:
+A billing system must reject a batch when two receipts carry the same number.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int duplicate_receipt(const int *ids, int n)
+
+It must return 1 if any receipt number repeats, and 0 otherwise. The harness prints YES or NO.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated receipt numbers.
+
+Output Format:
+One line with YES or NO.
+
+Constraints:
+1 <= n <= 500, 1 <= receipt numbers <= 100000
+TC s1 IN<5
+101 102 103 104 105> EXP<NO>
+TC s2 IN<4
+7 8 7 9> EXP<YES>
+TC t1 IN<3
+1 1 1> EXP<YES>
+TC t2 IN<6
+10 20 30 40 50 60> EXP<NO>
+TC t3 IN<4
+-2 -2 -2 -2> EXP<YES>
+SRC:
+int duplicate_receipt(const int *ids, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (ids[i] == ids[j]) return 1;
+        }
+    }
+    return 0;
+}
+===== Q8 [easy/10] Locker Slot Assignment | topic=Hashing and Hash Tables sub=Hash Functions type=practice
+BL:"" WL:""
+DESC:
+A school maps each student id to one of 101 cabinets with slot = studentId % 101.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int locker_slot(int studentId)
+
+It must return studentId % 101.
+
+Input Format:
+One line with the student id.
+
+Output Format:
+One line with the cabinet number 0..100.
+
+Constraints:
+0 <= studentId <= 1000000
+TC s1 IN<1024> EXP<14>
+TC s2 IN<0> EXP<0>
+TC t1 IN<101> EXP<0>
+TC t2 IN<555> EXP<50>
+TC t3 IN<9999> EXP<0>
+SRC:
+int locker_slot(int studentId) {
+    return studentId % 101;
+}
+===== Q9 [easy/10] Busy Slots in the Locker Room | topic=Hashing and Hash Tables sub=Hash Table Implementation type=practice
+BL:"" WL:""
+DESC:
+Given a batch of locker assignments, count how many distinct cabinets are occupied (two students with the same slot share the collision).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int occupied_slots(const int *ids, int n)
+
+It must return the number of distinct values among the slots id % 101. Marking a seen[] table of size 101 is the hash-table way to do it.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated student ids.
+
+Output Format:
+One line with the occupied slot count.
+
+Constraints:
+1 <= n <= 2000, 0 <= student ids <= 1000000
+TC s1 IN<5
+1 2 102 203 5> EXP<3>
+TC s2 IN<4
+0 101 202 303> EXP<1>
+TC t1 IN<3
+7 7 7> EXP<1>
+TC t2 IN<6
+1 2 3 4 5 6> EXP<6>
+TC t3 IN<4
+100 201 302 403> EXP<1>
+SRC:
+int occupied_slots(const int *ids, int n) {
+    int seen[101] = {0};
+    for (int i = 0; i < n; i++) {
+        seen[ids[i] % 101] = 1;
+    }
+    int count = 0;
+    for (int s = 0; s < 101; s++) {
+        if (seen[s]) count++;
+    }
+    return count;
+}
+===== Q10 [medium/20] First Duplicate in a Scan | topic=Hashing and Hash Tables sub=Duplicate Detection type=practice
+BL:"printf" WL:"seen"
+DESC:
+A warehouse scanner reads item codes; the alarm fires on the first value that appears a second time. Report that value (the one whose second occurrence comes earliest).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int first_duplicate(const int *arr, int n)
+
+It must return the value whose second occurrence has the smallest index, or -1 when every value is unique. Item codes are in the range 1..n, so a seen[] table keyed by value works in one pass.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated item codes.
+
+Output Format:
+One line with the first duplicate value or -1.
+
+Constraints:
+1 <= n <= 1000, 1 <= arr[i] <= n
+TC s1 IN<5
+2 3 4 3 2> EXP<3>
+TC s2 IN<4
+1 2 3 4> EXP<-1>
+TC t1 IN<6
+1 2 2 3 3 1> EXP<2>
+TC t2 IN<3
+5 5 5> EXP<5>
+TC t3 IN<7
+4 1 2 1 4 5 6> EXP<1>
+SRC:
+int first_duplicate(const int *arr, int n) {
+    int seen[1001] = {0};
+    for (int i = 0; i < n; i++) {
+        if (seen[arr[i]]) return arr[i];
+        seen[arr[i]] = 1;
+    }
+    return -1;
+}
+===== Q11 [medium/20] Transaction Pairs with a Target Sum | topic=Hashing and Hash Tables sub=Hash Table Implementation type=practice
+BL:"printf" WL:"freq"
+DESC:
+A fraud detector counts unordered index pairs (i < j) whose transaction amounts add up to a target. A frequency table over the bounded values makes this a single pass.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int count_pairs(const int *arr, int n, int target)
+
+It must return the number of pairs i < j with arr[i] + arr[j] == target. Values lie in [-50, 50], so a freq[] table of size 101 with a +50 offset covers every complement.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated amounts.
+Line 3: target.
+
+Output Format:
+One line with the pair count.
+
+Constraints:
+1 <= n <= 1000, -50 <= arr[i] <= 50, -100 <= target <= 100
+TC s1 IN<5
+1 5 7 -1 5
+6> EXP<3>
+TC s2 IN<4
+2 2 2 2
+4> EXP<6>
+TC t1 IN<6
+0 -5 5 10 -10 15
+5> EXP<3>
+TC t2 IN<3
+1 2 3
+100> EXP<0>
+TC t3 IN<6
+3 3 3 3 3 3
+6> EXP<15>
+SRC:
+int count_pairs(const int *arr, int n, int target) {
+    int freq[101] = {0};
+    int count = 0;
+    for (int i = 0; i < n; i++) {
+        int need = target - arr[i];
+        if (need >= -50 && need <= 50) count += freq[need + 50];
+        freq[arr[i] + 50]++;
+    }
+    return count;
+}
+===== Q12 [medium/20] Letter Frequency Histogram | topic=Hashing and Hash Tables sub=Frequency Counting type=practice
+BL:"printf" WL:"freq"
+DESC:
+A text profiler prints a histogram of the letters that occur in a word: every letter a-z that appears at least once, in alphabetical order, as "letter:count".
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void char_counts(const char *s, int *out)
+
+It must fill out[0..25] with the counts of 'a'..'z' (0 for absent letters). The harness prints the "letter:count" entries with a positive count.
+
+Input Format:
+One token of lowercase letters.
+
+Output Format:
+One line with entries like "a:3 b:1", space-separated, in a-to-z order.
+
+Constraints:
+1 <= length of s <= 999, s contains only 'a'-'z'
+TC s1 IN<programming> EXP<a:1 g:2 i:1 m:2 n:1 o:1 p:1 r:2>
+TC s2 IN<aaabbc> EXP<a:3 b:2 c:1>
+TC t1 IN<xyz> EXP<x:1 y:1 z:1>
+TC t2 IN<a> EXP<a:1>
+TC t3 IN<mississippi> EXP<i:4 m:1 p:2 s:4>
+SRC:
+void char_counts(const char *s, int *out) {
+    int freq[26] = {0};
+    for (int i = 0; s[i]; i++) {
+        freq[s[i] - 'a']++;
+    }
+    for (int c = 0; c < 26; c++) {
+        out[c] = freq[c];
+    }
+}
+===== Q13 [medium/20] Most Frequent Sensor Value | topic=Hashing and Hash Tables sub=Frequency Counting type=practice
+BL:"printf" WL:"freq"
+DESC:
+A calibration report names the value recorded most often. Ties are broken by the smaller value (though every test case has a unique mode).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int most_frequent(const int *arr, int n)
+
+It must return the value with the highest frequency. Values lie in [-50, 50], so a freq[] table with a +50 offset works.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated sensor values.
+
+Output Format:
+One line with the most frequent value.
+
+Constraints:
+1 <= n <= 1000, -50 <= arr[i] <= 50
+TC s1 IN<6
+1 3 2 3 4 3> EXP<3>
+TC s2 IN<5
+7 7 1 2 7> EXP<7>
+TC t1 IN<4
+-1 -1 -1 2> EXP<-1>
+TC t2 IN<3
+5 9 5> EXP<5>
+TC t3 IN<9
+2 2 2 3 3 4 4 5 5> EXP<2>
+SRC:
+int most_frequent(const int *arr, int n) {
+    int freq[101] = {0};
+    for (int i = 0; i < n; i++) freq[arr[i] + 50]++;
+    int best = -51, bestCount = 0;
+    for (int v = -50; v <= 50; v++) {
+        if (freq[v + 50] > bestCount) {
+            bestCount = freq[v + 50];
+            best = v;
+        }
+    }
+    return best;
+}
+===== Q14 [medium/20] Pharmacy Label Anagram Check | topic=Hashing and Hash Tables sub=Frequency Counting type=practice
+BL:"printf" WL:"freq"
+DESC:
+A pharmacy verifies that a medicine label is a rearrangement of the prescription code (same letters, any order). Counting letters with a frequency table answers it in O(length).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int is_anagram(const char *a, const char *b)
+
+It must return 1 when a and b are anagrams of each other (both lowercase, equal lengths), and 0 otherwise. The harness prints YES or NO.
+
+Input Format:
+One line with two lowercase tokens a and b (same length).
+
+Output Format:
+One line with YES or NO.
+
+Constraints:
+1 <= lengths <= 99, both tokens contain only 'a'-'z'
+TC s1 IN<listen silent> EXP<YES>
+TC s2 IN<triangle integral> EXP<YES>
+TC t1 IN<hello world> EXP<NO>
+TC t2 IN<abcd dcba> EXP<YES>
+TC t3 IN<aab aba> EXP<YES>
+SRC:
+int is_anagram(const char *a, const char *b) {
+    int freq[26] = {0};
+    int la = 0, lb = 0;
+    while (a[la]) la++;
+    while (b[lb]) lb++;
+    if (la != lb) return 0;
+    for (int i = 0; i < la; i++) freq[a[i] - 'a']++;
+    for (int i = 0; i < lb; i++) {
+        freq[b[i] - 'a']--;
+        if (freq[b[i] - 'a'] < 0) return 0;
+    }
+    return 1;
+}
+===== Q15 [medium/20] Distinct Inventory Codes | topic=Hashing and Hash Tables sub=Hash Table Implementation type=practice
+BL:"printf" WL:"seen"
+DESC:
+A stock report needs the number of distinct codes in a shipment. With bounded codes, a seen[] table replaces any heavyweight set.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int distinct_count(const int *arr, int n)
+
+It must return the number of distinct values in arr. Values lie in [-50, 50]; mark a seen[] table with a +50 offset and count marked entries.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated codes.
+
+Output Format:
+One line with the distinct count.
+
+Constraints:
+1 <= n <= 1000, -50 <= arr[i] <= 50
+TC s1 IN<6
+1 2 2 3 3 3> EXP<3>
+TC s2 IN<5
+0 0 0 0 0> EXP<1>
+TC t1 IN<7
+1 -1 2 -2 3 -3 4> EXP<7>
+TC t2 IN<4
+50 -50 50 -50> EXP<2>
+TC t3 IN<3
+7 8 9> EXP<3>
+SRC:
+int distinct_count(const int *arr, int n) {
+    int seen[101] = {0};
+    for (int i = 0; i < n; i++) seen[arr[i] + 50] = 1;
+    int count = 0;
+    for (int v = 0; v <= 100; v++) {
+        if (seen[v]) count++;
+    }
+    return count;
+}
+===== Q16 [hard/30] Fraud Pair: Two-Sum Indices | topic=Hashing and Hash Tables sub=Hash Table Implementation type=practice
+BL:"printf" WL:"seen"
+DESC:
+A fraud engine flags exactly one pair of transactions whose amounts sum to a target. Report their indices (smallest first) using a single left-to-right pass with a seen[] lookup table.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void two_sum(const int *arr, int n, int target, int *out)
+
+It must store the earlier index into out[0] and the later index into out[1]. Exactly one such pair exists in every test. Amounts lie in [-100, 100], so seen[v + 100] can hold the index (plus one) of the first occurrence of each value.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated amounts.
+Line 3: target.
+
+Output Format:
+One line with the two indices (earlier first), space-separated.
+
+Constraints:
+1 <= n <= 1000, -100 <= arr[i] <= 100, -200 <= target <= 200, exactly one valid pair exists
+TC s1 IN<4
+2 7 11 15
+9> EXP<0 1>
+TC s2 IN<3
+3 2 4
+6> EXP<1 2>
+TC t1 IN<5
+-10 20 30 -5 45
+35> EXP<0 4>
+TC t2 IN<6
+1 2 3 10 20 30
+13> EXP<2 3>
+TC t3 IN<4
+0 4 3 0
+0> EXP<0 3>
+SRC:
+void two_sum(const int *arr, int n, int target, int *out) {
+    int seen[201] = {0};
+    for (int i = 0; i < n; i++) {
+        int need = target - arr[i];
+        if (need >= -100 && need <= 100 && seen[need + 100]) {
+            out[0] = seen[need + 100] - 1;
+            out[1] = i;
+            return;
+        }
+        seen[arr[i] + 100] = i + 1;
+    }
+}
+===== Q17 [hard/30] Union and Intersection Counts | topic=Hashing and Hash Tables sub=Hash Table Implementation type=practice
+BL:"printf" WL:"freq"
+DESC:
+An analytics job reports how many distinct values the union and the intersection of two customer sets contain. Both arrays hold distinct values in [-50, 50], so two frequency tables with a +50 offset answer everything.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void union_intersection(const int *a, int n, const int *b, int m, int *out)
+
+It must store the union size into out[0] and the intersection size into out[1] (distinct values in both cases).
+
+Input Format:
+Line 1: n.
+Line 2: n distinct values of the first set.
+Line 3: m.
+Line 4: m distinct values of the second set.
+
+Output Format:
+One line with the union size, then the intersection size, space-separated.
+
+Constraints:
+1 <= n, m <= 1000, -50 <= values <= 50, values within each array are distinct
+TC s1 IN<4
+1 2 3 4
+3
+3 4 5> EXP<5 2>
+TC s2 IN<3
+-5 0 5
+3
+5 10 15> EXP<5 1>
+TC t1 IN<2
+7 8
+2
+7 8> EXP<2 2>
+TC t2 IN<5
+1 2 3 4 5
+2
+6 7> EXP<7 0>
+TC t3 IN<4
+-1 -2 -3 -4
+3
+-4 -5 -6> EXP<6 1>
+SRC:
+void union_intersection(const int *a, int n, const int *b, int m, int *out) {
+    int freqA[101] = {0}, freqB[101] = {0};
+    for (int i = 0; i < n; i++) freqA[a[i] + 50] = 1;
+    for (int j = 0; j < m; j++) freqB[b[j] + 50] = 1;
+    int uni = 0, inter = 0;
+    for (int v = 0; v <= 100; v++) {
+        if (freqA[v] || freqB[v]) uni++;
+        if (freqA[v] && freqB[v]) inter++;
+    }
+    out[0] = uni;
+    out[1] = inter;
+}
+===== Q18 [hard/30] Longest Consecutive Version Run | topic=Hashing and Hash Tables sub=Duplicate Detection type=practice
+BL:"printf" WL:"seen"
+DESC:
+Firmware build numbers arrive out of order; QA wants the length of the longest run of consecutive integers present anywhere in the batch (order in the input does not matter). Values lie in [-100, 100] — mark a seen[] table and scan it.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int longest_consecutive(const int *arr, int n)
+
+It must return the length of the longest sequence of consecutive integers (e.g. 3,4,5) such that every element of the sequence appears in arr.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated build numbers.
+
+Output Format:
+One line with the longest consecutive run length.
+
+Constraints:
+1 <= n <= 1000, -100 <= arr[i] <= 100
+TC s1 IN<6
+1 2 3 100 101 102> EXP<3>
+TC s2 IN<5
+1 9 3 10 4> EXP<2>
+TC t1 IN<4
+-2 -1 0 1> EXP<4>
+TC t2 IN<7
+5 5 5 6 7 8 9> EXP<5>
+TC t3 IN<1
+42> EXP<1>
+SRC:
+int longest_consecutive(const int *arr, int n) {
+    int seen[201] = {0};
+    for (int i = 0; i < n; i++) seen[arr[i] + 100] = 1;
+    int best = 0, run = 0;
+    for (int v = -100; v <= 100; v++) {
+        if (seen[v + 100]) {
+            run++;
+            if (run > best) best = run;
+        } else {
+            run = 0;
+        }
+    }
+    return best;
+}
+===== Q19 [hard/30] Sensor Drift: Subarrays with Target Sum | topic=Hashing and Hash Tables sub=Hash Functions type=practice
+BL:"printf" WL:"freq"
+DESC:
+A sensor stream may drift negative; QA counts how many contiguous windows sum exactly to a calibration constant k. Prefix sums plus a frequency table (with a +10000 offset) solve it in one pass.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int subarray_sum_count(const int *arr, int n, int k)
+
+It must return the number of pairs (l <= r) with arr[l] + ... + arr[r] == k. Readings lie in [-20, 20] and n <= 500, so every prefix sum stays within [-10000, 10000].
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated readings.
+Line 3: k.
+
+Output Format:
+One line with the count.
+
+Constraints:
+1 <= n <= 500, -20 <= arr[i] <= 20, -200 <= k <= 200
+TC s1 IN<5
+1 2 3 4 5
+9> EXP<2>
+TC s2 IN<4
+1 1 1 1
+2> EXP<3>
+TC t1 IN<5
+1 -1 1 -1 1
+1> EXP<6>
+TC t2 IN<3
+0 0 0
+0> EXP<6>
+TC t3 IN<6
+2 -2 2 -2 2 -2
+0> EXP<9>
+SRC:
+int subarray_sum_count(const int *arr, int n, int k) {
+    int freq[20001];
+    for (int i = 0; i <= 20000; i++) freq[i] = 0;
+    int pre = 0, count = 0;
+    freq[10000] = 1;
+    for (int i = 0; i < n; i++) {
+        pre += arr[i];
+        int need = pre - k;
+        if (need >= -10000 && need <= 10000) count += freq[need + 10000];
+        freq[pre + 10000]++;
+    }
+    return count;
+}

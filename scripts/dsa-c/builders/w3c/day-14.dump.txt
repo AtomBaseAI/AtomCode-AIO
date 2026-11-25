@@ -1,0 +1,819 @@
+===== Q0 [easy/10] Preorder Traversal | topic=Trees and Binary Trees sub=Preorder Traversal type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds a binary tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void preorder_fill(TNode *root, int out[], int *outn)
+
+It must fill out[] with the node values in PREORDER (node, then left subtree, then right subtree) and set *outn to the number of values filled. The harness prints the values space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the preorder sequence, space-separated.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<7
+1 2 3 4 5 6 7> EXP<1 2 4 5 3 6 7>
+TC s2 IN<3
+5 3 8> EXP<5 3 8>
+TC t1 IN<9
+6 4 9 2 5 8 10 1 3> EXP<6 4 2 1 3 5 9 8 10>
+TC t2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<5 4 3>
+TC t3 IN<1
+42> EXP<42>
+SRC:
+void preorder_fill(TNode *root, int out[], int *outn) {
+    if (root == NULL) return;
+    out[(*outn)++] = root->val;
+    preorder_fill(root->left, out, outn);
+    preorder_fill(root->right, out, outn);
+}
+===== Q1 [easy/10] Inorder Traversal | topic=Trees and Binary Trees sub=Inorder and Postorder Traversal type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds a binary tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void inorder_fill(TNode *root, int out[], int *outn)
+
+It must fill out[] with the node values in INORDER (left subtree, then node, then right subtree) and set *outn to the number of values filled. The harness prints the values space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the inorder sequence, space-separated.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<7
+1 2 3 4 5 6 7> EXP<4 2 5 1 6 3 7>
+TC s2 IN<3
+5 3 8> EXP<3 5 8>
+TC t1 IN<9
+6 4 9 2 5 8 10 1 3> EXP<1 2 3 4 5 6 8 9 10>
+TC t2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<4 3 5>
+TC t3 IN<1
+42> EXP<42>
+SRC:
+void inorder_fill(TNode *root, int out[], int *outn) {
+    if (root == NULL) return;
+    inorder_fill(root->left, out, outn);
+    out[(*outn)++] = root->val;
+    inorder_fill(root->right, out, outn);
+}
+===== Q2 [easy/10] Postorder Traversal | topic=Trees and Binary Trees sub=Inorder and Postorder Traversal type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds a binary tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void postorder_fill(TNode *root, int out[], int *outn)
+
+It must fill out[] with the node values in POSTORDER (left subtree, then right subtree, then node) and set *outn to the number of values filled. The harness prints the values space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the postorder sequence, space-separated.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<7
+1 2 3 4 5 6 7> EXP<4 5 2 6 7 3 1>
+TC s2 IN<3
+5 3 8> EXP<3 8 5>
+TC t1 IN<9
+6 4 9 2 5 8 10 1 3> EXP<1 3 2 5 4 8 10 9 6>
+TC t2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<3 4 5>
+TC t3 IN<1
+42> EXP<42>
+SRC:
+void postorder_fill(TNode *root, int out[], int *outn) {
+    if (root == NULL) return;
+    postorder_fill(root->left, out, outn);
+    postorder_fill(root->right, out, outn);
+    out[(*outn)++] = root->val;
+}
+===== Q3 [easy/10] Tree Height | topic=Trees and Binary Trees sub=Tree Terminology type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds a binary tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int tree_height(TNode *root)
+
+It must return the height of the tree measured in NODES on the longest root-to-leaf path (a single node has height 1; an empty tree has height 0).
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the height.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<7
+1 2 3 4 5 6 7> EXP<3>
+TC s2 IN<3
+5 3 8> EXP<2>
+TC t1 IN<7
+5 4 -1 -1 3 -1 -1> EXP<3>
+TC t2 IN<1
+42> EXP<1>
+TC t3 IN<9
+6 4 9 2 5 8 10 1 3> EXP<4>
+SRC:
+int tree_height(TNode *root) {
+    if (root == NULL) return 0;
+    int l = tree_height(root->left);
+    int r = tree_height(root->right);
+    return 1 + (l > r ? l : r);
+}
+===== Q4 [easy/10] Leaf Count | topic=Trees and Binary Trees sub=Tree Terminology type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds a binary tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int count_leaves(TNode *root)
+
+It must return the number of leaf nodes (nodes with no children). A single-node tree has exactly one leaf.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the leaf count.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<7
+1 2 3 4 5 6 7> EXP<4>
+TC s2 IN<3
+5 3 8> EXP<2>
+TC t1 IN<7
+5 4 -1 -1 3 -1 -1> EXP<1>
+TC t2 IN<1
+42> EXP<1>
+TC t3 IN<9
+6 4 9 2 5 8 10 1 3> EXP<5>
+SRC:
+int count_leaves(TNode *root) {
+    if (root == NULL) return 0;
+    if (root->left == NULL && root->right == NULL) return 1;
+    return count_leaves(root->left) + count_leaves(root->right);
+}
+===== Q5 [easy/10] Total Node Count | topic=Trees and Binary Trees sub=Tree Terminology type=practice
+BL:"" WL:""
+DESC:
+The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds a binary tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child). Note that n counts array slots including -1 placeholders, while the tree may hold fewer real nodes.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int count_nodes(TNode *root)
+
+It must return the number of REAL nodes in the tree.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the number of real nodes.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<11
+8 3 10 1 6 -1 14 -1 -1 4 7> EXP<8>
+TC s2 IN<3
+5 3 8> EXP<3>
+TC t1 IN<7
+5 4 -1 -1 3 -1 -1> EXP<3>
+TC t2 IN<1
+42> EXP<1>
+TC t3 IN<9
+6 4 9 2 5 8 10 1 3> EXP<9>
+SRC:
+int count_nodes(TNode *root) {
+    if (root == NULL) return 0;
+    return 1 + count_nodes(root->left) + count_nodes(root->right);
+}
+===== Q6 [easy/10] Dependency Manifest Preorder | topic=Trees and Binary Trees sub=Preorder Traversal type=practice
+BL:"" WL:""
+DESC:
+A build tool stores a dependency tree (each package lists its sub-packages left to right) and ships packages in PREORDER: install a package first, then its left branch, then its right branch. The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void preorder_fill(TNode *root, int out[], int *outn)
+
+It must fill out[] with the package ids in preorder and set *outn to the count. The harness prints the ids space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the preorder sequence, space-separated.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<5
+10 20 30 40 50> EXP<10 20 40 50 30>
+TC s2 IN<3
+5 3 8> EXP<5 3 8>
+TC t1 IN<9
+6 4 9 2 5 8 10 1 3> EXP<6 4 2 1 3 5 9 8 10>
+TC t2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<5 4 3>
+TC t3 IN<1
+42> EXP<42>
+SRC:
+void preorder_fill(TNode *root, int out[], int *outn) {
+    if (root == NULL) return;
+    out[(*outn)++] = root->val;
+    preorder_fill(root->left, out, outn);
+    preorder_fill(root->right, out, outn);
+}
+===== Q7 [easy/10] Expression Tree Inorder Audit | topic=Trees and Binary Trees sub=Inorder and Postorder Traversal type=practice
+BL:"" WL:""
+DESC:
+An audit tool walks an expression tree INORDER (left operand, operator, right operand) to dump the original token stream. The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void inorder_fill(TNode *root, int out[], int *outn)
+
+It must fill out[] with the token ids in inorder and set *outn to the count. The harness prints the ids space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the inorder sequence, space-separated.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<5
+10 20 30 40 50> EXP<40 20 50 10 30>
+TC s2 IN<3
+5 3 8> EXP<3 5 8>
+TC t1 IN<9
+6 4 9 2 5 8 10 1 3> EXP<1 2 3 4 5 6 8 9 10>
+TC t2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<4 3 5>
+TC t3 IN<1
+42> EXP<42>
+SRC:
+void inorder_fill(TNode *root, int out[], int *outn) {
+    if (root == NULL) return;
+    inorder_fill(root->left, out, outn);
+    out[(*outn)++] = root->val;
+    inorder_fill(root->right, out, outn);
+}
+===== Q8 [easy/10] Cleanup Sweep Postorder | topic=Trees and Binary Trees sub=Inorder and Postorder Traversal type=practice
+BL:"" WL:""
+DESC:
+A garbage collector tears down a tree of managed objects POSTORDER: children first, parent last, so nothing is freed while a descendant still points at it. The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void postorder_fill(TNode *root, int out[], int *outn)
+
+It must fill out[] with the object ids in postorder and set *outn to the count. The harness prints the ids space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the postorder sequence, space-separated.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<5
+10 20 30 40 50> EXP<40 50 20 30 10>
+TC s2 IN<3
+5 3 8> EXP<3 8 5>
+TC t1 IN<9
+6 4 9 2 5 8 10 1 3> EXP<1 3 2 5 4 8 10 9 6>
+TC t2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<3 4 5>
+TC t3 IN<1
+42> EXP<42>
+SRC:
+void postorder_fill(TNode *root, int out[], int *outn) {
+    if (root == NULL) return;
+    postorder_fill(root->left, out, outn);
+    postorder_fill(root->right, out, outn);
+    out[(*outn)++] = root->val;
+}
+===== Q9 [easy/10] Org Chart Depth Report | topic=Trees and Binary Trees sub=Tree Terminology type=practice
+BL:"" WL:""
+DESC:
+HR renders an org chart as a binary reporting tree (each manager keeps at most two direct reports) and needs the CHAIN DEPTH: the number of people on the longest manager-to-intern path. The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int tree_height(TNode *root)
+
+It must return the height in NODES on the longest root-to-leaf path (a lone CEO has height 1).
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the height.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<7
+1 2 3 4 5 6 7> EXP<3>
+TC s2 IN<3
+5 3 8> EXP<2>
+TC t1 IN<7
+5 4 -1 -1 3 -1 -1> EXP<3>
+TC t2 IN<1
+42> EXP<1>
+TC t3 IN<9
+6 4 9 2 5 8 10 1 3> EXP<4>
+SRC:
+int tree_height(TNode *root) {
+    if (root == NULL) return 0;
+    int l = tree_height(root->left);
+    int r = tree_height(root->right);
+    return 1 + (l > r ? l : r);
+}
+===== Q10 [medium/20] Leftmost Path Report | topic=Trees and Binary Trees sub=Tree Terminology type=practice
+BL:"qsort" WL:"->left"
+DESC:
+A warehouse scanner walks the LEFTMOST aisle of a binary aisle tree: start at the root, and at every node go to the left child if it exists, otherwise the right child, until a leaf is reached. The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void leftmost_fill(TNode *root, int out[], int *outn)
+
+It must fill out[] with the visited node values from the root down to the leftmost leaf (inclusive) and set *outn to the count. The harness prints the values space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the leftmost path, space-separated.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<9
+6 4 9 2 5 8 10 1 3> EXP<6 4 2 1>
+TC s2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<5 4 3>
+TC t1 IN<11
+8 3 10 1 6 -1 14 -1 -1 4 7> EXP<8 3 1>
+TC t2 IN<1
+42> EXP<42>
+TC t3 IN<7
+1 2 3 4 5 6 7> EXP<1 2 4>
+SRC:
+void leftmost_fill(TNode *root, int out[], int *outn) {
+    TNode *cur = root;
+    while (cur != NULL) {
+        out[(*outn)++] = cur->val;
+        if (cur->left != NULL) cur = cur->left;
+        else cur = cur->right;
+    }
+}
+===== Q11 [medium/20] Single-Child Hub Count | topic=Trees and Binary Trees sub=Tree Terminology type=practice
+BL:"qsort" WL:"->right"
+DESC:
+In a relay network stored as a binary tree, a hub with EXACTLY one downstream child is a bottleneck that needs a backup link. The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int count_one_child(TNode *root)
+
+It must return how many nodes have exactly one non-NULL child (leaves and full two-child nodes do not count).
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the bottleneck count.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<7
+5 4 -1 -1 3 -1 -1> EXP<2>
+TC s2 IN<9
+6 4 9 2 5 8 10 1 3> EXP<0>
+TC t1 IN<11
+8 3 10 1 6 -1 14 -1 -1 4 7> EXP<1>
+TC t2 IN<1
+42> EXP<0>
+TC t3 IN<7
+1 2 3 4 5 6 7> EXP<0>
+SRC:
+int count_one_child(TNode *root) {
+    if (root == NULL) return 0;
+    int here = 0;
+    if ((root->left == NULL) != (root->right == NULL)) here = 1;
+    return here + count_one_child(root->left) + count_one_child(root->right);
+}
+===== Q12 [medium/20] Subtree Size Report | topic=Trees and Binary Trees sub=Tree Terminology type=practice
+BL:"qsort" WL:"->val"
+DESC:
+A project tracker keeps a binary tree of tasks with DISTINCT ids. For a given task id, planners need the size of the whole sub-team below it. The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values with distinct values, -1 marks a missing child; line 3: target id, guaranteed present).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int subtree_size(TNode *root, int target)
+
+It must return the number of nodes in the subtree rooted at the node whose val equals target (the node itself counts).
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (distinct, -1 marks a missing child). Line 3: target id (present).
+
+Output Format:
+One line with the subtree size.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, values distinct
+TC s1 IN<9
+6 4 9 2 5 8 10 1 3
+4> EXP<5>
+TC s2 IN<9
+6 4 9 2 5 8 10 1 3
+6> EXP<9>
+TC t1 IN<11
+8 3 10 1 6 -1 14 -1 -1 4 7
+6> EXP<3>
+TC t2 IN<3
+5 3 8
+8> EXP<1>
+TC t3 IN<7
+1 2 3 4 5 6 7
+2> EXP<3>
+SRC:
+int count_from(TNode *root) {
+    if (root == NULL) return 0;
+    return 1 + count_from(root->left) + count_from(root->right);
+}
+
+int subtree_size(TNode *root, int target) {
+    if (root == NULL) return 0;
+    if (root->val == target) return count_from(root);
+    int l = subtree_size(root->left, target);
+    if (l > 0) return l;
+    return subtree_size(root->right, target);
+}
+===== Q13 [medium/20] Ancestor Chain Fill | topic=Trees and Binary Trees sub=Recursive Traversal type=practice
+BL:"qsort" WL:"->left"
+DESC:
+A version-control history is a binary tree of commits with DISTINCT ids. For a commit id, reviewers want every ANCESTOR commit from the root down to (but excluding) the commit itself. The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values with distinct values, -1 marks a missing child; line 3: target id, guaranteed present).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void ancestors_fill(TNode *root, int target, int out[], int *outn)
+
+It must fill out[] with the ancestor values in root-to-parent order and set *outn to the count (0 when the target is the root — the harness prints "none" then). Use a recursive root-to-target search.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (distinct, -1 marks a missing child). Line 3: target id (present).
+
+Output Format:
+One line with the ancestor chain space-separated, or "none".
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, values distinct
+TC s1 IN<9
+6 4 9 2 5 8 10 1 3
+1> EXP<6 4 2>
+TC s2 IN<9
+6 4 9 2 5 8 10 1 3
+6> EXP<none>
+TC t1 IN<7
+5 4 -1 -1 3 -1 -1
+3> EXP<5 4>
+TC t2 IN<1
+42
+42> EXP<none>
+TC t3 IN<11
+8 3 10 1 6 -1 14 -1 -1 4 7
+14> EXP<8 10>
+SRC:
+int find_path(TNode *root, int target, int out[], int *outn) {
+    if (root == NULL) return 0;
+    if (root->val == target) return 1;
+    out[(*outn)++] = root->val;
+    if (find_path(root->left, target, out, outn)) return 1;
+    if (find_path(root->right, target, out, outn)) return 1;
+    (*outn)--;
+    return 0;
+}
+
+void ancestors_fill(TNode *root, int target, int out[], int *outn) {
+    find_path(root, target, out, outn);
+}
+===== Q14 [medium/20] Sum of Left Leaves | topic=Trees and Binary Trees sub=Inorder and Postorder Traversal type=practice
+BL:"qsort" WL:"->left"
+DESC:
+A billing tree charges only LEFT leaves (leaf nodes reached via a left-child link). The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int sum_left_leaves(TNode *root)
+
+It must return the sum of values of nodes that are BOTH a left child of their parent AND a leaf.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the sum (0 when the tree has no left leaves).
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<9
+6 4 9 2 5 8 10 1 3> EXP<9>
+TC s2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<0>
+TC t1 IN<3
+5 3 8> EXP<3>
+TC t2 IN<1
+42> EXP<0>
+TC t3 IN<7
+1 2 3 4 5 6 7> EXP<10>
+SRC:
+int sum_left_leaves(TNode *root) {
+    if (root == NULL) return 0;
+    int s = 0;
+    if (root->left != NULL && root->left->left == NULL && root->left->right == NULL)
+        s += root->left->val;
+    s += sum_left_leaves(root->left);
+    s += sum_left_leaves(root->right);
+    return s;
+}
+===== Q15 [medium/20] Deepest Leaves Sum | topic=Trees and Binary Trees sub=Node Structures and Representation type=practice
+BL:"qsort" WL:"->left"
+DESC:
+A sensor grid is a binary tree; maintenance only visits the DEEPEST leaves (all leaves on the maximum-depth level). The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int deepest_leaves_sum(TNode *root)
+
+It must return the sum of the values of all deepest leaves (when the root is the only node, that is the sum).
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the sum.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<9
+6 4 9 2 5 8 10 1 3> EXP<4>
+TC s2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<3>
+TC t1 IN<1
+42> EXP<42>
+TC t2 IN<11
+8 3 10 1 6 -1 14 -1 -1 4 7> EXP<11>
+TC t3 IN<7
+1 2 3 4 5 6 7> EXP<22>
+SRC:
+int height_h(TNode *root) {
+    if (root == NULL) return 0;
+    int l = height_h(root->left);
+    int r = height_h(root->right);
+    return 1 + (l > r ? l : r);
+}
+
+int sum_at_depth(TNode *root, int want) {
+    if (root == NULL) return 0;
+    if (want == 1) return root->val;
+    return sum_at_depth(root->left, want - 1) + sum_at_depth(root->right, want - 1);
+}
+
+int deepest_leaves_sum(TNode *root) {
+    return sum_at_depth(root, height_h(root));
+}
+===== Q16 [hard/30] Support Ticket Level Order | topic=Trees and Binary Trees sub=Preorder Traversal type=practice
+BL:"qsort" WL:"while"
+DESC:
+A support desk resolves tickets stored in a binary escalation tree in LEVEL ORDER: the root ticket first, then level by level, left to right. The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void levelorder_fill(TNode *root, int out[], int *outn)
+
+It must fill out[] with the ticket ids in level order (use your own queue) and set *outn to the count. The harness prints the ids space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the level-order sequence, space-separated.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<11
+8 3 10 1 6 -1 14 -1 -1 4 7> EXP<8 3 10 1 6 14 4 7>
+TC s2 IN<9
+6 4 9 2 5 8 10 1 3> EXP<6 4 9 2 5 8 10 1 3>
+TC t1 IN<1
+42> EXP<42>
+TC t2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<5 4 3>
+TC t3 IN<13
+1 2 3 4 5 6 7 8 9 10 11 12 13> EXP<1 2 3 4 5 6 7 8 9 10 11 12 13>
+SRC:
+void levelorder_fill(TNode *root, int out[], int *outn) {
+    if (root == NULL) return;
+    TNode *q[2005];
+    int qh = 0, qt = 0;
+    q[qt++] = root;
+    while (qh < qt) {
+        TNode *cur = q[qh++];
+        out[(*outn)++] = cur->val;
+        if (cur->left != NULL) q[qt++] = cur->left;
+        if (cur->right != NULL) q[qt++] = cur->right;
+    }
+}
+===== Q17 [hard/30] Mirror Symmetry Check | topic=Trees and Binary Trees sub=Recursive Traversal type=practice
+BL:"qsort" WL:"->right"
+DESC:
+A load balancer keeps a mirrored binary tree layout; it is valid only when the tree is a MIRROR of itself around the root (left subtree mirrors the right subtree value-for-value). The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int is_symmetric(TNode *root)
+
+It must return 1 when the tree is symmetric around the root, 0 otherwise (an empty tree counts as symmetric).
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<7
+1 2 2 3 -1 -1 3> EXP<1>
+TC s2 IN<7
+1 2 2 -1 3 -1 3> EXP<0>
+TC t1 IN<1
+42> EXP<1>
+TC t2 IN<3
+5 3 8> EXP<0>
+TC t3 IN<5
+4 2 2 1 -1> EXP<0>
+SRC:
+int mirrors(TNode *a, TNode *b) {
+    if (a == NULL && b == NULL) return 1;
+    if (a == NULL || b == NULL) return 0;
+    return a->val == b->val && mirrors(a->left, b->right) && mirrors(a->right, b->left);
+}
+
+int is_symmetric(TNode *root) {
+    if (root == NULL) return 1;
+    return mirrors(root->left, root->right);
+}
+===== Q18 [hard/30] Cross-Campus Message Route | topic=Trees and Binary Trees sub=Recursive Traversal type=practice
+BL:"qsort" WL:"->right"
+DESC:
+A campus network is a binary tree of relay towers. The longest relay chain between ANY two towers determines the worst-case message delay; its length is the DIAMETER measured in EDGES (a single tower has diameter 0). The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int tree_diameter(TNode *root)
+
+It must return the number of edges on the longest root-to-... any path between two nodes (the longest chain in the tree).
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with the diameter in edges.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<9
+6 4 9 2 5 8 10 1 3> EXP<5>
+TC s2 IN<1
+42> EXP<0>
+TC t1 IN<3
+5 3 8> EXP<2>
+TC t2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<2>
+TC t3 IN<13
+1 2 3 4 5 6 7 8 9 10 11 12 13> EXP<6>
+SRC:
+int dia(TNode *root, int *best) {
+    if (root == NULL) return -1;
+    int l = dia(root->left, best);
+    int r = dia(root->right, best);
+    if (l + r + 2 > *best) *best = l + r + 2;
+    return 1 + (l > r ? l : r);
+}
+
+int tree_diameter(TNode *root) {
+    int best = 0;
+    dia(root, &best);
+    return best;
+}
+===== Q19 [hard/30] Balanced Height Check | topic=Trees and Binary Trees sub=Tree Terminology type=practice
+BL:"qsort" WL:"->left"
+DESC:
+A real-time scheduler keeps its priority tree height-balanced so lookups stay fast: at EVERY node the heights of the left and right subtrees may differ by at most 1. The node type is defined for you as typedef struct TNode { int val; struct TNode *left, *right; } TNode; and the harness builds the tree from the input (line 1: n; line 2: n level-order values, -1 marks a missing child).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int is_balanced(TNode *root)
+
+It must return 1 when the tree is height-balanced at every node, 0 otherwise (an empty tree is balanced).
+
+Input Format:
+Line 1: n. Line 2: n space-separated level-order values (-1 marks a missing child).
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= n <= 1000, |val| <= 1000000000, the first value is not -1
+TC s1 IN<7
+1 2 3 4 5 6 7> EXP<1>
+TC s2 IN<7
+5 4 -1 -1 3 -1 -1> EXP<0>
+TC t1 IN<1
+42> EXP<1>
+TC t2 IN<3
+5 3 8> EXP<1>
+TC t3 IN<6
+1 2 3 4 -1 -1 5> EXP<1>
+SRC:
+int check_bal(TNode *root, int *ok) {
+    if (root == NULL) return 0;
+    int l = check_bal(root->left, ok);
+    int r = check_bal(root->right, ok);
+    if (l - r > 1 || r - l > 1) *ok = 0;
+    return 1 + (l > r ? l : r);
+}
+
+int is_balanced(TNode *root) {
+    int ok = 1;
+    check_bal(root, &ok);
+    return ok;
+}

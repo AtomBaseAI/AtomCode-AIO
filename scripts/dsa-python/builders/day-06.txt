@@ -1,0 +1,961 @@
+=== DAY 6 ===
+TOPIC: Sorting Algorithms – Basics | subtopics: ['general', 'Bubble Sort', 'Selection Sort', 'Insertion Sort', 'Time and Space Comparison', 'Tracing Sorting Steps']
+
+================================================================================
+[0] After One Bubble Pass   lang=python type=practice diff=easy
+TOPIC: Sorting Algorithms – Basics | SUB: Tracing Sorting Steps
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 200; -1000 <= value <= 1000
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def after_one_bubble_pass(values):
+
+Perform exactly ONE full bubble-sort pass over values (compare every adjacent pair left to right, swapping when the left is larger) and return the list state after that single pass.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the list after one bubble pass, space-separated.
+
+Constraints:
+1 <= n <= 200
+-1000 <= value <= 1000
+  sampleinput1: "5\n5 1 4 2 8"
+  sampleoutput1: "1 4 2 5 8"
+  sampleinput2: "4\n3 1 2 4"
+  sampleoutput2: "1 2 3 4"
+  input1: "4\n1 3 2 5"
+  output1: "1 2 3 5"
+  input2: "6\n9 8 7 6 5 4"
+  output2: "8 7 6 5 4 9"
+  input3: "3\n2 2 1"
+  output3: "2 1 2"
+SOURCECODE:
+def after_one_bubble_pass(values):
+    a = values[:]
+    for j in range(len(a) - 1):
+        if a[j] > a[j + 1]:
+            a[j], a[j + 1] = a[j + 1], a[j]
+    return a
+
+
+================================================================================
+[1] Bubble Sort the List   lang=python type=practice diff=easy
+TOPIC: Sorting Algorithms – Basics | SUB: Bubble Sort
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 500; -1000 <= value <= 1000
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def bubble_sort(values):
+
+Sort values in ascending order with bubble sort (repeatedly swap adjacent out-of-order pairs) and return the sorted list.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the sorted list, space-separated.
+
+Constraints:
+1 <= n <= 500
+-1000 <= value <= 1000
+  sampleinput1: "5\n5 1 4 2 8"
+  sampleoutput1: "1 2 4 5 8"
+  sampleinput2: "3\n3 2 1"
+  sampleoutput2: "1 2 3"
+  input1: "6\n10 -2 33 0 7 -2"
+  output1: "-2 -2 0 7 10 33"
+  input2: "1\n9"
+  output2: "9"
+  input3: "7\n4 4 1 9 2 2 8"
+  output3: "1 2 2 4 4 8 9"
+SOURCECODE:
+def bubble_sort(values):
+    a = values[:]
+    n = len(a)
+    for i in range(n - 1):
+        for j in range(n - 1 - i):
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+    return a
+
+
+================================================================================
+[2] Selection Sort the List   lang=python type=practice diff=easy
+TOPIC: Sorting Algorithms – Basics | SUB: Selection Sort
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 500; -1000 <= value <= 1000
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def selection_sort(values):
+
+Sort values in ascending order with selection sort (each pass selects the minimum of the unsorted suffix and swaps it into place) and return the sorted list.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the sorted list, space-separated.
+
+Constraints:
+1 <= n <= 500
+-1000 <= value <= 1000
+  sampleinput1: "5\n64 25 12 22 11"
+  sampleoutput1: "11 12 22 25 64"
+  sampleinput2: "4\n5 5 1 3"
+  sampleoutput2: "1 3 5 5"
+  input1: "6\n9 -1 4 4 0 2"
+  output1: "-1 0 2 4 4 9"
+  input2: "2\n2 1"
+  output2: "1 2"
+  input3: "5\n3 3 3 1 3"
+  output3: "1 3 3 3 3"
+SOURCECODE:
+def selection_sort(values):
+    a = values[:]
+    n = len(a)
+    for i in range(n):
+        m = i
+        for j in range(i + 1, n):
+            if a[j] < a[m]:
+                m = j
+        a[i], a[m] = a[m], a[i]
+    return a
+
+
+================================================================================
+[3] Insertion Sort the List   lang=python type=practice diff=easy
+TOPIC: Sorting Algorithms – Basics | SUB: Insertion Sort
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 500; -1000 <= value <= 1000
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def insertion_sort(values):
+
+Sort values in ascending order with insertion sort (insert each element into the sorted prefix by shifting larger elements right) and return the sorted list.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the sorted list, space-separated.
+
+Constraints:
+1 <= n <= 500
+-1000 <= value <= 1000
+  sampleinput1: "5\n12 11 13 5 6"
+  sampleoutput1: "5 6 11 12 13"
+  sampleinput2: "4\n4 3 2 1"
+  sampleoutput2: "1 2 3 4"
+  input1: "6\n1 1 2 1 1 3"
+  output1: "1 1 1 1 2 3"
+  input2: "1\n7"
+  output2: "7"
+  input3: "5\n0 -3 8 -3 5"
+  output3: "-3 -3 0 5 8"
+SOURCECODE:
+def insertion_sort(values):
+    a = values[:]
+    for i in range(1, len(a)):
+        key = a[i]
+        j = i - 1
+        while j >= 0 and a[j] > key:
+            a[j + 1] = a[j]
+            j -= 1
+        a[j + 1] = key
+    return a
+
+
+================================================================================
+[4] Bubble Sort Swap Count   lang=python type=practice diff=easy
+TOPIC: Sorting Algorithms – Basics | SUB: Bubble Sort
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 300; -1000 <= value <= 1000
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def bubble_swaps(values):
+
+Run bubble sort on a copy of values and return the total number of adjacent swaps performed (this equals the number of inversions in the list).
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the total number of bubble-sort swaps.
+
+Constraints:
+1 <= n <= 300
+-1000 <= value <= 1000
+  sampleinput1: "5\n5 1 4 2 8"
+  sampleoutput1: "4"
+  sampleinput2: "3\n3 2 1"
+  sampleoutput2: "3"
+  input1: "4\n1 2 3 4"
+  output1: "0"
+  input2: "6\n6 5 4 3 2 1"
+  output2: "15"
+  input3: "5\n2 1 4 3 5"
+  output3: "2"
+SOURCECODE:
+def bubble_swaps(values):
+    a = values[:]
+    n = len(a)
+    swaps = 0
+    for i in range(n - 1):
+        for j in range(n - 1 - i):
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+                swaps += 1
+    return swaps
+
+
+================================================================================
+[5] Insertion Sort Shift Count   lang=python type=practice diff=easy
+TOPIC: Sorting Algorithms – Basics | SUB: Insertion Sort
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 300; -1000 <= value <= 1000
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def insertion_shifts(values):
+
+Run insertion sort on a copy of values and return the total number of element shifts (each time an element moves one slot to the right to open space for the key).
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the total number of shifts.
+
+Constraints:
+1 <= n <= 300
+-1000 <= value <= 1000
+  sampleinput1: "5\n12 11 13 5 6"
+  sampleoutput1: "7"
+  sampleinput2: "4\n4 3 2 1"
+  sampleoutput2: "6"
+  input1: "6\n1 1 2 1 1 3"
+  output1: "2"
+  input2: "1\n7"
+  output2: "0"
+  input3: "5\n0 -3 8 -3 5"
+  output3: "4"
+SOURCECODE:
+def insertion_shifts(values):
+    a = values[:]
+    shifts = 0
+    for i in range(1, len(a)):
+        key = a[i]
+        j = i - 1
+        while j >= 0 and a[j] > key:
+            a[j + 1] = a[j]
+            shifts += 1
+            j -= 1
+        a[j + 1] = key
+    return shifts
+
+
+================================================================================
+[6] Tidy the Marathon Finish Times   lang=python type=practice diff=easy
+TOPIC: Sorting Algorithms – Basics | SUB: Bubble Sort
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 300; 0 <= time <= 100000
+DESCRIPTION:
+Race marshals recorded finish times as they crossed the line; the results board needs them ascending. Bubble sort fits the almost-sorted tail of the field.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def sort_finish_times(times):
+
+Return the finish times sorted in ascending order, using bubble sort.
+
+Input Format:
+Line 1: n, the number of runners.
+Line 2: n integer finish times.
+
+Output Format:
+One line with the sorted times, space-separated.
+
+Constraints:
+1 <= n <= 300
+0 <= time <= 100000
+  sampleinput1: "6\n42 17 89 3 56 23"
+  sampleoutput1: "3 17 23 42 56 89"
+  sampleinput2: "4\n100 100 7 50"
+  sampleoutput2: "7 50 100 100"
+  input1: "5\n1 2 3 4 5"
+  output1: "1 2 3 4 5"
+  input2: "3\n5 4 3"
+  output2: "3 4 5"
+  input3: "8\n12 5 9 12 1 90 3 3"
+  output3: "1 3 3 5 9 12 12 90"
+SOURCECODE:
+def sort_finish_times(times):
+    a = times[:]
+    n = len(a)
+    for i in range(n - 1):
+        for j in range(n - 1 - i):
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+    return a
+
+
+================================================================================
+[7] Cheapest Supplier First   lang=python type=practice diff=easy
+TOPIC: Sorting Algorithms – Basics | SUB: Selection Sort
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 300; 1 <= price <= 100000
+DESCRIPTION:
+A procurement officer ranks vendor quotes from cheapest to most expensive. Selection sort makes exactly one swap per supplier placed — easy to audit.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def sort_prices(quotes):
+
+Return the quotes sorted in ascending order, using selection sort.
+
+Input Format:
+Line 1: n, the number of quotes.
+Line 2: n integer prices.
+
+Output Format:
+One line with the sorted prices, space-separated.
+
+Constraints:
+1 <= n <= 300
+1 <= price <= 100000
+  sampleinput1: "5\n220 180 95 310 95"
+  sampleoutput1: "95 95 180 220 310"
+  sampleinput2: "4\n50 40 30 20"
+  sampleoutput2: "20 30 40 50"
+  input1: "3\n7 7 7"
+  output1: "7 7 7"
+  input2: "6\n15 8 23 4 42 16"
+  output2: "4 8 15 16 23 42"
+  input3: "2\n99 100"
+  output3: "99 100"
+SOURCECODE:
+def sort_prices(quotes):
+    a = quotes[:]
+    n = len(a)
+    for i in range(n):
+        m = i
+        for j in range(i + 1, n):
+            if a[j] < a[m]:
+                m = j
+        a[i], a[m] = a[m], a[i]
+    return a
+
+
+================================================================================
+[8] Clinic Queue by Priority   lang=python type=practice diff=easy
+TOPIC: Sorting Algorithms – Basics | SUB: Insertion Sort
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 300; -10 <= priority <= 100
+DESCRIPTION:
+Walk-in patients receive priority tickets as they arrive. Reception re-sorts the queue with insertion sort whenever a new ticket lands, because the queue is nearly sorted all day.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def sort_priorities(tickets):
+
+Return the ticket priorities sorted in ascending order, using insertion sort.
+
+Input Format:
+Line 1: n, the number of tickets.
+Line 2: n integer priorities.
+
+Output Format:
+One line with the sorted priorities, space-separated.
+
+Constraints:
+1 <= n <= 300
+-10 <= priority <= 100
+  sampleinput1: "5\n3 1 4 1 5"
+  sampleoutput1: "1 1 3 4 5"
+  sampleinput2: "4\n9 8 7 6"
+  sampleoutput2: "6 7 8 9"
+  input1: "6\n2 2 2 1 1 3"
+  output1: "1 1 2 2 2 3"
+  input2: "1\n4"
+  output2: "4"
+  input3: "7\n10 -1 3 -1 0 10 2"
+  output3: "-1 -1 0 2 3 10 10"
+SOURCECODE:
+def sort_priorities(tickets):
+    a = tickets[:]
+    for i in range(1, len(a)):
+        key = a[i]
+        j = i - 1
+        while j >= 0 and a[j] > key:
+            a[j + 1] = a[j]
+            j -= 1
+        a[j + 1] = key
+    return a
+
+
+================================================================================
+[9] One Pass or Many? (Best Case)   lang=python type=practice diff=easy
+TOPIC: Sorting Algorithms – Basics | SUB: Time and Space Comparison
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 300; -1000 <= value <= 1000
+DESCRIPTION:
+A monitoring dashboard feeds bubble sort with sensor batches. When a batch already arrives sorted, the early-exit bubble finishes in one pass with zero swaps — the classic best case.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def already_sorted(batch):
+
+Return True if batch is already in non-decreasing order (the bubble best case), False otherwise.
+
+Input Format:
+Line 1: n, the number of readings.
+Line 2: n integers.
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= n <= 300
+-1000 <= value <= 1000
+  sampleinput1: "5\n1 2 3 4 5"
+  sampleoutput1: "True"
+  sampleinput2: "6\n1 3 2 4 5 6"
+  sampleoutput2: "False"
+  input1: "3\n7 7 7"
+  output1: "True"
+  input2: "4\n-1 -2 -3 -4"
+  output2: "False"
+  input3: "2\n1 2"
+  output3: "True"
+SOURCECODE:
+def already_sorted(batch):
+    for i in range(len(batch) - 1):
+        if batch[i] > batch[i + 1]:
+            return False
+    return True
+
+
+================================================================================
+[10] Bubble After k Passes   lang=python type=practice diff=medium
+TOPIC: Sorting Algorithms – Basics | SUB: Tracing Sorting Steps
+BLACKLIST: sorted(,.sort(
+WHITELIST: for
+INPUTCONSTRAINTS: 2 <= n <= 100; 1 <= k <= n-1; -1000 <= value <= 1000
+DESCRIPTION:
+A sorting visualiser snapshots the array between rounds. Reproduce exactly what the board shows after k bubble passes — no shortcuts to the final result.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def bubble_after_k_passes(values, k):
+
+Perform exactly k full bubble passes (each pass compares every adjacent pair left to right and swaps out-of-order neighbours) and return the list state after pass k.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+Line 3: k (1 <= k <= n-1).
+
+Output Format:
+One line with the list after k bubble passes, space-separated.
+
+Constraints:
+2 <= n <= 100
+1 <= k <= n-1
+-1000 <= value <= 1000
+  sampleinput1: "5\n5 1 4 2 8\n1"
+  sampleoutput1: "1 4 2 5 8"
+  sampleinput2: "5\n5 1 4 2 8\n2"
+  sampleoutput2: "1 2 4 5 8"
+  input1: "6\n9 8 7 6 5 4\n3"
+  output1: "6 5 4 7 8 9"
+  input2: "4\n2 1 3 4\n1"
+  output2: "1 2 3 4"
+  input3: "4\n3 1 2 4\n3"
+  output3: "1 2 3 4"
+SOURCECODE:
+def bubble_after_k_passes(values, k):
+    a = values[:]
+    n = len(a)
+    for _ in range(k):
+        for j in range(n - 1):
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+    return a
+
+
+================================================================================
+[11] Selection After k Passes   lang=python type=practice diff=medium
+TOPIC: Sorting Algorithms – Basics | SUB: Tracing Sorting Steps
+BLACKLIST: sorted(,.sort(
+WHITELIST: for
+INPUTCONSTRAINTS: 2 <= n <= 100; 1 <= k <= n-1; -1000 <= value <= 1000
+DESCRIPTION:
+The visualiser now replays selection sort round by round. Each round selects the minimum of the unsorted suffix and swaps it to the front of that suffix.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def selection_after_k_passes(values, k):
+
+Perform exactly k selection-sort passes (pass p, 0-based, finds the minimum of values[p:] and swaps it with position p) and return the list state after pass k.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+Line 3: k (1 <= k <= n-1).
+
+Output Format:
+One line with the list after k selection passes, space-separated.
+
+Constraints:
+2 <= n <= 100
+1 <= k <= n-1
+-1000 <= value <= 1000
+  sampleinput1: "5\n64 25 12 22 11\n1"
+  sampleoutput1: "11 25 12 22 64"
+  sampleinput2: "5\n64 25 12 22 11\n2"
+  sampleoutput2: "11 12 25 22 64"
+  input1: "5\n64 25 12 22 11\n4"
+  output1: "11 12 22 25 64"
+  input2: "4\n3 1 4 2\n2"
+  output2: "1 2 4 3"
+  input3: "6\n9 -1 4 4 0 2\n3"
+  output3: "-1 0 2 4 9 4"
+SOURCECODE:
+def selection_after_k_passes(values, k):
+    a = values[:]
+    n = len(a)
+    for p in range(k):
+        m = p
+        for j in range(p + 1, n):
+            if a[j] < a[m]:
+                m = j
+        a[p], a[m] = a[m], a[p]
+    return a
+
+
+================================================================================
+[12] Insertion After k Steps   lang=python type=practice diff=medium
+TOPIC: Sorting Algorithms – Basics | SUB: Tracing Sorting Steps
+BLACKLIST: sorted(,.sort(
+WHITELIST: while
+INPUTCONSTRAINTS: 2 <= n <= 100; 1 <= k <= n-1; -1000 <= value <= 1000
+DESCRIPTION:
+Step-through mode replays insertion sort one insertion at a time. After step k, the first k+1 elements form the sorted prefix the textbook picture shows.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def insertion_after_k_steps(values, k):
+
+Perform exactly k insertion steps (step i, for i = 1..k, inserts values[i] into the sorted prefix values[0..i-1] by shifting larger elements right) and return the whole list state after step k.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+Line 3: k (1 <= k <= n-1).
+
+Output Format:
+One line with the list after k insertion steps, space-separated.
+
+Constraints:
+2 <= n <= 100
+1 <= k <= n-1
+-1000 <= value <= 1000
+  sampleinput1: "5\n12 11 13 5 6\n1"
+  sampleoutput1: "11 12 13 5 6"
+  sampleinput2: "5\n12 11 13 5 6\n3"
+  sampleoutput2: "5 11 12 13 6"
+  input1: "5\n12 11 13 5 6\n4"
+  output1: "5 6 11 12 13"
+  input2: "4\n4 3 2 1\n2"
+  output2: "2 3 4 1"
+  input3: "6\n1 1 2 1 1 3\n5"
+  output3: "1 1 1 1 2 3"
+SOURCECODE:
+def insertion_after_k_steps(values, k):
+    a = values[:]
+    for i in range(1, k + 1):
+        key = a[i]
+        j = i - 1
+        while j >= 0 and a[j] > key:
+            a[j + 1] = a[j]
+            j -= 1
+        a[j + 1] = key
+    return a
+
+
+================================================================================
+[13] Stable Scores Keep Arrival Order   lang=python type=practice diff=medium
+TOPIC: Sorting Algorithms – Basics | SUB: Insertion Sort
+BLACKLIST: sorted(,.sort(
+WHITELIST: for
+INPUTCONSTRAINTS: 1 <= n <= 100; -1000 <= score <= 1000; 1 <= arrival <= 100000
+DESCRIPTION:
+Exam papers carry (score, arrival-number) pairs. The board must be ordered by score, and papers with equal scores must keep their arrival order — stability, done by hand with insertion sort.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def stable_order(pairs):
+
+pairs is a list of (score, arrival) tuples in arrival order. Stable-sort pairs by score ascending using insertion sort and return the list of arrival numbers in the final order.
+
+Input Format:
+Line 1: n, the number of papers.
+Lines 2..n+1: two integers per paper: score and arrival number.
+
+Output Format:
+One line with the arrival numbers in stable score order, space-separated.
+
+Constraints:
+1 <= n <= 100
+-1000 <= score <= 1000
+1 <= arrival <= 100000
+  sampleinput1: "4\n3 1\n1 2\n3 3\n2 4"
+  sampleoutput1: "2 4 1 3"
+  sampleinput2: "3\n5 1\n5 2\n5 3"
+  sampleoutput2: "1 2 3"
+  input1: "5\n2 1\n1 2\n2 3\n1 4\n2 5"
+  output1: "2 4 1 3 5"
+  input2: "2\n9 1\n9 2"
+  output2: "1 2"
+  input3: "6\n4 1\n4 2\n3 3\n4 4\n3 5\n1 6"
+  output3: "6 3 5 1 2 4"
+SOURCECODE:
+def stable_order(pairs):
+    a = pairs[:]
+    for i in range(1, len(a)):
+        cur = a[i]
+        j = i - 1
+        while j >= 0 and a[j][0] > cur[0]:
+            a[j + 1] = a[j]
+            j -= 1
+        a[j + 1] = cur
+    return [p[1] for p in a]
+
+
+================================================================================
+[14] Bubble Swaps vs Insertion Shifts   lang=python type=practice diff=medium
+TOPIC: Sorting Algorithms – Basics | SUB: Time and Space Comparison
+BLACKLIST: sorted(,.sort(
+WHITELIST: for
+INPUTCONSTRAINTS: 1 <= n <= 200; -1000 <= value <= 1000
+DESCRIPTION:
+A performance lab compares the basic sorts on identical data: how many adjacent swaps does bubble make, and how many shifts does insertion need? Report both work counters side by side.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def bubble_vs_insertion(values):
+
+Return the tuple (bubble_swaps, insertion_shifts): the total adjacent swaps bubble sort performs on a copy of values, and the total shifts insertion sort performs on another copy.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the two counters, space-separated: bubble swaps, then insertion shifts.
+
+Constraints:
+1 <= n <= 200
+-1000 <= value <= 1000
+  sampleinput1: "5\n5 1 4 2 8"
+  sampleoutput1: "4 4"
+  sampleinput2: "4\n1 2 3 4"
+  sampleoutput2: "0 0"
+  input1: "4\n4 3 2 1"
+  output1: "6 6"
+  input2: "6\n6 5 4 3 2 1"
+  output2: "15 15"
+  input3: "5\n2 1 4 3 5"
+  output3: "2 2"
+SOURCECODE:
+def bubble_vs_insertion(values):
+    a = values[:]
+    n = len(a)
+    swaps = 0
+    for i in range(n - 1):
+        for j in range(n - 1 - i):
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+                swaps += 1
+    b = values[:]
+    shifts = 0
+    for i in range(1, len(b)):
+        key = b[i]
+        j = i - 1
+        while j >= 0 and b[j] > key:
+            b[j + 1] = b[j]
+            shifts += 1
+            j -= 1
+        b[j + 1] = key
+    return swaps, shifts
+
+
+================================================================================
+[15] Passes Until Bubble Settles   lang=python type=practice diff=medium
+TOPIC: Sorting Algorithms – Basics | SUB: Tracing Sorting Steps
+BLACKLIST: sorted(,.sort(
+WHITELIST: while
+INPUTCONSTRAINTS: 1 <= n <= 100; -1000 <= value <= 1000
+DESCRIPTION:
+A classroom exercise asks: how many bubble passes does THIS data need before a pass completes with no swaps? Count them by simulating the sort with early exit.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def passes_until_settled(values):
+
+Simulate bubble sort with early exit and return the number of full passes performed, counting the final swap-free pass (an already-sorted list needs exactly 1).
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the number of passes until the list settles.
+
+Constraints:
+1 <= n <= 100
+-1000 <= value <= 1000
+  sampleinput1: "5\n5 1 4 2 8"
+  sampleoutput1: "3"
+  sampleinput2: "4\n1 2 3 4"
+  sampleoutput2: "1"
+  input1: "6\n6 5 4 3 2 1"
+  output1: "6"
+  input2: "4\n2 1 3 4"
+  output2: "2"
+  input3: "5\n3 1 2 4 5"
+  output3: "2"
+SOURCECODE:
+def passes_until_settled(values):
+    a = values[:]
+    n = len(a)
+    passes = 0
+    swapped = True
+    while swapped:
+        swapped = False
+        passes += 1
+        for j in range(n - 1):
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+                swapped = True
+    return passes
+
+
+================================================================================
+[16] Words by Length, Then Alphabet   lang=python type=practice diff=hard
+TOPIC: Sorting Algorithms – Basics | SUB: Insertion Sort
+BLACKLIST: sorted(,.sort(
+WHITELIST: for
+INPUTCONSTRAINTS: 1 <= n <= 100; 1 <= len(word) <= 20; lowercase words, no spaces
+DESCRIPTION:
+A dictionary app renders its index: words are ordered by length first, and equally long words alphabetically. The embedded build has no sort() — hand-roll the two-key comparison.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def words_by_length_then_alpha(words):
+
+Return the words ordered by (length, word) ascending: shorter words first; equal-length words in lexicographic (alphabetical) order. Use a manual sort with the compound comparison.
+
+Input Format:
+Line 1: n, the number of words.
+Lines 2..n+1: one word per line (lowercase letters, no spaces).
+
+Output Format:
+One line with the ordered words, space-separated.
+
+Constraints:
+1 <= n <= 100
+1 <= len(word) <= 20
+  sampleinput1: "4\npear\nfig\napple\nbanana"
+  sampleoutput1: "fig pear apple banana"
+  sampleinput2: "3\nbb\naa\ncc"
+  sampleoutput2: "aa bb cc"
+  input1: "5\nkiwi\nkiwi\nfig\ndate\nplum"
+  output1: "fig date kiwi kiwi plum"
+  input2: "2\nlongword\na"
+  output2: "a longword"
+  input3: "6\nd\ncc\nbbb\naaaa\ne\nbb"
+  output3: "d e bb cc bbb aaaa"
+SOURCECODE:
+def words_by_length_then_alpha(words):
+    a = words[:]
+    for i in range(1, len(a)):
+        cur = a[i]
+        j = i - 1
+        while j >= 0 and (len(a[j]) > len(cur) or (len(a[j]) == len(cur) and a[j] > cur)):
+            a[j + 1] = a[j]
+            j -= 1
+        a[j + 1] = cur
+    return a
+
+
+================================================================================
+[17] Tuples by Their Second Element   lang=python type=practice diff=hard
+TOPIC: Sorting Algorithms – Basics | SUB: Selection Sort
+BLACKLIST: sorted(,.sort(
+WHITELIST: for
+INPUTCONSTRAINTS: 1 <= n <= 100; 0 <= a, b <= 100000
+DESCRIPTION:
+A warehouse manifest stores (aisle, distance) records and the picker must visit records ordered by distance, with distance ties broken by the smaller aisle number.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def tuples_by_second(pairs):
+
+pairs is a list of (a, b) tuples. Sort them by b ascending, breaking ties by a ascending, using a manual sort with the compound comparison. Return the sorted list of tuples.
+
+Input Format:
+Line 1: n, the number of records.
+Lines 2..n+1: two integers per record: a and b.
+
+Output Format:
+n lines, one per record in sorted order: a and b space-separated.
+
+Constraints:
+1 <= n <= 100
+0 <= a, b <= 100000
+  sampleinput1: "3\n1 4\n2 3\n3 4"
+  sampleoutput1: "2 3\n1 4\n3 4"
+  sampleinput2: "4\n5 2\n1 2\n3 1\n4 2"
+  sampleoutput2: "3 1\n1 2\n4 2\n5 2"
+  input1: "2\n10 1\n9 1"
+  output1: "9 1\n10 1"
+  input2: "5\n1 9\n2 8\n3 7\n4 8\n5 9"
+  output2: "3 7\n2 8\n4 8\n1 9\n5 9"
+  input3: "3\n0 0\n0 1\n1 0"
+  output3: "0 0\n1 0\n0 1"
+SOURCECODE:
+def tuples_by_second(pairs):
+    a = pairs[:]
+    n = len(a)
+    for i in range(n):
+        m = i
+        for j in range(i + 1, n):
+            if a[j][1] < a[m][1] or (a[j][1] == a[m][1] and a[j][0] < a[m][0]):
+                m = j
+        a[i], a[m] = a[m], a[i]
+    return a
+
+
+================================================================================
+[18] Full Bubble Pass Trace   lang=python type=practice diff=hard
+TOPIC: Sorting Algorithms – Basics | SUB: Tracing Sorting Steps
+BLACKLIST: sorted(,.sort(
+WHITELIST: for
+INPUTCONSTRAINTS: 1 <= n <= 10; -50 <= value <= 50
+DESCRIPTION:
+The teaching dashboard prints the whole array after EVERY bubble pass so students can watch inversions drain away. Generate that trace.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def bubble_trace(values):
+
+Simulate bubble sort with early exit on a copy of values. After every pass (including the final pass that makes no swaps), record the list state. Return the list of states, one per pass.
+
+Input Format:
+Line 1: n, the number of values (n <= 10).
+Line 2: n integers.
+
+Output Format:
+One line per pass, space-separated: the array state after that pass.
+
+Constraints:
+1 <= n <= 10
+-50 <= value <= 50
+  sampleinput1: "4\n3 2 1 4"
+  sampleoutput1: "2 1 3 4\n1 2 3 4\n1 2 3 4"
+  sampleinput2: "3\n1 2 3"
+  sampleoutput2: "1 2 3"
+  input1: "5\n5 4 3 2 1"
+  output1: "4 3 2 1 5\n3 2 1 4 5\n2 1 3 4 5\n1 2 3 4 5\n1 2 3 4 5"
+  input2: "2\n2 1"
+  output2: "1 2\n1 2"
+  input3: "6\n2 9 1 5 3 7"
+  output3: "2 1 5 3 7 9\n1 2 3 5 7 9\n1 2 3 5 7 9"
+SOURCECODE:
+def bubble_trace(values):
+    a = values[:]
+    n = len(a)
+    states = []
+    swapped = True
+    while swapped:
+        swapped = False
+        for j in range(n - 1):
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+                swapped = True
+        states.append(a[:])
+    return states
+
+
+================================================================================
+[19] Points by Distance from Origin   lang=python type=practice diff=hard
+TOPIC: Sorting Algorithms – Basics | SUB: Selection Sort
+BLACKLIST: sorted(,.sort(
+WHITELIST: for
+INPUTCONSTRAINTS: 1 <= n <= 100; -1000 <= x, y <= 1000
+DESCRIPTION:
+A radar console sorts contact points (x, y) by distance from the origin; ties in distance are broken by smaller x, then by smaller y.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def points_by_distance(points):
+
+points is a list of (x, y) tuples. Sort them by x*x + y*y ascending, breaking ties by x ascending and then y ascending, with a manual sort and compound comparison. Return the sorted list of tuples.
+
+Input Format:
+Line 1: n, the number of points.
+Lines 2..n+1: two integers per point: x and y.
+
+Output Format:
+n lines, one per point in sorted order: x and y space-separated.
+
+Constraints:
+1 <= n <= 100
+-1000 <= x, y <= 1000
+  sampleinput1: "3\n1 1\n2 0\n0 2"
+  sampleoutput1: "1 1\n0 2\n2 0"
+  sampleinput2: "4\n3 4\n0 0\n1 7\n2 2"
+  sampleoutput2: "0 0\n2 2\n3 4\n1 7"
+  input1: "2\n-1 0\n1 0"
+  output1: "-1 0\n1 0"
+  input2: "5\n0 5\n5 0\n3 3\n1 1\n0 0"
+  output2: "0 0\n1 1\n3 3\n0 5\n5 0"
+  input3: "3\n4 -3\n-3 4\n0 6"
+  output3: "-3 4\n4 -3\n0 6"
+SOURCECODE:
+def points_by_distance(points):
+    a = points[:]
+    n = len(a)
+    for i in range(n):
+        m = i
+        for j in range(i + 1, n):
+            kj = (a[j][0] * a[j][0] + a[j][1] * a[j][1], a[j][0], a[j][1])
+            km = (a[m][0] * a[m][0] + a[m][1] * a[m][1], a[m][0], a[m][1])
+            if kj < km:
+                m = j
+        a[i], a[m] = a[m], a[i]
+    return a

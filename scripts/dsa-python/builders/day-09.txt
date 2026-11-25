@@ -1,0 +1,986 @@
+=== DAY 9 ===
+TOPIC: Singly Linked Lists | subtopics: ['general', 'Node Structures', 'Dynamic Allocation', 'Traversal', 'Insertion and Deletion', 'Reversing a List']
+
+================================================================================
+[0] Cancel the First Matching Booking   lang=python type=practice diff=medium
+TOPIC: Singly Linked Lists | SUB: Insertion and Deletion
+BLACKLIST: remove(,pop(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000
+DESCRIPTION:
+A booking chain stores reservation codes; when a guest cancels, only the FIRST matching booking is unlinked. Relink the surrounding nodes yourself.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def delete_first(head, x):
+
+head is the head Node of the booking chain. Unlink the first node holding x (watch the head case!) and return the (possibly new) head; if x is absent, return the chain unchanged. The harness prints the resulting chain, which is never empty for the given inputs.
+
+Input Format:
+Line 1: n, the number of bookings.
+Line 2: n integers — the codes in chain order.
+Line 3: the cancelled code x.
+
+Output Format:
+One line with the chain after the deletion, space-separated.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+  sampleinput1: "5\n101 102 103 104 105\n103"
+  sampleoutput1: "101 102 104 105"
+  sampleinput2: "4\n7 7 8 9\n7"
+  sampleoutput2: "7 8 9"
+  input1: "3\n1 2 3\n5"
+  output1: "1 2 3"
+  input2: "2\n42 43\n42"
+  output2: "43"
+  input3: "5\n3 1 3 2 3\n3"
+  output3: "1 3 2 3"
+SOURCECODE:
+def delete_first(head, x):
+    if head is None:
+        return None
+    if head.value == x:
+        return head.next
+    prev = head
+    while prev.next is not None:
+        if prev.next.value == x:
+            prev.next = prev.next.next
+            break
+        prev = prev.next
+    return head
+
+
+================================================================================
+[1] Linked List Length   lang=python type=practice diff=easy
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def list_length(head):
+
+head is the head Node of a singly linked chain (each node has value and next). Return the number of nodes by walking the chain.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+
+Output Format:
+One line with the number of nodes.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n4 8 15 16 23"
+  sampleoutput1: "5"
+  sampleinput2: "1\n7"
+  sampleoutput2: "1"
+  input1: "3\n10 20 30"
+  output1: "3"
+  input2: "6\n1 2 3 4 5 6"
+  output2: "6"
+  input3: "4\n-5 0 5 10"
+  output3: "4"
+SOURCECODE:
+def list_length(head):
+    count = 0
+    node = head
+    while node is not None:
+        count += 1
+        node = node.next
+    return count
+
+
+================================================================================
+[2] Linked List Total Sum   lang=python type=practice diff=easy
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def list_sum(head):
+
+head is the head Node of a singly linked chain. Return the sum of all node values by walking the chain.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+
+Output Format:
+One line with the sum of the values.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n4 8 15 16 23"
+  sampleoutput1: "66"
+  sampleinput2: "1\n7"
+  sampleoutput2: "7"
+  input1: "3\n10 -20 30"
+  output1: "20"
+  input2: "6\n1 2 3 4 5 6"
+  output2: "21"
+  input3: "4\n-5 0 5 10"
+  output3: "10"
+SOURCECODE:
+def list_sum(head):
+    total = 0
+    node = head
+    while node is not None:
+        total += node.value
+        node = node.next
+    return total
+
+
+================================================================================
+[3] Find Value Index in the Chain   lang=python type=practice diff=easy
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000
+DESCRIPTION:
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def find_index(head, x):
+
+head is the head Node of a singly linked chain. Return the 0-based index of the FIRST node holding x, or -1 when x is not in the chain.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+Line 3: the target x.
+
+Output Format:
+One line with the first index of x, or -1.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+  sampleinput1: "5\n4 8 15 16 23\n15"
+  sampleoutput1: "2"
+  sampleinput2: "3\n7 7 7\n7"
+  sampleoutput2: "0"
+  input1: "4\n1 2 3 4\n9"
+  output1: "-1"
+  input2: "6\n10 20 30 40 50 60\n60"
+  output2: "5"
+  input3: "5\n-1 -2 -3 -4 -5\n-3"
+  output3: "2"
+SOURCECODE:
+def find_index(head, x):
+    idx = 0
+    node = head
+    while node is not None:
+        if node.value == x:
+            return idx
+        idx += 1
+        node = node.next
+    return -1
+
+
+================================================================================
+[4] Value at a Given Position   lang=python type=practice diff=easy
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; 0 <= pos < n; -1000000 <= value <= 1000000
+DESCRIPTION:
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def value_at(head, pos):
+
+head is the head Node of a singly linked chain and pos is a 0-based position guaranteed to exist. Return the value of the node at that position by walking pos links.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+Line 3: the position pos (0-based, pos < n).
+
+Output Format:
+One line with the value at position pos.
+
+Constraints:
+1 <= n <= 1000
+0 <= pos < n
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n10 20 30 40\n2"
+  sampleoutput1: "30"
+  sampleinput2: "1\n5\n0"
+  sampleoutput2: "5"
+  input1: "5\n1 2 3 4 5\n0"
+  output1: "1"
+  input2: "6\n2 4 6 8 10 12\n5"
+  output2: "12"
+  input3: "3\n7 8 9\n1"
+  output3: "8"
+SOURCECODE:
+def value_at(head, pos):
+    node = head
+    i = 0
+    while i < pos:
+        node = node.next
+        i += 1
+    return node.value
+
+
+================================================================================
+[5] Reverse a Linked List   lang=python type=practice diff=easy
+TOPIC: Singly Linked Lists | SUB: Reversing a List
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def reverse_list(head):
+
+head is the head Node of a singly linked chain. Reverse the chain by re-linking the next pointers (three-pointer walk: prev, node, nxt) and return the NEW head. The harness prints the reversed chain.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+
+Output Format:
+One line with the reversed chain values, space-separated (printed by the harness).
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4"
+  sampleoutput1: "4 3 2 1"
+  sampleinput2: "1\n9"
+  sampleoutput2: "9"
+  input1: "5\n1 2 3 4 5"
+  output1: "5 4 3 2 1"
+  input2: "3\n10 -20 30"
+  output2: "30 -20 10"
+  input3: "6\n2 4 6 8 10 12"
+  output3: "12 10 8 6 4 2"
+SOURCECODE:
+def reverse_list(head):
+    prev = None
+    node = head
+    while node is not None:
+        nxt = node.next
+        node.next = prev
+        prev = node
+        node = nxt
+    return prev
+
+
+================================================================================
+[6] Middle Node Value   lang=python type=practice diff=easy
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def middle_value(head):
+
+head is the head Node of a singly linked chain. Return the value of the middle node — the node at index n // 2 (for an even count this is the SECOND of the two middles). Two passes (count, then walk) are fine.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+
+Output Format:
+One line with the middle node's value.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n1 2 3 4 5"
+  sampleoutput1: "3"
+  sampleinput2: "4\n1 2 3 4"
+  sampleoutput2: "3"
+  input1: "1\n7"
+  output1: "7"
+  input2: "6\n2 4 6 8 10 12"
+  output2: "8"
+  input3: "3\n10 20 30"
+  output3: "20"
+SOURCECODE:
+def middle_value(head):
+    count = 0
+    node = head
+    while node is not None:
+        count += 1
+        node = node.next
+    node = head
+    i = 0
+    while i < count // 2:
+        node = node.next
+        i += 1
+    return node.value
+
+
+================================================================================
+[7] Wagon Coupling Display   lang=python type=practice diff=easy
+TOPIC: Singly Linked Lists | SUB: Node Structures
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+A freight yard renders a train on the depot board as its wagon chain: every wagon's code followed by an arrow, ending at NULL. The board driver walks the linked chain of wagons.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def to_arrow(head):
+
+head is the head Node of the wagon chain. Return the display string: the values in order joined by " -> " and ending with " -> NULL" (e.g. "4 -> 8 -> NULL").
+
+Input Format:
+Line 1: n, the number of wagons.
+Line 2: n integers — the wagon codes in coupling order.
+
+Output Format:
+One line with the arrow display string.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n4 8 15 23"
+  sampleoutput1: "4 -> 8 -> 15 -> 23 -> NULL"
+  sampleinput2: "1\n7"
+  sampleoutput2: "7 -> NULL"
+  input1: "3\n10 -20 30"
+  output1: "10 -> -20 -> 30 -> NULL"
+  input2: "5\n1 2 3 4 5"
+  output2: "1 -> 2 -> 3 -> 4 -> 5 -> NULL"
+  input3: "6\n2 4 6 8 10 12"
+  output3: "2 -> 4 -> 6 -> 8 -> 10 -> 12 -> NULL"
+SOURCECODE:
+def to_arrow(head):
+    parts = []
+    node = head
+    while node is not None:
+        parts.append(str(node.value))
+        node = node.next
+    parts.append("NULL")
+    return " -> ".join(parts)
+
+
+================================================================================
+[8] Peak Sensor Reading   lang=python type=practice diff=easy
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+A sensor probe chain streams its readings as a linked list, and readings may be negative — so the peak tracker must seed its best value from the FIRST node, never from a hardcoded zero.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def peak_reading(head):
+
+head is the head Node of the reading chain. Return the largest value in the chain.
+
+Input Format:
+Line 1: n, the number of readings.
+Line 2: n integers — the readings in stream order (may be negative).
+
+Output Format:
+One line with the highest reading.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n-9 -4 -15 -2 -7"
+  sampleoutput1: "-2"
+  sampleinput2: "4\n3 12 8 5"
+  sampleoutput2: "12"
+  input1: "1\n-1"
+  output1: "-1"
+  input2: "6\n-5 -3 -8 -1 -9 -6"
+  output2: "-1"
+  input3: "3\n7 7 7"
+  output3: "7"
+SOURCECODE:
+def peak_reading(head):
+    best = head.value
+    node = head.next
+    while node is not None:
+        if node.value > best:
+            best = node.value
+        node = node.next
+    return best
+
+
+================================================================================
+[9] Refund Requests in the Order Chain   lang=python type=practice diff=easy
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+An order desk chains its profit records as a linked list; every node holding a negative value is a refund request. The supervisor counts them with one traversal.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def count_negative(head):
+
+head is the head Node of the profit chain. Return how many nodes hold a value less than zero.
+
+Input Format:
+Line 1: n, the number of orders.
+Line 2: n integers — the profit values in chain order.
+
+Output Format:
+One line with the number of negative values.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "6\n-5 3 -2 8 -9 1"
+  sampleoutput1: "3"
+  sampleinput2: "4\n1 2 3 4"
+  sampleoutput2: "0"
+  input1: "3\n-1 -2 -3"
+  output1: "3"
+  input2: "5\n5 -5 5 -5 5"
+  output2: "2"
+  input3: "1\n0"
+  output3: "0"
+SOURCECODE:
+def count_negative(head):
+    total = 0
+    node = head
+    while node is not None:
+        if node.value < 0:
+            total += 1
+        node = node.next
+    return total
+
+
+================================================================================
+[10] Tail Drop Code   lang=python type=practice diff=easy
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+A dispatch board shows the FINAL drop code of a delivery route chain — the value of the last allocated node. The reporter walks the chain to its tail.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def tail_value(head):
+
+head is the head Node of the route chain (at least one node). Return the value of the LAST node.
+
+Input Format:
+Line 1: n, the number of stops.
+Line 2: n integers — the stop codes in chain order.
+
+Output Format:
+One line with the last stop's code.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n4 8 15 16 23"
+  sampleoutput1: "23"
+  sampleinput2: "1\n7"
+  sampleoutput2: "7"
+  input1: "4\n3 1 2 9"
+  output1: "9"
+  input2: "3\n10 -20 30"
+  output2: "30"
+  input3: "6\n1 2 3 4 5 6"
+  output3: "6"
+SOURCECODE:
+def tail_value(head):
+    node = head
+    while node.next is not None:
+        node = node.next
+    return node.value
+
+
+================================================================================
+[11] Insert into a Sorted Chain   lang=python type=practice diff=medium
+TOPIC: Singly Linked Lists | SUB: Insertion and Deletion
+BLACKLIST: sorted(,.sort(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000; values ascending
+DESCRIPTION:
+A vault keeps its access codes ascending in a linked chain. A new code must slot in so the chain stays ascending — link the nodes yourself, no list shortcuts.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def insert_in_order(head, x):
+
+head is the head Node of an ascending chain and x is the new code. Insert a Node(x) at the right spot (before the first node strictly greater than x; equal codes stay in front) and return the (possibly new) head. The harness prints the resulting chain.
+
+Input Format:
+Line 1: n, the number of codes.
+Line 2: n integers in ascending order.
+Line 3: the new code x.
+
+Output Format:
+One line with the chain after the insertion, space-separated.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+  sampleinput1: "4\n1 3 5 7\n4"
+  sampleoutput1: "1 3 4 5 7"
+  sampleinput2: "3\n2 4 6\n0"
+  sampleoutput2: "0 2 4 6"
+  input1: "1\n9\n9"
+  output1: "9 9"
+  input2: "5\n1 2 3 4 5\n6"
+  output2: "1 2 3 4 5 6"
+  input3: "4\n1 3 5 7\n3"
+  output3: "1 3 3 5 7"
+SOURCECODE:
+def insert_in_order(head, x):
+    node = Node(x)
+    if head is None or x < head.value:
+        node.next = head
+        return node
+    prev = head
+    while prev.next is not None and prev.next.value <= x:
+        prev = prev.next
+    node.next = prev.next
+    prev.next = node
+    return head
+
+
+================================================================================
+[12] Cycle Detection by Floyd   lang=python type=practice diff=medium
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: set(,dict(
+WHITELIST: slow
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1 <= pos < n; -1000000 <= value <= 1000000
+DESCRIPTION:
+A ticket chain has looped somewhere and the auditor runs Floyd's tortoise-and-hare: slow moves one link per step, fast moves two; they must meet iff a cycle exists. Naming matters on this floor — use the variables slow and fast.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def has_cycle(head):
+
+head is the head Node of the chain; the harness has already linked the tail back to a node when the input says so. Return True when the chain contains a cycle, False otherwise, using the slow/fast two-pointer method. Storing visited nodes is banned — the grader rejects set( and dict(.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+Line 3: pos: the 0-based index the tail loops back to, or -1 when the chain is linear.
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= n <= 1000
+-1 <= pos < n
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4\n1"
+  sampleoutput1: "True"
+  sampleinput2: "3\n5 6 7\n-1"
+  sampleoutput2: "False"
+  input1: "1\n9\n0"
+  output1: "True"
+  input2: "5\n1 2 3 4 5\n-1"
+  output2: "False"
+  input3: "6\n1 2 3 4 5 6\n2"
+  output3: "True"
+SOURCECODE:
+def has_cycle(head):
+    slow = head
+    fast = head
+    while fast is not None and fast.next is not None:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            return True
+    return False
+
+
+================================================================================
+[13] Score k Places From the Bottom   lang=python type=practice diff=medium
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: len(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 1000; 0 <= k < n; -1000000 <= value <= 1000000
+DESCRIPTION:
+A leaderboard chain stores scores; the ceremony desk reports the score exactly k places from the bottom (k = 0 is the last node). Counting len() is banned — count the nodes by walking them.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def kth_from_end(head, k):
+
+head is the head Node of the score chain and 0 <= k < n. Return the value of the node k places from the end. len() is banned — the grader rejects len(.
+
+Input Format:
+Line 1: n, the number of scores.
+Line 2: n integers — the scores in chain order.
+Line 3: k (0-based from the end, k < n).
+
+Output Format:
+One line with the requested score.
+
+Constraints:
+1 <= n <= 1000
+0 <= k < n
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n90 85 80 75 70\n1"
+  sampleoutput1: "75"
+  sampleinput2: "4\n10 20 30 40\n0"
+  sampleoutput2: "40"
+  input1: "6\n1 2 3 4 5 6\n5"
+  output1: "1"
+  input2: "3\n7 8 9\n2"
+  output2: "7"
+  input3: "5\n2 4 6 8 10\n3"
+  output3: "4"
+SOURCECODE:
+def kth_from_end(head, k):
+    depth = 0
+    node = head
+    while node is not None:
+        depth += 1
+        node = node.next
+    node = head
+    steps = depth - 1 - k
+    while steps > 0:
+        node = node.next
+        steps -= 1
+    return node.value
+
+
+================================================================================
+[14] Rush Order Into the Job Chain   lang=python type=practice diff=medium
+TOPIC: Singly Linked Lists | SUB: Dynamic Allocation
+BLACKLIST: insert(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 1000; 0 <= pos <= n; -1000000 <= value, x <= 1000000
+DESCRIPTION:
+A print shop chains its jobs; a rush order can cut in at any position pos (0-based, inserting at pos = n appends it). Allocate the node and relink the chain yourself — list.insert is banned.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def insert_at(head, pos, x):
+
+head is the head Node of the job chain. Insert Node(x) so it ends up at 0-based position pos and return the (possibly new) head. The harness prints the resulting chain.
+
+Input Format:
+Line 1: n, the number of jobs.
+Line 2: n integers — the job ids in chain order.
+Line 3: the position pos (0 <= pos <= n).
+Line 4: the rush job id x.
+
+Output Format:
+One line with the chain after the insertion, space-separated.
+
+Constraints:
+1 <= n <= 1000
+0 <= pos <= n
+-1000000 <= value, x <= 1000000
+  sampleinput1: "4\n10 20 30 40\n0\n5"
+  sampleoutput1: "5 10 20 30 40"
+  sampleinput2: "4\n10 20 30 40\n2\n99"
+  sampleoutput2: "10 20 99 30 40"
+  input1: "3\n1 2 3\n3\n4"
+  output1: "1 2 3 4"
+  input2: "5\n1 2 3 4 5\n2\n100"
+  output2: "1 2 100 3 4 5"
+  input3: "1\n7\n1\n8"
+  output3: "7 8"
+SOURCECODE:
+def insert_at(head, pos, x):
+    node = Node(x)
+    if pos == 0:
+        node.next = head
+        return node
+    prev = head
+    i = 0
+    while i < pos - 1:
+        prev = prev.next
+        i += 1
+    node.next = prev.next
+    prev.next = node
+    return head
+
+
+================================================================================
+[15] Drop Every Second Backup Job   lang=python type=practice diff=medium
+TOPIC: Singly Linked Lists | SUB: Insertion and Deletion
+BLACKLIST: pop(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+A scheduler chains its nightly backup jobs and drops every second one (keep positions 0, 2, 4, ...; delete positions 1, 3, 5, ...). Relink around the dropped nodes in a single walk.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def delete_alternates(head):
+
+head is the head Node of the job chain. Unlink every second node (the ones at odd 0-based positions) and return head (the head always survives). The harness prints the resulting chain.
+
+Input Format:
+Line 1: n, the number of jobs.
+Line 2: n integers — the job ids in chain order.
+
+Output Format:
+One line with the surviving jobs, space-separated.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n1 2 3 4 5"
+  sampleoutput1: "1 3 5"
+  sampleinput2: "4\n10 20 30 40"
+  sampleoutput2: "10 30"
+  input1: "1\n7"
+  output1: "7"
+  input2: "6\n2 4 6 8 10 12"
+  output2: "2 6 10"
+  input3: "2\n5 9"
+  output3: "5"
+SOURCECODE:
+def delete_alternates(head):
+    if head is None:
+        return None
+    curr = head
+    while curr.next is not None:
+        curr.next = curr.next.next
+        if curr.next is not None:
+            curr = curr.next
+    return head
+
+
+================================================================================
+[16] Purge Cancelled Orders   lang=python type=practice diff=hard
+TOPIC: Singly Linked Lists | SUB: Insertion and Deletion
+BLACKLIST: remove(,count(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000; at least one node survives
+DESCRIPTION:
+A transaction chain keeps order codes; every node holding the cancelled code must be unlinked — including runs of them and matches at the head. Purge them all in one pass.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def delete_all(head, x):
+
+head is the head Node of the transaction chain. Unlink EVERY node holding x and return the (possibly new) head — at least one node always survives in the given inputs. The harness prints the resulting chain.
+
+Input Format:
+Line 1: n, the number of transactions.
+Line 2: n integers — the order codes in chain order.
+Line 3: the cancelled code x.
+
+Output Format:
+One line with the surviving transactions, space-separated.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+  sampleinput1: "6\n5 1 5 2 5 3\n5"
+  sampleoutput1: "1 2 3"
+  sampleinput2: "5\n7 7 7 7 8\n7"
+  sampleoutput2: "8"
+  input1: "4\n1 2 3 4\n9"
+  output1: "1 2 3 4"
+  input2: "5\n8 3 8 3 8\n8"
+  output2: "3 3"
+  input3: "4\n9 9 1 9\n9"
+  output3: "1"
+SOURCECODE:
+def delete_all(head, x):
+    while head is not None and head.value == x:
+        head = head.next
+    if head is None:
+        return None
+    prev = head
+    while prev.next is not None:
+        if prev.next.value == x:
+            prev.next = prev.next.next
+        else:
+            prev = prev.next
+    return head
+
+
+================================================================================
+[17] Splice Two Depot Chains   lang=python type=practice diff=hard
+TOPIC: Singly Linked Lists | SUB: Node Structures
+BLACKLIST: sorted(,.sort(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n1, n2 <= 1000; -1000000 <= value <= 1000000; both chains ascending
+DESCRIPTION:
+Two depots ship chains of parcels, each already ascending by priority. The control room splices them into ONE ascending chain by re-linking nodes — no re-sorting.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def merge_chains(head1, head2):
+
+head1 and head2 are the head Nodes of two ascending chains. Return the head of the merged ascending chain built from the SAME nodes (a dummy head node makes the splicing easy — Node is available). The harness prints the merged chain.
+
+Input Format:
+Line 1: n1, the size of the first chain.
+Line 2: n1 integers in ascending order.
+Line 3: n2, the size of the second chain.
+Line 4: n2 integers in ascending order.
+
+Output Format:
+One line with the merged chain, space-separated.
+
+Constraints:
+1 <= n1, n2 <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "3\n1 3 5\n3\n2 4 6"
+  sampleoutput1: "1 2 3 4 5 6"
+  sampleinput2: "2\n1 4\n3\n2 3 5"
+  sampleoutput2: "1 2 3 4 5"
+  input1: "1\n7\n1\n3"
+  output1: "3 7"
+  input2: "4\n2 2 5 8\n3\n2 6 9"
+  output2: "2 2 2 5 6 8 9"
+  input3: "3\n1 2 3\n3\n4 5 6"
+  output3: "1 2 3 4 5 6"
+SOURCECODE:
+def merge_chains(head1, head2):
+    dummy = Node(0)
+    tail = dummy
+    a, b = head1, head2
+    while a is not None and b is not None:
+        if a.value <= b.value:
+            tail.next = a
+            a = a.next
+        else:
+            tail.next = b
+            b = b.next
+        tail = tail.next
+    if a is not None:
+        tail.next = a
+    else:
+        tail.next = b
+    return dummy.next
+
+
+================================================================================
+[18] Where the Loop Begins   lang=python type=practice diff=hard
+TOPIC: Singly Linked Lists | SUB: Traversal
+BLACKLIST: set(,dict(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1 <= pos < n; -1000000 <= value <= 1000000
+DESCRIPTION:
+A ticket chain has looped somewhere (or not at all). Extend Floyd's tortoise-and-hare: after slow and fast meet, restart one pointer at the head and step both one link at a time — they meet exactly at the loop's entry node.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def cycle_start(head):
+
+head is the head Node of the chain; the harness has already linked the tail back to a node when the input says so. Return the VALUE of the node where the loop begins, or -1 when the chain is linear. Storing visited nodes is banned — the grader rejects set( and dict(.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+Line 3: pos: the 0-based index the tail loops back to, or -1 when the chain is linear.
+
+Output Format:
+One line with the entry node's value, or -1.
+
+Constraints:
+1 <= n <= 1000
+-1 <= pos < n
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4\n2"
+  sampleoutput1: "3"
+  sampleinput2: "5\n1 2 3 4 5\n-1"
+  sampleoutput2: "-1"
+  input1: "3\n7 8 9\n0"
+  output1: "7"
+  input2: "6\n1 2 3 4 5 6\n4"
+  output2: "5"
+  input3: "2\n1 2\n1"
+  output3: "2"
+SOURCECODE:
+def cycle_start(head):
+    slow = head
+    fast = head
+    while fast is not None and fast.next is not None:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            finder = head
+            while finder is not slow:
+                finder = finder.next
+                slow = slow.next
+            return finder.value
+    return -1
+
+
+================================================================================
+[19] Reverse Checkpoints in Blocks   lang=python type=practice diff=hard
+TOPIC: Singly Linked Lists | SUB: Reversing a List
+BLACKLIST: sorted(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 1000; 1 <= k <= n + 4; -1000000 <= value <= 1000000
+DESCRIPTION:
+A memory pager reverses its checkpoint chain in blocks of k: every full group of k consecutive nodes is reversed, and a leftover tail shorter than k stays untouched (k = 1 leaves everything as-is).
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def reverse_groups(head, k):
+
+head is the head Node of the checkpoint chain. Reverse the chain in groups of exactly k nodes and return the NEW head. The harness prints the resulting chain.
+
+Input Format:
+Line 1: n, the number of checkpoints.
+Line 2: n integers — the checkpoint ids in chain order.
+Line 3: the block size k (1 <= k <= n + 4).
+
+Output Format:
+One line with the reordered checkpoints, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= k <= n + 4
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4\n2"
+  sampleoutput1: "2 1 4 3"
+  sampleinput2: "5\n1 2 3 4 5\n2"
+  sampleoutput2: "2 1 4 3 5"
+  input1: "3\n1 2 3\n3"
+  output1: "3 2 1"
+  input2: "5\n1 2 3 4 5\n3"
+  output2: "3 2 1 4 5"
+  input3: "1\n7\n5"
+  output3: "7"
+SOURCECODE:
+def reverse_groups(head, k):
+    node = head
+    count = 0
+    while node is not None:
+        count += 1
+        node = node.next
+    new_head = None
+    prev_tail = None
+    curr = head
+    while count >= k:
+        group_head = curr
+        prev = None
+        i = 0
+        while i < k:
+            nxt = curr.next
+            curr.next = prev
+            prev = curr
+            curr = nxt
+            i += 1
+        if new_head is None:
+            new_head = prev
+        else:
+            prev_tail.next = prev
+        prev_tail = group_head
+        count -= k
+    if prev_tail is not None:
+        prev_tail.next = curr
+    if new_head is None:
+        return head
+    return new_head

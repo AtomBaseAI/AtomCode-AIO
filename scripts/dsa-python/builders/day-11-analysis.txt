@@ -1,0 +1,620 @@
+DAY 11 topics=['Stacks']
+====================================================================================================
+[0] title='Top of the Stack' diff=easy topic='Stacks' sub='LIFO Principle' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def stack_top(values):
+
+Push every value in the list onto an initially empty list-based stack (use append) and return the element left on top.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the top element after all pushes.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+sampleinput1='4\n5 7 9 2'
+sampleoutput1='2'
+sampleinput2='1\n42'
+sampleoutput2='42'
+input1='6\n3 1 4 1 5 9'
+output1='9'
+input2='5\n-2 0 7 -8 3'
+output2='3'
+input3='8\n10 20 30 40 50 60 70 80'
+output3='80'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+SRC: 'def stack_top(values):\n    stack = []\n    for v in values:\n        stack.append(v)\n    return stack[-1]\n'
+====================================================================================================
+[1] title='Pop Two from the Stack' diff=easy topic='Stacks' sub='LIFO Principle' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def pop_two(values):
+
+Push every value onto an initially empty list-based stack, then pop twice. Return the two popped values as a tuple (first popped, second popped).
+
+Input Format:
+Line 1: n, the number of values (n >= 2).
+Line 2: n integers.
+
+Output Format:
+One line with the first popped value, then the second popped value, space-separated.
+
+Constraints:
+2 <= n <= 1000
+-1000000 <= value <= 1000000
+sampleinput1='5\n1 2 3 4 5'
+sampleoutput1='5 4'
+sampleinput2='2\n7 8'
+sampleoutput2='8 7'
+input1='6\n10 20 30 40 50 60'
+output1='60 50'
+input2='3\n-1 -2 -3'
+output2='-3 -2'
+input3='4\n100 200 300 400'
+output3='400 300'
+CONSTRAINTS: 2 <= n <= 1000; -1000000 <= value <= 1000000
+SRC: 'def pop_two(values):\n    stack = []\n    for v in values:\n        stack.append(v)\n    first = stack.pop()\n    second = stack.pop()\n    return first, second\n'
+====================================================================================================
+[2] title='Balanced Round Brackets' diff=easy topic='Stacks' sub='Balanced Parentheses' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def is_balanced(s):
+
+Decide whether the round brackets in the string are balanced. Every opening '(' must be closed by a matching ')' and no closing bracket may appear before its opener. Return True or False.
+
+Input Format:
+One line containing the string s (only '(' and ')' plus possibly other characters — only brackets matter).
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= len(s) <= 1000
+sampleinput1='(())()'
+sampleoutput1='True'
+sampleinput2='((('
+sampleoutput2='False'
+input1='()()'
+output1='True'
+input2=')('
+output2='False'
+input3='(()())(())'
+output3='True'
+CONSTRAINTS: 1 <= len(s) <= 1000
+SRC: "def is_balanced(s):\n    stack = []\n    for ch in s:\n        if ch == '(':\n            stack.append(ch)\n        elif ch == ')':\n            if not stack:\n                return False\n            stack.pop()\n    return not stack\n"
+====================================================================================================
+[3] title='Reverse a Word with a Stack' diff=easy topic='Stacks' sub='Array-Based Stacks' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def reverse_word(s):
+
+Reverse the string by pushing each character onto a list-based stack and popping them back off. Return the reversed string.
+
+Input Format:
+One line containing the word s (no spaces).
+
+Output Format:
+One line with the reversed word.
+
+Constraints:
+1 <= len(s) <= 1000
+sampleinput1='stack'
+sampleoutput1='kcats'
+sampleinput2='python'
+sampleoutput2='nohtyp'
+input1='Atom'
+output1='motA'
+input2='abcd'
+output2='dcba'
+input3='racecar'
+output3='racecar'
+CONSTRAINTS: 1 <= len(s) <= 1000; s contains no spaces
+SRC: 'def reverse_word(s):\n    stack = []\n    for ch in s:\n        stack.append(ch)\n    out = []\n    while stack:\n        out.append(stack.pop())\n    return "".join(out)\n'
+====================================================================================================
+[4] title='Next Greater Element' diff=easy topic='Stacks' sub='Next Greater Element' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def next_greater(nums):
+
+For each element, find the first element strictly greater than it that appears to its right; if none exists, use -1. Return the list of answers in the same order.
+
+Input Format:
+Line 1: n, the number of elements.
+Line 2: n integers.
+
+Output Format:
+One line with n answers, space-separated.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+sampleinput1='4\n1 3 2 4'
+sampleoutput1='3 4 4 -1'
+sampleinput2='5\n5 4 3 2 1'
+sampleoutput2='-1 -1 -1 -1 -1'
+input1='1\n7'
+output1='-1'
+input2='6\n2 1 3 5 4 6'
+output2='3 3 5 6 6 -1'
+input3='5\n10 3 12 4 12'
+output3='12 12 -1 12 -1'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+SRC: 'def next_greater(nums):\n    res = []\n    for i in range(len(nums)):\n        res.append(-1)\n        for j in range(i + 1, len(nums)):\n            if nums[j] > nums[i]:\n                res[i] = nums[j]\n                break\n    return res\n'
+====================================================================================================
+[5] title='Second From the Top' diff=easy topic='Stacks' sub='LIFO Principle' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def second_from_top(values):
+
+Push every value onto an initially empty list-based stack and return the element just below the top (the second element that would be popped).
+
+Input Format:
+Line 1: n, the number of values (n >= 2).
+Line 2: n integers.
+
+Output Format:
+One line with the element second from the top.
+
+Constraints:
+2 <= n <= 1000
+-1000000 <= value <= 1000000
+sampleinput1='3\n1 2 3'
+sampleoutput1='2'
+sampleinput2='2\n9 8'
+sampleoutput2='9'
+input1='7\n4 5 6 7 8 9 10'
+output1='9'
+input2='4\n11 22 33 44'
+output2='33'
+input3='5\n5 10 15 20 25'
+output3='20'
+CONSTRAINTS: 2 <= n <= 1000; -1000000 <= value <= 1000000
+SRC: 'def second_from_top(values):\n    stack = []\n    for v in values:\n        stack.append(v)\n    top = stack.pop()\n    second = stack[-1]\n    stack.append(top)\n    return second\n'
+====================================================================================================
+[6] title='Browser Back Button' diff=easy topic='Stacks' sub='Array-Based Stacks' type=practice bl='' wl=''
+DESC: A browser records the pages a user visited, most recent on top. Pressing Back moves one page down the stack.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def page_after_backs(history, k):
+
+history is the list of visited page names in visit order (oldest first) and k is the number of Back presses (the stack is never emptied by k). Return the name of the page shown after k presses.
+
+Input Format:
+Line 1: n, the number of visited pages.
+Line 2: n page names, space-separated (single words).
+Line 3: k, the number of Back presses (0 <= k < n).
+
+Output Format:
+One line with the page name displayed.
+
+Constraints:
+2 <= n <= 1000
+0 <= k < n
+sampleinput1='4\nhome search cart pay\n1'
+sampleoutput1='cart'
+sampleinput2='3\na b c\n2'
+sampleoutput2='a'
+input1='5\nlogin dashboard profile settings logout\n4'
+output1='login'
+input2='2\nx y\n1'
+output2='x'
+input3='6\np1 p2 p3 p4 p5 p6\n3'
+output3='p3'
+CONSTRAINTS: 2 <= n <= 1000; 0 <= k < n; page names are single words
+SRC: 'def page_after_backs(history, k):\n    stack = []\n    for page in history:\n        stack.append(page)\n    for _ in range(k):\n        stack.pop()\n    return stack[-1]\n'
+====================================================================================================
+[7] title='Undo Typing' diff=easy topic='Stacks' sub='LIFO Principle' type=practice bl='' wl=''
+DESC: A text editor records a typing stream where the character '<' means "undo the last typed character" (ignored if nothing is typed).
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def final_text(s):
+
+Process the stream left to right with a stack: letters are pushed, '<' pops. Return the final visible text as a string.
+
+Input Format:
+One line containing the typing stream (letters and '<' only).
+
+Output Format:
+One line with the final text (guaranteed non-empty in every test).
+
+Constraints:
+1 <= len(s) <= 1000
+the final text is never empty in the tests
+sampleinput1='abcde<'
+sampleoutput1='abcd'
+sampleinput2='xy<<z'
+sampleoutput2='z'
+input1='hi<there'
+output1='hthere'
+input2='ab<'
+output2='a'
+input3='code<<'
+output3='co'
+CONSTRAINTS: 1 <= len(s) <= 1000; final text non-empty in every test
+SRC: 'def final_text(s):\n    stack = []\n    for ch in s:\n        if ch == \'<\':\n            if stack:\n                stack.pop()\n        else:\n            stack.append(ch)\n    return "".join(stack)\n'
+====================================================================================================
+[8] title='Bracket Nesting Depth' diff=easy topic='Stacks' sub='Balanced Parentheses' type=practice bl='' wl=''
+DESC: A code formatter reports how deeply nested the parentheses of a line are.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def max_depth(s):
+
+s is guaranteed to be a balanced parenthesis string (possibly containing other characters). Push on '(' and pop on ')' with a stack, and return the maximum stack size reached.
+
+Input Format:
+One line containing the string s.
+
+Output Format:
+One line with the maximum nesting depth.
+
+Constraints:
+1 <= len(s) <= 1000
+s is a balanced parenthesis string
+sampleinput1='((a(b)))'
+sampleoutput1='3'
+sampleinput2='()'
+sampleoutput2='1'
+input1='(((())))'
+output1='4'
+input2='a(b)c(d(e))'
+output2='2'
+input3='(x(y)z)'
+output3='2'
+CONSTRAINTS: 1 <= len(s) <= 1000; s is balanced
+SRC: "def max_depth(s):\n    stack = []\n    best = 0\n    for ch in s:\n        if ch == '(':\n            stack.append(ch)\n            if len(stack) > best:\n                best = len(stack)\n        elif ch == ')':\n            stack.pop()\n    return best\n"
+====================================================================================================
+[9] title='Bounded Exam-Paper Stack' diff=easy topic='Stacks' sub='Array-Based Stacks' type=practice bl='' wl=''
+DESC: An invigilator stacks exam papers on a tray that holds at most C papers; further papers are left aside.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def pushed_values(values, cap):
+
+values are the papers in arrival order and cap is the tray capacity. Push papers onto a stack but stop adding once the stack holds cap items (extra arrivals are dropped). Return the list of values actually on the stack, bottom to top.
+
+Input Format:
+Line 1: n and cap, space-separated.
+Line 2: n integers (the papers in arrival order).
+
+Output Format:
+One line with the values left on the stack, space-separated (guaranteed non-empty).
+
+Constraints:
+1 <= n <= 1000
+1 <= cap <= n
+sampleinput1='5 3\n2 4 6 8 10'
+sampleoutput1='2 4 6'
+sampleinput2='4 2\n1 2 3 4'
+sampleoutput2='1 2'
+input1='1 5\n9'
+output1='9'
+input2='6 4\n5 5 5 5 5 5'
+output2='5 5 5 5'
+input3='3 1\n7 8 9'
+output3='7'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= cap <= n
+SRC: 'def pushed_values(values, cap):\n    stack = []\n    for v in values:\n        if len(stack) < cap:\n            stack.append(v)\n    return stack\n'
+====================================================================================================
+[10] title='Trading Min-Stack Log' diff=medium topic='Stacks' sub='Array-Based Stacks' type=practice bl='min(' wl='append'
+DESC: A trading app tracks a stock price with a stack that can also report the current minimum in O(1).
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def min_stack_ops(ops):
+
+ops is a list of operation strings: "push x", "pop" or "min". Maintain a stack (pop and min are only issued on a non-empty stack). Return the list of results for the "min" operations in order.
+
+Input Format:
+Line 1: m, the number of operations.
+Lines 2..m+1: one operation per line.
+
+Output Format:
+One line per "min" operation with the current stack minimum.
+
+Constraints:
+1 <= m <= 2000
+-1000000 <= x <= 1000000
+pop and min never run on an empty stack; at least one min per test
+sampleinput1='7\npush 5\npush 2\nmin\npop\npush 7\nmin\nmin'
+sampleoutput1='2\n5\n5'
+sampleinput2='4\npush 10\npush 3\nmin\nmin'
+sampleoutput2='3\n3'
+input1='8\npush 4\npush 4\npush 1\nmin\npop\nmin\npop\nmin'
+output1='1\n4\n4'
+input2='5\npush 9\npop\npush 2\npush 8\nmin'
+output2='2'
+input3='6\npush -3\nmin\npush -3\nmin\npop\nmin'
+output3='-3\n-3\n-3'
+CONSTRAINTS: 1 <= m <= 2000; pop/min never on empty stack; >= 1 min per test
+SRC: 'def min_stack_ops(ops):\n    stack = []\n    mins = []\n    res = []\n    for op in ops:\n        parts = op.split()\n        if parts[0] == "push":\n            x = int(parts[1])\n            stack.append(x)\n            if mins and x > mins[-1]:\n                mins.append(mins[-1])\n            else:\n                mins.append(x)\n        elif parts[0] == "pop":\n            stack.pop()\n  
+====================================================================================================
+[11] title='Config Bracket Validator' diff=medium topic='Stacks' sub='Balanced Parentheses' type=practice bl='count(' wl='pop('
+DESC: A config-file linter must check that (), [] and {} brackets are balanced and correctly nested.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def is_balanced(s):
+
+Use a stack: push openers, pop and compare on closers. Return True if every bracket matches and nesting is correct, else False.
+
+Input Format:
+One line containing the string s (brackets and possibly other characters).
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= len(s) <= 1000
+sampleinput1='{[()()]}'
+sampleoutput1='True'
+sampleinput2='([)]'
+sampleoutput2='False'
+input1='{[]}'
+output1='True'
+input2='(([])){}'
+output2='True'
+input3=']('
+output3='False'
+CONSTRAINTS: 1 <= len(s) <= 1000
+SRC: "def is_balanced(s):\n    stack = []\n    pairs = {')': '(', ']': '[', '}': '{'}\n    for ch in s:\n        if ch in '([{':\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n"
+====================================================================================================
+[12] title='Robot Crate Pickup Order' diff=medium topic='Stacks' sub='LIFO Principle' type=practice bl='sorted(,.sort(' wl='pop('
+DESC: A warehouse robot pushes crates in a fixed order and claims to pick them up in another order. A crate can only be picked while it is on top of the stack.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def valid_order(pushes, pops):
+
+pushes is the push order and pops the claimed pickup order (both distinct values; pops is a permutation of pushes). Simulate with a stack and return True if the pickup order is achievable, else False.
+
+Input Format:
+Line 1: n.
+Line 2: n distinct integers (push order).
+Line 3: n distinct integers (claimed pickup order).
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= n <= 1000
+pops is a permutation of pushes
+sampleinput1='5\n1 2 3 4 5\n4 5 3 2 1'
+sampleoutput1='True'
+sampleinput2='5\n1 2 3 4 5\n5 4 3 1 2'
+sampleoutput2='False'
+input1='3\n10 20 30\n30 20 10'
+output1='True'
+input2='4\n2 4 6 8\n8 6 4 2'
+output2='True'
+input3='4\n1 3 5 7\n7 5 1 3'
+output3='False'
+CONSTRAINTS: 1 <= n <= 1000; pops is a permutation of pushes
+SRC: 'def valid_order(pushes, pops):\n    stack = []\n    i = 0\n    for x in pushes:\n        stack.append(x)\n        while stack and stack[-1] == pops[i]:\n            stack.pop()\n            i += 1\n    return i == len(pops)\n'
+====================================================================================================
+[13] title='Sticky Key Text Cleaner' diff=medium topic='Stacks' sub='Array-Based Stacks' type=practice bl='re.' wl='pop('
+DESC: A keyboard repeats a key next to itself ("abba" style). A cleaner removes pairs of adjacent equal letters repeatedly until none remain.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def clean_text(s):
+
+Scan s with a stack: if the top equals the current character, pop (the pair vanishes), else push. Return the final cleaned string.
+
+Input Format:
+One line containing the string s (lowercase letters).
+
+Output Format:
+One line with the cleaned text (guaranteed non-empty in every test).
+
+Constraints:
+1 <= len(s) <= 1000
+the cleaned text is never empty in the tests
+sampleinput1='abbaca'
+sampleoutput1='ca'
+sampleinput2='azxxzy'
+sampleoutput2='ay'
+input1='mississippi'
+output1='m'
+input2='aabbb'
+output2='b'
+input3='pqqprsq'
+output3='rsq'
+CONSTRAINTS: 1 <= len(s) <= 1000; cleaned text non-empty in every test
+SRC: 'def clean_text(s):\n    stack = []\n    for ch in s:\n        if stack and stack[-1] == ch:\n            stack.pop()\n        else:\n            stack.append(ch)\n    return "".join(stack)\n'
+====================================================================================================
+[14] title='Decode the Message Pattern' diff=medium topic='Stacks' sub='Linked-List Stacks' type=practice bl='eval(' wl='append'
+DESC: A spy message encodes repeated text as k[letters] meaning "repeat letters k times". Patterns may nest, e.g. 2[3[x]y] -> xxxyxxxy.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def decode(s):
+
+Decode the pattern with a stack (save the current text and repeat count on '['), and return the decoded string.
+
+Input Format:
+One line containing the pattern s (digits, lowercase letters and '[' / ']' only; k >= 1).
+
+Output Format:
+One line with the decoded message.
+
+Constraints:
+1 <= len(s) <= 300
+the decoded message has at most 10000 characters
+sampleinput1='3[a]2[bc]'
+sampleoutput1='aaabcbc'
+sampleinput2='2[ab]c'
+sampleoutput2='ababc'
+input1='10[a]'
+output1='aaaaaaaaaa'
+input2='2[3[x]y]'
+output2='xxxyxxxy'
+input3='1[b2[c]]'
+output3='bcc'
+CONSTRAINTS: 1 <= len(s) <= 300; k >= 1; decoded length <= 10000
+SRC: 'def decode(s):\n    stack = []\n    cur = []\n    num = 0\n    for ch in s:\n        if ch.isdigit():\n            num = num * 10 + int(ch)\n        elif ch == \'[\':\n            stack.append((cur, num))\n            cur = []\n            num = 0\n        elif ch == \']\':\n            prev, k = stack.pop()\n            prev.extend(cur * k)\n            cur = prev\n        else:\n            cur
+====================================================================================================
+[15] title='When Is It Warmer?' diff=medium topic='Stacks' sub='Next Greater Element' type=practice bl='sorted(' wl='pop('
+DESC: A weather app tells each day how many days to wait until a strictly warmer day arrives.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def warmer_days(temps):
+
+For each day i, return the number of days until a temperature strictly greater than temps[i] occurs (0 if never).
+
+Input Format:
+Line 1: n, the number of days.
+Line 2: n integers (the temperatures).
+
+Output Format:
+One line with n answers, space-separated.
+
+Constraints:
+1 <= n <= 1000
+-50 <= temperature <= 60
+sampleinput1='8\n73 74 75 71 69 72 76 73'
+sampleoutput1='1 1 4 2 1 1 0 0'
+sampleinput2='4\n30 40 50 60'
+sampleoutput2='1 1 1 0'
+input1='3\n60 50 40'
+output1='0 0 0'
+input2='5\n70 70 70 71 70'
+output2='3 2 1 0 0'
+input3='6\n5 4 3 2 1 6'
+output3='5 4 3 2 1 0'
+CONSTRAINTS: 1 <= n <= 1000; -50 <= temperature <= 60
+SRC: 'def warmer_days(temps):\n    n = len(temps)\n    res = [0] * n\n    stack = []\n    for i in range(n):\n        while stack and temps[stack[-1]] < temps[i]:\n            j = stack.pop()\n            res[j] = i - j\n        stack.append(i)\n    return res\n'
+====================================================================================================
+[16] title='Reverse Polish Calculator' diff=hard topic='Stacks' sub='Array-Based Stacks' type=practice bl='eval(' wl='pop('
+DESC: A calculator engine evaluates expressions written in postfix (Reverse Polish) notation using a stack.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def eval_postfix(tokens):
+
+tokens are integers or the operators + - * /. Pop the top two values for each operator (second popped is the LEFT operand). Division truncates toward zero and never divides by zero. Return the single remaining value.
+
+Input Format:
+One line with the space-separated tokens of a valid postfix expression.
+
+Output Format:
+One line with the evaluated integer result.
+
+Constraints:
+3 <= number of tokens <= 100
+-1000000 <= operand <= 1000000
+division is never by zero
+sampleinput1='5 1 2 + 4 * + 3 -'
+sampleoutput1='14'
+sampleinput2='2 3 +'
+sampleoutput2='5'
+input1='100 20 / 5 +'
+output1='10'
+input2='4 13 5 / +'
+output2='6'
+input3='3 4 - 2 *'
+output3='-2'
+CONSTRAINTS: 3 <= tokens <= 100; division truncates toward zero; no division by zero
+SRC: "def eval_postfix(tokens):\n    stack = []\n    for tok in tokens:\n        if tok in ('+', '-', '*', '/'):\n            b = stack.pop()\n            a = stack.pop()\n            if tok == '+':\n                stack.append(a + b)\n            elif tok == '-':\n                stack.append(a - b)\n            elif tok == '*':\n                stack.append(a * b)\n            else:\n               
+====================================================================================================
+[17] title='Stock Price Span Report' diff=hard topic='Stacks' sub='Next Greater Element' type=practice bl='sorted(' wl='pop('
+DESC: A stock dashboard shows, for each day, how many consecutive past days (including today) had a price less than or equal to today's price — the classic stock span.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def stock_spans(prices):
+
+Return the list of spans, one per day, in order. A monotonic stack keeps this O(n).
+
+Input Format:
+Line 1: n, the number of days.
+Line 2: n integers (the daily prices).
+
+Output Format:
+One line with n spans, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= price <= 100000
+sampleinput1='7\n100 80 60 70 60 75 85'
+sampleoutput1='1 1 1 2 1 4 6'
+sampleinput2='5\n10 10 10 10 10'
+sampleoutput2='1 2 3 4 5'
+input1='1\n5'
+output1='1'
+input2='6\n2 5 1 4 4 7'
+output2='1 2 1 2 3 6'
+input3='8\n31 41 48 59 79 79 19 9'
+output3='1 2 3 4 5 6 1 1'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= price <= 100000
+SRC: 'def stock_spans(prices):\n    n = len(prices)\n    spans = [0] * n\n    stack = []\n    for i in range(n):\n        while stack and prices[stack[-1]] <= prices[i]:\n            stack.pop()\n        spans[i] = i + 1 if not stack else i - stack[-1]\n        stack.append(i)\n    return spans\n'
+====================================================================================================
+[18] title='Largest Billboard in the Skyline' diff=hard topic='Stacks' sub='Array-Based Stacks' type=practice bl='sorted(' wl='pop('
+DESC: A city planner looks at a histogram of building heights and wants the largest rectangle that fits under the skyline (largest rectangle in a histogram).
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def max_area(heights):
+
+heights are the bar heights (each of width 1). Return the area of the largest rectangle. A monotonic stack solves this in O(n).
+
+Input Format:
+Line 1: n, the number of bars.
+Line 2: n integers (the bar heights).
+
+Output Format:
+One line with the largest rectangle area.
+
+Constraints:
+1 <= n <= 1000
+0 <= height <= 10000
+sampleinput1='6\n2 1 5 6 2 3'
+sampleoutput1='10'
+sampleinput2='2\n2 4'
+sampleoutput2='4'
+input1='1\n5'
+output1='5'
+input2='5\n1 1 1 1 1'
+output2='5'
+input3='8\n6 2 5 4 5 1 6 2'
+output3='12'
+CONSTRAINTS: 1 <= n <= 1000; 0 <= height <= 10000
+SRC: 'def max_area(heights):\n    stack = [-1]\n    best = 0\n    for i in range(len(heights) + 1):\n        h = heights[i] if i < len(heights) else 0\n        while stack[-1] != -1 and heights[stack[-1]] >= h:\n            hh = heights[stack.pop()]\n            w = i - stack[-1] - 1\n            if hh * w > best:\n                best = hh * w\n        stack.append(i)\n    return best\n'
+====================================================================================================
+[19] title='Longest Valid Bracket Run' diff=hard topic='Stacks' sub='Balanced Parentheses' type=practice bl='re.' wl='pop('
+DESC: A log analyser wants the length of the longest contiguous run of a string made of '(' and ')' that is a balanced bracket sequence.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def longest_valid(s):
+
+Return the length of the longest contiguous valid substring (0 if there is none). A stack of indices with a sentinel bottom marker solves this in one pass.
+
+Input Format:
+One line containing the string s ('(' and ')' only).
+
+Output Format:
+One line with the length of the longest valid run.
+
+Constraints:
+1 <= len(s) <= 200
+sampleinput1='(()'
+sampleoutput1='2'
+sampleinput2=')()())'
+sampleoutput2='4'
+input1='(('
+output1='0'
+input2='()(()'
+output2='2'
+input3=')(())())'
+output3='6'
+CONSTRAINTS: 1 <= len(s) <= 200
+SRC: "def longest_valid(s):\n    stack = [-1]\n    best = 0\n    for i, ch in enumerate(s):\n        if ch == '(':\n            stack.append(i)\n        else:\n            stack.pop()\n            if not stack:\n                stack.append(i)\n            elif i - stack[-1] > best:\n                best = i - stack[-1]\n    return best\n"

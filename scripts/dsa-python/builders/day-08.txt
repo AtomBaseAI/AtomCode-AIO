@@ -1,0 +1,855 @@
+=== DAY 8 ===
+TOPIC: Recursion and Backtracking Basics | subtopics: ['general', 'Base Cases', 'Recursion Trees', 'Call Stack', 'Factorial and Fibonacci', 'Subsets and Permutations']
+
+================================================================================
+[0] Fibonacci Term by Recursion   lang=python type=practice diff=easy
+TOPIC: Recursion and Backtracking Basics | SUB: Recursion Trees
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 0 <= n <= 18
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def fib(n):
+
+Return the n-th Fibonacci number computed RECURSIVELY with fib(0) = 0, fib(1) = 1 and fib(n) = fib(n-1) + fib(n-2). This double call is the classic recursion-tree example.
+
+Input Format:
+Line 1: the integer n.
+
+Output Format:
+One line with the n-th Fibonacci number.
+
+Constraints:
+0 <= n <= 18
+  sampleinput1: "6"
+  sampleoutput1: "8"
+  sampleinput2: "0"
+  sampleoutput2: "0"
+  input1: "1"
+  output1: "1"
+  input2: "10"
+  output2: "55"
+  input3: "15"
+  output3: "610"
+SOURCECODE:
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+
+================================================================================
+[1] Recursive Factorial   lang=python type=practice diff=easy
+TOPIC: Recursion and Backtracking Basics | SUB: Factorial and Fibonacci
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 0 <= n <= 12
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def factorial(n):
+
+Return n! computed RECURSIVELY (the function must call itself): factorial(0) = 1 and factorial(n) = n * factorial(n-1). A loop is not allowed by the grader's style contract for later drills — practise the recursive base case + step here.
+
+Input Format:
+Line 1: the integer n.
+
+Output Format:
+One line with n!.
+
+Constraints:
+0 <= n <= 12
+  sampleinput1: "5"
+  sampleoutput1: "120"
+  sampleinput2: "0"
+  sampleoutput2: "1"
+  input1: "7"
+  output1: "5040"
+  input2: "10"
+  output2: "3628800"
+  input3: "12"
+  output3: "479001600"
+SOURCECODE:
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+
+================================================================================
+[2] Recursive Digit Sum   lang=python type=practice diff=easy
+TOPIC: Recursion and Backtracking Basics | SUB: Base Cases
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 0 <= n <= 2000000000
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def digit_sum(n):
+
+Return the sum of the decimal digits of n computed RECURSIVELY: digit_sum(n) = digit_sum(n // 10) + n % 10, with digit_sum below 10 being the number itself.
+
+Input Format:
+Line 1: the non-negative integer n.
+
+Output Format:
+One line with the sum of the digits of n.
+
+Constraints:
+0 <= n <= 2000000000
+  sampleinput1: "12345"
+  sampleoutput1: "15"
+  sampleinput2: "7"
+  sampleoutput2: "7"
+  input1: "907"
+  output1: "16"
+  input2: "1000000"
+  output2: "1"
+  input3: "99999"
+  output3: "45"
+SOURCECODE:
+def digit_sum(n):
+    if n < 10:
+        return n
+    return digit_sum(n // 10) + n % 10
+
+
+================================================================================
+[3] Reverse a String Recursively   lang=python type=practice diff=easy
+TOPIC: Recursion and Backtracking Basics | SUB: Base Cases
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= len(s) <= 100
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def reverse_string(s):
+
+Return the string s reversed, computed RECURSIVELY: reverse_string("") = "" and reverse_string(s) = reverse_string(s[1:]) + s[0]. Think of the base case (empty or single character) first.
+
+Input Format:
+Line 1: the string s (may contain letters, digits and spaces).
+
+Output Format:
+One line with s reversed.
+
+Constraints:
+1 <= len(s) <= 100
+  sampleinput1: "python"
+  sampleoutput1: "nohtyp"
+  sampleinput2: "a"
+  sampleoutput2: "a"
+  input1: "racecar"
+  output1: "racecar"
+  input2: "atom"
+  output2: "mota"
+  input3: "hello world"
+  output3: "dlrow olleh"
+SOURCECODE:
+def reverse_string(s):
+    if len(s) <= 1:
+        return s
+    return reverse_string(s[1:]) + s[0]
+
+
+================================================================================
+[4] Recursive GCD   lang=python type=practice diff=easy
+TOPIC: Recursion and Backtracking Basics | SUB: Base Cases
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= a, b <= 1000000000
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def gcd(a, b):
+
+Return the greatest common divisor of a and b using the RECURSIVE Euclidean algorithm: gcd(a, 0) = a and gcd(a, b) = gcd(b, a % b).
+
+Input Format:
+Line 1: two integers a and b separated by a space.
+
+Output Format:
+One line with gcd(a, b).
+
+Constraints:
+1 <= a, b <= 1000000000
+  sampleinput1: "48 18"
+  sampleoutput1: "6"
+  sampleinput2: "17 5"
+  sampleoutput2: "1"
+  input1: "100 75"
+  output1: "25"
+  input2: "7 7"
+  output2: "7"
+  input3: "270 192"
+  output3: "6"
+SOURCECODE:
+def gcd(a, b):
+    if b == 0:
+        return a
+    return gcd(b, a % b)
+
+
+================================================================================
+[5] Countdown Sequence Recursively   lang=python type=practice diff=easy
+TOPIC: Recursion and Backtracking Basics | SUB: Call Stack
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 20
+DESCRIPTION:
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def countdown(n):
+
+Simulate the call stack unwinding: return the list [n, n-1, ..., 1] built RECURSIVELY — countdown(n) = [n] + countdown(n-1), with countdown(1) = [1].
+
+Input Format:
+Line 1: the integer n.
+
+Output Format:
+One line with the numbers n down to 1, space-separated.
+
+Constraints:
+1 <= n <= 20
+  sampleinput1: "4"
+  sampleoutput1: "4 3 2 1"
+  sampleinput2: "1"
+  sampleoutput2: "1"
+  input1: "6"
+  output1: "6 5 4 3 2 1"
+  input2: "3"
+  output2: "3 2 1"
+  input3: "9"
+  output3: "9 8 7 6 5 4 3 2 1"
+SOURCECODE:
+def countdown(n):
+    if n <= 1:
+        return [n]
+    return [n] + countdown(n - 1)
+
+
+================================================================================
+[6] Warehouse Pick-Order Count   lang=python type=practice diff=easy
+TOPIC: Recursion and Backtracking Basics | SUB: Factorial and Fibonacci
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 0 <= n <= 12
+DESCRIPTION:
+A warehouse robot must visit n distinct parcels in some order; the number of possible picking sequences is n!, and the planner computes it with recursion.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def pick_orders(n):
+
+Return the number of ways to order n distinct parcels, computed RECURSIVELY: pick_orders(0) = 1 and pick_orders(n) = n * pick_orders(n-1).
+
+Input Format:
+Line 1: the number of parcels n.
+
+Output Format:
+One line with the number of picking orders.
+
+Constraints:
+0 <= n <= 12
+  sampleinput1: "6"
+  sampleoutput1: "720"
+  sampleinput2: "3"
+  sampleoutput2: "6"
+  input1: "1"
+  output1: "1"
+  input2: "8"
+  output2: "40320"
+  input3: "4"
+  output3: "24"
+SOURCECODE:
+def pick_orders(n):
+    if n <= 1:
+        return 1
+    return n * pick_orders(n - 1)
+
+
+================================================================================
+[7] Rabbit Colony Pair Count   lang=python type=practice diff=easy
+TOPIC: Recursion and Backtracking Basics | SUB: Recursion Trees
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= month <= 18
+DESCRIPTION:
+A breeding farm models its rabbit colony with the classic Fibonacci growth: month 1 starts with 1 pair, month 2 still has 1 pair, and every later month the colony equals the previous month plus the month before that (each mature pair adds one new pair).
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def colony_pairs(month):
+
+Return the number of pairs alive in the given month, computed RECURSIVELY: colony_pairs(1) = colony_pairs(2) = 1 and colony_pairs(m) = colony_pairs(m-1) + colony_pairs(m-2).
+
+Input Format:
+Line 1: the month number m.
+
+Output Format:
+One line with the number of pairs in that month.
+
+Constraints:
+1 <= m <= 18
+  sampleinput1: "5"
+  sampleoutput1: "5"
+  sampleinput2: "3"
+  sampleoutput2: "2"
+  input1: "1"
+  output1: "1"
+  input2: "8"
+  output2: "21"
+  input3: "10"
+  output3: "55"
+SOURCECODE:
+def colony_pairs(month):
+    if month <= 2:
+        return 1
+    return colony_pairs(month - 1) + colony_pairs(month - 2)
+
+
+================================================================================
+[8] Digital Root Checksum   lang=python type=practice diff=easy
+TOPIC: Recursion and Backtracking Basics | SUB: Base Cases
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 0 <= n <= 2000000000
+DESCRIPTION:
+An embassy prints a checksum on every ID: keep adding up the digits until exactly one digit remains (the digital root). The check is computed by recursion.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def digital_root(n):
+
+If n is a single digit return it; otherwise return digital_root of the sum of the digits of n. Both the outer step and the digit summing must be recursive-free arithmetic (a while loop over n % 10 is fine).
+
+Input Format:
+Line 1: the non-negative integer n.
+
+Output Format:
+One line with the digital root of n.
+
+Constraints:
+0 <= n <= 2000000000
+  sampleinput1: "942"
+  sampleoutput1: "6"
+  sampleinput2: "51"
+  sampleoutput2: "6"
+  input1: "7"
+  output1: "7"
+  input2: "123456789"
+  output2: "9"
+  input3: "1000000001"
+  output3: "2"
+SOURCECODE:
+def digital_root(n):
+    if n < 10:
+        return n
+    s = 0
+    m = n
+    while m > 0:
+        s += m % 10
+        m //= 10
+    return digital_root(s)
+
+
+================================================================================
+[9] Stair Climb Ways   lang=python type=practice diff=easy
+TOPIC: Recursion and Backtracking Basics | SUB: Factorial and Fibonacci
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 15
+DESCRIPTION:
+A maintenance robot climbs a ladder of n steps, taking either 1 or 2 steps at a time. The dispatcher counts the distinct climbing schedules with recursion.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def climb_ways(n):
+
+Return the number of distinct ways to climb n steps, computed RECURSIVELY: climb_ways(1) = 1, climb_ways(2) = 2 and climb_ways(n) = climb_ways(n-1) + climb_ways(n-2).
+
+Input Format:
+Line 1: the number of steps n.
+
+Output Format:
+One line with the number of climbing schedules.
+
+Constraints:
+1 <= n <= 15
+  sampleinput1: "4"
+  sampleoutput1: "5"
+  sampleinput2: "1"
+  sampleoutput2: "1"
+  input1: "2"
+  output1: "2"
+  input2: "10"
+  output2: "89"
+  input3: "15"
+  output3: "987"
+SOURCECODE:
+def climb_ways(n):
+    if n <= 2:
+        return n
+    return climb_ways(n - 1) + climb_ways(n - 2)
+
+
+================================================================================
+[10] Fast Power by Halving   lang=python type=practice diff=medium
+TOPIC: Recursion and Backtracking Basics | SUB: Recursion Trees
+BLACKLIST: for,while
+WHITELIST: return
+INPUTCONSTRAINTS: 1 <= base <= 10; 0 <= e <= 18
+DESCRIPTION:
+An offline calculator must raise base to the exponent e without looping: the fast-power (exponentiation by squaring) method halves the exponent recursively.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def fast_power(base, e):
+
+Compute base raised to the power e RECURSIVELY with the halving method: fast_power(base, 0) = 1; compute half = fast_power(base, e // 2); return half * half when e is even and half * half * base when e is odd. Loops are banned on this floor — the grader rejects any for/while keyword.
+
+Input Format:
+Line 1: two integers base and e separated by a space.
+
+Output Format:
+One line with base ** e.
+
+Constraints:
+1 <= base <= 10
+0 <= e <= 18
+  sampleinput1: "3 4"
+  sampleoutput1: "81"
+  sampleinput2: "2 10"
+  sampleoutput2: "1024"
+  input1: "5 0"
+  output1: "1"
+  input2: "7 5"
+  output2: "16807"
+  input3: "10 6"
+  output3: "1000000"
+SOURCECODE:
+def fast_power(base, e):
+    if e == 0:
+        return 1
+    half = fast_power(base, e // 2)
+    if e % 2 == 0:
+        return half * half
+    return half * half * base
+
+
+================================================================================
+[11] Recursive Binary Search   lang=python type=practice diff=medium
+TOPIC: Recursion and Backtracking Basics | SUB: Base Cases
+BLACKLIST: for,while
+WHITELIST: return
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000; values ascending
+DESCRIPTION:
+A parts catalog is stored ascending and the lookup service mirrors its tree design: the search must be written as recursion over lo/hi bounds.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def binary_search_recursive(values, x, lo=0, hi=None):
+
+values is sorted ascending. Return the 0-based index of x, or -1 when absent. Use RECURSIVE calls: base case lo > hi returns -1; compare against mid = (lo + hi) // 2 and recurse into the left or right half. Loops are banned — the grader rejects any for/while keyword.
+
+Input Format:
+Line 1: n, the number of parts.
+Line 2: n integers in ascending order.
+Line 3: the queried part code x.
+
+Output Format:
+One line with the index of x, or -1.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+  sampleinput1: "5\n1 3 5 7 9\n7"
+  sampleoutput1: "3"
+  sampleinput2: "4\n2 4 6 8\n5"
+  sampleoutput2: "-1"
+  input1: "6\n1 2 3 4 5 6\n1"
+  output1: "0"
+  input2: "5\n10 20 30 40 50\n50"
+  output2: "4"
+  input3: "7\n2 4 6 8 10 12 14\n6"
+  output3: "2"
+SOURCECODE:
+def binary_search_recursive(values, x, lo=0, hi=None):
+    if hi is None:
+        hi = len(values) - 1
+    if lo > hi:
+        return -1
+    mid = (lo + hi) // 2
+    if values[mid] == x:
+        return mid
+    if values[mid] < x:
+        return binary_search_recursive(values, x, mid + 1, hi)
+    return binary_search_recursive(values, x, lo, mid - 1)
+
+
+================================================================================
+[12] Tower of Hanoi Move Count   lang=python type=practice diff=medium
+TOPIC: Recursion and Backtracking Basics | SUB: Recursion Trees
+BLACKLIST: for,while
+WHITELIST: return
+INPUTCONSTRAINTS: 1 <= n <= 12
+DESCRIPTION:
+A backup service migrates a tower of n tapes between two racks one tape at a time; the transfer always takes 2*ways(n-1) + 1 moves, so the counter is pure recursion.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def hanoi_moves(n):
+
+Return the minimum number of moves to shift an n-tape tower, computed RECURSIVELY: hanoi_moves(1) = 1 and hanoi_moves(n) = 2 * hanoi_moves(n-1) + 1. Loops are banned — the grader rejects any for/while keyword.
+
+Input Format:
+Line 1: the number of tapes n.
+
+Output Format:
+One line with the minimum move count.
+
+Constraints:
+1 <= n <= 12
+  sampleinput1: "3"
+  sampleoutput1: "7"
+  sampleinput2: "1"
+  sampleoutput2: "1"
+  input1: "5"
+  output1: "31"
+  input2: "8"
+  output2: "255"
+  input3: "12"
+  output3: "4095"
+SOURCECODE:
+def hanoi_moves(n):
+    if n <= 1:
+        return n
+    return 2 * hanoi_moves(n - 1) + 1
+
+
+================================================================================
+[13] Count Subsets With Sum S   lang=python type=practice diff=medium
+TOPIC: Recursion and Backtracking Basics | SUB: Subsets and Permutations
+BLACKLIST: for,while,itertools
+WHITELIST: return
+INPUTCONSTRAINTS: 1 <= n <= 10; -50 <= value <= 50; 0 <= target <= 200
+DESCRIPTION:
+A promo engine counts how many selections of the sampled products add up to exactly S. Each product may be taken at most once; the counter walks the list recursively (take it or leave it).
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def count_subsets(values, target):
+
+Return the number of subsets of values (including the empty subset) whose elements sum to target, using RECURSIVE include/exclude calls on the rest of the list. Loops and itertools are banned — the grader rejects for, while and itertools.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+Line 3: the target sum.
+
+Output Format:
+One line with the number of subsets summing to target.
+
+Constraints:
+1 <= n <= 10
+-50 <= value <= 50
+0 <= target <= 200
+  sampleinput1: "5\n1 2 3 4 5\n5"
+  sampleoutput1: "3"
+  sampleinput2: "4\n2 4 6 8\n10"
+  sampleoutput2: "2"
+  input1: "3\n1 1 2\n3"
+  output1: "2"
+  input2: "5\n3 5 6 7 9\n14"
+  output2: "2"
+  input3: "4\n1 2 3 4\n0"
+  output3: "1"
+SOURCECODE:
+def count_subsets(values, target):
+    if not values:
+        return 1 if target == 0 else 0
+    head = values[0]
+    rest = values[1:]
+    return count_subsets(rest, target) + count_subsets(rest, target - head)
+
+
+================================================================================
+[14] Distinct Letter Arrangements   lang=python type=practice diff=medium
+TOPIC: Recursion and Backtracking Basics | SUB: Subsets and Permutations
+BLACKLIST: itertools
+WHITELIST: return
+INPUTCONSTRAINTS: 1 <= len(letters) <= 7; lowercase letters
+DESCRIPTION:
+A gift-shop sign maker wants to know how many DISTINCT layouts its letter tiles can form (duplicate letters collapse into one layout). Count them by recursive backtracking over the tile positions.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def count_arrangements(letters):
+
+Return the number of distinct arrangements of the letters (an empty word has exactly 1 arrangement). Recursion with itertools is banned — the grader rejects itertools.
+
+Input Format:
+Line 1: the word (lowercase letters).
+
+Output Format:
+One line with the number of distinct arrangements.
+
+Constraints:
+1 <= len(letters) <= 7
+  sampleinput1: "aab"
+  sampleoutput1: "3"
+  sampleinput2: "abc"
+  sampleoutput2: "6"
+  input1: "aaa"
+  output1: "1"
+  input2: "aabb"
+  output2: "6"
+  input3: "abcabc"
+  output3: "90"
+SOURCECODE:
+def count_arrangements(letters):
+    if not letters:
+        return 1
+    seen = []
+    total = 0
+    i = 0
+    while i < len(letters):
+        ch = letters[i]
+        if ch not in seen:
+            seen.append(ch)
+            rest = letters[:i] + letters[i + 1:]
+            total += count_arrangements(rest)
+        i += 1
+    return total
+
+
+================================================================================
+[15] Count Digit Occurrences Recursively   lang=python type=practice diff=medium
+TOPIC: Recursion and Backtracking Basics | SUB: Call Stack
+BLACKLIST: str(
+WHITELIST: return
+INPUTCONSTRAINTS: 0 <= n <= 2000000000; 0 <= d <= 9
+DESCRIPTION:
+A device logger counts how many times a given digit appears in a device id — using arithmetic recursion (peel the last digit with % 10 and // 10), never string conversion.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def count_digit(n, d):
+
+Return how many times digit d occurs in the decimal representation of n, computed RECURSIVELY on n // 10. String conversion is banned — the grader rejects str(.
+
+Input Format:
+Line 1: the non-negative integer n.
+Line 2: the digit d (0-9).
+
+Output Format:
+One line with the number of occurrences of d in n.
+
+Constraints:
+0 <= n <= 2000000000
+0 <= d <= 9
+  sampleinput1: "777\n7"
+  sampleoutput1: "3"
+  sampleinput2: "12345\n2"
+  sampleoutput2: "1"
+  input1: "1000\n0"
+  output1: "3"
+  input2: "7\n7"
+  output2: "1"
+  input3: "505\n5"
+  output3: "2"
+SOURCECODE:
+def count_digit(n, d):
+    if n < 10:
+        return 1 if n == d else 0
+    rest = count_digit(n // 10, d)
+    if n % 10 == d:
+        return rest + 1
+    return rest
+
+
+================================================================================
+[16] Every Product Bundle   lang=python type=practice diff=hard
+TOPIC: Recursion and Backtracking Basics | SUB: Subsets and Permutations
+BLACKLIST: itertools
+WHITELIST: return
+INPUTCONSTRAINTS: 1 <= n <= 5; 1 <= value <= 50; values distinct and ascending
+DESCRIPTION:
+The promo engine must list every possible non-empty bundle of the n sampled products before printing the promo cards. Generate the bundles by recursion (take the first product or skip it).
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def all_subsets(values):
+
+Return a list of tuples — every non-empty subset of values. The hidden harness sorts the tuples and prints one bundle per line, so the order you return them in does not matter. itertools is banned — the grader rejects itertools.
+
+Input Format:
+Line 1: n, the number of sampled products.
+Line 2: n DISTINCT integers in ascending order.
+
+Output Format:
+One bundle per line (space-separated values), sorted ascending; the harness handles the sorting and printing.
+
+Constraints:
+1 <= n <= 5
+1 <= value <= 50
+  sampleinput1: "3\n1 2 3"
+  sampleoutput1: "1\n1 2\n1 2 3\n1 3\n2\n2 3\n3"
+  sampleinput2: "1\n9"
+  sampleoutput2: "9"
+  input1: "4\n1 2 3 4"
+  output1: "1\n1 2\n1 2 3\n1 2 3 4\n1 2 4\n1 3\n1 3 4\n1 4\n2\n2 3\n2 3 4\n2 4\n3\n3 4\n4"
+  input2: "2\n5 7"
+  output2: "5\n5 7\n7"
+  input3: "3\n2 4 6"
+  output3: "2\n2 4\n2 4 6\n2 6\n4\n4 6\n6"
+SOURCECODE:
+def all_subsets(values):
+    if not values:
+        return []
+    rest = all_subsets(values[1:])
+    return rest + [(values[0],)] + [(values[0],) + s for s in rest]
+
+
+================================================================================
+[17] Nth Lexicographic Permutation   lang=python type=practice diff=hard
+TOPIC: Recursion and Backtracking Basics | SUB: Subsets and Permutations
+BLACKLIST: itertools
+WHITELIST: return
+INPUTCONSTRAINTS: 1 <= len(letters) <= 6; letters distinct and ascending; 1 <= k <= len(letters)!
+DESCRIPTION:
+A cipher wheel needs the k-th arrangement of its letter ring in dictionary order. With the letters given ascending, the block-size trick picks one letter per call and recurses on the remainder.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def nth_permutation(letters, k):
+
+letters holds DISTINCT lowercase letters in ascending order and k is 1-based with 1 <= k <= len(letters)!. Return the k-th permutation in lexicographic order. Recursively: block = factorial(len(letters) - 1) (write a recursive helper — itertools is banned); idx = (k - 1) // block; answer = letters[idx] + nth_permutation(rest, k - idx * block) where rest is letters without position idx.
+
+Input Format:
+Line 1: the letters (distinct, ascending).
+Line 2: the rank k.
+
+Output Format:
+One line with the k-th lexicographic permutation.
+
+Constraints:
+1 <= len(letters) <= 6
+1 <= k <= len(letters)!
+  sampleinput1: "abc\n3"
+  sampleoutput1: "bac"
+  sampleinput2: "abcd\n7"
+  sampleoutput2: "bacd"
+  input1: "xyz\n2"
+  output1: "xzy"
+  input2: "ace\n5"
+  output2: "eac"
+  input3: "abcdef\n1"
+  output3: "abcdef"
+SOURCECODE:
+def fact(m):
+    if m <= 1:
+        return 1
+    return m * fact(m - 1)
+
+def nth_permutation(letters, k):
+    if not letters:
+        return ""
+    block = fact(len(letters) - 1)
+    idx = (k - 1) // block
+    rest = letters[:idx] + letters[idx + 1:]
+    return letters[idx] + nth_permutation(rest, k - idx * block)
+
+
+================================================================================
+[18] N-Queens Layout Count   lang=python type=practice diff=hard
+TOPIC: Recursion and Backtracking Basics | SUB: Recursion Trees
+BLACKLIST: for,while,itertools
+WHITELIST: return
+INPUTCONSTRAINTS: 1 <= n <= 6
+DESCRIPTION:
+The museum wall is an n × n grid and the curator hangs n spotlight tokens so that no two share a column or a diagonal. The exhibition app counts the valid layouts with pure recursive backtracking — column choice per row is itself written as recursion.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def n_queens(n):
+
+Return the number of ways to place n non-attacking queens on an n x n board. Loops and itertools are banned — the grader rejects for, while and itertools. Track occupied columns and the two diagonal directions (row+col, row-col) in sets, place row by row, and try columns recursively (a try-columns helper that recurses col+1 works well).
+
+Input Format:
+Line 1: the board size n.
+
+Output Format:
+One line with the number of valid layouts.
+
+Constraints:
+1 <= n <= 6
+  sampleinput1: "4"
+  sampleoutput1: "2"
+  sampleinput2: "5"
+  sampleoutput2: "10"
+  input1: "6"
+  output1: "4"
+  input2: "3"
+  output2: "0"
+  input3: "1"
+  output3: "1"
+SOURCECODE:
+def n_queens(n):
+    def try_col(row, col, cols, d1, d2):
+        if col == n:
+            return 0
+        total = 0
+        if col not in cols and (row + col) not in d1 and (row - col) not in d2:
+            if row + 1 == n:
+                total += 1
+            else:
+                total += try_col(row + 1, 0, cols | {col}, d1 | {row + col}, d2 | {row - col})
+        return total + try_col(row, col + 1, cols, d1, d2)
+
+    return try_col(0, 0, set(), set(), set())
+
+
+================================================================================
+[19] Count Subsets With Sum S (Negative Values)   lang=python type=practice diff=hard
+TOPIC: Recursion and Backtracking Basics | SUB: Subsets and Permutations
+BLACKLIST: for,while,itertools
+WHITELIST: return
+INPUTCONSTRAINTS: 1 <= n <= 12; -50 <= value <= 50; -150 <= target <= 150
+DESCRIPTION:
+The ledger now holds corrections that can be negative, and the auditor still needs the number of selections summing exactly to S. Include/exclude recursion handles negatives — pruning by "target went negative" is NOT possible, which is what makes this version hard.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def count_subsets_neg(values, target, i=0):
+
+Return the number of subsets of values[i:] (including the empty subset) whose elements sum to target, recursing on index i: when i == len(values) the subset is empty — return 1 exactly when target == 0; otherwise count both taking values[i] and skipping it. Loops and itertools are banned — the grader rejects for, while and itertools.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers (may be negative or zero).
+Line 3: the target sum (may be negative).
+
+Output Format:
+One line with the number of subsets summing to target.
+
+Constraints:
+1 <= n <= 12
+-50 <= value <= 50
+-150 <= target <= 150
+  sampleinput1: "4\n2 -1 3 5\n4"
+  sampleoutput1: "2"
+  sampleinput2: "5\n1 -2 3 -4 5\n3"
+  sampleoutput2: "3"
+  input1: "3\n-1 -1 -1\n-2"
+  output1: "3"
+  input2: "4\n0 0 2 2\n2"
+  output2: "8"
+  input3: "2\n-5 5\n0"
+  output3: "2"
+SOURCECODE:
+def count_subsets_neg(values, target, i=0):
+    if i == len(values):
+        return 1 if target == 0 else 0
+    return count_subsets_neg(values, target - values[i], i + 1) + count_subsets_neg(values, target, i + 1)

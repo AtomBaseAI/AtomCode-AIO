@@ -1,0 +1,541 @@
+DAY 8 — 20 questions
+
+===== Q1: Factorial by Recursion [easy/10] topic=Recursion and Backtracking Basics sub=Factorial and Fibonacci type=practice
+DESC: The classic first recursion: n! grows fast, so the answer is a long. The class Main and its main method are already provided. Write only the required static method:
+
+    static long factorial(int n)
+
+It must return n! with 0! = 1 and 1! = 1. Implement it recursively: a base case, then n * factorial(n - 1).
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with n!.
+
+Constraints:
+0 <= n <= 20
+BL:  | WL: 
+  sampleinput1="0"
+  => sampleoutput1="1"
+  sampleinput2="1"
+  => sampleoutput2="1"
+  input1="5"
+  => output1="120"
+  input2="12"
+  => output2="479001600"
+  input3="20"
+  => output3="2432902008176640000"
+
+===== Q2: Fibonacci Term [easy/10] topic=Recursion and Backtracking Basics sub=Factorial and Fibonacci type=practice
+DESC: The Fibonacci sequence starts fib(0) = 0 and fib(1) = 1, and every later term is the sum of the two before it. The class Main and its main method are already provided. Write only the required static method:
+
+    static long fibTerm(int n)
+
+It must return fib(n). A plain recursive solution is fast enough for these limits.
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with fib(n).
+
+Constraints:
+0 <= n <= 30
+BL:  | WL: 
+  sampleinput1="0"
+  => sampleoutput1="0"
+  sampleinput2="1"
+  => sampleoutput2="1"
+  input1="2"
+  => output1="1"
+  input2="10"
+  => output2="55"
+  input3="30"
+  => output3="832040"
+
+===== Q3: Digit Sum by Recursion [easy/10] topic=Recursion and Backtracking Basics sub=Base Cases type=practice
+DESC: Peel digits off with % 10 and / 10 until the base case 0 is reached. The class Main and its main method are already provided. Write only the required static method:
+
+    static long digitSum(long n)
+
+It must return the sum of the decimal digits of n (digitSum(0) = 0).
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with the digit sum.
+
+Constraints:
+0 <= n <= 1000000000000000000
+BL:  | WL: 
+  sampleinput1="0"
+  => sampleoutput1="0"
+  sampleinput2="5"
+  => sampleoutput2="5"
+  input1="1234"
+  => output1="10"
+  input2="999999999999999999"
+  => output2="162"
+  input3="1000000000000000000"
+  => output3="1"
+
+===== Q4: GCD by Euclid [easy/10] topic=Recursion and Backtracking Basics sub=Base Cases type=practice
+DESC: Euclid's algorithm is recursion at its cleanest: gcd(a, b) = gcd(b, a mod b) until b hits 0. The class Main and its main method are already provided. Write only the required static method:
+
+    static long gcd(long a, long b)
+
+It must return the greatest common divisor of a and b (both at least 1).
+
+Input Format:
+Line 1: a. Line 2: b.
+
+Output Format:
+One line with gcd(a, b).
+
+Constraints:
+1 <= a, b <= 1000000000000000000
+BL:  | WL: 
+  sampleinput1="12\n18"
+  => sampleoutput1="6"
+  sampleinput2="1000000000000000000\n999999999999999999"
+  => sampleoutput2="1"
+  input1="7\n7"
+  => output1="7"
+  input2="270\n192"
+  => output2="6"
+  input3="5\n1000000000"
+  => output3="5"
+
+===== Q5: Reverse a Word by Recursion [easy/10] topic=Recursion and Backtracking Basics sub=Call Stack type=practice
+DESC: Build the mirror of a word one character at a time: reverse everything after the first character, then append that character at the end. The class Main and its main method are already provided. Write only the required static method:
+
+    static String reverseWord(String s)
+
+It must return s reversed. A recursive solution is expected (substring plus first character works at these sizes).
+
+Input Format:
+One line with the word s (lowercase letters, no spaces).
+
+Output Format:
+One line with s reversed.
+
+Constraints:
+1 <= length(s) <= 300
+BL:  | WL: 
+  sampleinput1="abc"
+  => sampleoutput1="cba"
+  sampleinput2="a"
+  => sampleoutput2="a"
+  input1="recursion"
+  => output1="noisrucer"
+  input2="zzz"
+  => output2="zzz"
+  input3="atomcode"
+  => output3="edocmota"
+
+===== Q6: Sum One To N by Recursion [easy/10] topic=Recursion and Backtracking Basics sub=Call Stack type=practice
+DESC: The simplest call-stack drill: sum(n) = n + sum(n - 1) down to sum(1) = 1. The class Main and its main method are already provided. Write only the required static method:
+
+    static long sumToN(int n)
+
+It must return 1 + 2 + ... + n. Implement it recursively.
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with the sum.
+
+Constraints:
+1 <= n <= 5000
+BL:  | WL: 
+  sampleinput1="1"
+  => sampleoutput1="1"
+  sampleinput2="2"
+  => sampleoutput2="3"
+  input1="10"
+  => output1="55"
+  input2="100"
+  => output2="5050"
+  input3="5000"
+  => output3="12502500"
+
+===== Q7: Climbing Stairs Ways [easy/10] topic=Recursion and Backtracking Basics sub=Recursion Trees type=practice
+DESC: A stairmaster counts the ways to reach step n when each move climbs 1 or 2 steps — the count follows the Fibonacci recurrence. The class Main and its main method are already provided. Write only the required static method:
+
+    static long climbWays(int n)
+
+ways(0) = 1, ways(1) = 1 and ways(n) = ways(n-1) + ways(n-2). It must return the number of distinct move sequences.
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with the number of ways.
+
+Constraints:
+0 <= n <= 30
+BL:  | WL: 
+  sampleinput1="0"
+  => sampleoutput1="1"
+  sampleinput2="1"
+  => sampleoutput2="1"
+  input1="3"
+  => output1="3"
+  input2="7"
+  => output2="21"
+  input3="25"
+  => output3="121393"
+
+===== Q8: Palindrome Check by Recursion [easy/10] topic=Recursion and Backtracking Basics sub=Base Cases type=practice
+DESC: A spell checker validates words by comparing the outer letters and recursing inward until the pointers cross — the base case does the work. The class Main and its main method are already provided. Write only the required static method:
+
+    static int isPalindrome(String s)
+
+It must return 1 when s reads the same forwards and backwards, else 0. Implement the inward comparison recursively.
+
+Input Format:
+One line with the word s (lowercase letters).
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= length(s) <= 200
+BL:  | WL: 
+  sampleinput1="racecar"
+  => sampleoutput1="1"
+  sampleinput2="atom"
+  => sampleoutput2="0"
+  input1="aa"
+  => output1="1"
+  input2="ab"
+  => output2="0"
+  input3="rotator"
+  => output3="1"
+
+===== Q9: Triangular Cup Stack [easy/10] topic=Recursion and Backtracking Basics sub=Recursion Trees type=practice
+DESC: A cafe stacks cups in a triangle: row k holds k cups, so a full stack of n rows holds T(n) = n + T(n-1) cups with T(0) = 0. The class Main and its main method are already provided. Write only the required static method:
+
+    static long triangleCount(int n)
+
+It must return T(n) computed recursively.
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with T(n).
+
+Constraints:
+0 <= n <= 5000
+BL:  | WL: 
+  sampleinput1="0"
+  => sampleoutput1="0"
+  sampleinput2="1"
+  => sampleoutput2="1"
+  input1="3"
+  => output1="6"
+  input2="10"
+  => output2="55"
+  input3="5000"
+  => output3="12502500"
+
+===== Q10: Countdown Echo [easy/10] topic=Recursion and Backtracking Basics sub=Call Stack type=practice
+DESC: A launch console echoes the countdown recursively: print n, then echo the rest. The class Main and its main method are already provided. Write only the required static method:
+
+    static String countdownEcho(int n)
+
+It must return the numbers n, n-1, ..., 1 joined by single spaces, where echo(1) = "1" and echo(n) = n + " " + echo(n-1).
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with the countdown.
+
+Constraints:
+1 <= n <= 500
+BL:  | WL: 
+  sampleinput1="1"
+  => sampleoutput1="1"
+  sampleinput2="2"
+  => sampleoutput2="2 1"
+  input1="5"
+  => output1="5 4 3 2 1"
+  input2="12"
+  => output2="12 11 10 9 8 7 6 5 4 3 2 1"
+  input3="500"
+  => output3="500 499 498 497 496 495 494 493 492 491 490 489 488 487 486 485 484 483 482 481 480 479 478 477 476 475 474 473 472 471 470 469 468 467 466 465 464 463 462 461 460 459 458 457 456 455 454 453 452 451 450 449 448 447 446 445 444 443 442 441 440 439 438 437 436 435 434 433 432 431 430 429 428 427 426 425 424 423 422 421 420 419 418 417 416 415 414 413 412 411 410 409 408 407 406 405 404 403 402 401 400 399 398 397 396 395 394 393 392 391 390 389 388 387 386 385 384 383 382 381 380 379 378 377 376 375 374 373 372 371 370 369 368 367 366 365 364 363 362 361 360 359 358 357 356 355 354 353 352 351 350 349 348 347 346 345 344 343 342 341 340 339 338 337 336 335 334 333 332 331 330 329 328 327 326 325 324 323 322 321 320 319 318 317 316 315 314 313 312 311 310 309 308 307 306 305 304 303 302 301 300 299 298 297 296 295 294 293 292 291 290 289 288 287 286 285 284 283 282 281 280 279 278 277 276 275 274 273 272 271 270 269 268 267 266 265 264 263 262 261 260 259 258 257 256 255 254 253 252 251 250 249 248 247 246 245 244 243 242 241 240 239 238 237 236 235 234 233 232 231 230 229 228 227 226 225 224 223 222 221 220 219 218 217 216 215 214 213 212 211 210 209 208 207 206 205 204 203 202 201 200 199 198 197 196 195 194 193 192 191 190 189 188 187 186 185 184 183 182 181 180 179 178 177 176 175 174 173 172 171 170 169 168 167 166 165 164 163 162 161 160 159 158 157 156 155 154 153 152 151 150 149 148 147 146 145 144 143 142 141 140 139 138 137 136 135 134 133 132 131 130 129 128 127 126 125 124 123 122 121 120 119 118 117 116 115 114 113 112 111 110 109 108 107 106 105 104 103 102 101 100 99 98 97 96 95 94 93 92 91 90 89 88 87 86 85 84 83 82 81 80 79 78 77 76 75 74 73 72 71 70 69 68 67 66 65 64 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1"
+
+===== Q11: Fast Power Modulo [medium/20] topic=Recursion and Backtracking Basics sub=Recursion Trees type=practice
+DESC: Encryption needs b^e mod m where e can be astronomical — binary exponentiation halves the exponent at every recursive call and squares the base. The class Main and its main method are already provided. Write only the required static method:
+
+    static long fastPower(long b, long e, long m)
+
+It must return (b^e) mod m, with b^0 = 1. Implement it recursively WITHOUT loops — the recursion tree halves the exponent: fastPower(b, e, m) squares fastPower(b, e/2, m) and multiplies by b once more when e is odd, reducing mod m at every step.
+
+Input Format:
+Line 1: b. Line 2: e. Line 3: m.
+
+Output Format:
+One line with (b^e) mod m.
+
+Constraints:
+0 <= b <= 1000000000, 0 <= e <= 1000000000000000000, 1 <= m <= 2000000000
+BL: for,while,System.out.print | WL: return
+  sampleinput1="2\n10\n1000000007"
+  => sampleoutput1="1024"
+  sampleinput2="5\n0\n7"
+  => sampleoutput2="1"
+  input1="0\n5\n7"
+  => output1="0"
+  input2="10\n3\n1"
+  => output2="0"
+  input3="2\n62\n1000000007"
+  => output3="145586002"
+
+===== Q12: Count Subsets With Sum S [medium/20] topic=Recursion and Backtracking Basics sub=Subsets and Permutations type=practice
+DESC: A gift box can pack any subset of n items; the packer counts how many subsets weigh exactly S grams. The class Main and its main method are already provided. Write only the required static method:
+
+    static long subsetSumCount(int[] arr, int s)
+
+Each item is used at most once; the empty subset counts when s = 0. It must return the number of subsets summing to s — recurse include/exclude over the items.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: s.
+
+Output Format:
+One line with the subset count.
+
+Constraints:
+1 <= n <= 20, 1 <= arr[i] <= 1000, 0 <= s <= 20000
+BL: System.out.print | WL: return
+  sampleinput1="4\n1 2 3 4\n5"
+  => sampleoutput1="2"
+  sampleinput2="3\n1 1 1\n2"
+  => sampleoutput2="3"
+  input1="1\n10\n5"
+  => output1="0"
+  input2="5\n2 4 6 8 10\n12"
+  => output2="3"
+  input3="6\n1 2 3 4 5 6\n10"
+  => output3="5"
+
+===== Q13: Tower of Hanoi Moves [medium/20] topic=Recursion and Backtracking Basics sub=Recursion Trees type=practice
+DESC: Moving n disks between pegs takes a famously precise number of single-disk moves: move n-1 disks aside, step the biggest disk over, move n-1 disks back. The class Main and its main method are already provided. Write only the required static method:
+
+    static long hanoiMoves(int n)
+
+moves(1) = 1 and moves(n) = 2 * moves(n-1) + 1. It must return the number of moves for n disks (use long — n reaches 40).
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with the move count.
+
+Constraints:
+1 <= n <= 40
+BL: System.out.print | WL: return
+  sampleinput1="1"
+  => sampleoutput1="1"
+  sampleinput2="3"
+  => sampleoutput2="7"
+  input1="10"
+  => output1="1023"
+  input2="20"
+  => output2="1048575"
+  input3="40"
+  => output3="1099511627775"
+
+===== Q14: Distinct Permutations of a Word [medium/20] topic=Recursion and Backtracking Basics sub=Subsets and Permutations type=practice
+DESC: A badge printer lists every DISTINCT arrangement of a word's letters; repeated letters collapse duplicates, so the count is len! divided by the factorials of the letter multiplicities. The class Main and its main method are already provided. Write only the required static method:
+
+    static long permutationCount(String s)
+
+It must return the number of distinct permutations of the characters of s.
+
+Input Format:
+One line with the word s (lowercase letters).
+
+Output Format:
+One line with the number of distinct arrangements.
+
+Constraints:
+1 <= length(s) <= 20
+BL: System.out.print | WL: return
+  sampleinput1="abc"
+  => sampleoutput1="6"
+  sampleinput2="aab"
+  => sampleoutput2="3"
+  input1="zzzz"
+  => output1="1"
+  input2="banana"
+  => output2="60"
+  input3="aabbccddeeffgghhiijj"
+  => output3="2375880867360000"
+
+===== Q15: Josephus Survivor [medium/20] topic=Recursion and Backtracking Basics sub=Call Stack type=practice
+DESC: The elimination circle: n people numbered 1..n, counting starts at person 1 and every k-th person leaves; counting resumes around the circle until one survivor remains. The class Main and its main method are already provided. Write only the required static method:
+
+    static int josephusSurvivor(int n, int k)
+
+The recursive rank formula: survivor(1) = 1 and survivor(n) = ((survivor(n-1) + k - 1) mod n) + 1. It must return the survivor's number.
+
+Input Format:
+Line 1: n. Line 2: k.
+
+Output Format:
+One line with the survivor's number.
+
+Constraints:
+1 <= k <= n <= 500
+BL: System.out.print | WL: return
+  sampleinput1="5\n2"
+  => sampleoutput1="3"
+  sampleinput2="1\n1"
+  => sampleoutput2="1"
+  input1="7\n3"
+  => output1="4"
+  input2="10\n1"
+  => output2="10"
+  input3="6\n5"
+  => output3="1"
+
+===== Q16: Next Permutation [medium/20] topic=Recursion and Backtracking Basics sub=Subsets and Permutations type=practice
+DESC: A word generator produces the NEXT lexicographic arrangement: find the suffix that is already maximal, swap the pivot with the smallest larger letter on its right, then reverse the suffix. The class Main and its main method are already provided. Write only the required static method:
+
+    static String nextPermutation(String s)
+
+It must return the next lexicographic permutation of s's characters; when s is already the highest permutation, return the lowest one (its characters sorted ascending).
+
+Input Format:
+One line with the word s (lowercase letters).
+
+Output Format:
+One line with the next permutation.
+
+Constraints:
+1 <= length(s) <= 8
+BL: System.out.print | WL: return
+  sampleinput1="abc"
+  => sampleoutput1="acb"
+  sampleinput2="acb"
+  => sampleoutput2="bac"
+  input1="cba"
+  => output1="abc"
+  input2="aab"
+  => output2="aba"
+  input3="dcba"
+  => output3="abcd"
+
+===== Q17: Nth Lexicographic Permutation [hard/30] topic=Recursion and Backtracking Basics sub=Subsets and Permutations type=practice
+DESC: A combination lock lists all permutations of its distinct symbols in lexicographic order and must jump straight to the k-th one — factorial blocks decide each position: with r symbols remaining, every leading symbol owns (r-1)! complete blocks. The class Main and its main method are already provided. Write only the required static method:
+
+    static String kthPermutation(String s, int k)
+
+s has distinct lowercase letters; k is 1-based and never exceeds the number of permutations. It must return the k-th permutation in lexicographic order.
+
+Input Format:
+Line 1: the string s (distinct lowercase letters). Line 2: k.
+
+Output Format:
+One line with the k-th permutation.
+
+Constraints:
+1 <= length(s) <= 8, 1 <= k <= length(s)!
+BL: System.out.print | WL: return
+  sampleinput1="abc\n3"
+  => sampleoutput1="bac"
+  sampleinput2="a\n1"
+  => sampleoutput2="a"
+  input1="abcd\n12"
+  => output1="bdca"
+  input2="zyxw\n24"
+  => output2="zyxw"
+  input3="dog\n4"
+  => output3="god"
+
+===== Q18: Count Subsets With Sum S Large [hard/30] topic=Recursion and Backtracking Basics sub=Subsets and Permutations type=practice
+DESC: The gift packer is back with a bulk order: n up to 30 items with huge weights — brute force over 2^30 subsets is too slow. Split the array into two halves, enumerate every subset sum of each half, sort one half's sums, and for each sum of the other half binary-search how many complements hit S (meet in the middle). The class Main and its main method are already provided. Write only the required static method:
+
+    static long subsetSumCountBig(int[] arr, long s)
+
+It must return the number of subsets (each index used at most once, empty subset sums to 0) with sum exactly s.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: s.
+
+Output Format:
+One line with the subset count.
+
+Constraints:
+1 <= n <= 30, 1 <= arr[i] <= 1000000000, 0 <= s <= 30000000000
+BL: System.out.print | WL: return
+  sampleinput1="30\n1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1\n15"
+  => sampleoutput1="155117520"
+  sampleinput2="10\n1 2 4 8 16 32 64 128 256 512\n1023"
+  => sampleoutput2="1"
+  input1="5\n1000000000 1000000000 1000000000 1000000000 1000000000\n2000000000"
+  => output1="10"
+  input2="3\n1 2 3\n3"
+  => output2="2"
+  input3="20\n5 10 15 20 25 30 35 40 45 50 5 10 15 20 25 30 35 40 45 50\n60"
+  => output3="170"
+
+===== Q19: N-Queens Solution Count [hard/30] topic=Recursion and Backtracking Basics sub=Call Stack type=practice
+DESC: The classic backtracking drill: place n queens on an n x n board so none attack another — put one queen per row and recurse over columns, undoing placements that collide vertically or diagonally. The class Main and its main method are already provided. Write only the required static method:
+
+    static int nQueensCount(int n)
+
+It must return the number of distinct solutions.
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with the solution count.
+
+Constraints:
+1 <= n <= 8
+BL: System.out.print | WL: return
+  sampleinput1="1"
+  => sampleoutput1="1"
+  sampleinput2="4"
+  => sampleoutput2="2"
+  input1="6"
+  => output1="4"
+  input2="8"
+  => output2="92"
+  input3="3"
+  => output3="0"
+
+===== Q20: Balanced Parentheses in Order [hard/30] topic=Recursion and Backtracking Basics sub=Recursion Trees type=practice
+DESC: A syntax generator lists every balanced sequence of n bracket pairs in lexicographic order ('(' sorts before ')'): at each position try '(' while any unused pair remains, then ')' while it closes an open bracket — this backtracking order is already lexicographic. The class Main and its main method are already provided. Write only the required static method:
+
+    static String balancedSet(int n)
+
+It must return all 2n-character sequences in lexicographic order, separated by newline characters (no trailing newline needed).
+
+Input Format:
+One line with n.
+
+Output Format:
+The valid sequences, one per line, in lexicographic order.
+
+Constraints:
+1 <= n <= 7
+BL: System.out.print | WL: return
+  sampleinput1="1"
+  => sampleoutput1="()"
+  sampleinput2="2"
+  => sampleoutput2="(())\n()()"
+  input1="3"
+  => output1="((()))\n(()())\n(())()\n()(())\n()()()"
+  input2="5"
+  => output2="((((()))))\n(((()())))\n(((())()))\n(((()))())\n(((())))()\n((()(())))\n((()()()))\n((()())())\n((()()))()\n((())(()))\n((())()())\n((())())()\n((()))(())\n((()))()()\n(()((())))\n(()(()()))\n(()(())())\n(()(()))()\n(()()(()))\n(()()()())\n(()()())()\n(()())(())\n(()())()()\n(())((()))\n(())(()())\n(())(())()\n(())()(())\n(())()()()\n()(((())))\n()((()()))\n()((())())\n()((()))()\n()(()(()))\n()(()()())\n()(()())()\n()(())(())\n()(())()()\n()()((()))\n()()(()())\n()()(())()\n()()()(())\n()()()()()"
+  input3="7"
+  => output3="((((((()))))))\n(((((()())))))\n(((((())()))))\n(((((()))())))\n(((((())))()))\n(((((()))))())\n(((((())))))()\n((((()(())))))\n((((()()()))))\n((((()())())))\n((((()()))()))\n((((()())))())\n((((()()))))()\n((((())(()))))\n((((())()())))\n((((())())()))\n((((())()))())\n((((())())))()\n((((()))(())))\n((((()))()()))\n((((()))())())\n((((()))()))()\n((((())))(()))\n((((())))()())\n((((())))())()\n((((()))))(())\n((((()))))()()\n(((()((())))))\n(((()(()()))))\n(((()(())())))\n(((()(()))()))\n(((()(())))())\n(((()(()))))()\n(((()()(()))))\n(((()()()())))\n(((()()())()))\n(((()()()))())\n(((()()())))()\n(((()())(())))\n(((()())()()))\n(((()())())())\n(((()())()))()\n(((()()))(()))\n(((()()))()())\n(((()()))())()\n(((()())))(())\n(((()())))()()\n(((())((()))))\n(((())(()())))\n(((())(())()))\n(((())(()))())\n(((())(())))()\n(((())()(())))\n(((())()()()))\n(((())()())())\n(((())()()))()\n(((())())(()))\n(((())())()())\n(((())())())()\n(((())()))(())\n(((())()))()()\n(((()))((())))\n(((()))(()()))\n(((()))(())())\n(((()))(()))()\n(((()))()(()))\n(((()))()()())\n(((()))()())()\n(((()))())(())\n(((()))())()()\n(((())))((()))\n(((())))(()())\n(((())))(())()\n(((())))()(())\n(((())))()()()\n((()(((())))))\n((()((()()))))\n((()((())())))\n((()((()))()))\n((()((())))())\n((()((()))))()\n((()(()(()))))\n((()(()()())))\n((()(()())()))\n((()(()()))())\n((()(()())))()\n((()(())(())))\n((()(())()()))\n((()(())())())\n((()(())()))()\n((()(()))(()))\n((()(()))()())\n((()(()))())()\n((()(())))(())\n((()(())))()()\n((()()((()))))\n((()()(()())))\n((()()(())()))\n((()()(()))())\n((()()(())))()\n((()()()(())))\n((()()()()()))\n((()()()())())\n((()()()()))()\n((()()())(()))\n((()()())()())\n((()()())())()\n((()()()))(())\n((()()()))()()\n((()())((())))\n((()())(()()))\n((()())(())())\n((()())(()))()\n((()())()(()))\n((()())()()())\n((()())()())()\n((()())())(())\n((()())())()()\n((()()))((()))\n((()()))(()())\n((()()))(())()\n((()()))()(())\n((()()))()()()\n((())(((()))))\n((())((()())))\n((())((())()))\n((())((()))())\n((())((())))()\n((())(()(())))\n((())(()()()))\n((())(()())())\n((())(()()))()\n((())(())(()))\n((())(())()())\n((())(())())()\n((())(()))(())\n((())(()))()()\n((())()((())))\n((())()(()()))\n((())()(())())\n((())()(()))()\n((())()()(()))\n((())()()()())\n((())()()())()\n((())()())(())\n((())()())()()\n((())())((()))\n((())())(()())\n((())())(())()\n((())())()(())\n((())())()()()\n((()))(((())))\n((()))((()()))\n((()))((())())\n((()))((()))()\n((()))(()(()))\n((()))(()()())\n((()))(()())()\n((()))(())(())\n((()))(())()()\n((()))()((()))\n((()))()(()())\n((()))()(())()\n((()))()()(())\n((()))()()()()\n(()((((())))))\n(()(((()()))))\n(()(((())())))\n(()(((()))()))\n(()(((())))())\n(()(((()))))()\n(()((()(()))))\n(()((()()())))\n(()((()())()))\n(()((()()))())\n(()((()())))()\n(()((())(())))\n(()((())()()))\n(()((())())())\n(()((())()))()\n(()((()))(()))\n(()((()))()())\n(()((()))())()\n(()((())))(())\n(()((())))()()\n(()(()((()))))\n(()(()(()())))\n(()(()(())()))\n(()(()(()))())\n(()(()(())))()\n(()(()()(())))\n(()(()()()()))\n(()(()()())())\n(()(()()()))()\n(()(()())(()))\n(()(()())()())\n(()(()())())()\n(()(()()))(())\n(()(()()))()()\n(()(())((())))\n(()(())(()()))\n(()(())(())())\n(()(())(()))()\n(()(())()(()))\n(()(())()()())\n(()(())()())()\n(()(())())(())\n(()(())())()()\n(()(()))((()))\n(()(()))(()())\n(()(()))(())()\n(()(()))()(())\n(()(()))()()()\n(()()(((()))))\n(()()((()())))\n(()()((())()))\n(()()((()))())\n(()()((())))()\n(()()(()(())))\n(()()(()()()))\n(()()(()())())\n(()()(()()))()\n(()()(())(()))\n(()()(())()())\n(()()(())())()\n(()()(()))(())\n(()()(()))()()\n(()()()((())))\n(()()()(()()))\n(()()()(())())\n(()()()(()))()\n(()()()()(()))\n(()()()()()())\n(()()()()())()\n(()()()())(())\n(()()()())()()\n(()()())((()))\n(()()())(()())\n(()()())(())()\n(()()())()(())\n(()()())()()()\n(()())(((())))\n(()())((()()))\n(()())((())())\n(()())((()))()\n(()())(()(()))\n(()())(()()())\n(()())(()())()\n(()())(())(())\n(()())(())()()\n(()())()((()))\n(()())()(()())\n(()())()(())()\n(()())()()(())\n(()())()()()()\n(())((((()))))\n(())(((()())))\n(())(((())()))\n(())(((()))())\n(())(((())))()\n(())((()(())))\n(())((()()()))\n(())((()())())\n(())((()()))()\n(())((())(()))\n(())((())()())\n(())((())())()\n(())((()))(())\n(())((()))()()\n(())(()((())))\n(())(()(()()))\n(())(()(())())\n(())(()(()))()\n(())(()()(()))\n(())(()()()())\n(())(()()())()\n(())(()())(())\n(())(()())()()\n(())(())((()))\n(())(())(()())\n(())(())(())()\n(())(())()(())\n(())(())()()()\n(())()(((())))\n(())()((()()))\n(())()((())())\n(())()((()))()\n(())()(()(()))\n(())()(()()())\n(())()(()())()\n(())()(())(())\n(())()(())()()\n(())()()((()))\n(())()()(()())\n(())()()(())()\n(())()()()(())\n(())()()()()()\n()(((((())))))\n()((((()()))))\n()((((())())))\n()((((()))()))\n()((((())))())\n()((((()))))()\n()(((()(()))))\n()(((()()())))\n()(((()())()))\n()(((()()))())\n()(((()())))()\n()(((())(())))\n()(((())()()))\n()(((())())())\n()(((())()))()\n()(((()))(()))\n()(((()))()())\n()(((()))())()\n()(((())))(())\n()(((())))()()\n()((()((()))))\n()((()(()())))\n()((()(())()))\n()((()(()))())\n()((()(())))()\n()((()()(())))\n()((()()()()))\n()((()()())())\n()((()()()))()\n()((()())(()))\n()((()())()())\n()((()())())()\n()((()()))(())\n()((()()))()()\n()((())((())))\n()((())(()()))\n()((())(())())\n()((())(()))()\n()((())()(()))\n()((())()()())\n()((())()())()\n()((())())(())\n()((())())()()\n()((()))((()))\n()((()))(()())\n()((()))(())()\n()((()))()(())\n()((()))()()()\n()(()(((()))))\n()(()((()())))\n()(()((())()))\n()(()((()))())\n()(()((())))()\n()(()(()(())))\n()(()(()()()))\n()(()(()())())\n()(()(()()))()\n()(()(())(()))\n()(()(())()())\n()(()(())())()\n()(()(()))(())\n()(()(()))()()\n()(()()((())))\n()(()()(()()))\n()(()()(())())\n()(()()(()))()\n()(()()()(()))\n()(()()()()())\n()(()()()())()\n()(()()())(())\n()(()()())()()\n()(()())((()))\n()(()())(()())\n()(()())(())()\n()(()())()(())\n()(()())()()()\n()(())(((())))\n()(())((()()))\n()(())((())())\n()(())((()))()\n()(())(()(()))\n()(())(()()())\n()(())(()())()\n()(())(())(())\n()(())(())()()\n()(())()((()))\n()(())()(()())\n()(())()(())()\n()(())()()(())\n()(())()()()()\n()()((((()))))\n()()(((()())))\n()()(((())()))\n()()(((()))())\n()()(((())))()\n()()((()(())))\n()()((()()()))\n()()((()())())\n()()((()()))()\n()()((())(()))\n()()((())()())\n()()((())())()\n()()((()))(())\n()()((()))()()\n()()(()((())))\n()()(()(()()))\n()()(()(())())\n()()(()(()))()\n()()(()()(()))\n()()(()()()())\n()()(()()())()\n()()(()())(())\n()()(()())()()\n()()(())((()))\n()()(())(()())\n()()(())(())()\n()()(())()(())\n()()(())()()()\n()()()(((())))\n()()()((()()))\n()()()((())())\n()()()((()))()\n()()()(()(()))\n()()()(()()())\n()()()(()())()\n()()()(())(())\n()()()(())()()\n()()()()((()))\n()()()()(()())\n()()()()(())()\n()()()()()(())\n()()()()()()()"

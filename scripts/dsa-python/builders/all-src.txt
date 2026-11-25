@@ -1,0 +1,1163 @@
+### day11[0] Top of the Stack
+def stack_top(values):
+    stack = []
+    for v in values:
+        stack.append(v)
+    return stack[-1]
+
+
+### day11[1] Pop Two from the Stack
+def pop_two(values):
+    stack = []
+    for v in values:
+        stack.append(v)
+    first = stack.pop()
+    second = stack.pop()
+    return first, second
+
+
+### day11[2] Balanced Round Brackets
+def is_balanced(s):
+    stack = []
+    for ch in s:
+        if ch == '(':
+            stack.append(ch)
+        elif ch == ')':
+            if not stack:
+                return False
+            stack.pop()
+    return not stack
+
+
+### day11[3] Reverse a Word with a Stack
+def reverse_word(s):
+    stack = []
+    for ch in s:
+        stack.append(ch)
+    out = []
+    while stack:
+        out.append(stack.pop())
+    return "".join(out)
+
+
+### day11[4] Next Greater Element
+def next_greater(nums):
+    res = []
+    for i in range(len(nums)):
+        res.append(-1)
+        for j in range(i + 1, len(nums)):
+            if nums[j] > nums[i]:
+                res[i] = nums[j]
+                break
+    return res
+
+
+### day11[5] Second From the Top
+def second_from_top(values):
+    stack = []
+    for v in values:
+        stack.append(v)
+    top = stack.pop()
+    second = stack[-1]
+    stack.append(top)
+    return second
+
+
+### day11[6] Browser Back Button
+def page_after_backs(history, k):
+    stack = []
+    for page in history:
+        stack.append(page)
+    for _ in range(k):
+        stack.pop()
+    return stack[-1]
+
+
+### day11[7] Undo Typing
+def final_text(s):
+    stack = []
+    for ch in s:
+        if ch == '<':
+            if stack:
+                stack.pop()
+        else:
+            stack.append(ch)
+    return "".join(stack)
+
+
+### day11[8] Bracket Nesting Depth
+def max_depth(s):
+    stack = []
+    best = 0
+    for ch in s:
+        if ch == '(':
+            stack.append(ch)
+            if len(stack) > best:
+                best = len(stack)
+        elif ch == ')':
+            stack.pop()
+    return best
+
+
+### day11[9] Bounded Exam-Paper Stack
+def pushed_values(values, cap):
+    stack = []
+    for v in values:
+        if len(stack) < cap:
+            stack.append(v)
+    return stack
+
+
+### day11[10] Trading Min-Stack Log
+def min_stack_ops(ops):
+    stack = []
+    mins = []
+    res = []
+    for op in ops:
+        parts = op.split()
+        if parts[0] == "push":
+            x = int(parts[1])
+            stack.append(x)
+            if mins and x > mins[-1]:
+                mins.append(mins[-1])
+            else:
+                mins.append(x)
+        elif parts[0] == "pop":
+            stack.pop()
+            mins.pop()
+        else:
+            res.append(mins[-1])
+    return res
+
+
+### day11[11] Config Bracket Validator
+def is_balanced(s):
+    stack = []
+    pairs = {')': '(', ']': '[', '}': '{'}
+    for ch in s:
+        if ch in '([{':
+            stack.append(ch)
+        elif ch in pairs:
+            if not stack or stack.pop() != pairs[ch]:
+                return False
+    return not stack
+
+
+### day11[12] Robot Crate Pickup Order
+def valid_order(pushes, pops):
+    stack = []
+    i = 0
+    for x in pushes:
+        stack.append(x)
+        while stack and stack[-1] == pops[i]:
+            stack.pop()
+            i += 1
+    return i == len(pops)
+
+
+### day11[13] Sticky Key Text Cleaner
+def clean_text(s):
+    stack = []
+    for ch in s:
+        if stack and stack[-1] == ch:
+            stack.pop()
+        else:
+            stack.append(ch)
+    return "".join(stack)
+
+
+### day11[14] Decode the Message Pattern
+def decode(s):
+    stack = []
+    cur = []
+    num = 0
+    for ch in s:
+        if ch.isdigit():
+            num = num * 10 + int(ch)
+        elif ch == '[':
+            stack.append((cur, num))
+            cur = []
+            num = 0
+        elif ch == ']':
+            prev, k = stack.pop()
+            prev.extend(cur * k)
+            cur = prev
+        else:
+            cur.append(ch)
+    return "".join(cur)
+
+
+### day11[15] When Is It Warmer?
+def warmer_days(temps):
+    n = len(temps)
+    res = [0] * n
+    stack = []
+    for i in range(n):
+        while stack and temps[stack[-1]] < temps[i]:
+            j = stack.pop()
+            res[j] = i - j
+        stack.append(i)
+    return res
+
+
+### day11[16] Reverse Polish Calculator
+def eval_postfix(tokens):
+    stack = []
+    for tok in tokens:
+        if tok in ('+', '-', '*', '/'):
+            b = stack.pop()
+            a = stack.pop()
+            if tok == '+':
+                stack.append(a + b)
+            elif tok == '-':
+                stack.append(a - b)
+            elif tok == '*':
+                stack.append(a * b)
+            else:
+                stack.append(int(a / b))
+        else:
+            stack.append(int(tok))
+    return stack[0]
+
+
+### day11[17] Stock Price Span Report
+def stock_spans(prices):
+    n = len(prices)
+    spans = [0] * n
+    stack = []
+    for i in range(n):
+        while stack and prices[stack[-1]] <= prices[i]:
+            stack.pop()
+        spans[i] = i + 1 if not stack else i - stack[-1]
+        stack.append(i)
+    return spans
+
+
+### day11[18] Largest Billboard in the Skyline
+def max_area(heights):
+    stack = [-1]
+    best = 0
+    for i in range(len(heights) + 1):
+        h = heights[i] if i < len(heights) else 0
+        while stack[-1] != -1 and heights[stack[-1]] >= h:
+            hh = heights[stack.pop()]
+            w = i - stack[-1] - 1
+            if hh * w > best:
+                best = hh * w
+        stack.append(i)
+    return best
+
+
+### day11[19] Longest Valid Bracket Run
+def longest_valid(s):
+    stack = [-1]
+    best = 0
+    for i, ch in enumerate(s):
+        if ch == '(':
+            stack.append(i)
+        else:
+            stack.pop()
+            if not stack:
+                stack.append(i)
+            elif i - stack[-1] > best:
+                best = i - stack[-1]
+    return best
+
+
+### day12[0] Serve in FIFO Order
+def serve_order(values):
+    q = deque(values)
+    out = []
+    while q:
+        out.append(q.popleft())
+    return out
+
+
+### day12[1] Deque From Both Ends
+def pop_ends(values):
+    dq = deque(values)
+    left = dq.popleft()
+    right = dq.pop()
+    return left, right
+
+
+### day12[2] Rotate the Deque Right
+def rotated(values, k):
+    dq = deque(values)
+    dq.rotate(k)
+    return list(dq)
+
+
+### day12[3] Front After k Serves
+def front_after_serves(values, k):
+    q = deque(values)
+    for _ in range(k):
+        q.popleft()
+    return q[0], len(q)
+
+
+### day12[4] Reverse a Queue with a Deque
+def reversed_queue(values):
+    dq = deque()
+    for v in values:
+        dq.appendleft(v)
+    return list(dq)
+
+
+### day12[5] Deque Symmetry Check
+def symmetric(values):
+    dq = deque(values)
+    while len(dq) > 1:
+        if dq.popleft() != dq.pop():
+            return False
+    return True
+
+
+### day12[6] Printer Job Lanes
+def print_order(jobs):
+    urgent = deque()
+    normal = deque()
+    for job in jobs:
+        name, prio = job.split()
+        if prio == "1":
+            urgent.append(name)
+        else:
+            normal.append(name)
+    out = []
+    while urgent:
+        out.append(urgent.popleft())
+    while normal:
+        out.append(normal.popleft())
+    return out
+
+
+### day12[7] Hot Potato Survivor
+def survivor(names, p):
+    q = deque(names)
+    while len(q) > 1:
+        for _ in range(p - 1):
+            q.append(q.popleft())
+        q.popleft()
+    return q[0]
+
+
+### day12[8] Toll Booth Express Lane
+def diverted(cars, k):
+    q = deque(cars)
+    i = 0
+    out = []
+    while q:
+        car = q.popleft()
+        i += 1
+        if i % k == 0:
+            out.append(car)
+    return out
+
+
+### day12[9] Sensor Window Averages
+def window_averages(nums, k):
+    res = []
+    for i in range(len(nums) - k + 1):
+        res.append(sum(nums[i:i + k]) / k)
+    return res
+
+
+### day12[10] Circular Queue Ticket Desk
+def circular_queue_ops(cap, ops):
+    buf = [None] * cap
+    head = 0
+    count = 0
+    res = []
+    for op in ops:
+        parts = op.split()
+        if parts[0] == "enq":
+            if count < cap:
+                buf[(head + count) % cap] = int(parts[1])
+                count += 1
+        elif parts[0] == "deq":
+            if count == 0:
+                res.append("EMPTY")
+            else:
+                res.append(buf[head])
+                head = (head + 1) % cap
+                count -= 1
+        else:
+            res.append("EMPTY" if count == 0 else buf[head])
+    return res
+
+
+### day12[11] Numbers Made of 5s and 6s
+def fives_sixes(n):
+    res = []
+    q = deque()
+    for seed in (5, 6):
+        if seed <= n:
+            q.append(seed)
+    while q:
+        x = q.popleft()
+        res.append(x)
+        for d in (5, 6):
+            y = x * 10 + d
+            if y <= n:
+                q.append(y)
+    return res
+
+
+### day12[12] First Negative in Every Window
+def first_negatives(nums, k):
+    dq = deque()
+    res = []
+    for i, x in enumerate(nums):
+        if x < 0:
+            dq.append(i)
+        if i >= k and dq and dq[0] <= i - k:
+            dq.popleft()
+        if i >= k - 1:
+            res.append(nums[dq[0]] if dq else 0)
+    return res
+
+
+### day12[13] Round Robin Job Finish Order
+def completion_order(bursts, quantum):
+    q = deque(range(len(bursts)))
+    left = list(bursts)
+    done = []
+    while q:
+        i = q.popleft()
+        step = left[i] if left[i] < quantum else quantum
+        left[i] -= step
+        if left[i] == 0:
+            done.append(i)
+        else:
+            q.append(i)
+    return done
+
+
+### day12[14] Petrol Pump Circuit Start
+def start_station(petrol, dist):
+    total = 0
+    curr = 0
+    start = 0
+    for i in range(len(petrol)):
+        d = petrol[i] - dist[i]
+        total += d
+        curr += d
+        if curr < 0:
+            start = i + 1
+            curr = 0
+    return start if total >= 0 else -1
+
+
+### day12[15] Interleave the Two Halves
+def interleaved(values):
+    first = deque(values[: len(values) // 2])
+    second = deque(values[len(values) // 2 :])
+    out = []
+    while first:
+        out.append(first.popleft())
+        out.append(second.popleft())
+    return out
+
+
+### day12[16] Trading Window Maximum
+def window_maxes(nums, k):
+    dq = deque()
+    res = []
+    for i, x in enumerate(nums):
+        while dq and nums[dq[-1]] <= x:
+            dq.pop()
+        dq.append(i)
+        if dq[0] <= i - k:
+            dq.popleft()
+        if i >= k - 1:
+            res.append(nums[dq[0]])
+    return res
+
+
+### day12[17] Live Chat First Unique Letter
+def stream_chars(s):
+    count = {}
+    q = deque()
+    res = []
+    for ch in s:
+        count[ch] = count.get(ch, 0) + 1
+        q.append(ch)
+        while q and count[q[0]] > 1:
+            q.popleft()
+        res.append(q[0] if q else "-")
+    return res
+
+
+### day12[18] Cooling Window Minimum
+def window_mins(nums, k):
+    dq = deque()
+    res = []
+    for i, x in enumerate(nums):
+        while dq and nums[dq[-1]] >= x:
+            dq.pop()
+        dq.append(i)
+        if dq[0] <= i - k:
+            dq.popleft()
+        if i >= k - 1:
+            res.append(nums[dq[0]])
+    return res
+
+
+### day12[19] Shortest Surge at Least K
+def shortest_subarray(nums, target):
+    n = len(nums)
+    prefix = [0]
+    for x in nums:
+        prefix.append(prefix[-1] + x)
+    dq = deque()
+    best = n + 1
+    for j in range(n + 1):
+        while dq and prefix[j] - prefix[dq[0]] >= target:
+            if j - dq[0] < best:
+                best = j - dq[0]
+            dq.popleft()
+        while dq and prefix[dq[-1]] >= prefix[j]:
+            dq.pop()
+        dq.append(j)
+    return best if best <= n else -1
+
+
+### day13[0] Target Frequency Count
+def count_target(nums, target):
+    freq = {}
+    for x in nums:
+        freq[x] = freq.get(x, 0) + 1
+    return freq.get(target, 0)
+
+
+### day13[1] Set Union Size
+def union_size(a, b):
+    return len(set(a) | set(b))
+
+
+### day13[2] Set Intersection Size
+def intersection_size(a, b):
+    return len(set(a) & set(b))
+
+
+### day13[3] Symmetric Difference Size
+def symdiff_size(a, b):
+    return len(set(a) ^ set(b))
+
+
+### day13[4] First Duplicate Value
+def first_duplicate(nums):
+    seen = set()
+    for x in nums:
+        if x in seen:
+            return x
+        seen.add(x)
+    return -1
+
+
+### day13[5] All Values Unique
+def all_unique(nums):
+    return len(set(nums)) == len(nums)
+
+
+### day13[6] Attendance Distinct Count
+def distinct_names(names):
+    seen = set()
+    for name in names:
+        seen.add(name)
+    return len(seen)
+
+
+### day13[7] Common Grocery Items
+def common_items(a, b):
+    shared = set(a) & set(b)
+    return sorted(shared)
+
+
+### day13[8] Character Frequency Report
+def char_counts(s):
+    counts = {}
+    for ch in s:
+        counts[ch] = counts.get(ch, 0) + 1
+    return counts
+
+
+### day13[9] Top Review Word
+def top_word(words):
+    freq = {}
+    for w in words:
+        freq[w] = freq.get(w, 0) + 1
+    best = None
+    for w in sorted(freq):
+        if best is None or freq[w] > freq[best]:
+            best = w
+    return best
+
+
+### day13[10] Pairs Adding to a Bill
+def count_pairs(nums, target):
+    freq = {}
+    pairs = 0
+    for x in nums:
+        pairs += freq.get(target - x, 0)
+        freq[x] = freq.get(x, 0) + 1
+    return pairs
+
+
+### day13[11] Key-Value Store Terminal
+def dict_ops(ops):
+    store = {}
+    res = []
+    for op in ops:
+        parts = op.split()
+        cmd = parts[0]
+        if cmd == "put":
+            store[int(parts[1])] = int(parts[2])
+        elif cmd == "get":
+            res.append(store.get(int(parts[1]), -1))
+        elif cmd == "del":
+            store.pop(int(parts[1]), None)
+        else:
+            res.append(len(store))
+    return res
+
+
+### day13[12] Badge Clash Alert
+def nearby_duplicate(nums, k):
+    last = {}
+    for i, x in enumerate(nums):
+        if x in last and i - last[x] <= k:
+            return True
+        last[x] = i
+    return False
+
+
+### day13[13] Ransom Note from Magazine
+def can_build(note, magazine):
+    need = {}
+    for ch in note:
+        need[ch] = need.get(ch, 0) + 1
+    have = {}
+    for ch in magazine:
+        have[ch] = have.get(ch, 0) + 1
+    for ch in need:
+        if have.get(ch, 0) < need[ch]:
+            return False
+    return True
+
+
+### day13[14] Top k Trending Topics
+def top_frequent(nums, k):
+    freq = {}
+    for x in nums:
+        freq[x] = freq.get(x, 0) + 1
+    ordered = sorted(freq.keys(), key=lambda x: (-freq[x], x))
+    return ordered[:k]
+
+
+### day13[15] Rolling Distinct Client Count
+def window_distincts(nums, k):
+    freq = {}
+    res = []
+    for i, x in enumerate(nums):
+        freq[x] = freq.get(x, 0) + 1
+        if i >= k:
+            y = nums[i - k]
+            freq[y] -= 1
+            if freq[y] == 0:
+                del freq[y]
+        if i >= k - 1:
+            res.append(len(freq))
+    return res
+
+
+### day13[16] Two-Sum Checkout Indices
+def two_sum(nums, target):
+    seen = {}
+    for j, x in enumerate(nums):
+        if target - x in seen:
+            return [seen[target - x], j]
+        if x not in seen:
+            seen[x] = j
+    return [-1, -1]
+
+
+### day13[17] Count the Anagram Groups
+def anagram_groups(words):
+    groups = {}
+    for w in words:
+        key = "".join(sorted(w))
+        groups[key] = groups.get(key, 0) + 1
+    return sorted(groups.values(), reverse=True)
+
+
+### day13[18] Longest Unique-Client Call Window
+def longest_unique(s):
+    last = {}
+    start = 0
+    best = 0
+    for i, ch in enumerate(s):
+        if ch in last and last[ch] >= start:
+            start = last[ch] + 1
+        last[ch] = i
+        if i - start + 1 > best:
+            best = i - start + 1
+    return best
+
+
+### day13[19] Subarray Totals Equal to K
+def count_subarrays(nums, k):
+    freq = {0: 1}
+    total = 0
+    ans = 0
+    for x in nums:
+        total += x
+        ans += freq.get(total - k, 0)
+        freq[total] = freq.get(total, 0) + 1
+    return ans
+
+
+### day14[0] Diameter of the Tree
+def height(root):
+    if root is None:
+        return 0
+    return 1 + max(height(root.left), height(root.right))
+
+def diameter(root):
+    if root is None:
+        return 0
+    through_root = height(root.left) + height(root.right) + 1
+    return max(through_root, diameter(root.left), diameter(root.right))
+
+
+### day14[1] Preorder Fill
+def preorder(root, out):
+    if root is None:
+        return
+    out.append(root.val)
+    preorder(root.left, out)
+    preorder(root.right, out)
+
+
+### day14[2] Inorder Fill
+def inorder(root, out):
+    if root is None:
+        return
+    inorder(root.left, out)
+    out.append(root.val)
+    inorder(root.right, out)
+
+
+### day14[3] Postorder Fill
+def postorder(root, out):
+    if root is None:
+        return
+    postorder(root.left, out)
+    postorder(root.right, out)
+    out.append(root.val)
+
+
+### day14[4] Height of the Tree
+def height(root):
+    if root is None:
+        return 0
+    lh = height(root.left)
+    rh = height(root.right)
+    if lh > rh:
+        return lh + 1
+    return rh + 1
+
+
+### day14[5] Count the Nodes
+def count_nodes(root):
+    if root is None:
+        return 0
+    return 1 + count_nodes(root.left) + count_nodes(root.right)
+
+
+### day14[6] Count the Leaves
+def count_leaves(root):
+    if root is None:
+        return 0
+    if root.left is None and root.right is None:
+        return 1
+    return count_leaves(root.left) + count_leaves(root.right)
+
+
+### day14[7] Crate Unload Order
+def preorder(root, out):
+    if root is None:
+        return
+    out.append(root.val)
+    preorder(root.left, out)
+    preorder(root.right, out)
+
+
+### day14[8] Sorted Shelf Scan
+def inorder(root, out):
+    if root is None:
+        return
+    inorder(root.left, out)
+    out.append(root.val)
+    inorder(root.right, out)
+
+
+### day14[9] Reporting Lines Depth
+def height(root):
+    if root is None:
+        return 0
+    lh = height(root.left)
+    rh = height(root.right)
+    if lh > rh:
+        return lh + 1
+    return rh + 1
+
+
+### day14[10] Terminal Depot Count
+def count_leaves(root):
+    if root is None:
+        return 0
+    if root.left is None and root.right is None:
+        return 1
+    return count_leaves(root.left) + count_leaves(root.right)
+
+
+### day14[11] Sum of Left Leaves
+def left_leaf_sum(root):
+    if root is None:
+        return 0
+    total = 0
+    if root.left is not None and root.left.left is None and root.left.right is None:
+        total += root.left.val
+    total += left_leaf_sum(root.left) + left_leaf_sum(root.right)
+    return total
+
+
+### day14[12] Single-Child Junctions
+def count_single_child(root):
+    if root is None:
+        return 0
+    count = 0
+    has_left = root.left is not None
+    has_right = root.right is not None
+    if has_left != has_right:
+        count += 1
+    return count + count_single_child(root.left) + count_single_child(root.right)
+
+
+### day14[13] Peak Cargo Value
+def peak_load(root):
+    best = root.val
+    if root.left is not None:
+        l = peak_load(root.left)
+        if l > best:
+            best = l
+    if root.right is not None:
+        r = peak_load(root.right)
+        if r > best:
+            best = r
+    return best
+
+
+### day14[14] Depth of a Target Crate
+def depth_of(root, x):
+    if root is None:
+        return -1
+    if root.val == x:
+        return 0
+    left = depth_of(root.left, x)
+    if left != -1:
+        return left + 1
+    right = depth_of(root.right, x)
+    if right != -1:
+        return right + 1
+    return -1
+
+
+### day14[15] Loads Above the Threshold
+def count_at_least(root, x):
+    if root is None:
+        return 0
+    count = 1 if root.val >= x else 0
+    return count + count_at_least(root.left, x) + count_at_least(root.right, x)
+
+
+### day14[16] Branch Subtotal
+def find_node(root, x):
+    if root is None:
+        return None
+    if root.val == x:
+        return root
+    found = find_node(root.left, x)
+    if found is not None:
+        return found
+    return find_node(root.right, x)
+
+def collect(root):
+    if root is None:
+        return 0
+    return root.val + collect(root.left) + collect(root.right)
+
+def subtree_sum(root, x):
+    node = find_node(root, x)
+    if node is None:
+        return 0
+    return collect(node)
+
+
+### day14[17] Level Order Fill
+def level_order(root, out):
+    if root is None:
+        return
+    queue = [root]
+    while queue:
+        node = queue.pop(0)
+        out.append(node.val)
+        if node.left is not None:
+            queue.append(node.left)
+        if node.right is not None:
+            queue.append(node.right)
+
+
+### day14[18] Twin Trees Check
+def is_identical(a, b):
+    if a is None and b is None:
+        return True
+    if a is None or b is None:
+        return False
+    if a.val != b.val:
+        return False
+    return is_identical(a.left, b.left) and is_identical(a.right, b.right)
+
+
+### day14[19] Mirror Images
+def is_mirror(a, b):
+    if a is None and b is None:
+        return True
+    if a is None or b is None:
+        return False
+    if a.val != b.val:
+        return False
+    return is_mirror(a.left, b.right) and is_mirror(a.right, b.left)
+
+
+### day15[0] BST Insert
+def bst_insert(root, x):
+    if root is None:
+        return TNode(x)
+    if x < root.val:
+        root.left = bst_insert(root.left, x)
+    elif x > root.val:
+        root.right = bst_insert(root.right, x)
+    return root
+
+
+### day15[1] BST Search
+def bst_search(root, x):
+    node = root
+    while node is not None:
+        if x == node.val:
+            return True
+        if x < node.val:
+            node = node.left
+        else:
+            node = node.right
+    return False
+
+
+### day15[2] Smallest Code in the BST
+def bst_min(root):
+    node = root
+    while node.left is not None:
+        node = node.left
+    return node.val
+
+
+### day15[3] Largest Code in the BST
+def bst_max(root):
+    node = root
+    while node.right is not None:
+        node = node.right
+    return node.val
+
+
+### day15[4] Sum of BST Codes
+def bst_sum(root):
+    if root is None:
+        return 0
+    return root.val + bst_sum(root.left) + bst_sum(root.right)
+
+
+### day15[5] Heap Slot Arithmetic
+def heap_indices(i):
+    return [2 * i + 1, 2 * i + 2]
+
+
+### day15[6] Register the New Asset Code
+def bst_insert(root, x):
+    if root is None:
+        return TNode(x)
+    if x < root.val:
+        root.left = bst_insert(root.left, x)
+    elif x > root.val:
+        root.right = bst_insert(root.right, x)
+    return root
+
+
+### day15[7] Pin the Faulty Sensor
+def bst_search(root, x):
+    node = root
+    while node is not None:
+        if x == node.val:
+            return True
+        if x < node.val:
+            node = node.left
+        else:
+            node = node.right
+    return False
+
+
+### day15[8] Coldest Sensor Reading
+def bst_min(root):
+    node = root
+    while node.left is not None:
+        node = node.left
+    return node.val
+
+
+### day15[9] Highest Bid So Far
+def bst_max(root):
+    node = root
+    while node.right is not None:
+        node = node.right
+    return node.val
+
+
+### day15[10] Kth Smallest Ticket
+def kth_smallest(root, k):
+    stack = []
+    node = root
+    while stack or node is not None:
+        while node is not None:
+            stack.append(node)
+            node = node.left
+        node = stack.pop()
+        k -= 1
+        if k == 0:
+            return node.val
+        node = node.right
+    return -1
+
+
+### day15[11] Heapify the Waiting Room
+def to_min_heap(nums):
+    heap = list(nums)
+    heapq.heapify(heap)
+    return heap
+
+
+### day15[12] Priority Desk Operations
+def process_ops(ops):
+    heap = []
+    popped = []
+    for op, x in ops:
+        if op == "push":
+            heapq.heappush(heap, x)
+        else:
+            if heap:
+                popped.append(heapq.heappop(heap))
+    return popped
+
+
+### day15[13] Bulk Load the Registry
+def insert_one(root, x):
+    if root is None:
+        return TNode(x)
+    if x < root.val:
+        root.left = insert_one(root.left, x)
+    else:
+        root.right = insert_one(root.right, x)
+    return root
+
+def insert_all(root, xs):
+    for x in xs:
+        root = insert_one(root, x)
+    return root
+
+
+### day15[14] Drop the Leaf Ticket
+def delete_leaf(root, x):
+    if root is None:
+        return None
+    if x < root.val:
+        root.left = delete_leaf(root.left, x)
+    elif x > root.val:
+        root.right = delete_leaf(root.right, x)
+    else:
+        return None
+    return root
+
+
+### day15[15] Drain the Priority Heap
+def drain_heap(nums):
+    heap = list(nums)
+    heapq.heapify(heap)
+    drained = []
+    while heap:
+        drained.append(heapq.heappop(heap))
+    return drained
+
+
+### day15[16] Validate the Registry
+def is_bst(root):
+    def check(node, lo, hi):
+        if node is None:
+            return True
+        if node.val <= lo or node.val >= hi:
+            return False
+        return check(node.left, lo, node.val) and check(node.right, node.val, hi)
+    return check(root, float("-inf"), float("inf"))
+
+
+### day15[17] Kth Largest via Size-K Heap
+def kth_largest(nums, k):
+    heap = []
+    for x in nums:
+        if len(heap) < k:
+            heapq.heappush(heap, x)
+        elif x > heap[0]:
+            heapq.heapreplace(heap, x)
+    return heap[0]
+
+
+### day15[18] Remove a Registry Code
+def bst_delete(root, x):
+    if root is None:
+        return None
+    if x < root.val:
+        root.left = bst_delete(root.left, x)
+    elif x > root.val:
+        root.right = bst_delete(root.right, x)
+    else:
+        if root.left is None:
+            return root.right
+        if root.right is None:
+            return root.left
+        successor = root.right
+        while successor.left is not None:
+            successor = successor.left
+        root.val = successor.val
+        root.right = bst_delete(root.right, successor.val)
+    return root
+
+
+### day15[19] Codes in the Price Band
+def count_range(root, lo, hi):
+    if root is None:
+        return 0
+    if root.val < lo:
+        return count_range(root.right, lo, hi)
+    if root.val > hi:
+        return count_range(root.left, lo, hi)
+    return 1 + count_range(root.left, lo, hi) + count_range(root.right, lo, hi)
+

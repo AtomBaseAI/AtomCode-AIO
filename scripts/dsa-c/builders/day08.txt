@@ -1,0 +1,556 @@
+DAY 8 topics=[{"name":"Recursion and Backtracking Basics","subtopics":["general","Base Cases","Recursion Trees","Call Stack","Factorial and Fibonacci","Subsets and Permutations"]}] questions=20
+=== q00 [practice] lang=c diff=easy score=10 topic=Recursion and Backtracking Basics/Factorial and Fibonacci
+title: Recursive Factorial
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long factorial(int n)
+
+It must return n! computed RECURSIVELY (no loops): factorial(n) = n * factorial(n-1) with the base case returning 1 for n <= 1.
+
+Input Format:
+One line with the integer n.
+
+Output Format:
+One line with n!.
+
+Constraints:
+0 <= n <= 20 (n! fits in a 64-bit integer)
+constraints: 0 <= n <= 20 (n! fits in a 64-bit integer)
+s1: IN="5" OUT="120"
+s2: IN="0" OUT="1"
+t1: IN="12" OUT="479001600"
+t2: IN="1" OUT="1"
+t3: IN="10" OUT="3628800"
+srccode_len=89
+=== q01 [practice] lang=c diff=easy score=10 topic=Recursion and Backtracking Basics/Factorial and Fibonacci
+title: Recursive Fibonacci
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long fib(int n)
+
+It must return the n-th Fibonacci number computed RECURSIVELY (no loops), with fib(0) = 0 and fib(1) = 1, so fib(n) = fib(n-1) + fib(n-2).
+
+Input Format:
+One line with the integer n.
+
+Output Format:
+One line with fib(n).
+
+Constraints:
+0 <= n <= 30
+constraints: 0 <= n <= 30
+s1: IN="10" OUT="55"
+s2: IN="0" OUT="0"
+t1: IN="20" OUT="6765"
+t2: IN="1" OUT="1"
+t3: IN="15" OUT="610"
+srccode_len=86
+=== q02 [practice] lang=c diff=easy score=10 topic=Recursion and Backtracking Basics/Base Cases
+title: Digit Sum by Recursion
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int digit_sum(int n)
+
+It must return the sum of the decimal digits of n, computed RECURSIVELY (no loops): digit_sum(n) = n % 10 + digit_sum(n / 10) with the base case returning n when n < 10. digit_sum(0) = 0.
+
+Input Format:
+One line with the non-negative integer n.
+
+Output Format:
+One line with the digit sum.
+
+Constraints:
+0 <= n <= 2000000000
+constraints: 0 <= n <= 2000000000
+s1: IN="1234" OUT="10"
+s2: IN="0" OUT="0"
+t1: IN="99999" OUT="45"
+t2: IN="7" OUT="7"
+t3: IN="100203" OUT="6"
+srccode_len=89
+=== q03 [practice] lang=c diff=easy score=10 topic=Recursion and Backtracking Basics/Call Stack
+title: Reverse a String Recursively
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void reverse_string(char s[], int len)
+
+It must reverse the string s (of exactly len characters) IN PLACE, recursively: swap the outer pair s[lo]/s[hi] and recurse on the inner substring (no loops).
+
+Input Format:
+One line with a token (no spaces) and its length is passed to you.
+
+Output Format:
+One line with the reversed string.
+
+Constraints:
+1 <= len <= 100000
+constraints: 1 <= len <= 100000
+s1: IN="atom" OUT="mota"
+s2: IN="a" OUT="a"
+t1: IN="recursion" OUT="noisrucer"
+t2: IN="AbC" OUT="CbA"
+t3: IN="12345" OUT="54321"
+srccode_len=232
+=== q04 [practice] lang=c diff=easy score=10 topic=Recursion and Backtracking Basics/Base Cases
+title: Recursive GCD
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long gcd(long long a, long long b)
+
+It must return the greatest common divisor of a and b using the RECURSIVE Euclidean algorithm (no loops): gcd(a, b) = a when b == 0, otherwise gcd(b, a % b).
+
+Input Format:
+One line with two integers a and b (not both zero).
+
+Output Format:
+One line with gcd(a, b).
+
+Constraints:
+0 <= a, b <= 1000000000000, not both zero
+constraints: 0 <= a, b <= 1000000000000, not both zero
+s1: IN="12 18" OUT="6"
+s2: IN="7 13" OUT="1"
+t1: IN="100 75" OUT="25"
+t2: IN="5 5" OUT="5"
+t3: IN="270 192" OUT="6"
+srccode_len=95
+=== q05 [practice] lang=c diff=easy score=10 topic=Recursion and Backtracking Basics/Subsets and Permutations
+title: Count All Subsets
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long subset_count(int n)
+
+An n-element set has exactly 2^n subsets (the empty set included). Return the count computed RECURSIVELY (no loops): subset_count(0) = 1 and subset_count(n) = 2 * subset_count(n-1) — each element doubles the number of subsets.
+
+Input Format:
+One line with the integer n.
+
+Output Format:
+One line with 2^n.
+
+Constraints:
+0 <= n <= 30
+constraints: 0 <= n <= 30
+s1: IN="3" OUT="8"
+s2: IN="0" OUT="1"
+t1: IN="10" OUT="1024"
+t2: IN="1" OUT="2"
+t3: IN="16" OUT="65536"
+srccode_len=95
+=== q06 [practice] lang=c diff=easy score=10 topic=Recursion and Backtracking Basics/Recursion Trees
+title: Recursive Power Function
+desc: A finance model grows an amount by repeated multiplication and wants the exponentiation done by pure recursion — each level of the recursion tree multiplies once more until the exponent bottoms out.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long power(int base, int exp)
+
+It must return base raised to exp, computed RECURSIVELY (no loops): power(base, 0) = 1 and power(base, exp) = base * power(base, exp - 1).
+
+Input Format:
+One line with the integers base and exp.
+
+Output Format:
+One line with base^exp.
+
+Constraints:
+|base| <= 30, 0 <= exp <= 15
+constraints: |base| <= 30, 0 <= exp <= 15
+s1: IN="2 10" OUT="1024"
+s2: IN="5 0" OUT="1"
+t1: IN="3 7" OUT="2187"
+t2: IN="1 30" OUT="1"
+t3: IN="7 3" OUT="343"
+srccode_len=106
+=== q07 [practice] lang=c diff=easy score=10 topic=Recursion and Backtracking Basics/Call Stack
+title: Ticket Code Palindrome
+desc: A ticketing system validates codes that must read the same in both directions. The check is done by recursion: compare the outer characters and shrink inward — the call stack remembers where to resume.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int is_palindrome(char s[], int len)
+
+It must return 1 when s is a palindrome (reads identically forwards and backwards), else 0. Implement it recursively by comparing s[lo] with s[hi] and recursing inward (no loops).
+
+Input Format:
+One line with a token (no spaces).
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= len <= 100000
+constraints: 1 <= len <= 100000
+s1: IN="level" OUT="1"
+s2: IN="code" OUT="0"
+t1: IN="racecar" OUT="1"
+t2: IN="Atom" OUT="0"
+t3: IN="a" OUT="1"
+srccode_len=225
+=== q08 [practice] lang=c diff=easy score=10 topic=Recursion and Backtracking Basics/Base Cases
+title: Sensor Batch Total
+desc: A field device batches sensor readings and sums them with a divide-and-conquer recursion instead of a loop — each call splits the batch until single readings remain.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long array_sum(int arr[], int n)
+
+It must return the sum of arr[0..n-1] computed RECURSIVELY (no loops): array_sum of nothing is 0, otherwise arr[n-1] + array_sum of the first n-1 readings.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the sum.
+
+Constraints:
+1 <= n <= 1000, |value| <= 1000000000
+constraints: 1 <= n <= 1000, |value| <= 1000000000
+s1: IN="4\n1 2 3 4" OUT="10"
+s2: IN="1\n-5" OUT="-5"
+t1: IN="5\n10 20 30 40 50" OUT="150"
+t2: IN="3\n7 7 7" OUT="21"
+t3: IN="6\n2 -2 3 -3 4 -4" OUT="0"
+srccode_len=114
+=== q09 [practice] lang=c diff=easy score=10 topic=Recursion and Backtracking Basics/Recursion Trees
+title: Peak Load Finder
+desc: An uptime dashboard finds the day's peak load recursively: the max of n readings is the larger of the last reading and the max of the rest — a recursion that walks the call stack down to a single reading.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int array_max(int arr[], int n)
+
+It must return the maximum of arr[0..n-1] computed RECURSIVELY (no loops): array_max of one element is that element, otherwise the larger of arr[n-1] and array_max of the first n-1 readings.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the maximum value.
+
+Constraints:
+1 <= n <= 1000, |value| <= 1000000000
+constraints: 1 <= n <= 1000, |value| <= 1000000000
+s1: IN="4\n3 9 2 7" OUT="9"
+s2: IN="1\n-8" OUT="-8"
+t1: IN="5\n1 2 99 3 4" OUT="99"
+t2: IN="3\n5 5 5" OUT="5"
+t3: IN="6\n-3 -1 -7 -2 -9 -4" OUT="-1"
+srccode_len=154
+=== q10 [practice] lang=c diff=medium score=20 topic=Recursion and Backtracking Basics/Subsets and Permutations
+title: Count Subsets Summing to S
+desc: A warehouse picker wonders in how many ways a target weight S can be assembled from a set of item weights, using each item at most once (order does not matter, the empty selection counts when S = 0). The answer must come from pure include/exclude recursion.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int count_subsets_sum(int arr[], int n, int S)
+
+It must return the number of subsets of arr[0..n-1] whose values sum to exactly S. Implement it recursively: for each item either include it (recurse with S - arr[i]) or skip it (recurse with S); NO loops are allowed in your code.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: S.
+
+Output Format:
+One line with the number of qualifying subsets.
+
+Constraints:
+1 <= n <= 20, 1 <= value <= 100, 0 <= S <= 2000
+constraints: 1 <= n <= 20, 1 <= value <= 100, 0 <= S <= 2000
+BLACKLIST: for,while
+WHITELIST: count_subsets_sum(
+s1: IN="4\n1 2 3 4\n5" OUT="2"
+s2: IN="3\n1 2 3\n0" OUT="1"
+t1: IN="5\n2 4 6 8 10\n12" OUT="3"
+t2: IN="4\n3 3 3 3\n6" OUT="6"
+t3: IN="6\n1 1 1 1 1 1\n2" OUT="15"
+srccode_len=228
+=== q11 [practice] lang=c diff=medium score=20 topic=Recursion and Backtracking Basics/Recursion Trees
+title: Tower of Hanoi Moves
+desc: A puzzle app animates the Tower of Hanoi and needs the exact move script produced by the classic recursion: move n-1 disks aside, move the biggest disk, move them back. Each move is one line.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void hanoi(int n, char from, char to, char aux)
+
+It must PRINT one line per move, in the order the moves happen, formatted exactly as:
+
+    disk X: FROM->TO
+
+Solve it recursively: hanoi(n-1, from, aux, to), then move disk n from the FROM peg to the TO peg (print the line), then hanoi(n-1, aux, to, from). The harness calls hanoi(n, 'A', 'C', 'B') and prints nothing else. No loops are allowed in your code.
+
+Input Format:
+One line with the integer n.
+
+Output Format:
+2^n - 1 lines, one per move, in execution order.
+
+Constraints:
+1 <= n <= 8
+constraints: 1 <= n <= 8
+BLACKLIST: for,while
+WHITELIST: hanoi(
+s1: IN="2" OUT="disk 1: A->B\ndisk 2: A->C\ndisk 1: B->C"
+s2: IN="1" OUT="disk 1: A->C"
+t1: IN="3" OUT="disk 1: A->C\ndisk 2: A->B\ndisk 1: C->B\ndisk 3: A->C\ndisk 1: B->A\ndisk 2: B->C\ndisk 1: A->C"
+t2: IN="4" OUT="disk 1: A->B\ndisk 2: A->C\ndisk 1: B->C\ndisk 3: A->B\ndisk 1: C->A\ndisk 2: C->B\ndisk 1: A->B\ndisk 4: A->C\ndisk 1: B->C\ndisk 2: B->A\ndisk 1: C->A\ndisk 3: B->C\ndisk 1: A->B\ndisk 2: A->C\ndisk 1: B->C"
+t3: IN="5" OUT="disk 1: A->C\ndisk 2: A->B\ndisk 1: C->B\ndisk 3: A->C\ndisk 1: B->A\ndisk 2: B->C\ndisk 1: A->C\ndisk 4: A->B\ndisk 1: C->B\ndisk 2: C->A\ndisk 1: B->A\ndisk 3: C->B\ndisk 1: A->C\ndisk 2: A->B\ndisk 1: C->B\ndisk 5: A->C\ndisk 1: B->A\ndisk 2: B->C\ndisk 1: A->C\ndisk 3: B->A\ndisk 1: C->B\ndisk 2: C->A\ndisk 1: B->A\ndisk 4: B->C\ndisk 1: A->C\ndisk 2: A->B\ndisk 1: C->B\ndisk 3: A->C\ndisk 1: B->A\ndisk 2: B->C\ndisk 1: A->C"
+srccode_len=187
+=== q12 [practice] lang=c diff=medium score=20 topic=Recursion and Backtracking Basics/Subsets and Permutations
+title: Distinct Permutations of a Multiset
+desc: A badge printer arranges engraved plates in a row. Identical plates make arrangements indistinguishable, so the printer needs the number of DISTINCT permutations of the multiset: n! divided by the factorial of every value's multiplicity.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long distinct_perms(int arr[], int n)
+
+It must return n! / (c1! * c2! * ...), where each ci is how many times one distinct value occurs. Count multiplicities with nested loops (do NOT sort and do NOT use qsort; handle each distinct value exactly once).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the number of distinct permutations.
+
+Constraints:
+1 <= n <= 12, 0 <= value <= 100
+constraints: 1 <= n <= 12, 0 <= value <= 100
+BLACKLIST: qsort
+WHITELIST: for
+s1: IN="3\n1 2 2" OUT="3"
+s2: IN="2\n5 5" OUT="1"
+t1: IN="4\n1 1 2 2" OUT="6"
+t2: IN="3\n7 8 9" OUT="6"
+t3: IN="5\n1 1 1 2 2" OUT="10"
+srccode_len=512
+=== q13 [practice] lang=c diff=medium score=20 topic=Recursion and Backtracking Basics/Recursion Trees
+title: Fibonacci Call Counter
+desc: A CS tutor visualizes the recursion tree of the naive Fibonacci: fib(n) spawns fib(n-1) and fib(n-2). To size the drawing, count how many function calls the naive recursion makes in total — the tree of calls IS the recursion tree.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long fib_calls(int n)
+
+It must return the total number of calls made by the naive recursion for fib(n), counting the initial call: fib_calls(0) = 1, fib_calls(1) = 1, and fib_calls(n) = 1 + fib_calls(n-1) + fib_calls(n-2). Implement it recursively (no loops).
+
+Input Format:
+One line with the integer n.
+
+Output Format:
+One line with the total call count.
+
+Constraints:
+0 <= n <= 30
+constraints: 0 <= n <= 30
+BLACKLIST: for,while
+WHITELIST: fib_calls(
+s1: IN="0" OUT="1"
+s2: IN="5" OUT="15"
+t1: IN="10" OUT="177"
+t2: IN="3" OUT="5"
+t3: IN="12" OUT="465"
+srccode_len=108
+=== q14 [practice] lang=c diff=medium score=20 topic=Recursion and Backtracking Basics/Base Cases
+title: Recursive Binary Search
+desc: A dictionary service looks up words with binary search implemented as recursion: examine the middle slot, then recurse into the surviving half — the call stack replaces the loop.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int rbsearch(int arr[], int lo, int hi, int target)
+
+The array arr[lo..hi] is sorted ascending with distinct values. It must return the 0-based index of target, or -1 when absent. Implement it recursively: if lo > hi return -1, otherwise compare against the middle and recurse into one half. NO loops are allowed in your code.
+
+Input Format:
+Line 1: n. Line 2: n sorted distinct integers. Line 3: target.
+
+Output Format:
+One line with the index or -1.
+
+Constraints:
+1 <= n <= 10000, |value|, |target| <= 1000000000
+constraints: 1 <= n <= 10000, |value|, |target| <= 1000000000
+BLACKLIST: for,while
+WHITELIST: rbsearch(
+s1: IN="5\n2 4 6 8 10\n6" OUT="2"
+s2: IN="5\n2 4 6 8 10\n5" OUT="-1"
+t1: IN="1\n3\n3" OUT="0"
+t2: IN="6\n1 3 5 7 9 11\n11" OUT="5"
+t3: IN="4\n10 20 30 40\n1" OUT="-1"
+srccode_len=274
+=== q15 [practice] lang=c diff=medium score=20 topic=Recursion and Backtracking Basics/Subsets and Permutations
+title: Print Permutations in Lex Order
+desc: A locker-assignment tool lists every way to order n distinct items (the input already lists them ascending) so the listing comes out in lexicographic order — a classic backtracking walk: pick the smallest unused item next, recurse, un-pick.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void permute(int arr[], int n)
+
+It must PRINT every permutation of arr on its own line, values space-separated, in lexicographic order. The values are distinct and given ascending, so a backtracking recursion that tries candidates in input order produces exactly the lex order. The harness prints nothing else.
+
+Input Format:
+Line 1: n. Line 2: n distinct integers in ascending order.
+
+Output Format:
+n! lines, each one permutation (space-separated), in lexicographic order.
+
+Constraints:
+1 <= n <= 6
+constraints: 1 <= n <= 6
+BLACKLIST: qsort
+WHITELIST: permute(
+s1: IN="3\n1 2 3" OUT="1 2 3\n1 3 2\n2 1 3\n2 3 1\n3 1 2\n3 2 1"
+s2: IN="1\n7" OUT="7"
+t1: IN="2\n2 5" OUT="2 5\n5 2"
+t2: IN="4\n1 2 3 4" OUT="1 2 3 4\n1 2 4 3\n1 3 2 4\n1 3 4 2\n1 4 2 3\n1 4 3 2\n2 1 3 4\n2 1 4 3\n2 3 1 4\n2 3 4 1\n2 4 1 3\n2 4 3 1\n3 1 2 4\n3 1 4 2\n3 2 1 4\n3 2 4 1\n3 4 1 2\n3 4 2 1\n4 1 2 3\n4 1 3 2\n4 2 1 3\n4 2 3 1\n4 3 1 2\n4 3 2 1"
+t3: IN="3\n5 9 12" OUT="5 9 12\n5 12 9\n9 5 12\n9 12 5\n12 5 9\n12 9 5"
+srccode_len=538
+=== q16 [practice] lang=c diff=hard score=30 topic=Recursion and Backtracking Basics/Subsets and Permutations
+title: Permutation Rank in Lex Order
+desc: A puzzle grader receives a permutation of 1..n and must report its 1-based position (rank) in the lexicographically sorted list of ALL permutations. The rank comes from the factorial number system: at each position, every smaller unused value that could have stood there contributes (remaining positions)! skipped permutations.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long perm_rank(int arr[], int n)
+
+arr is a permutation of the values 1..n. It must return the 1-based lexicographic rank. Walk positions left to right; before fixing arr[i], count the unused values smaller than arr[i] (call it c) and add c * (n-1-i)! to the rank, then mark arr[i] used.
+
+Input Format:
+Line 1: n. Line 2: a permutation of 1..n.
+
+Output Format:
+One line with the 1-based rank.
+
+Constraints:
+2 <= n <= 12
+constraints: 2 <= n <= 12
+BLACKLIST: qsort
+WHITELIST: for
+s1: IN="3\n2 1 3" OUT="3"
+s2: IN="3\n3 2 1" OUT="6"
+t1: IN="4\n2 4 1 3" OUT="11"
+t2: IN="4\n1 2 3 4" OUT="1"
+t3: IN="5\n3 1 5 2 4" OUT="53"
+srccode_len=484
+=== q17 [practice] lang=c diff=hard score=30 topic=Recursion and Backtracking Basics/Subsets and Permutations
+title: Print Subsets With Sum S
+desc: A diet planner lists every meal combination from a menu whose calories sum exactly to the daily budget S. Backtracking must both COUNT the combinations and PRINT each one — pure include/exclude recursion, no loops anywhere.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void subsets_sum(int arr[], int n, int S)
+
+It must PRINT exactly:
+
+Line 1: K, the number of subsets of arr whose values sum to S.
+Then K lines, each one qualifying subset's values space-separated, in the order produced by include-first backtracking (item i is tried as "included" before "excluded", items visited left to right). When K is 0, nothing follows the count line. The harness prints nothing else. NO loops are allowed in your code — print each subset with recursion too.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: S.
+
+Output Format:
+The count line, then K subset lines (see the exact ordering rule).
+
+Constraints:
+1 <= n <= 12, 1 <= value <= 100, 0 <= S <= 1200
+constraints: 1 <= n <= 12, 1 <= value <= 100, 0 <= S <= 1200
+BLACKLIST: for,while
+WHITELIST: subsets_sum(
+s1: IN="4\n1 2 3 4\n5" OUT="2\n1 4\n2 3"
+s2: IN="3\n1 2 3\n6" OUT="1\n1 2 3"
+t1: IN="5\n2 4 6 8 10\n12" OUT="3\n2 4 6\n2 10\n4 8"
+t2: IN="3\n5 10 15\n15" OUT="2\n5 10\n15"
+t3: IN="4\n1 3 5 7\n8" OUT="2\n1 7\n3 5"
+srccode_len=806
+=== q18 [practice] lang=c diff=hard score=30 topic=Recursion and Backtracking Basics/Recursion Trees
+title: N-Queens Solution Count
+desc: A chess-training app needs the number of ways to place n non-attacking queens on an n x n board. Backtracking places one queen per row, tries each column, and undoes the placement when a branch fails — the search tree IS the recursion tree.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int nqueens(int n)
+
+It must return the number of distinct solutions for the n-queens problem. Track occupied columns and both diagonal directions with marker arrays while recursing row by row.
+
+Input Format:
+One line with the integer n.
+
+Output Format:
+One line with the number of solutions.
+
+Constraints:
+1 <= n <= 8
+constraints: 1 <= n <= 8
+BLACKLIST: qsort
+WHITELIST: nqueens(
+s1: IN="4" OUT="2"
+s2: IN="1" OUT="1"
+t1: IN="5" OUT="10"
+t2: IN="6" OUT="4"
+t3: IN="8" OUT="92"
+srccode_len=669
+=== q19 [practice] lang=c diff=hard score=30 topic=Recursion and Backtracking Basics/Subsets and Permutations
+title: Balanced Bracket Sequences
+desc: A config validator generates every balanced bracket sequence with n pairs, in lexicographic order ('(' sorts before ')'). Backtracking appends '(' while any remain, appends ')' only when it would not unbalance, and prints when the sequence is complete.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void brackets(int n)
+
+It must PRINT all balanced sequences of n '(' and n ')' pairs, one per line, in lexicographic order — trying '(' before ')' at every position yields exactly that order. The harness prints nothing else. NO loops are allowed in your code.
+
+Input Format:
+One line with the integer n.
+
+Output Format:
+Catalan(n) lines, each a balanced bracket sequence, in lexicographic order.
+
+Constraints:
+1 <= n <= 6
+constraints: 1 <= n <= 6
+BLACKLIST: for,while
+WHITELIST: brackets(
+s1: IN="2" OUT="(())\n()()"
+s2: IN="1" OUT="()"
+t1: IN="3" OUT="((()))\n(()())\n(())()\n()(())\n()()()"
+t2: IN="4" OUT="(((())))\n((()()))\n((())())\n((()))()\n(()(()))\n(()()())\n(()())()\n(())(())\n(())()()\n()((()))\n()(()())\n()(())()\n()()(())\n()()()()"
+t3: IN="5" OUT="((((()))))\n(((()())))\n(((())()))\n(((()))())\n(((())))()\n((()(())))\n((()()()))\n((()())())\n((()()))()\n((())(()))\n((())()())\n((())())()\n((()))(())\n((()))()()\n(()((())))\n(()(()()))\n(()(())())\n(()(()))()\n(()()(()))\n(()()()())\n(()()())()\n(()())(())\n(()())()()\n(())((()))\n(())(()())\n(())(())()\n(())()(())\n(())()()()\n()(((())))\n()((()()))\n()((())())\n()((()))()\n()(()(()))\n()(()()())\n()(()())()\n()(())(())\n()(())()()\n()()((()))\n()()(()())\n()()(())()\n()()()(())\n()()()()()"
+srccode_len=452

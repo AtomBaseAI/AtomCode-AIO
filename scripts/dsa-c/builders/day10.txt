@@ -1,0 +1,561 @@
+DAY 10 topics=[{"name":"Doubly and Circular Linked Lists","subtopics":["general","Doubly Linked Nodes","Circular Linked Lists","Two-Direction Traversal","Insertion and Deletion","Use Cases"]}] questions=20
+=== q00 [practice] lang=c diff=easy score=10 topic=Doubly and Circular Linked Lists/Doubly Linked Nodes
+title: Doubly List Length
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; and the harness builds a DOUBLY linked list from the input (line 1: n; line 2: n values), with head->prev = NULL and the tail's next = NULL.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int dll_length(Node *head)
+
+It must return the number of nodes in the list (0 for an empty list).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the node count.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="4\n1 2 3 4" OUT="4"
+s2: IN="1\n9" OUT="1"
+t1: IN="6\n5 4 3 2 1 0" OUT="6"
+t2: IN="3\n7 7 7" OUT="3"
+t3: IN="2\n1 -1" OUT="2"
+srccode_len=127
+=== q01 [practice] lang=c diff=easy score=10 topic=Doubly and Circular Linked Lists/Two-Direction Traversal
+title: Forward Fill Array
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; and the harness builds a DOUBLY linked list from the input (line 1: n; line 2: n values).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void dll_fill_forward(Node *head, int out[])
+
+It must walk the list from head to tail via next pointers and fill out[0..n-1] with the node values in forward order. The harness prints the filled array.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the array contents, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="3\n4 5 6" OUT="4 5 6"
+s2: IN="1\n8" OUT="8"
+t1: IN="5\n1 3 5 7 9" OUT="1 3 5 7 9"
+t2: IN="2\n-2 2" OUT="-2 2"
+t3: IN="4\n10 20 30 40" OUT="10 20 30 40"
+srccode_len=158
+=== q02 [practice] lang=c diff=easy score=10 topic=Doubly and Circular Linked Lists/Two-Direction Traversal
+title: Backward Fill Array
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; and the harness builds a DOUBLY linked list from the input (line 1: n; line 2: n values).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void dll_fill_backward(Node *head, int out[])
+
+It must first walk to the tail via next pointers, then walk back to the head via prev pointers, filling out[0..n-1] with the values in BACKWARD order (tail first, head last). The harness prints the filled array.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the array contents in backward order, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="3\n4 5 6" OUT="6 5 4"
+s2: IN="1\n8" OUT="8"
+t1: IN="5\n1 3 5 7 9" OUT="9 7 5 3 1"
+t2: IN="4\n1 2 3 4" OUT="4 3 2 1"
+t3: IN="2\n-5 5" OUT="5 -5"
+srccode_len=232
+=== q03 [practice] lang=c diff=easy score=10 topic=Doubly and Circular Linked Lists/Circular Linked Lists
+title: Circular Check
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node;. The harness builds a singly linked chain from the input (line 1: n; line 2: n values; line 3: flag c). When c = 1 the last node's next is set back to head (a ring); when c = 0 the chain stays straight.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int is_circular(Node *head)
+
+It must return 1 when following next pointers from head eventually revisits a node (the list is circular), else 0. Use cycle detection that works for any length (e.g. two pointers moving at different speeds).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: flag (1 or 0).
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= n <= 10000, flag is 1 or 0
+constraints: 1 <= n <= 10000, flag is 1 or 0
+s1: IN="3\n1 2 3\n1" OUT="1"
+s2: IN="3\n1 2 3\n0" OUT="0"
+t1: IN="1\n7\n1" OUT="1"
+t2: IN="4\n5 6 7 8\n0" OUT="0"
+t3: IN="2\n9 4\n1" OUT="1"
+srccode_len=242
+=== q04 [practice] lang=c diff=easy score=10 topic=Doubly and Circular Linked Lists/Insertion and Deletion
+title: Insert at Front
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; and the harness builds a DOUBLY linked list from the input (line 1: n; line 2: n values; line 3: new value).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *dll_insert_front(Node *head, int value)
+
+It must malloc a node holding value, link it before the current head (its prev is NULL, its next is the old head, and the old head's prev must point back at it) and return the new head.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: value.
+
+Output Format:
+One line with the list after insertion, space-separated (forward order).
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="3\n1 2 3\n0" OUT="0 1 2 3"
+s2: IN="1\n5\n5" OUT="5 5"
+t1: IN="4\n10 20 30 40\n50" OUT="50 10 20 30 40"
+t2: IN="2\n-1 -2\n-3" OUT="-3 -1 -2"
+t3: IN="3\n7 8 9\n6" OUT="6 7 8 9"
+srccode_len=224
+=== q05 [practice] lang=c diff=easy score=10 topic=Doubly and Circular Linked Lists/Insertion and Deletion
+title: Insert at Back
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; and the harness builds a DOUBLY linked list from the input (line 1: n; line 2: n values; line 3: new value).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *dll_insert_back(Node *head, int value)
+
+It must malloc a node holding value and append it after the current tail (the old tail's next must point at it and its prev must point at the old tail); on an empty list it becomes the head. Return the (unchanged) head.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: value.
+
+Output Format:
+One line with the list after insertion, space-separated (forward order).
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="3\n1 2 3\n4" OUT="1 2 3 4"
+s2: IN="1\n5\n3" OUT="5 3"
+t1: IN="4\n10 20 30 40\n50" OUT="10 20 30 40 50"
+t2: IN="2\n-1 -2\n-3" OUT="-1 -2 -3"
+t3: IN="3\n7 8 9\n6" OUT="7 8 9 6"
+srccode_len=356
+=== q06 [practice] lang=c diff=easy score=10 topic=Doubly and Circular Linked Lists/Circular Linked Lists
+title: Circular Roster Length
+desc: An on-call roster is stored as a circular singly linked list: the last guard's next pointer links back to the first, so there is no NULL. Count its members by walking the ring exactly once. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; (prev stays NULL in this ring).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int clist_length(Node *head)
+
+head points at some node of the non-empty ring. It must return the number of nodes in the ring.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers (the ring is built for you).
+
+Output Format:
+One line with the member count.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="4\n1 2 3 4" OUT="4"
+s2: IN="1\n6" OUT="1"
+t1: IN="5\n5 4 3 2 1" OUT="5"
+t2: IN="2\n8 9" OUT="2"
+t3: IN="3\n1 1 1" OUT="3"
+srccode_len=165
+=== q07 [practice] lang=c diff=easy score=10 topic=Doubly and Circular Linked Lists/Two-Direction Traversal
+title: Backward Walk Sum
+desc: A billing batch is stored in a DOUBLY linked list; the auditor jumps to the last record and sums the amounts sweeping back to the first via prev pointers. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int dll_backward_sum(Node *head)
+
+It must walk to the tail via next, then accumulate the values back to the head via prev, and return the total.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the sum.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="4\n1 2 3 4" OUT="10"
+s2: IN="1\n-9" OUT="-9"
+t1: IN="5\n2 4 6 8 10" OUT="30"
+t2: IN="3\n5 0 5" OUT="10"
+t3: IN="4\n-1 1 -1 1" OUT="0"
+srccode_len=217
+=== q08 [practice] lang=c diff=easy score=10 topic=Doubly and Circular Linked Lists/Circular Linked Lists
+title: Serve the Ring Front
+desc: A ticket kiosk keeps its waiting queue as a circular singly linked list. A VIP ticket is inserted at the FRONT of the ring: the new node's next points at the old head and the last node's next is re-pointed at the new node. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; (prev stays NULL).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *cinsert_front(Node *head, int value)
+
+head is the non-empty ring's entry node. It must malloc the new node, splice it in front of head while keeping the ring closed, and return the NEW head (the new node).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers (the ring). Line 3: value.
+
+Output Format:
+One line with the ring printed from the new head around, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="3\n1 2 3\n0" OUT="0 1 2 3"
+s2: IN="1\n5\n4" OUT="4 5"
+t1: IN="4\n1 3 5 7\n9" OUT="9 1 3 5 7"
+t2: IN="2\n10 20\n5" OUT="5 10 20"
+t3: IN="3\n-1 0 1\n-2" OUT="-2 -1 0 1"
+srccode_len=354
+=== q09 [practice] lang=c diff=easy score=10 topic=Doubly and Circular Linked Lists/Use Cases
+title: Undo History Replay
+desc: An editor's undo history lives in a DOUBLY linked list; pressing undo repeatedly replays states from the newest (tail) back to the oldest (head) — exactly the two-direction traversal doubly lists exist for. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void dll_print_backward(Node *head)
+
+It must PRINT the list values from tail to head on one line, space-separated, followed by a newline (a trailing space is fine; output is trimmed). Walk to the tail via next, then emit values through prev. The harness prints nothing else.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the values in backward order.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="3\n1 2 3" OUT="3 2 1"
+s2: IN="1\n4" OUT="4"
+t1: IN="4\n1 2 3 4" OUT="4 3 2 1"
+t2: IN="2\n8 9" OUT="9 8"
+t3: IN="5\n1 3 5 7 9" OUT="9 7 5 3 1"
+srccode_len=190
+=== q10 [practice] lang=c diff=medium score=20 topic=Doubly and Circular Linked Lists/Insertion and Deletion
+title: Delete Node by Index
+desc: A doubly linked queue drops the record at a 0-based index. Both directions must be repaired: the previous node's next and the next node's prev. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *dll_delete_at(Node *head, int index)
+
+It must free the node at 0-based index (0 <= index < n; the list keeps at least one node) and return the (possibly new) head. Fix both prev and next of the surviving neighbours.
+
+Input Format:
+Line 1: n (at least 2). Line 2: n space-separated integers. Line 3: index.
+
+Output Format:
+One line with the resulting list, space-separated (forward order).
+
+Constraints:
+2 <= n <= 10000, 0 <= index < n, |value| <= 1000000000
+constraints: 2 <= n <= 10000, 0 <= index < n, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->prev
+s1: IN="3\n1 2 3\n1" OUT="1 3"
+s2: IN="2\n4 5\n0" OUT="5"
+t1: IN="4\n10 20 30 40\n3" OUT="10 20 30"
+t2: IN="2\n7 8\n1" OUT="7"
+t3: IN="5\n1 2 3 4 5\n4" OUT="1 2 3 4"
+srccode_len=292
+=== q11 [practice] lang=c diff=medium score=20 topic=Doubly and Circular Linked Lists/Insertion and Deletion
+title: Sorted Insert Doubly
+desc: A price ladder is a DOUBLY linked list sorted ascending; a new quote must be spliced in with both directions intact. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *dll_insert_sorted(Node *head, int value)
+
+The list is sorted ascending with distinct values. It must malloc a node holding value and insert it before the first node with a greater value (at the end when all are smaller; at the front when the list is empty or the value is smallest), repairing prev and next on both sides, and return the (possibly new) head.
+
+Input Format:
+Line 1: n. Line 2: n sorted distinct integers. Line 3: value.
+
+Output Format:
+One line with the resulting list, space-separated (forward order).
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->prev
+s1: IN="4\n10 20 30 40\n25" OUT="10 20 25 30 40"
+s2: IN="1\n5\n3" OUT="3 5"
+t1: IN="3\n1 3 5\n5" OUT="1 3 5 5"
+t2: IN="2\n-10 -5\n0" OUT="-10 -5 0"
+t3: IN="5\n2 4 6 8 10\n12" OUT="2 4 6 8 10 12"
+srccode_len=529
+=== q12 [practice] lang=c diff=medium score=20 topic=Doubly and Circular Linked Lists/Circular Linked Lists
+title: Rotate the Ring
+desc: A round-robin scheduler advances its circular task ring by k steps: the task k positions ahead becomes the new starting node, and the ring itself stays closed. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; (the ring uses next pointers; prev stays NULL).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *clist_rotate(Node *head, int k)
+
+head is the non-empty ring's entry node and 0 < k < n. It must return the node at 0-based index k of the ring as the new entry (the ring links stay untouched).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers (the ring). Line 3: k.
+
+Output Format:
+One line with the ring printed from the new entry around, space-separated.
+
+Constraints:
+2 <= n <= 10000, 0 < k < n, |value| <= 1000000000
+constraints: 2 <= n <= 10000, 0 < k < n, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: while
+s1: IN="4\n1 2 3 4\n2" OUT="3 4 1 2"
+s2: IN="3\n7 8 9\n1" OUT="8 9 7"
+t1: IN="5\n1 2 3 4 5\n4" OUT="5 1 2 3 4"
+t2: IN="4\n4 3 2 1\n2" OUT="2 1 4 3"
+t3: IN="6\n1 2 3 4 5 6\n3" OUT="4 5 6 1 2 3"
+srccode_len=294
+=== q13 [practice] lang=c diff=medium score=20 topic=Doubly and Circular Linked Lists/Two-Direction Traversal
+title: Pair Sum From Both Ends
+desc: A reconciliation tool looks for two records whose amounts add to a target by sweeping a DOUBLY linked list from BOTH directions at once: one pointer steps forward from the head, the other steps backward from the tail — the classic two-direction traversal. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void dll_pair_sum(Node *head, int target, int *a, int *b)
+
+The list is sorted ascending with DISTINCT values. Move the pointers inward: when the sum equals target store the two values (head-side value in *a, tail-side in *b) and stop; when the sum is smaller step the forward pointer, when larger step the backward pointer. When pointers cross without a match store -1 in both.
+
+Input Format:
+Line 1: n. Line 2: n sorted distinct integers. Line 3: target.
+
+Output Format:
+One line with the two values space-separated, or "-1 -1".
+
+Constraints:
+2 <= n <= 10000, |value| <= 1000000000, |target| <= 2000000000
+constraints: 2 <= n <= 10000, |value| <= 1000000000, |target| <= 2000000000
+BLACKLIST: qsort
+WHITELIST: ->prev
+s1: IN="5\n1 3 5 7 9\n10" OUT="1 9"
+s2: IN="4\n1 2 3 4\n8" OUT="-1 -1"
+t1: IN="6\n2 4 6 8 10 12\n14" OUT="2 12"
+t2: IN="5\n-5 -2 0 3 8\n1" OUT="-2 3"
+t3: IN="3\n1 2 3\n4" OUT="1 3"
+srccode_len=508
+=== q14 [practice] lang=c diff=medium score=20 topic=Doubly and Circular Linked Lists/Doubly Linked Nodes
+title: Reverse the Doubly List
+desc: A timeline viewer flips a DOUBLY linked list so the newest record leads: every node swaps its prev and next pointers, and the old tail becomes the new head. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *dll_reverse(Node *head)
+
+It must reverse the list in place by swapping each node's prev and next (walking with the ORIGINAL next pointer) and return the new head.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the reversed list, space-separated (forward order after reversal).
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->prev
+s1: IN="4\n1 2 3 4" OUT="4 3 2 1"
+s2: IN="1\n7" OUT="7"
+t1: IN="5\n10 20 30 40 50" OUT="50 40 30 20 10"
+t2: IN="3\n5 1 9" OUT="9 1 5"
+t3: IN="2\n-1 -2" OUT="-2 -1"
+srccode_len=268
+=== q15 [practice] lang=c diff=medium score=20 topic=Doubly and Circular Linked Lists/Two-Direction Traversal
+title: Middle of the Doubly List
+desc: A moderation queue reports the record sitting at the middle position. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int dll_middle(Node *head)
+
+It must return the data of the node at 0-based index floor(n/2). For odd n that is the exact middle; for even n it is the second of the two middle nodes.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the middle value.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: while
+s1: IN="5\n1 2 3 4 5" OUT="3"
+s2: IN="4\n10 20 30 40" OUT="30"
+t1: IN="1\n9" OUT="9"
+t2: IN="6\n2 4 6 8 10 12" OUT="8"
+t3: IN="3\n7 8 9" OUT="8"
+srccode_len=246
+=== q16 [practice] lang=c diff=hard score=30 topic=Doubly and Circular Linked Lists/Use Cases
+title: Josephus Survivor
+desc: A load-balancer simulates the Josephus problem over a ring of n workers numbered by their data values: counting starts at the head node, every k-th node counted is eliminated, and counting resumes from the node after the eliminated one until one worker remains. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; (the ring is circular via next; prev stays NULL).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int josephus_survivor(Node *head, int k)
+
+head is the non-empty ring's entry node and 1 <= k <= n. Counting includes the current node as 1. It must eliminate every k-th node (freeing it) and return the survivor's data value.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers (the ring, distinct values). Line 3: k.
+
+Output Format:
+One line with the survivor's value.
+
+Constraints:
+1 <= n <= 100, 1 <= k <= n
+constraints: 1 <= n <= 100, 1 <= k <= n
+BLACKLIST: qsort
+WHITELIST: while
+s1: IN="5\n1 2 3 4 5\n2" OUT="3"
+s2: IN="1\n7\n1" OUT="7"
+t1: IN="6\n1 2 3 4 5 6\n3" OUT="1"
+t2: IN="5\n1 2 3 4 5\n1" OUT="5"
+t3: IN="7\n1 2 3 4 5 6 7\n2" OUT="7"
+srccode_len=358
+=== q17 [practice] lang=c diff=hard score=30 topic=Doubly and Circular Linked Lists/Circular Linked Lists
+title: Convert to Circular
+desc: A message broker receives a straight singly chain and must close it into a ring for its rotating dispatcher, reporting the ring size. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; (prev stays NULL).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *make_circular(Node *head, int *len)
+
+The harness hands you a straight non-empty chain. Walk to the tail counting the nodes, store the count in *len, set the tail's next to head to close the ring, and return the head (unchanged). The harness prints the length and the ring from head around.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers (a straight chain).
+
+Output Format:
+Line 1: the ring length. Line 2: the ring values printed from head around, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->next
+s1: IN="3\n1 2 3" OUT="3\n1 2 3"
+s2: IN="1\n9" OUT="1\n9"
+t1: IN="5\n4 3 2 1 0" OUT="5\n4 3 2 1 0"
+t2: IN="2\n8 6" OUT="2\n8 6"
+t3: IN="4\n1 1 2 2" OUT="4\n1 1 2 2"
+srccode_len=255
+=== q18 [practice] lang=c diff=hard score=30 topic=Doubly and Circular Linked Lists/Insertion and Deletion
+title: Swap Kth From Both Ends
+desc: A presentation tool swaps the k-th node of a DOUBLY linked list with the k-th node from the END (the j-th node, j = n + 1 - k). When k equals j the list stays as it is; otherwise all four affected prev/next links must be repaired — including the adjacency case. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *dll_swap_kth(Node *head, int k)
+
+Values are distinct and 1 <= k <= n (k is 1-based). It must swap the k-th and j-th nodes (relinking the nodes themselves, or exchanging their data values — the harness prints the forward sequence either way) and return the head.
+
+Input Format:
+Line 1: n. Line 2: n distinct space-separated integers. Line 3: k.
+
+Output Format:
+One line with the list after the swap, space-separated (forward order).
+
+Constraints:
+2 <= n <= 10000, 1 <= k <= n, |value| <= 1000000000
+constraints: 2 <= n <= 10000, 1 <= k <= n, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->prev
+s1: IN="5\n1 2 3 4 5\n2" OUT="1 4 3 2 5"
+s2: IN="3\n7 8 9\n2" OUT="7 8 9"
+t1: IN="4\n10 20 30 40\n1" OUT="40 20 30 10"
+t2: IN="4\n1 2 3 4\n2" OUT="1 3 2 4"
+t3: IN="6\n5 10 15 20 25 30\n3" OUT="5 10 20 15 25 30"
+srccode_len=1241
+=== q19 [practice] lang=c diff=hard score=30 topic=Doubly and Circular Linked Lists/Circular Linked Lists
+title: Copy the Ring
+desc: A sandbox clones a scheduler's circular singly linked ring so experiments never touch the live ring: allocate fresh nodes and close the clone into its own ring, stopping exactly once around. The node type is defined for you as typedef struct Node { int data; struct Node *prev; struct Node *next; } Node; (prev stays NULL).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *clist_copy(Node *head)
+
+head is the non-empty source ring's entry node. It must malloc a fresh node per source node (copying the data in ring order), close the clone's tail back to the clone's head, and return the CLONE's head. Your code must use malloc — no static node pools.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers (the source ring).
+
+Output Format:
+One line with the cloned ring printed from its head around, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: static
+WHITELIST: malloc
+s1: IN="3\n1 2 3" OUT="1 2 3"
+s2: IN="1\n5" OUT="5"
+t1: IN="4\n9 7 5 3" OUT="9 7 5 3"
+t2: IN="2\n1 2" OUT="1 2"
+t3: IN="5\n2 4 6 8 10" OUT="2 4 6 8 10"
+srccode_len=486

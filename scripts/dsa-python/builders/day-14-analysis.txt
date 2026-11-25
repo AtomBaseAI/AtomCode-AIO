@@ -1,0 +1,656 @@
+DAY 14 topics=['Trees and Binary Trees']
+====================================================================================================
+[0] title='Diameter of the Tree' diff=hard topic='Trees and Binary Trees' sub='Recursive Traversal' type=practice bl='len(' wl='left'
+DESC: The longest corridor between any two crates in the stack tree is the diameter — the number of NODES on the longest path (a single-node tree has diameter 1). The classic recursion: for every node the longest path through it is height(left) + height(right) + 1; take the maximum over all nodes. You may define helper functions (e.g. height).
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def diameter(root):
+
+root is the root TNode of the crate tree. Return the diameter in nodes.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the diameter.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='5'
+sampleinput2='1\n9'
+sampleoutput2='1'
+input1='6\n10 5 15 -1 8 12 20'
+output1='5'
+input2='4\n1 2 -1 3'
+output2='3'
+input3='3\n5 -1 6'
+output3='2'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def height(root):\n    if root is None:\n        return 0\n    return 1 + max(height(root.left), height(root.right))\n\ndef diameter(root):\n    if root is None:\n        return 0\n    through_root = height(root.left) + height(root.right) + 1\n    return max(through_root, diameter(root.left), diameter(root.right))\n'
+====================================================================================================
+[1] title='Preorder Fill' diff=easy topic='Trees and Binary Trees' sub='Preorder Traversal' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def preorder(root, out):
+
+root is the root TNode of a binary tree (each node has val, left, right) and out is a list you must fill with the node values in PREORDER (root first, then the left subtree, then the right subtree). The harness prints the filled list.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the preorder values, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='50 30 20 40 70 60 80'
+sampleinput2='1\n42'
+sampleoutput2='42'
+input1='5\n1 2 3 -1 -1 4 5'
+output1='1 2 3 4 5'
+input2='6\n10 5 15 -1 8 12 20'
+output2='10 5 8 15 12 20'
+input3='4\n7 3 9 -1 4'
+output3='7 3 4 9'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def preorder(root, out):\n    if root is None:\n        return\n    out.append(root.val)\n    preorder(root.left, out)\n    preorder(root.right, out)\n'
+====================================================================================================
+[2] title='Inorder Fill' diff=easy topic='Trees and Binary Trees' sub='Inorder and Postorder Traversal' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def inorder(root, out):
+
+root is the root TNode of a binary tree and out is a list you must fill with the node values in INORDER (left subtree, then root, then right subtree). The harness prints the filled list.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the inorder values, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='20 30 40 50 60 70 80'
+sampleinput2='3\n2 1 3'
+sampleoutput2='1 2 3'
+input1='5\n4 2 6 1 3 5 7'
+output1='1 2 3 4 5 6 7'
+input2='6\n10 5 15 -1 8 12 20'
+output2='5 8 10 12 15 20'
+input3='4\n7 3 9 -1 4'
+output3='3 4 7 9'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def inorder(root, out):\n    if root is None:\n        return\n    inorder(root.left, out)\n    out.append(root.val)\n    inorder(root.right, out)\n'
+====================================================================================================
+[3] title='Postorder Fill' diff=easy topic='Trees and Binary Trees' sub='Inorder and Postorder Traversal' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def postorder(root, out):
+
+root is the root TNode of a binary tree and out is a list you must fill with the node values in POSTORDER (left subtree, then right subtree, then root). The harness prints the filled list.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the postorder values, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='20 40 30 60 80 70 50'
+sampleinput2='3\n2 1 3'
+sampleoutput2='1 3 2'
+input1='5\n4 2 6 1 3 5 7'
+output1='1 3 2 5 7 6 4'
+input2='6\n10 5 15 -1 8 12 20'
+output2='8 5 12 20 15 10'
+input3='4\n7 3 9 -1 4'
+output3='4 3 9 7'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def postorder(root, out):\n    if root is None:\n        return\n    postorder(root.left, out)\n    postorder(root.right, out)\n    out.append(root.val)\n'
+====================================================================================================
+[4] title='Height of the Tree' diff=easy topic='Trees and Binary Trees' sub='Recursive Traversal' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def height(root):
+
+root is the root TNode of a binary tree. Return the height: the number of NODES on the longest root-to-leaf path (a single-node tree has height 1).
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the height.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='3'
+sampleinput2='1\n9'
+sampleoutput2='1'
+input1='5\n4 2 6 1 3 5 7'
+output1='3'
+input2='6\n10 5 15 -1 8 12 20'
+output2='3'
+input3='3\n5 -1 6'
+output3='2'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def height(root):\n    if root is None:\n        return 0\n    lh = height(root.left)\n    rh = height(root.right)\n    if lh > rh:\n        return lh + 1\n    return rh + 1\n'
+====================================================================================================
+[5] title='Count the Nodes' diff=easy topic='Trees and Binary Trees' sub='Tree Terminology' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def count_nodes(root):
+
+root is the root TNode of a binary tree. Return the total number of nodes in the tree.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the node count.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='7'
+sampleinput2='1\n3'
+sampleoutput2='1'
+input1='6\n10 5 15 -1 8 12 20'
+output1='6'
+input2='9\n1 2 3 4 5 6 7 8 9'
+output2='9'
+input3='4\n7 3 9 -1 4'
+output3='4'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def count_nodes(root):\n    if root is None:\n        return 0\n    return 1 + count_nodes(root.left) + count_nodes(root.right)\n'
+====================================================================================================
+[6] title='Count the Leaves' diff=easy topic='Trees and Binary Trees' sub='Tree Terminology' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def count_leaves(root):
+
+root is the root TNode of a binary tree. Return the number of LEAF nodes — nodes whose left and right are both None.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the leaf count.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='4'
+sampleinput2='1\n9'
+sampleoutput2='1'
+input1='6\n10 5 15 -1 8 12 20'
+output1='3'
+input2='7\n1 2 3 -1 -1 -1 -1'
+output2='2'
+input3='3\n5 6 -1'
+output3='1'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def count_leaves(root):\n    if root is None:\n        return 0\n    if root.left is None and root.right is None:\n        return 1\n    return count_leaves(root.left) + count_leaves(root.right)\n'
+====================================================================================================
+[7] title='Crate Unload Order' diff=easy topic='Trees and Binary Trees' sub='Preorder Traversal' type=practice bl='' wl=''
+DESC: A yard crane unloads crates stacked as a binary tree: the root crate always comes off first, then the whole left stack, then the whole right stack — exactly a preorder walk.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def preorder(root, out):
+
+root is the root TNode of the crate tree and out is the unload list you must fill with the crate codes in preorder. The harness prints the filled list.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the crate codes in unload order, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n40 20 60 10 30 50 70'
+sampleoutput1='40 20 10 30 60 50 70'
+sampleinput2='1\n15'
+sampleoutput2='15'
+input1='5\n9 4 12 -1 -1 11 14'
+output1='9 4 12 11 14'
+input2='6\n8 3 10 1 6 -1 9'
+output2='8 3 1 6 10 9'
+input3='3\n5 2 8'
+output3='5 2 8'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def preorder(root, out):\n    if root is None:\n        return\n    out.append(root.val)\n    preorder(root.left, out)\n    preorder(root.right, out)\n'
+====================================================================================================
+[8] title='Sorted Shelf Scan' diff=easy topic='Trees and Binary Trees' sub='Inorder and Postorder Traversal' type=practice bl='' wl=''
+DESC: The archive keeps shelf codes in a binary search tree, so an inorder walk (left subtree, shelf, right subtree) reads every code in ascending order.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def inorder(root, out):
+
+root is the root TNode of the shelf tree and out is the scan list you must fill with the codes in inorder. The harness prints the filled list.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the shelf codes in ascending order, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='20 30 40 50 60 70 80'
+sampleinput2='3\n2 1 3'
+sampleoutput2='1 2 3'
+input1='5\n10 5 15 3 7 12 18'
+output1='3 5 7 10 12 15 18'
+input2='1\n99'
+output2='99'
+input3='6\n20 10 30 5 15 25'
+output3='5 10 15 20 25 30'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def inorder(root, out):\n    if root is None:\n        return\n    inorder(root.left, out)\n    out.append(root.val)\n    inorder(root.right, out)\n'
+====================================================================================================
+[9] title='Reporting Lines Depth' diff=easy topic='Trees and Binary Trees' sub='Node Structures and Representation' type=practice bl='' wl=''
+DESC: An org chart is stored as a binary tree: the top node is the director and each subtree is a reporting line. The chart's depth is the longest chain of command from the top node down to a leaf, measured in people.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def height(root):
+
+root is the root TNode of the org chart. Return the number of nodes on the longest root-to-leaf chain.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the depth.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n1 2 3 4 5 6 7'
+sampleoutput1='3'
+sampleinput2='1\n7'
+sampleoutput2='1'
+input1='6\n10 5 15 -1 8 12 20'
+output1='3'
+input2='4\n1 2 -1 3'
+output2='3'
+input3='3\n5 -1 6'
+output3='2'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def height(root):\n    if root is None:\n        return 0\n    lh = height(root.left)\n    rh = height(root.right)\n    if lh > rh:\n        return lh + 1\n    return rh + 1\n'
+====================================================================================================
+[10] title='Terminal Depot Count' diff=easy topic='Trees and Binary Trees' sub='Tree Terminology' type=practice bl='' wl=''
+DESC: A delivery network is stored as a binary tree of depots. Terminal depots are the endpoints of the network — nodes with no downstream depot (no left and no right child).
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def count_leaves(root):
+
+root is the root TNode of the depot tree. Return the number of terminal depots (leaves).
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the terminal depot count.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='4'
+sampleinput2='1\n9'
+sampleoutput2='1'
+input1='7\n1 2 3 -1 -1 -1 -1'
+output1='2'
+input2='6\n10 5 15 -1 8 12 20'
+output2='3'
+input3='3\n5 6 -1'
+output3='1'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def count_leaves(root):\n    if root is None:\n        return 0\n    if root.left is None and root.right is None:\n        return 1\n    return count_leaves(root.left) + count_leaves(root.right)\n'
+====================================================================================================
+[11] title='Sum of Left Leaves' diff=medium topic='Trees and Binary Trees' sub='Recursive Traversal' type=practice bl='dict(,set(' wl='left'
+DESC: A warehouse robot totals only the crates that sit as LEFT children of their parent AND have no children of their own — the classic left-leaf sum. Crates on the right or internal crates are ignored.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def left_leaf_sum(root):
+
+root is the root TNode of the crate tree. Return the sum of the values of all left leaves. Storing nodes in a dict or set is banned — walk the tree directly.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the sum (0 when there are no left leaves).
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='3\n1 2 3'
+sampleoutput1='2'
+sampleinput2='1\n5'
+sampleoutput2='0'
+input1='7\n3 9 20 -1 -1 15 7'
+output1='24'
+input2='7\n1 2 3 4 -1 -1 5'
+output2='4'
+input3='5\n10 5 20 15 25'
+output3='15'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def left_leaf_sum(root):\n    if root is None:\n        return 0\n    total = 0\n    if root.left is not None and root.left.left is None and root.left.right is None:\n        total += root.left.val\n    total += left_leaf_sum(root.left) + left_leaf_sum(root.right)\n    return total\n'
+====================================================================================================
+[12] title='Single-Child Junctions' diff=medium topic='Trees and Binary Trees' sub='Node Structures and Representation' type=practice bl='dict(,set(' wl='left'
+DESC: A pipeline map is a binary tree of valve stations. A junction with exactly one continuation (one child only) is a maintenance bottleneck. Count how many such junctions the map contains.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def count_single_child(root):
+
+root is the root TNode of the pipeline tree. Return the number of nodes with EXACTLY one child. Storing nodes in a dict or set is banned — walk the tree directly.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the count.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='3\n5 6 -1'
+sampleoutput1='1'
+sampleinput2='7\n1 2 3 4 5 6 7'
+sampleoutput2='0'
+input1='6\n10 5 15 -1 8 12 20'
+output1='1'
+input2='4\n1 2 -1 3'
+output2='2'
+input3='2\n7 8'
+output3='1'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def count_single_child(root):\n    if root is None:\n        return 0\n    count = 0\n    has_left = root.left is not None\n    has_right = root.right is not None\n    if has_left != has_right:\n        count += 1\n    return count + count_single_child(root.left) + count_single_child(root.right)\n'
+====================================================================================================
+[13] title='Peak Cargo Value' diff=medium topic='Trees and Binary Trees' sub='Tree Terminology' type=practice bl='max(' wl='val'
+DESC: Cargo loads sit on a binary tree of pallets and the auditor wants the single heaviest load. Walk the tree yourself — the max() shortcut is banned.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def peak_load(root):
+
+root is the root TNode of the cargo tree (at least one node). Return the largest value in the tree using explicit comparisons.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the largest value.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='80'
+sampleinput2='1\n42'
+sampleoutput2='42'
+input1='5\n9 4 12 -1 -1 11 14'
+output1='14'
+input2='6\n8 3 10 1 6 -1 9'
+output2='10'
+input3='4\n-5 -9 -3 -7'
+output3='-3'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def peak_load(root):\n    best = root.val\n    if root.left is not None:\n        l = peak_load(root.left)\n        if l > best:\n            best = l\n    if root.right is not None:\n        r = peak_load(root.right)\n        if r > best:\n            best = r\n    return best\n'
+====================================================================================================
+[14] title='Depth of a Target Crate' diff=medium topic='Trees and Binary Trees' sub='Recursive Traversal' type=practice bl='import' wl='left'
+DESC: Inspectors report how deep a given crate sits in the stack tree: the root crate sits at depth 0, its children at depth 1, and so on. A crate code that is not in the tree reports -1. Crate values are unique.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def depth_of(root, x):
+
+root is the root TNode and x is the target crate code. Return the depth of the node holding x, or -1 when x is absent.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+Line 3: the target code x.
+
+Output Format:
+One line with the depth of x, or -1.
+
+Constraints:
+1 <= n <= 1000
+1 <= value, x <= 1000000
+All crate values are distinct.
+sampleinput1='7\n50 30 70 20 40 60 80\n60'
+sampleoutput1='2'
+sampleinput2='1\n9\n9'
+sampleoutput2='0'
+input1='5\n4 2 6 1 3 5 7\n1'
+output1='2'
+input2='6\n10 5 15 -1 8 12 20\n8'
+output2='2'
+input3='4\n7 3 9 -1 4\n4'
+output3='2'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value, x <= 1000000; values distinct
+SRC: 'def depth_of(root, x):\n    if root is None:\n        return -1\n    if root.val == x:\n        return 0\n    left = depth_of(root.left, x)\n    if left != -1:\n        return left + 1\n    right = depth_of(root.right, x)\n    if right != -1:\n        return right + 1\n    return -1\n'
+====================================================================================================
+[15] title='Loads Above the Threshold' diff=medium topic='Trees and Binary Trees' sub='Tree Terminology' type=practice bl='import' wl='val'
+DESC: A safety audit counts every pallet in the loading tree whose load is at or above the weight threshold. One recursive sweep does the job.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def count_at_least(root, x):
+
+root is the root TNode of the loading tree and x is the threshold. Return how many nodes hold a value >= x.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+Line 3: the threshold x.
+
+Output Format:
+One line with the count.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80\n45'
+sampleoutput1='4'
+sampleinput2='1\n5\n6'
+sampleoutput2='0'
+input1='5\n9 4 12 -1 -1 11 14\n10'
+output1='3'
+input2='6\n8 3 10 1 6 -1 9\n7'
+output2='3'
+input3='4\n-5 -9 -3 -7\n-6'
+output3='2'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def count_at_least(root, x):\n    if root is None:\n        return 0\n    count = 1 if root.val >= x else 0\n    return count + count_at_least(root.left, x) + count_at_least(root.right, x)\n'
+====================================================================================================
+[16] title='Branch Subtotal' diff=medium topic='Trees and Binary Trees' sub='Recursive Traversal' type=practice bl='max(,min(' wl='val'
+DESC: Finance wants the subtotal of one branch: find the node holding the picked code x and total EVERY value in its subtree (the node itself plus everything below it). A code that is not in the tree reports 0. Values are unique and nonzero.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def subtree_sum(root, x):
+
+root is the root TNode and x is the picked node's value. Return the sum of the subtree rooted at the node holding x, or 0 when x is absent. You may define helper functions.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+Line 3: the picked code x.
+
+Output Format:
+One line with the branch subtotal.
+
+Constraints:
+1 <= n <= 1000
+1 <= value, x <= 1000000
+All values are distinct and nonzero.
+sampleinput1='7\n50 30 70 20 40 60 80\n30'
+sampleoutput1='90'
+sampleinput2='3\n2 1 3\n9'
+sampleoutput2='0'
+input1='5\n4 2 6 1 3 5 7\n2'
+output1='6'
+input2='6\n10 5 15 -1 8 12 20\n15'
+output2='47'
+input3='4\n7 3 9 -1 4\n9'
+output3='9'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value, x <= 1000000; values distinct and nonzero
+SRC: 'def find_node(root, x):\n    if root is None:\n        return None\n    if root.val == x:\n        return root\n    found = find_node(root.left, x)\n    if found is not None:\n        return found\n    return find_node(root.right, x)\n\ndef collect(root):\n    if root is None:\n        return 0\n    return root.val + collect(root.left) + collect(root.right)\n\ndef subtree_sum(root, x):\n    node 
+====================================================================================================
+[17] title='Level Order Fill' diff=hard topic='Trees and Binary Trees' sub='Node Structures and Representation' type=practice bl='collections,popleft' wl='append'
+DESC: The yard crane works deck by deck: every crate on the top deck first, then the next deck, left to right within a deck — a level-order (breadth-first) walk. Deques and collections are banned: use a plain list as the queue with pop(0).
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def level_order(root, out):
+
+root is the root TNode of the crate tree and out is the list you must fill with the values level by level, left to right. The harness prints the filled list.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line with the values in level order, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='50 30 70 20 40 60 80'
+sampleinput2='1\n11'
+sampleoutput2='11'
+input1='6\n10 5 15 -1 8 12 20'
+output1='10 5 15 8 12 20'
+input2='4\n1 2 -1 3'
+output2='1 2 3'
+input3='5\n9 4 12 -1 -1 11 14'
+output3='9 4 12 11 14'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; -1 marks a missing child; tree non-empty
+SRC: 'def level_order(root, out):\n    if root is None:\n        return\n    queue = [root]\n    while queue:\n        node = queue.pop(0)\n        out.append(node.val)\n        if node.left is not None:\n            queue.append(node.left)\n        if node.right is not None:\n            queue.append(node.right)\n'
+====================================================================================================
+[18] title='Twin Trees Check' diff=hard topic='Trees and Binary Trees' sub='Recursive Traversal' type=practice bl='set(' wl='left'
+DESC: Two depot copies of a routing tree must be verified STRUCTURALLY IDENTICAL — same shape AND same value at every position. Compare the two roots recursively: both None means match so far, exactly one None means failure.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def is_identical(a, b):
+
+a and b are the root TNodes of the two trees. Return True when the trees are identical, False otherwise. The harness prints True or False. Storing nodes in a set is banned.
+
+Input Format:
+Line 1: n1, the number of values of the first tree.
+Line 2: n1 integers — the first tree in level order (-1 marks a missing child).
+Line 3: n2, the number of values of the second tree.
+Line 4: n2 integers — the second tree in level order.
+
+Output Format:
+One line, True or False.
+
+Constraints:
+1 <= n1, n2 <= 1000
+1 <= value <= 1000000
+Both trees have at least one node.
+sampleinput1='3\n1 2 3\n3\n1 2 3'
+sampleoutput1='True'
+sampleinput2='3\n1 2 3\n3\n1 3 2'
+sampleoutput2='False'
+input1='1\n5\n1\n5'
+output1='True'
+input2='5\n4 2 6 1 3\n5\n4 2 6 1 4'
+output2='False'
+input3='4\n7 3 9 -1 4\n4\n7 3 9 -1 4'
+output3='True'
+CONSTRAINTS: 1 <= n1, n2 <= 1000; 1 <= value <= 1000000; both trees non-empty
+SRC: 'def is_identical(a, b):\n    if a is None and b is None:\n        return True\n    if a is None or b is None:\n        return False\n    if a.val != b.val:\n        return False\n    return is_identical(a.left, b.left) and is_identical(a.right, b.right)\n'
+====================================================================================================
+[19] title='Mirror Images' diff=hard topic='Trees and Binary Trees' sub='Recursive Traversal' type=practice bl='sorted(' wl='right'
+DESC: Two ingestion pipelines produce trees that should be MIRROR images: at every position the values match but the left and right subtrees are swapped. Verify b is the mirror of a by recursing with crossed children (a.left vs b.right, a.right vs b.left).
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def is_mirror(a, b):
+
+a and b are the root TNodes of the two trees. Return True when b mirrors a, False otherwise. The harness prints True or False.
+
+Input Format:
+Line 1: n1, the number of values of the first tree.
+Line 2: n1 integers — the first tree in level order (-1 marks a missing child).
+Line 3: n2, the number of values of the second tree.
+Line 4: n2 integers — the second tree in level order.
+
+Output Format:
+One line, True or False.
+
+Constraints:
+1 <= n1, n2 <= 1000
+1 <= value <= 1000000
+Both trees have at least one node.
+sampleinput1='3\n1 2 3\n3\n1 3 2'
+sampleoutput1='True'
+sampleinput2='3\n1 2 3\n3\n1 2 3'
+sampleoutput2='False'
+input1='1\n5\n1\n5'
+output1='True'
+input2='5\n4 2 6 1 3\n5\n4 6 2 3 1'
+output2='False'
+input3='4\n7 3 9 -1 4\n4\n7 9 3 -1 4'
+output3='False'
+CONSTRAINTS: 1 <= n1, n2 <= 1000; 1 <= value <= 1000000; both trees non-empty
+SRC: 'def is_mirror(a, b):\n    if a is None and b is None:\n        return True\n    if a is None or b is None:\n        return False\n    if a.val != b.val:\n        return False\n    return is_mirror(a.left, b.right) and is_mirror(a.right, b.left)\n'

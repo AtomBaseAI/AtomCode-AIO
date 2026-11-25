@@ -1,0 +1,1312 @@
+
+
+===== Q0 =====
+title: Stable Order of Contest Results
+difficulty: medium lang: cpp type: practice
+blacklist: "stable_sort,sort("
+whitelist: "for"
+inputconstrains: "1 <= n <= 1000, -1000000 <= scores <= 1000000, ids distinct"
+DESCRIPTION:
+Contestants finished with possibly equal scores. The rules require a STABLE ordering: equal scores keep the arrival order. You receive the scores (line 2) and arrival ids (line 3, aligned by position); return the ids ordered by stable ascending score. Implement the stable sort yourself, e.g. insertion sort on pairs — std::sort and std::stable_sort are banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> stable_ids(const std::vector<int> &scores, const std::vector<int> &ids)
+
+Input Format:
+Line 1: n. Line 2: n space-separated scores. Line 3: n distinct space-separated ids.
+
+Output Format:
+One line with the ids in stable score order.
+
+Constraints:
+1 <= n <= 1000, -1000000 <= scores <= 1000000, ids distinct
+--- TC1 INPUT ---
+4
+3 1 2 1
+101 102 103 104
+--- TC1 EXPECTED ---
+103 0 104 102
+--- TC2 INPUT ---
+3
+5 5 5
+7 8 9
+--- TC2 EXPECTED ---
+8 9 0
+--- TC3 INPUT ---
+5
+2 3 1 3 2
+11 12 13 14 15
+--- TC3 EXPECTED ---
+14 12 0 13 15
+--- TC4 INPUT ---
+2
+9 1
+55 44
+--- TC4 EXPECTED ---
+0 44
+--- TC5 INPUT ---
+1
+0
+1
+--- TC5 EXPECTED ---
+0
+SOURCECODE (orig):
+std::vector<int> stable_ids(const std::vector<int> &scores, const std::vector<int> &ids) {
+    int n = (int)scores.size();
+    std::vector<int> order(n);
+    for (int i = 0; i < n; i++) order[i] = i;
+    for (int i = 1; i < n; i++) {
+        int cur = order[i], j = i - 1;
+        while (j >= 0 && scores[order[j]] > scores[cur]) {
+            order[j + 1] = order[j];
+            j--;
+        }
+        order[j + 1] = cur;
+    }
+    std::vector<int> out(n);
+    for (int i = 0; i < n; i++) out[i] = ids[order[i]];
+    return out;
+}
+
+
+===== Q1 =====
+title: Rank Products by Price Then Id
+difficulty: hard lang: cpp type: practice
+blacklist: "std::sort,sort("
+whitelist: "for"
+inputconstrains: "1 <= n <= 1000, 0 <= prices <= 1000000, ids distinct"
+DESCRIPTION:
+A storefront ranks products by price DESCENDING; products with equal prices keep the smaller id first. You receive prices (line 2) and ids (line 3, aligned by position); return the ids in final rank order. Implement the sort manually — std::sort is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> rank_products(const std::vector<int> &prices, const std::vector<int> &ids)
+
+Input Format:
+Line 1: n. Line 2: n space-separated prices. Line 3: n distinct space-separated ids.
+
+Output Format:
+One line with the ids in rank order.
+
+Constraints:
+1 <= n <= 1000, 0 <= prices <= 1000000, ids distinct
+--- TC1 INPUT ---
+4
+50 20 50 30
+1 2 3 4
+--- TC1 EXPECTED ---
+0 2 0 0
+--- TC2 INPUT ---
+3
+10 10 10
+5 9 2
+--- TC2 EXPECTED ---
+0 2 9
+--- TC3 INPUT ---
+5
+8 3 8 3 1
+11 12 13 14 15
+--- TC3 EXPECTED ---
+12 14 13 15 0
+--- TC4 INPUT ---
+2
+7 9
+1 2
+--- TC4 EXPECTED ---
+0 2
+--- TC5 INPUT ---
+1
+5
+42
+--- TC5 EXPECTED ---
+0
+SOURCECODE (orig):
+std::vector<int> rank_products(const std::vector<int> &prices, const std::vector<int> &ids) {
+    int n = (int)prices.size();
+    std::vector<int> order(n);
+    for (int i = 0; i < n; i++) order[i] = i;
+    for (int i = 0; i < n - 1; i++) {
+        int m = i;
+        for (int j = i + 1; j < n; j++) {
+            bool better = prices[order[j]] > prices[order[m]] ||
+                (prices[order[j]] == prices[order[m]] &&
+                 ids[order[j]] < ids[order[m]]);
+            if (better) m = j;
+        }
+        if (m != i) {
+            int t = order[i];
+            order[i] = order[m];
+            order[m] = t;
+        }
+    }
+    std::vector<int> out(n);
+    for (int i = 0; i < n; i++) out[i] = ids[order[i]];
+    return out;
+}
+
+
+===== Q2 =====
+title: Shelf by Popularity Then Label
+difficulty: hard lang: cpp type: practice
+blacklist: "std::sort,sort("
+whitelist: "for"
+inputconstrains: "1 <= n <= 200, -1000000 <= values <= 1000000"
+DESCRIPTION:
+A library shelf reorders books by popularity: values that occur more often come first, and equally popular values are ordered by the value itself ascending. n is small, so you may recount a value's frequency with a scan whenever needed. No library sort — order the vector manually. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> freq_order(std::vector<int> v)
+
+It must return the values ordered by (frequency descending, value ascending). The harness prints them space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated values.
+
+Output Format:
+One line with the ordered values.
+
+Constraints:
+1 <= n <= 200, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+6
+4 4 6 2 2 2
+--- TC1 EXPECTED ---
+2 2 2 4 4 6
+--- TC2 INPUT ---
+5
+7 7 7 7 7
+--- TC2 EXPECTED ---
+7 7 7 7 7
+--- TC3 INPUT ---
+5
+3 1 3 1 5
+--- TC3 EXPECTED ---
+1 1 3 3 5
+--- TC4 INPUT ---
+4
+9 8 9 8
+--- TC4 EXPECTED ---
+8 8 9 9
+--- TC5 INPUT ---
+3
+10 20 30
+--- TC5 EXPECTED ---
+10 20 30
+SOURCECODE (orig):
+std::vector<int> freq_order(std::vector<int> v) {
+    int n = (int)v.size();
+    for (int i = 0; i < n - 1; i++) {
+        int m = i, mf = -1;
+        for (int j = i; j < n; j++) {
+            int f = 0;
+            for (int k = 0; k < n; k++)
+                if (v[k] == v[j]) f++;
+            bool better = f > mf || (f == mf && v[j] < v[m]);
+            if (better) {
+                m = j;
+                mf = f;
+            }
+        }
+        if (m != i) {
+            int t = v[i];
+            v[i] = v[m];
+            v[m] = t;
+        }
+    }
+    return v;
+}
+
+
+===== Q3 =====
+title: Bubble Sort a Vector
+difficulty: easy lang: cpp type: practice
+blacklist: ""
+whitelist: ""
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Implement the classic bubble sort: repeatedly step through the vector, swapping adjacent elements that are out of order, until everything is ascending. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> bubble_sort(std::vector<int> v)
+
+It must return the vector sorted ascending. The harness prints it space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the sorted elements.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+3 1 4 1 5
+--- TC1 EXPECTED ---
+1 1 3 4 5
+--- TC2 INPUT ---
+1
+42
+--- TC2 EXPECTED ---
+42
+--- TC3 INPUT ---
+6
+10 -2 0 7 7 3
+--- TC3 EXPECTED ---
+-2 0 3 7 7 10
+--- TC4 INPUT ---
+4
+5 5 5 5
+--- TC4 EXPECTED ---
+5 5 5 5
+--- TC5 INPUT ---
+7
+9 8 7 6 5 4 3
+--- TC5 EXPECTED ---
+3 4 5 6 7 8 9
+SOURCECODE (orig):
+std::vector<int> bubble_sort(std::vector<int> v) {
+    int n = (int)v.size();
+    for (int p = 0; p < n - 1; p++)
+        for (int j = 0; j < n - 1 - p; j++)
+            if (v[j] > v[j + 1]) {
+                int t = v[j];
+                v[j] = v[j + 1];
+                v[j + 1] = t;
+            }
+    return v;
+}
+
+
+===== Q4 =====
+title: Selection Sort a Vector
+difficulty: easy lang: cpp type: practice
+blacklist: ""
+whitelist: ""
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Implement selection sort: on every pass, select the minimum of the unsorted suffix (leftmost on ties) and swap it into its final position. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> selection_sort(std::vector<int> v)
+
+It must return the vector sorted ascending. The harness prints it space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the sorted elements.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+3 1 4 1 5
+--- TC1 EXPECTED ---
+1 1 3 4 5
+--- TC2 INPUT ---
+1
+42
+--- TC2 EXPECTED ---
+42
+--- TC3 INPUT ---
+6
+10 -2 0 7 7 3
+--- TC3 EXPECTED ---
+-2 0 3 7 7 10
+--- TC4 INPUT ---
+4
+5 5 5 5
+--- TC4 EXPECTED ---
+5 5 5 5
+--- TC5 INPUT ---
+7
+9 8 7 6 5 4 3
+--- TC5 EXPECTED ---
+3 4 5 6 7 8 9
+SOURCECODE (orig):
+std::vector<int> selection_sort(std::vector<int> v) {
+    int n = (int)v.size();
+    for (int i = 0; i < n - 1; i++) {
+        int m = i;
+        for (int j = i + 1; j < n; j++)
+            if (v[j] < v[m]) m = j;
+        if (m != i) {
+            int t = v[i];
+            v[i] = v[m];
+            v[m] = t;
+        }
+    }
+    return v;
+}
+
+
+===== Q5 =====
+title: Insertion Sort a Vector
+difficulty: easy lang: cpp type: practice
+blacklist: ""
+whitelist: ""
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Implement insertion sort: grow a sorted prefix by taking the next element and shifting larger ones right until it drops into place. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> insertion_sort(std::vector<int> v)
+
+It must return the vector sorted ascending. The harness prints it space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the sorted elements.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+3 1 4 1 5
+--- TC1 EXPECTED ---
+1 1 3 4 5
+--- TC2 INPUT ---
+1
+42
+--- TC2 EXPECTED ---
+42
+--- TC3 INPUT ---
+6
+10 -2 0 7 7 3
+--- TC3 EXPECTED ---
+-2 0 3 7 7 10
+--- TC4 INPUT ---
+4
+5 5 5 5
+--- TC4 EXPECTED ---
+5 5 5 5
+--- TC5 INPUT ---
+7
+9 8 7 6 5 4 3
+--- TC5 EXPECTED ---
+3 4 5 6 7 8 9
+SOURCECODE (orig):
+std::vector<int> insertion_sort(std::vector<int> v) {
+    for (int i = 1; i < (int)v.size(); i++) {
+        int key = v[i], j = i - 1;
+        while (j >= 0 && v[j] > key) {
+            v[j + 1] = v[j];
+            j--;
+        }
+        v[j + 1] = key;
+    }
+    return v;
+}
+
+
+===== Q6 =====
+title: Bubble Sort Swap Count
+difficulty: easy lang: cpp type: practice
+blacklist: ""
+whitelist: ""
+inputconstrains: "1 <= n <= 1000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Run the classic bubble sort and count how many adjacent swaps it performs — this equals the number of inversions in the input. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bubble_swaps(std::vector<int> v)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the number of swaps.
+
+Constraints:
+1 <= n <= 1000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+3 1 4 1 5
+--- TC1 EXPECTED ---
+3
+--- TC2 INPUT ---
+4
+1 2 3 4
+--- TC2 EXPECTED ---
+0
+--- TC3 INPUT ---
+6
+10 -2 0 7 7 3
+--- TC3 EXPECTED ---
+7
+--- TC4 INPUT ---
+2
+2 1
+--- TC4 EXPECTED ---
+1
+--- TC5 INPUT ---
+7
+9 8 7 6 5 4 3
+--- TC5 EXPECTED ---
+21
+SOURCECODE (orig):
+int bubble_swaps(std::vector<int> v) {
+    int n = (int)v.size(), swaps = 0;
+    for (int p = 0; p < n - 1; p++)
+        for (int j = 0; j < n - 1 - p; j++)
+            if (v[j] > v[j + 1]) {
+                int t = v[j];
+                v[j] = v[j + 1];
+                v[j + 1] = t;
+                swaps++;
+            }
+    return swaps;
+}
+
+
+===== Q7 =====
+title: Selection Sort Swap Count
+difficulty: easy lang: cpp type: practice
+blacklist: ""
+whitelist: ""
+inputconstrains: "1 <= n <= 1000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Run selection sort — each pass selects the minimum of the remaining suffix (leftmost on ties) and swaps it with the current position — and count the swaps actually performed. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int selection_swaps(std::vector<int> v)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the number of swaps.
+
+Constraints:
+1 <= n <= 1000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+3 1 4 1 5
+--- TC1 EXPECTED ---
+3
+--- TC2 INPUT ---
+4
+5 5 5 5
+--- TC2 EXPECTED ---
+0
+--- TC3 INPUT ---
+6
+10 -2 0 7 7 3
+--- TC3 EXPECTED ---
+3
+--- TC4 INPUT ---
+2
+2 1
+--- TC4 EXPECTED ---
+1
+--- TC5 INPUT ---
+7
+9 8 7 6 5 4 3
+--- TC5 EXPECTED ---
+3
+SOURCECODE (orig):
+int selection_swaps(std::vector<int> v) {
+    int n = (int)v.size(), swaps = 0;
+    for (int i = 0; i < n - 1; i++) {
+        int m = i;
+        for (int j = i + 1; j < n; j++)
+            if (v[j] < v[m]) m = j;
+        if (m != i) {
+            int t = v[i];
+            v[i] = v[m];
+            v[m] = t;
+            swaps++;
+        }
+    }
+    return swaps;
+}
+
+
+===== Q8 =====
+title: Insertion Sort Shift Count
+difficulty: easy lang: cpp type: practice
+blacklist: ""
+whitelist: ""
+inputconstrains: "1 <= n <= 1000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Run insertion sort and count how many times an element is shifted one slot to the right while making room for the inserted key. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int insertion_shifts(std::vector<int> v)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the number of shifts.
+
+Constraints:
+1 <= n <= 1000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+3 1 4 1 5
+--- TC1 EXPECTED ---
+3
+--- TC2 INPUT ---
+4
+1 2 3 4
+--- TC2 EXPECTED ---
+0
+--- TC3 INPUT ---
+6
+10 -2 0 7 7 3
+--- TC3 EXPECTED ---
+7
+--- TC4 INPUT ---
+5
+1 1 2 2 1
+--- TC4 EXPECTED ---
+2
+--- TC5 INPUT ---
+2
+2 1
+--- TC5 EXPECTED ---
+1
+SOURCECODE (orig):
+int insertion_shifts(std::vector<int> v) {
+    int shifts = 0;
+    for (int i = 1; i < (int)v.size(); i++) {
+        int key = v[i], j = i - 1;
+        while (j >= 0 && v[j] > key) {
+            v[j + 1] = v[j];
+            j--;
+            shifts++;
+        }
+        v[j + 1] = key;
+    }
+    return shifts;
+}
+
+
+===== Q9 =====
+title: Sort the Exam Scores
+difficulty: easy lang: cpp type: practice
+blacklist: ""
+whitelist: ""
+inputconstrains: "1 <= n <= 10000, 0 <= scores <= 100"
+DESCRIPTION:
+A teacher needs the class's exam scores in ascending order before publishing the grade list. Sort them with bubble sort. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> bubble_scores(std::vector<int> v)
+
+It must return the scores sorted ascending. The harness prints them space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated scores.
+
+Output Format:
+One line with the sorted scores.
+
+Constraints:
+1 <= n <= 10000, 0 <= scores <= 100
+--- TC1 INPUT ---
+6
+72 88 65 90 72 81
+--- TC1 EXPECTED ---
+65 72 72 81 88 90
+--- TC2 INPUT ---
+1
+50
+--- TC2 EXPECTED ---
+50
+--- TC3 INPUT ---
+5
+100 0 50 25 75
+--- TC3 EXPECTED ---
+0 25 50 75 100
+--- TC4 INPUT ---
+4
+60 60 60 60
+--- TC4 EXPECTED ---
+60 60 60 60
+--- TC5 INPUT ---
+7
+45 92 38 77 81 29 66
+--- TC5 EXPECTED ---
+29 38 45 66 77 81 92
+SOURCECODE (orig):
+std::vector<int> bubble_scores(std::vector<int> v) {
+    int n = (int)v.size();
+    for (int p = 0; p < n - 1; p++)
+        for (int j = 0; j < n - 1 - p; j++)
+            if (v[j] > v[j + 1]) {
+                int t = v[j];
+                v[j] = v[j + 1];
+                v[j + 1] = t;
+            }
+    return v;
+}
+
+
+===== Q10 =====
+title: Rank Players by Score
+difficulty: easy lang: cpp type: practice
+blacklist: ""
+whitelist: ""
+inputconstrains: "1 <= n <= 10000, 0 <= scores <= 1000000"
+DESCRIPTION:
+A leaderboard shows the highest score first. Sort the players' scores DESCENDING with a selection-sort pass that repeatedly selects the maximum of the remaining suffix. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> selection_rank(std::vector<int> v)
+
+It must return the scores in descending order. The harness prints them space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated scores.
+
+Output Format:
+One line with the scores, highest first.
+
+Constraints:
+1 <= n <= 10000, 0 <= scores <= 1000000
+--- TC1 INPUT ---
+5
+1200 950 1500 875 1500
+--- TC1 EXPECTED ---
+1500 1500 1200 950 875
+--- TC2 INPUT ---
+2
+10 20
+--- TC2 EXPECTED ---
+20 10
+--- TC3 INPUT ---
+4
+7 7 7 7
+--- TC3 EXPECTED ---
+7 7 7 7
+--- TC4 INPUT ---
+6
+30 10 40 20 50 0
+--- TC4 EXPECTED ---
+50 40 30 20 10 0
+--- TC5 INPUT ---
+1
+99
+--- TC5 EXPECTED ---
+99
+SOURCECODE (orig):
+std::vector<int> selection_rank(std::vector<int> v) {
+    int n = (int)v.size();
+    for (int i = 0; i < n - 1; i++) {
+        int m = i;
+        for (int j = i + 1; j < n; j++)
+            if (v[j] > v[m]) m = j;
+        if (m != i) {
+            int t = v[i];
+            v[i] = v[m];
+            v[m] = t;
+        }
+    }
+    return v;
+}
+
+
+===== Q11 =====
+title: Sort the Invoice Amounts
+difficulty: easy lang: cpp type: practice
+blacklist: ""
+whitelist: ""
+inputconstrains: "1 <= n <= 10000, 0 <= amounts <= 1000000"
+DESCRIPTION:
+An accountant wants a month's invoice amounts in ascending order. Sort them with insertion sort — most months are almost ordered already. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> insertion_amounts(std::vector<int> v)
+
+It must return the amounts sorted ascending. The harness prints them space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated amounts.
+
+Output Format:
+One line with the sorted amounts.
+
+Constraints:
+1 <= n <= 10000, 0 <= amounts <= 1000000
+--- TC1 INPUT ---
+6
+250 90 310 90 45 500
+--- TC1 EXPECTED ---
+45 90 90 250 310 500
+--- TC2 INPUT ---
+3
+10 2 33
+--- TC2 EXPECTED ---
+2 10 33
+--- TC3 INPUT ---
+1
+7
+--- TC3 EXPECTED ---
+7
+--- TC4 INPUT ---
+5
+5 4 3 2 1
+--- TC4 EXPECTED ---
+1 2 3 4 5
+--- TC5 INPUT ---
+8
+12 5 8 5 20 1 9 9
+--- TC5 EXPECTED ---
+1 5 5 8 9 9 12 20
+SOURCECODE (orig):
+std::vector<int> insertion_amounts(std::vector<int> v) {
+    for (int i = 1; i < (int)v.size(); i++) {
+        int key = v[i], j = i - 1;
+        while (j >= 0 && v[j] > key) {
+            v[j + 1] = v[j];
+            j--;
+        }
+        v[j + 1] = key;
+    }
+    return v;
+}
+
+
+===== Q12 =====
+title: Shifts on a Nearly Sorted Price List
+difficulty: easy lang: cpp type: practice
+blacklist: ""
+whitelist: ""
+inputconstrains: "1 <= n <= 1000, 0 <= prices <= 1000000"
+DESCRIPTION:
+A price list is nearly sorted — every element sits at most a couple of slots from its final position. Insertion sort shines here: count how many shifts it performs (a fully sorted list needs zero). The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int price_shifts(std::vector<int> v)
+
+Input Format:
+Line 1: n. Line 2: n space-separated prices.
+
+Output Format:
+One line with the number of shifts insertion sort performs.
+
+Constraints:
+1 <= n <= 1000, 0 <= prices <= 1000000
+--- TC1 INPUT ---
+6
+10 12 11 13 12 14
+--- TC1 EXPECTED ---
+2
+--- TC2 INPUT ---
+5
+1 2 4 3 5
+--- TC2 EXPECTED ---
+1
+--- TC3 INPUT ---
+8
+2 3 1 4 5 7 6 8
+--- TC3 EXPECTED ---
+3
+--- TC4 INPUT ---
+4
+9 10 11 8
+--- TC4 EXPECTED ---
+3
+--- TC5 INPUT ---
+7
+5 6 7 8 9 1 2
+--- TC5 EXPECTED ---
+10
+SOURCECODE (orig):
+int price_shifts(std::vector<int> v) {
+    int shifts = 0;
+    for (int i = 1; i < (int)v.size(); i++) {
+        int key = v[i], j = i - 1;
+        while (j >= 0 && v[j] > key) {
+            v[j + 1] = v[j];
+            j--;
+            shifts++;
+        }
+        v[j + 1] = key;
+    }
+    return shifts;
+}
+
+
+===== Q13 =====
+title: Roster After k Bubble Passes
+difficulty: medium lang: cpp type: practice
+blacklist: "std::sort,sort("
+whitelist: "for"
+inputconstrains: "1 <= n <= 100, 0 <= k <= 1000"
+DESCRIPTION:
+A duty roster is being sorted by bubble sort while the supervisor watches. Predict the state after EXACTLY k passes, where one pass is a full left-to-right scan (j from 0 to n-2) swapping adjacent out-of-order pairs. k may exceed the number of passes actually needed — extra passes leave a sorted roster unchanged. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> bubble_after_k(std::vector<int> v, int k)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: k.
+
+Output Format:
+One line with the roster after exactly k passes.
+
+Constraints:
+1 <= n <= 100, 0 <= k <= 1000
+--- TC1 INPUT ---
+5
+5 1 4 2 8
+1
+--- TC1 EXPECTED ---
+1 4 2 5 8
+--- TC2 INPUT ---
+4
+3 2 1 4
+2
+--- TC2 EXPECTED ---
+1 2 3 4
+--- TC3 INPUT ---
+3
+7 7 7
+3
+--- TC3 EXPECTED ---
+7 7 7
+--- TC4 INPUT ---
+6
+9 8 7 6 5 4
+6
+--- TC4 EXPECTED ---
+4 5 6 7 8 9
+--- TC5 INPUT ---
+1
+42
+5
+--- TC5 EXPECTED ---
+42
+SOURCECODE (orig):
+std::vector<int> bubble_after_k(std::vector<int> v, int k) {
+    int n = (int)v.size();
+    for (int p = 0; p < k; p++)
+        for (int j = 0; j < n - 1; j++)
+            if (v[j] > v[j + 1]) {
+                int t = v[j];
+                v[j] = v[j + 1];
+                v[j + 1] = t;
+            }
+    return v;
+}
+
+
+===== Q14 =====
+title: Standings After k Selection Passes
+difficulty: medium lang: cpp type: practice
+blacklist: "std::sort,sort("
+whitelist: "for"
+inputconstrains: "1 <= n <= 100, 0 <= k <= 1000"
+DESCRIPTION:
+A tournament table is sorted with selection sort. Predict the standings after EXACTLY k passes, where pass i (0-based) finds the minimum of the unsorted suffix (leftmost on ties) and swaps it into position i. k may exceed n-1; extra passes change nothing. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> selection_after_k(std::vector<int> v, int k)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: k.
+
+Output Format:
+One line with the standings after exactly k passes.
+
+Constraints:
+1 <= n <= 100, 0 <= k <= 1000
+--- TC1 INPUT ---
+5
+5 1 4 2 8
+2
+--- TC1 EXPECTED ---
+1 2 4 5 8
+--- TC2 INPUT ---
+4
+9 7 8 6
+1
+--- TC2 EXPECTED ---
+6 7 8 9
+--- TC3 INPUT ---
+3
+2 1 3
+3
+--- TC3 EXPECTED ---
+1 2 3
+--- TC4 INPUT ---
+6
+4 4 3 3 2 2
+4
+--- TC4 EXPECTED ---
+2 2 3 3 4 4
+--- TC5 INPUT ---
+1
+5
+0
+--- TC5 EXPECTED ---
+5
+SOURCECODE (orig):
+std::vector<int> selection_after_k(std::vector<int> v, int k) {
+    int n = (int)v.size();
+    for (int i = 0; i < k && i < n - 1; i++) {
+        int m = i;
+        for (int j = i + 1; j < n; j++)
+            if (v[j] < v[m]) m = j;
+        if (m != i) {
+            int t = v[i];
+            v[i] = v[m];
+            v[m] = t;
+        }
+    }
+    return v;
+}
+
+
+===== Q15 =====
+title: Comparisons for Early-Stop Bubble
+difficulty: medium lang: cpp type: practice
+blacklist: "std::sort,sort("
+whitelist: "while"
+inputconstrains: "1 <= n <= 100"
+DESCRIPTION:
+Bubble sort can stop early: pass over the array (full scans, j from 0 to n-2, one comparison per adjacent check) and stop after the first pass that performs NO swaps. Count the total number of adjacent comparisons performed — a sorted input costs exactly n-1. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bubble_comparisons(std::vector<int> v)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the total comparison count.
+
+Constraints:
+1 <= n <= 100
+--- TC1 INPUT ---
+4
+1 2 3 4
+--- TC1 EXPECTED ---
+3
+--- TC2 INPUT ---
+4
+4 3 2 1
+--- TC2 EXPECTED ---
+12
+--- TC3 INPUT ---
+5
+2 1 3 4 5
+--- TC3 EXPECTED ---
+8
+--- TC4 INPUT ---
+3
+7 7 7
+--- TC4 EXPECTED ---
+2
+--- TC5 INPUT ---
+1
+9
+--- TC5 EXPECTED ---
+0
+SOURCECODE (orig):
+int bubble_comparisons(std::vector<int> v) {
+    int n = (int)v.size(), comps = 0;
+    bool swapped = true;
+    while (swapped) {
+        swapped = false;
+        for (int j = 0; j < n - 1; j++) {
+            comps++;
+            if (v[j] > v[j + 1]) {
+                int t = v[j];
+                v[j] = v[j + 1];
+                v[j + 1] = t;
+                swapped = true;
+            }
+        }
+    }
+    return comps;
+}
+
+
+===== Q16 =====
+title: Passes Until the Deck Is Sorted
+difficulty: medium lang: cpp type: practice
+blacklist: "std::sort,sort("
+whitelist: "while"
+inputconstrains: "1 <= n <= 100"
+DESCRIPTION:
+The same early-stop bubble sort: full left-to-right scans until a pass makes no swaps. Report the number of passes performed INCLUDING the final verification pass — a sorted deck needs exactly 1. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int bubble_passes(std::vector<int> v)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the number of passes.
+
+Constraints:
+1 <= n <= 100
+--- TC1 INPUT ---
+4
+1 2 3 4
+--- TC1 EXPECTED ---
+1
+--- TC2 INPUT ---
+4
+4 3 2 1
+--- TC2 EXPECTED ---
+4
+--- TC3 INPUT ---
+5
+2 1 3 4 5
+--- TC3 EXPECTED ---
+2
+--- TC4 INPUT ---
+6
+5 1 4 2 8 3
+--- TC4 EXPECTED ---
+4
+--- TC5 INPUT ---
+1
+9
+--- TC5 EXPECTED ---
+1
+SOURCECODE (orig):
+int bubble_passes(std::vector<int> v) {
+    int n = (int)v.size(), passes = 0;
+    bool swapped = true;
+    while (swapped) {
+        swapped = false;
+        passes++;
+        for (int j = 0; j < n - 1; j++)
+            if (v[j] > v[j + 1]) {
+                int t = v[j];
+                v[j] = v[j + 1];
+                v[j + 1] = t;
+                swapped = true;
+            }
+    }
+    return passes;
+}
+
+
+===== Q17 =====
+title: Workbook After k Insertion Steps
+difficulty: medium lang: cpp type: practice
+blacklist: "std::sort,sort("
+whitelist: "for"
+inputconstrains: "1 <= n <= 100, 0 <= k <= 1000"
+DESCRIPTION:
+A workbook's page counts are being sorted by insertion sort. Predict the state after EXACTLY k steps, where step i (i = 1, 2, 3, ...) fully inserts the element at index i into the sorted prefix v[0..i-1]. k may exceed n-1 — the workbook is then fully sorted. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> insertion_after_k(std::vector<int> v, int k)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: k.
+
+Output Format:
+One line with the workbook after exactly k insertion steps.
+
+Constraints:
+1 <= n <= 100, 0 <= k <= 1000
+--- TC1 INPUT ---
+5
+5 1 4 2 8
+2
+--- TC1 EXPECTED ---
+1 4 5 2 8
+--- TC2 INPUT ---
+4
+3 2 1 4
+3
+--- TC2 EXPECTED ---
+1 2 3 4
+--- TC3 INPUT ---
+3
+7 7 7
+5
+--- TC3 EXPECTED ---
+7 7 7
+--- TC4 INPUT ---
+6
+9 8 7 6 5 4
+1
+--- TC4 EXPECTED ---
+8 9 7 6 5 4
+--- TC5 INPUT ---
+1
+42
+0
+--- TC5 EXPECTED ---
+42
+SOURCECODE (orig):
+std::vector<int> insertion_after_k(std::vector<int> v, int k) {
+    int n = (int)v.size();
+    for (int i = 1; i <= k && i < n; i++) {
+        int key = v[i], j = i - 1;
+        while (j >= 0 && v[j] > key) {
+            v[j + 1] = v[j];
+            j--;
+        }
+        v[j + 1] = key;
+    }
+    return v;
+}
+
+
+===== Q18 =====
+title: Wordlist by Length Then Alphabet
+difficulty: hard lang: cpp type: practice
+blacklist: "std::sort,sort("
+whitelist: "for"
+inputconstrains: "1 <= n <= 200, 1 <= word length <= 20, lowercase letters only"
+DESCRIPTION:
+A dictionary tool must order words by length ascending, breaking ties alphabetically. No library sort is available on this device — implement the ordering manually (insertion sort with the two-part comparison works well). The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<std::string> sort_words(std::vector<std::string> words)
+
+It must return the words ordered by (length, lexicographic). The harness prints them space-separated.
+
+Input Format:
+Line 1: n. Line 2: n whitespace-separated lowercase words.
+
+Output Format:
+One line with the ordered words.
+
+Constraints:
+1 <= n <= 200, 1 <= word length <= 20, lowercase letters only
+--- TC1 INPUT ---
+5
+pear fig apple kiwi date
+--- TC1 EXPECTED ---
+fig date kiwi pear apple
+--- TC2 INPUT ---
+3
+bb aa cc
+--- TC2 EXPECTED ---
+aa bb cc
+--- TC3 INPUT ---
+1
+solo
+--- TC3 EXPECTED ---
+solo
+--- TC4 INPUT ---
+6
+dog cat ox elephant ant bee
+--- TC4 EXPECTED ---
+ox ant bee cat dog elephant
+--- TC5 INPUT ---
+4
+zebra ant apple zoom
+--- TC5 EXPECTED ---
+ant zoom apple zebra
+SOURCECODE (orig):
+std::vector<std::string> sort_words(std::vector<std::string> words) {
+    int n = (int)words.size();
+    for (int i = 1; i < n; i++) {
+        std::string key = words[i];
+        int j = i - 1;
+        while (j >= 0 && (words[j].size() > key.size() ||
+                          (words[j].size() == key.size() && words[j] > key))) {
+            words[j + 1] = words[j];
+            j--;
+        }
+        words[j + 1] = key;
+    }
+    return words;
+}
+
+
+===== Q19 =====
+title: Full Bubble Sort Flight Recorder
+difficulty: hard lang: cpp type: practice
+blacklist: "std::sort,sort("
+whitelist: "for"
+inputconstrains: "1 <= n <= 100"
+DESCRIPTION:
+A teaching app records every intermediate state of bubble sort. Run early-stop bubble sort (full left-to-right scans, stop after the first pass with no swaps) and record the vector's state after EVERY pass, including the final no-swap pass. The harness prints one state per line. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<std::vector<int>> bubble_trace(std::vector<int> v)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line per recorded pass state, elements space-separated.
+
+Constraints:
+1 <= n <= 100
+--- TC1 INPUT ---
+4
+4 3 2 1
+--- TC1 EXPECTED ---
+3 2 1 4
+2 1 3 4
+1 2 3 4
+1 2 3 4
+--- TC2 INPUT ---
+4
+1 2 3 4
+--- TC2 EXPECTED ---
+1 2 3 4
+--- TC3 INPUT ---
+5
+2 1 3 4 5
+--- TC3 EXPECTED ---
+1 2 3 4 5
+1 2 3 4 5
+--- TC4 INPUT ---
+5
+3 1 2 5 4
+--- TC4 EXPECTED ---
+1 2 3 4 5
+1 2 3 4 5
+--- TC5 INPUT ---
+3
+7 7 7
+--- TC5 EXPECTED ---
+7 7 7
+SOURCECODE (orig):
+std::vector<std::vector<int>> bubble_trace(std::vector<int> v) {
+    int n = (int)v.size();
+    std::vector<std::vector<int>> rows;
+    bool swapped = true;
+    while (swapped) {
+        swapped = false;
+        for (int j = 0; j < n - 1; j++)
+            if (v[j] > v[j + 1]) {
+                int t = v[j];
+                v[j] = v[j + 1];
+                v[j + 1] = t;
+                swapped = true;
+            }
+        rows.push_back(v);
+    }
+    return rows;
+}

@@ -1,0 +1,642 @@
+DAY 13 topics=['Hashing and Dictionaries/Sets']
+====================================================================================================
+[0] title='Target Frequency Count' diff=easy topic='Hashing and Dictionaries/Sets' sub='Average Lookup Behaviour' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def count_target(nums, target):
+
+Count how many times target occurs in nums by building a dict frequency map (keys are the values) and looking target up.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+Line 3: target.
+
+Output Format:
+One line with the count.
+
+Constraints:
+1 <= n <= 10000
+-1000000 <= value, target <= 1000000
+sampleinput1='6\n1 2 2 3 2 4\n2'
+sampleoutput1='3'
+sampleinput2='1\n7\n7'
+sampleoutput2='1'
+input1='5\n5 5 5 5 5\n5'
+output1='5'
+input2='6\n1 2 3 4 5 6\n9'
+output2='0'
+input3='7\n-1 -1 0 -1 2 -1 3\n-1'
+output3='4'
+CONSTRAINTS: 1 <= n <= 10000; -1000000 <= value, target <= 1000000
+SRC: 'def count_target(nums, target):\n    freq = {}\n    for x in nums:\n        freq[x] = freq.get(x, 0) + 1\n    return freq.get(target, 0)\n'
+====================================================================================================
+[1] title='Set Union Size' diff=easy topic='Hashing and Dictionaries/Sets' sub='set Operations' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def union_size(a, b):
+
+Return the number of distinct values in the union of the two lists (set(a) | set(b)).
+
+Input Format:
+Line 1: n, the size of a.
+Line 2: n integers.
+Line 3: m, the size of b.
+Line 4: m integers.
+
+Output Format:
+One line with the union size.
+
+Constraints:
+1 <= n, m <= 10000
+-1000000 <= value <= 1000000
+sampleinput1='3\n1 2 3\n3\n3 4 5'
+sampleoutput1='5'
+sampleinput2='2\n1 1\n2\n1 1'
+sampleoutput2='1'
+input1='1\n0\n1\n0'
+output1='1'
+input2='4\n1 2 3 4\n3\n4 5 6'
+output2='6'
+input3='3\n-1 -2 -3\n2\n-3 9'
+output3='4'
+CONSTRAINTS: 1 <= n, m <= 10000; -1000000 <= value <= 1000000
+SRC: 'def union_size(a, b):\n    return len(set(a) | set(b))\n'
+====================================================================================================
+[2] title='Set Intersection Size' diff=easy topic='Hashing and Dictionaries/Sets' sub='set Operations' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def intersection_size(a, b):
+
+Return the number of distinct values present in BOTH lists (set(a) & set(b)).
+
+Input Format:
+Line 1: n, the size of a.
+Line 2: n integers.
+Line 3: m, the size of b.
+Line 4: m integers.
+
+Output Format:
+One line with the intersection size.
+
+Constraints:
+1 <= n, m <= 10000
+-1000000 <= value <= 1000000
+sampleinput1='3\n1 2 3\n3\n3 4 5'
+sampleoutput1='1'
+sampleinput2='2\n1 1\n2\n1 1'
+sampleoutput2='1'
+input1='1\n0\n1\n0'
+output1='1'
+input2='4\n1 2 3 4\n3\n5 6 7'
+output2='0'
+input3='3\n-1 -2 -3\n2\n-3 9'
+output3='1'
+CONSTRAINTS: 1 <= n, m <= 10000; -1000000 <= value <= 1000000
+SRC: 'def intersection_size(a, b):\n    return len(set(a) & set(b))\n'
+====================================================================================================
+[3] title='Symmetric Difference Size' diff=easy topic='Hashing and Dictionaries/Sets' sub='set Operations' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def symdiff_size(a, b):
+
+Return the number of distinct values present in exactly one of the two lists (set(a) ^ set(b)).
+
+Input Format:
+Line 1: n, the size of a.
+Line 2: n integers.
+Line 3: m, the size of b.
+Line 4: m integers.
+
+Output Format:
+One line with the symmetric difference size.
+
+Constraints:
+1 <= n, m <= 10000
+-1000000 <= value <= 1000000
+sampleinput1='3\n1 2 3\n3\n3 4 5'
+sampleoutput1='4'
+sampleinput2='2\n1 1\n2\n1 1'
+sampleoutput2='0'
+input1='1\n0\n1\n0'
+output1='0'
+input2='4\n1 2 3 4\n3\n4 5 6'
+output2='5'
+input3='3\n-1 -2 -3\n2\n-3 9'
+output3='3'
+CONSTRAINTS: 1 <= n, m <= 10000; -1000000 <= value <= 1000000
+SRC: 'def symdiff_size(a, b):\n    return len(set(a) ^ set(b))\n'
+====================================================================================================
+[4] title='First Duplicate Value' diff=easy topic='Hashing and Dictionaries/Sets' sub='Two-Sum and Duplicate Detection' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def first_duplicate(nums):
+
+Scan left to right with a set of seen values and return the first value that appears a second time; return -1 if every value is unique.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the first duplicate or -1.
+
+Constraints:
+1 <= n <= 10000
+-1000000 <= value <= 1000000
+sampleinput1='6\n1 2 3 2 5 1'
+sampleoutput1='2'
+sampleinput2='4\n1 2 3 4'
+sampleoutput2='-1'
+input1='1\n9'
+output1='-1'
+input2='7\n5 4 5 4 5 4 4'
+output2='5'
+input3='5\n-1 0 -1 0 -1'
+output3='-1'
+CONSTRAINTS: 1 <= n <= 10000; -1000000 <= value <= 1000000
+SRC: 'def first_duplicate(nums):\n    seen = set()\n    for x in nums:\n        if x in seen:\n            return x\n        seen.add(x)\n    return -1\n'
+====================================================================================================
+[5] title='All Values Unique' diff=easy topic='Hashing and Dictionaries/Sets' sub='Hashability and Collisions' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def all_unique(nums):
+
+Return True if no value occurs twice in nums, else False — compare the list length with the size of its set.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= n <= 10000
+-1000000 <= value <= 1000000
+sampleinput1='5\n1 2 3 4 5'
+sampleoutput1='True'
+sampleinput2='5\n1 2 3 2 5'
+sampleoutput2='False'
+input1='1\n0'
+output1='True'
+input2='6\n1 1 1 1 1 1'
+output2='False'
+input3='4\n-1 -2 -3 -4'
+output3='True'
+CONSTRAINTS: 1 <= n <= 10000; -1000000 <= value <= 1000000
+SRC: 'def all_unique(nums):\n    return len(set(nums)) == len(nums)\n'
+====================================================================================================
+[6] title='Attendance Distinct Count' diff=easy topic='Hashing and Dictionaries/Sets' sub='Frequency Counting' type=practice bl='' wl=''
+DESC: An event host checks in attendees and wants to know how many DIFFERENT people attended (repeated check-ins count once).
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def distinct_names(names):
+
+names is the list of check-in names in arrival order. Return the number of distinct names.
+
+Input Format:
+Line 1: n, the number of check-ins.
+Line 2: n names, space-separated (single words).
+
+Output Format:
+One line with the distinct count.
+
+Constraints:
+1 <= n <= 5000
+names are single words
+sampleinput1='6\nana bob ana cid bob ana'
+sampleoutput1='3'
+sampleinput2='3\nx y z'
+sampleoutput2='3'
+input1='1\nsolo'
+output1='1'
+input2='5\na a a a a'
+output2='1'
+input3='7\ntim kim tim lim kim tim dim'
+output3='4'
+CONSTRAINTS: 1 <= n <= 5000; names are single words
+SRC: 'def distinct_names(names):\n    seen = set()\n    for name in names:\n        seen.add(name)\n    return len(seen)\n'
+====================================================================================================
+[7] title='Common Grocery Items' diff=easy topic='Hashing and Dictionaries/Sets' sub='set Operations' type=practice bl='' wl=''
+DESC: Two flatmates compare shopping lists to see what BOTH of them bought, printed in alphabetical order.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def common_items(a, b):
+
+Return the sorted list of items present in both lists (distinct, alphabetical order).
+
+Input Format:
+Line 1: n, the size of a.
+Line 2: n items, space-separated (single words).
+Line 3: m, the size of b.
+Line 4: m items, space-separated (single words).
+
+Output Format:
+One line with the common items in alphabetical order, space-separated (guaranteed non-empty in every test).
+
+Constraints:
+1 <= n, m <= 5000
+the intersection is never empty in the tests
+sampleinput1='4\nmilk eggs bread rice\n3\nrice milk jam'
+sampleoutput1='milk rice'
+sampleinput2='2\napples apples\n2\napples pears'
+sampleoutput2='apples'
+input1='3\ntea coffee tea\n1\ntea'
+output1='tea'
+input2='3\nsoap soap soap\n2\nsoap soap'
+output2='soap'
+input3='5\npen ink pad clip note\n4\nnote pad glue ink'
+output3='ink note pad'
+CONSTRAINTS: 1 <= n, m <= 5000; intersection non-empty in every test
+SRC: 'def common_items(a, b):\n    shared = set(a) & set(b)\n    return sorted(shared)\n'
+====================================================================================================
+[8] title='Character Frequency Report' diff=easy topic='Hashing and Dictionaries/Sets' sub='dict Operations' type=practice bl='' wl=''
+DESC: A text analyser reports how many times each character occurs in a line, characters listed in sorted order.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def char_counts(s):
+
+Build a dict mapping each character to its count and return it. The harness prints the report: for every character in sorted key order, one line "ch count".
+
+Input Format:
+One line containing the string s (lowercase letters).
+
+Output Format:
+One line per distinct character: the character, a space, then its count (characters in sorted order).
+
+Constraints:
+1 <= len(s) <= 1000
+sampleinput1='banana'
+sampleoutput1='a 3\nb 1\nn 2'
+sampleinput2='aabbbcc'
+sampleoutput2='a 2\nb 3\nc 2'
+input1='z'
+output1='z 1'
+input2='abcabc'
+output2='a 2\nb 2\nc 2'
+input3='mississippi'
+output3='i 4\nm 1\np 2\ns 4'
+CONSTRAINTS: 1 <= len(s) <= 1000; lowercase letters
+SRC: 'def char_counts(s):\n    counts = {}\n    for ch in s:\n        counts[ch] = counts.get(ch, 0) + 1\n    return counts\n'
+====================================================================================================
+[9] title='Top Review Word' diff=easy topic='Hashing and Dictionaries/Sets' sub='Frequency Counting' type=practice bl='' wl=''
+DESC: A review aggregator highlights the most frequent word of a batch of product reviews; ties are broken alphabetically (smallest word wins).
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def top_word(words):
+
+words is the list of review words. Count frequencies with a dict and return the most frequent word (ties: lexicographically smallest).
+
+Input Format:
+Line 1: n, the number of words.
+Line 2: n words, space-separated (single words).
+
+Output Format:
+One line with the winning word.
+
+Constraints:
+1 <= n <= 5000
+words are single words
+sampleinput1='6\ngood bad good good bad ok'
+sampleoutput1='good'
+sampleinput2='3\none one one'
+sampleoutput2='one'
+input1='4\nb a a b'
+output1='a'
+input2='5\nx y x y z'
+output2='x'
+input3='7\nred blue red green blue red green'
+output3='red'
+CONSTRAINTS: 1 <= n <= 5000; words are single words; tie -> smallest word
+SRC: 'def top_word(words):\n    freq = {}\n    for w in words:\n        freq[w] = freq.get(w, 0) + 1\n    best = None\n    for w in sorted(freq):\n        if best is None or freq[w] > freq[best]:\n            best = w\n    return best\n'
+====================================================================================================
+[10] title='Pairs Adding to a Bill' diff=medium topic='Hashing and Dictionaries/Sets' sub='Two-Sum and Duplicate Detection' type=practice bl='itertools' wl='return'
+DESC: A restaurant till counts how many unordered pairs of menu items have prices adding exactly to a coupon value.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def count_pairs(nums, target):
+
+Count pairs (i, j) with i < j and nums[i] + nums[j] == target. Use a dict of counts of values seen so far — one pass.
+
+Input Format:
+Line 1: n, the number of prices.
+Line 2: n integers.
+Line 3: target.
+
+Output Format:
+One line with the number of pairs.
+
+Constraints:
+1 <= n <= 10000
+-1000000 <= value, target <= 1000000
+sampleinput1='5\n1 5 7 -1 5\n6'
+sampleoutput1='3'
+sampleinput2='4\n2 2 2 2\n4'
+sampleoutput2='6'
+input1='1\n3\n6'
+output1='0'
+input2='6\n1 1 1 1 1 1\n2'
+output2='15'
+input3='5\n0 0 0 0 0\n0'
+output3='10'
+CONSTRAINTS: 1 <= n <= 10000; -1000000 <= value, target <= 1000000
+SRC: 'def count_pairs(nums, target):\n    freq = {}\n    pairs = 0\n    for x in nums:\n        pairs += freq.get(target - x, 0)\n        freq[x] = freq.get(x, 0) + 1\n    return pairs\n'
+====================================================================================================
+[11] title='Key-Value Store Terminal' diff=medium topic='Hashing and Dictionaries/Sets' sub='dict Operations' type=practice bl='eval(' wl='len('
+DESC: A toy key-value store reads a fixed command log: put k v, get k, del k and size. get prints the stored value or -1 when the key is absent; size prints the number of stored keys; put and del print nothing.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def dict_ops(ops):
+
+ops is the list of command strings. Maintain a dict and return the list of outputs of the get and size commands in order.
+
+Input Format:
+Line 1: m, the number of commands.
+Lines 2..m+1: one command per line.
+
+Output Format:
+One line per output of get / size (a number). Every test has at least one such command.
+
+Constraints:
+1 <= m <= 2000
+-100000 <= k, v <= 100000
+del may target an absent key (ignore it)
+sampleinput1='6\nput 1 10\nput 2 20\nget 1\ndel 1\nget 1\nsize'
+sampleoutput1='10\n-1\n1'
+sampleinput2='4\nsize\nput 5 5\nsize\nget 5'
+sampleoutput2='0\n1\n5'
+input1='3\nget 9\nput 9 -1\nget 9'
+output1='-1\n-1'
+input2='7\nput 3 30\nput 4 40\nput 3 31\nget 3\ndel 3\nget 3\nsize'
+output2='31\n-1\n1'
+input3='5\nput 0 0\ndel 7\nsize\nget 0\nget 7'
+output3='1\n0\n-1'
+CONSTRAINTS: 1 <= m <= 2000; -100000 <= k, v <= 100000
+SRC: 'def dict_ops(ops):\n    store = {}\n    res = []\n    for op in ops:\n        parts = op.split()\n        cmd = parts[0]\n        if cmd == "put":\n            store[int(parts[1])] = int(parts[2])\n        elif cmd == "get":\n            res.append(store.get(int(parts[1]), -1))\n        elif cmd == "del":\n            store.pop(int(parts[1]), None)\n        else:\n            res.append(len(store
+====================================================================================================
+[12] title='Badge Clash Alert' diff=medium topic='Hashing and Dictionaries/Sets' sub='Two-Sum and Duplicate Detection' type=practice bl='itertools' wl='return'
+DESC: A security system flags when the same badge is swiped again within k swipes of its previous swipe.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def nearby_duplicate(nums, k):
+
+nums is the list of badge ids in swipe order. Return True if some value repeats at two positions i != j with |i - j| <= k, else False.
+
+Input Format:
+Line 1: n and k, space-separated.
+Line 2: n integers.
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= n <= 10000
+1 <= k <= n
+-1000000 <= badge id <= 1000000
+sampleinput1='6 2\n1 2 3 1 4 5'
+sampleoutput1='False'
+sampleinput2='6 1\n1 2 3 1 4 5'
+sampleoutput2='False'
+input1='1 1\n7'
+output1='False'
+input2='5 4\n9 8 7 6 9'
+output2='True'
+input3='4 3\n-1 -1 -1 -1'
+output3='True'
+CONSTRAINTS: 1 <= n <= 10000; 1 <= k <= n
+SRC: 'def nearby_duplicate(nums, k):\n    last = {}\n    for i, x in enumerate(nums):\n        if x in last and i - last[x] <= k:\n            return True\n        last[x] = i\n    return False\n'
+====================================================================================================
+[13] title='Ransom Note from Magazine' diff=medium topic='Hashing and Dictionaries/Sets' sub='Frequency Counting' type=practice bl='count(' wl='get('
+DESC: A note must be assembled by cutting letters out of a magazine word — each magazine letter can be used at most once.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def can_build(note, magazine):
+
+Count letter frequencies of both words with dicts and return True if the magazine word covers every letter of the note, else False.
+
+Input Format:
+Line 1: the note (one lowercase word).
+Line 2: the magazine (one lowercase word).
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= len(note), len(magazine) <= 1000
+lowercase letters only
+sampleinput1='aa\naab'
+sampleoutput1='True'
+sampleinput2='abc\nab'
+sampleoutput2='False'
+input1='note\nstone'
+output1='True'
+input2='aaa\naa'
+output2='False'
+input3='xyz\nxxyyzz'
+output3='True'
+CONSTRAINTS: 1 <= len(note), len(magazine) <= 1000; lowercase letters
+SRC: 'def can_build(note, magazine):\n    need = {}\n    for ch in note:\n        need[ch] = need.get(ch, 0) + 1\n    have = {}\n    for ch in magazine:\n        have[ch] = have.get(ch, 0) + 1\n    for ch in need:\n        if have.get(ch, 0) < need[ch]:\n            return False\n    return True\n'
+====================================================================================================
+[14] title='Top k Trending Topics' diff=medium topic='Hashing and Dictionaries/Sets' sub='Frequency Counting' type=practice bl='Counter' wl='sorted('
+DESC: A trends board lists the k most frequent topic ids: by count descending, ties broken by smaller id first.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def top_frequent(nums, k):
+
+nums are topic mentions. Count with a dict, order by (-count, id), and return the first k ids.
+
+Input Format:
+Line 1: n and k, space-separated (1 <= k <= distinct ids).
+Line 2: n integers.
+
+Output Format:
+One line with the k ids, space-separated.
+
+Constraints:
+1 <= n <= 10000
+1 <= k <= number of distinct values
+-1000000 <= id <= 1000000
+sampleinput1='6 2\n1 1 2 2 3 3'
+sampleoutput1='1 2'
+sampleinput2='5 1\n4 4 4 5 5'
+sampleoutput2='4'
+input1='3 3\n7 8 9'
+output1='7 8 9'
+input2='8 3\n1 2 2 3 3 3 4 4'
+output2='3 2 4'
+input3='4 2\n-1 -1 0 0'
+output3='-1 0'
+CONSTRAINTS: 1 <= n <= 10000; 1 <= k <= distinct count
+SRC: 'def top_frequent(nums, k):\n    freq = {}\n    for x in nums:\n        freq[x] = freq.get(x, 0) + 1\n    ordered = sorted(freq.keys(), key=lambda x: (-freq[x], x))\n    return ordered[:k]\n'
+====================================================================================================
+[15] title='Rolling Distinct Client Count' diff=medium topic='Hashing and Dictionaries/Sets' sub='dict Operations' type=practice bl='itertools' wl='len('
+DESC: An analytics job reports, for every window of k consecutive events, how many DISTINCT client ids appear in that window.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def window_distincts(nums, k):
+
+Slide a dict frequency map over the windows (add the entering id, drop the leaving id) and return the list of distinct counts.
+
+Input Format:
+Line 1: n and k, space-separated (1 <= k <= n).
+Line 2: n integers.
+
+Output Format:
+One line with n-k+1 counts, space-separated.
+
+Constraints:
+1 <= n <= 10000
+1 <= k <= n
+-1000000 <= id <= 1000000
+sampleinput1='6 2\n1 2 1 3 3 3'
+sampleoutput1='2 2 2 1 1'
+sampleinput2='4 4\n1 2 3 4'
+sampleoutput2='4'
+input1='1 1\n5'
+output1='1'
+input2='7 3\n1 1 2 2 3 3 1'
+output2='2 2 2 2 2'
+input3='5 5\n9 9 9 9 9'
+output3='1'
+CONSTRAINTS: 1 <= n <= 10000; 1 <= k <= n
+SRC: 'def window_distincts(nums, k):\n    freq = {}\n    res = []\n    for i, x in enumerate(nums):\n        freq[x] = freq.get(x, 0) + 1\n        if i >= k:\n            y = nums[i - k]\n            freq[y] -= 1\n            if freq[y] == 0:\n                del freq[y]\n        if i >= k - 1:\n            res.append(len(freq))\n    return res\n'
+====================================================================================================
+[16] title='Two-Sum Checkout Indices' diff=hard topic='Hashing and Dictionaries/Sets' sub='Two-Sum and Duplicate Detection' type=practice bl='itertools' wl='return'
+DESC: A payment gateway finds the first pair of transaction amounts that sum to a settlement target and reports their positions.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def two_sum(nums, target):
+
+Scan once with a dict value -> earliest index seen. At position j, if target - nums[j] was seen before, return [that earlier index, j]; otherwise remember nums[j] (keep the earliest index). If no pair exists return [-1, -1].
+
+Input Format:
+Line 1: n, the number of amounts.
+Line 2: n integers.
+Line 3: target.
+
+Output Format:
+One line with the two indices space-separated, or -1 -1.
+
+Constraints:
+1 <= n <= 10000
+-1000000 <= value, target <= 1000000
+sampleinput1='5\n2 7 11 15 4\n9'
+sampleoutput1='0 1'
+sampleinput2='4\n3 2 4\n6'
+sampleoutput2='1 2'
+input1='3\n1 2 3\n100'
+output1='-1 -1'
+input2='6\n5 5 5 5 5 5\n10'
+output2='0 1'
+input3='4\n-3 4 3 90\n0'
+output3='0 2'
+CONSTRAINTS: 1 <= n <= 10000; -1000000 <= value, target <= 1000000
+SRC: 'def two_sum(nums, target):\n    seen = {}\n    for j, x in enumerate(nums):\n        if target - x in seen:\n            return [seen[target - x], j]\n        if x not in seen:\n            seen[x] = j\n    return [-1, -1]\n'
+====================================================================================================
+[17] title='Count the Anagram Groups' diff=hard topic='Hashing and Dictionaries/Sets' sub='Frequency Counting' type=practice bl='itertools' wl='sorted('
+DESC: A word-game server buckets a word list into anagram groups (same letters, any order, case given lowercase) and reports the group profile.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def anagram_groups(words):
+
+Group words by their sorted-letter signature with a dict and return the list of group sizes sorted in descending order. The harness prints the number of groups, then the sizes.
+
+Input Format:
+Line 1: n, the number of words.
+Line 2: n words, space-separated (single lowercase words).
+
+Output Format:
+Line 1: the number of groups.
+Line 2: the group sizes in descending order, space-separated.
+
+Constraints:
+1 <= n <= 200
+1 <= len(word) <= 20
+sampleinput1='6\neat tea tan ate nat bat'
+sampleoutput1='3\n3 2 1'
+sampleinput2='3\nabc bca cab'
+sampleoutput2='1\n3'
+input1='1\nsolo'
+output1='1\n1'
+input2='5\naa a aa aa a'
+output2='2\n3 2'
+input3='7\nlisten silent enlist google gogole inlets tinsel'
+output3='2\n5 2'
+CONSTRAINTS: 1 <= n <= 200; 1 <= len(word) <= 20; lowercase words
+SRC: 'def anagram_groups(words):\n    groups = {}\n    for w in words:\n        key = "".join(sorted(w))\n        groups[key] = groups.get(key, 0) + 1\n    return sorted(groups.values(), reverse=True)\n'
+====================================================================================================
+[18] title='Longest Unique-Client Call Window' diff=hard topic='Hashing and Dictionaries/Sets' sub='dict Operations' type=practice bl='itertools' wl='in '
+DESC: A call router logs a stream of client ids and wants the longest stretch of the stream with no repeated client.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def longest_unique(s):
+
+s is a string of client codes (letters). Slide a window with a dict of last positions and return the length of the longest substring without repeating characters.
+
+Input Format:
+One line containing the string s (lowercase letters).
+
+Output Format:
+One line with the length.
+
+Constraints:
+1 <= len(s) <= 100
+sampleinput1='abcabcbb'
+sampleoutput1='3'
+sampleinput2='bbbbb'
+sampleoutput2='1'
+input1='pwwkew'
+output1='3'
+input2='abcdefgh'
+output2='8'
+input3='abacabadabacaba'
+output3='3'
+CONSTRAINTS: 1 <= len(s) <= 100; lowercase letters
+SRC: 'def longest_unique(s):\n    last = {}\n    start = 0\n    best = 0\n    for i, ch in enumerate(s):\n        if ch in last and last[ch] >= start:\n            start = last[ch] + 1\n        last[ch] = i\n        if i - start + 1 > best:\n            best = i - start + 1\n    return best\n'
+====================================================================================================
+[19] title='Subarray Totals Equal to K' diff=hard topic='Hashing and Dictionaries/Sets' sub='Frequency Counting' type=practice bl='itertools' wl='get('
+DESC: An analytics engine counts how many contiguous blocks of daily revenue total exactly k.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def count_subarrays(nums, k):
+
+Count subarrays whose sum equals k with prefix sums and a dict of prefix counts (seed prefix 0 with count 1). Values may be negative.
+
+Input Format:
+Line 1: n and k, space-separated.
+Line 2: n integers.
+
+Output Format:
+One line with the number of subarrays.
+
+Constraints:
+1 <= n <= 2000
+-100 <= value <= 100
+-10000 <= k <= 10000
+sampleinput1='5 9\n1 2 3 4 5'
+sampleoutput1='2'
+sampleinput2='4 0\n1 -1 1 -1'
+sampleoutput2='4'
+input1='3 7\n1 2 3'
+output1='0'
+input2='6 3\n1 2 3 -6 3 3'
+output2='6'
+input3='5 0\n0 0 0 0 0'
+output3='15'
+CONSTRAINTS: 1 <= n <= 2000; -100 <= value <= 100; -10000 <= k <= 10000
+SRC: 'def count_subarrays(nums, k):\n    freq = {0: 1}\n    total = 0\n    ans = 0\n    for x in nums:\n        total += x\n        ans += freq.get(total - k, 0)\n        freq[total] = freq.get(total, 0) + 1\n    return ans\n'

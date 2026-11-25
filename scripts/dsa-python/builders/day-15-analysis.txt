@@ -1,0 +1,655 @@
+DAY 15 topics=['Binary Search Trees and Heaps']
+====================================================================================================
+[0] title='BST Insert' diff=easy topic='Binary Search Trees and Heaps' sub='BST Insertion and Deletion' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class, tree building and the inorder printer) is already set up for you. Implement only this function:
+
+    def bst_insert(root, x):
+
+root is the root TNode of a binary search tree and x is a value NOT already in it. Insert x at the correct spot (smaller values go left, larger go right) and return the root. The harness prints the tree's inorder fill, which must stay ascending.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the BST in level order (-1 marks a missing child).
+Line 3: the new value x.
+
+Output Format:
+One line with the inorder fill after the insert, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= value, x <= 1000000
+x is not already in the tree.
+sampleinput1='7\n50 30 70 20 40 60 80\n55'
+sampleoutput1='20 30 40 50 55 60 70 80'
+sampleinput2='1\n10\n5'
+sampleoutput2='5 10'
+input1='7\n50 30 70 20 40 60 80\n90'
+output1='20 30 40 50 60 70 80 90'
+input2='3\n2 1 3\n4'
+output2='1 2 3 4'
+input3='5\n10 5 15 3 7\n8'
+output3='3 5 7 8 10 15'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value, x <= 1000000; x not already in the tree
+SRC: 'def bst_insert(root, x):\n    if root is None:\n        return TNode(x)\n    if x < root.val:\n        root.left = bst_insert(root.left, x)\n    elif x > root.val:\n        root.right = bst_insert(root.right, x)\n    return root\n'
+====================================================================================================
+[1] title='BST Search' diff=easy topic='Binary Search Trees and Heaps' sub='BST Search' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def bst_search(root, x):
+
+root is the root TNode of a binary search tree. Return True when x is present, False otherwise — walk down ONE path using the ordering (left subtree smaller, right larger), not a full scan. The harness prints True or False.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the BST in level order (-1 marks a missing child).
+Line 3: the target x.
+
+Output Format:
+One line, True or False.
+
+Constraints:
+1 <= n <= 1000
+1 <= value, x <= 1000000
+sampleinput1='7\n50 30 70 20 40 60 80\n60'
+sampleoutput1='True'
+sampleinput2='7\n50 30 70 20 40 60 80\n65'
+sampleoutput2='False'
+input1='5\n10 5 15 3 7\n3'
+output1='True'
+input2='3\n2 1 3\n5'
+output2='False'
+input3='1\n9\n9'
+output3='True'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value, x <= 1000000
+SRC: 'def bst_search(root, x):\n    node = root\n    while node is not None:\n        if x == node.val:\n            return True\n        if x < node.val:\n            node = node.left\n        else:\n            node = node.right\n    return False\n'
+====================================================================================================
+[2] title='Smallest Code in the BST' diff=easy topic='Binary Search Trees and Heaps' sub='BST Search' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def bst_min(root):
+
+root is the root TNode of a non-empty binary search tree. Return the smallest value by walking LEFT as far as possible — no full traversal needed.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the BST in level order (-1 marks a missing child).
+
+Output Format:
+One line with the smallest value.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='20'
+sampleinput2='1\n9'
+sampleoutput2='9'
+input1='5\n10 5 15 3 7'
+output1='3'
+input2='3\n2 1 3'
+output2='1'
+input3='5\n8 3 10 -1 5'
+output3='3'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; tree non-empty
+SRC: 'def bst_min(root):\n    node = root\n    while node.left is not None:\n        node = node.left\n    return node.val\n'
+====================================================================================================
+[3] title='Largest Code in the BST' diff=easy topic='Binary Search Trees and Heaps' sub='BST Search' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def bst_max(root):
+
+root is the root TNode of a non-empty binary search tree. Return the largest value by walking RIGHT as far as possible — no full traversal needed.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the BST in level order (-1 marks a missing child).
+
+Output Format:
+One line with the largest value.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='80'
+sampleinput2='1\n4'
+sampleoutput2='4'
+input1='5\n10 5 15 3 7'
+output1='15'
+input2='5\n8 3 10 -1 5'
+output2='10'
+input3='6\n20 10 30 5 15 25'
+output3='30'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; tree non-empty
+SRC: 'def bst_max(root):\n    node = root\n    while node.right is not None:\n        node = node.right\n    return node.val\n'
+====================================================================================================
+[4] title='Sum of BST Codes' diff=easy topic='Binary Search Trees and Heaps' sub='BST Search' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def bst_sum(root):
+
+root is the root TNode of a binary search tree. Return the sum of ALL node values with a recursive sweep (an empty subtree contributes 0).
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the BST in level order (-1 marks a missing child).
+
+Output Format:
+One line with the sum.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='350'
+sampleinput2='1\n6'
+sampleoutput2='6'
+input1='5\n10 5 15 3 7'
+output1='40'
+input2='3\n2 1 3'
+output2='6'
+input3='5\n8 3 10 -1 5'
+output3='26'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; tree non-empty
+SRC: 'def bst_sum(root):\n    if root is None:\n        return 0\n    return root.val + bst_sum(root.left) + bst_sum(root.right)\n'
+====================================================================================================
+[5] title='Heap Slot Arithmetic' diff=easy topic='Binary Search Trees and Heaps' sub='Heap Representation' type=practice bl='' wl=''
+DESC: A binary heap lives in a flat list: the item at index i has its LEFT child at index 2*i + 1 and its RIGHT child at index 2*i + 2. Compute both slots for a given index.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def heap_indices(i):
+
+i is a 0-based heap index. Return the two-element list [left_slot, right_slot]. The harness prints both slots space-separated.
+
+Input Format:
+Line 1: the heap index i.
+
+Output Format:
+One line with the two slot indices, space-separated.
+
+Constraints:
+0 <= i <= 100
+sampleinput1='2'
+sampleoutput1='5 6'
+sampleinput2='0'
+sampleoutput2='1 2'
+input1='3'
+output1='7 8'
+input2='7'
+output2='15 16'
+input3='10'
+output3='21 22'
+CONSTRAINTS: 0 <= i <= 100
+SRC: 'def heap_indices(i):\n    return [2 * i + 1, 2 * i + 2]\n'
+====================================================================================================
+[6] title='Register the New Asset Code' diff=easy topic='Binary Search Trees and Heaps' sub='BST Insertion and Deletion' type=practice bl='' wl=''
+DESC: An asset registry is kept as a binary search tree so lookups stay fast. When a new asset id arrives, the registrar must slot it into the tree without breaking the ordering, then print the whole registry in ascending order (an inorder fill).
+
+The program scaffolding (input reading, TNode class, tree building and the inorder printer) is already set up for you. Implement only this function:
+
+    def bst_insert(root, x):
+
+root is the root TNode of the registry tree and x is the new asset id (not already registered). Insert it and return the root.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the registry BST in level order (-1 marks a missing child).
+Line 3: the new asset id x.
+
+Output Format:
+One line with the registry in ascending order after the insert, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= value, x <= 1000000
+x is not already registered.
+sampleinput1='7\n40 20 60 10 30 50 70\n45'
+sampleoutput1='10 20 30 40 45 50 60 70'
+sampleinput2='1\n100\n80'
+sampleoutput2='80 100'
+input1='7\n40 20 60 10 30 50 70\n5'
+output1='5 10 20 30 40 50 60 70'
+input2='3\n15 10 20\n25'
+output2='10 15 20 25'
+input3='5\n50 25 75 12 37\n30'
+output3='12 25 30 37 50 75'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value, x <= 1000000; x not already registered
+SRC: 'def bst_insert(root, x):\n    if root is None:\n        return TNode(x)\n    if x < root.val:\n        root.left = bst_insert(root.left, x)\n    elif x > root.val:\n        root.right = bst_insert(root.right, x)\n    return root\n'
+====================================================================================================
+[7] title='Pin the Faulty Sensor' diff=easy topic='Binary Search Trees and Heaps' sub='BST Search' type=practice bl='' wl=''
+DESC: Sensor stations are indexed in a binary search tree. Control wants to know whether sensor code x is actually deployed before dispatching a technician — a single ordered descent answers it.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def bst_search(root, x):
+
+root is the root TNode of the sensor tree. Return True when code x is deployed, False otherwise. The harness prints True or False.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the sensor BST in level order (-1 marks a missing child).
+Line 3: the queried code x.
+
+Output Format:
+One line, True or False.
+
+Constraints:
+1 <= n <= 1000
+1 <= value, x <= 1000000
+sampleinput1='7\n40 20 60 10 30 50 70\n30'
+sampleoutput1='True'
+sampleinput2='7\n40 20 60 10 30 50 70\n65'
+sampleoutput2='False'
+input1='5\n50 25 75 12 37\n12'
+output1='True'
+input2='3\n8 4 12\n6'
+output2='False'
+input3='1\n11\n11'
+output3='True'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value, x <= 1000000
+SRC: 'def bst_search(root, x):\n    node = root\n    while node is not None:\n        if x == node.val:\n            return True\n        if x < node.val:\n            node = node.left\n        else:\n            node = node.right\n    return False\n'
+====================================================================================================
+[8] title='Coldest Sensor Reading' diff=easy topic='Binary Search Trees and Heaps' sub='BST Search' type=practice bl='' wl=''
+DESC: Temperature readings are stored in a binary search tree. The coldest reading is always the leftmost node — walk LEFT until you cannot anymore.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def bst_min(root):
+
+root is the root TNode of the readings tree (at least one node). Return the smallest reading.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the readings BST in level order (-1 marks a missing child).
+
+Output Format:
+One line with the coldest reading.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n5 2 8 1 3 7 9'
+sampleoutput1='1'
+sampleinput2='1\n-3'
+sampleoutput2='-3'
+input1='5\n12 6 18 4 9'
+output1='4'
+input2='6\n15 9 22 3 11 18'
+output2='3'
+input3='4\n0 -5 5 -8'
+output3='-8'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000; tree non-empty
+SRC: 'def bst_min(root):\n    node = root\n    while node.left is not None:\n        node = node.left\n    return node.val\n'
+====================================================================================================
+[9] title='Highest Bid So Far' diff=easy topic='Binary Search Trees and Heaps' sub='BST Search' type=practice bl='' wl=''
+DESC: Bids stream into an auction house that keeps them in a binary search tree. The top bid is always the rightmost node — walk RIGHT until you cannot anymore.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def bst_max(root):
+
+root is the root TNode of the bids tree (at least one node). Return the largest bid.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the bids BST in level order (-1 marks a missing child).
+
+Output Format:
+One line with the highest bid.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='80'
+sampleinput2='1\n120'
+sampleoutput2='120'
+input1='5\n45 20 65 60 70'
+output1='65'
+input2='6\n30 15 40 10 25 35'
+output2='40'
+input3='6\n10 5 15 -1 -1 12'
+output3='15'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; tree non-empty
+SRC: 'def bst_max(root):\n    node = root\n    while node.right is not None:\n        node = node.right\n    return node.val\n'
+====================================================================================================
+[10] title='Kth Smallest Ticket' diff=medium topic='Binary Search Trees and Heaps' sub='Kth Largest Element' type=practice bl='sorted(,.sort(' wl='left'
+DESC: A support desk stores ticket ids in a binary search tree and must call the k-th SMALLEST ticket next (1-based). The k-th smallest is the k-th stop of an inorder walk — you must not sort anything; no sorted() and no .sort().
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def kth_smallest(root, k):
+
+root is the root TNode of the ticket BST and k is 1-based. Return the k-th smallest value (k is always valid).
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the ticket BST in level order (-1 marks a missing child).
+Line 3: k.
+
+Output Format:
+One line with the k-th smallest ticket id.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+1 <= k <= number of nodes
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80\n3'
+sampleoutput1='40'
+sampleinput2='1\n7\n1'
+sampleoutput2='7'
+input1='7\n50 30 70 20 40 60 80\n1'
+output1='20'
+input2='5\n10 5 15 3 7\n4'
+output2='10'
+input3='6\n20 10 30 5 15 25\n5'
+output3='25'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; 1 <= k <= node count
+SRC: 'def kth_smallest(root, k):\n    stack = []\n    node = root\n    while stack or node is not None:\n        while node is not None:\n            stack.append(node)\n            node = node.left\n        node = stack.pop()\n        k -= 1\n        if k == 0:\n            return node.val\n        node = node.right\n    return -1\n'
+====================================================================================================
+[11] title='Heapify the Waiting Room' diff=medium topic='Binary Search Trees and Heaps' sub='Heap Representation' type=practice bl='sorted(,.sort(' wl='heapify'
+DESC: A walk-in clinic re-orders its waiting list into a min-heap so the front desk can always peek at the most urgent number. Turn the raw list into a valid min-heap with heapq.heapify and hand the heap array back.
+
+The program scaffolding (input reading and main) is already set up for you; heapq is already imported. Implement only this function:
+
+    def to_min_heap(nums):
+
+nums is the list of waiting-list numbers. Return the list AFTER heapq.heapify turns it into a min-heap (same length, heap slot order). The harness prints the heap array space-separated.
+
+Input Format:
+Line 1: n, the number of waiting entries.
+Line 2: n integers — the raw waiting list.
+
+Output Format:
+One line with the heap array, space-separated.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+sampleinput1='5\n5 3 8 1 9'
+sampleoutput1='1 3 8 5 9'
+sampleinput2='1\n4'
+sampleoutput2='4'
+input1='6\n7 2 9 4 1 8'
+output1='1 2 8 4 7 9'
+input2='4\n10 -3 6 0'
+output2='-3 0 6 10'
+input3='7\n9 1 8 2 7 3 6'
+output3='1 2 3 9 7 8 6'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+SRC: 'def to_min_heap(nums):\n    heap = list(nums)\n    heapq.heapify(heap)\n    return heap\n'
+====================================================================================================
+[12] title='Priority Desk Operations' diff=medium topic='Binary Search Trees and Heaps' sub='Priority Operations' type=practice bl='sorted(,.sort(' wl='heapq'
+DESC: A priority desk replays its operations log against a min-heap: "push x" adds a ticket with urgency x, "pop" removes and records the most urgent (smallest) ticket — pops on an empty heap are silently skipped. Process the log with heapq and report every recorded pop in order.
+
+The program scaffolding (input reading and main) is already set up for you; heapq is already imported and ops arrives as a list of ("push", x) / ("pop", 0) tuples. Implement only this function:
+
+    def process_ops(ops):
+
+ops is the operations list. Return the list of popped values in the order they were popped. The harness prints them space-separated.
+
+Input Format:
+Line 1: m, the number of operations.
+Next m lines: "push x" or "pop".
+
+Output Format:
+One line with the popped values in order, space-separated (at least one pop always succeeds).
+
+Constraints:
+1 <= m <= 1000
+-1000000 <= x <= 1000000
+sampleinput1='5\npush 5\npush 3\npop\npush 1\npop'
+sampleoutput1='3 1'
+sampleinput2='3\npush 7\npop\npop'
+sampleoutput2='7'
+input1='6\npush 4\npush 4\npush 2\npop\npop\npop'
+output1='2 4 4'
+input2='4\npush 9\npush 5\npush 6\npop'
+output2='5'
+input3='7\npop\npush 8\npush 3\npop\npush 10\npush 2\npop'
+output3='3 2'
+CONSTRAINTS: 1 <= m <= 1000; -1000000 <= x <= 1000000; at least one successful pop
+SRC: 'def process_ops(ops):\n    heap = []\n    popped = []\n    for op, x in ops:\n        if op == "push":\n            heapq.heappush(heap, x)\n        else:\n            if heap:\n                popped.append(heapq.heappop(heap))\n    return popped\n'
+====================================================================================================
+[13] title='Bulk Load the Registry' diff=medium topic='Binary Search Trees and Heaps' sub='BST Insertion and Deletion' type=practice bl='sorted(,.sort(' wl='left'
+DESC: Overnight, a batch of asset ids floods into the registry tree. Insert every id in order (smaller left, larger right), then the morning report lists the whole registry ascending via the inorder fill. No sorted() and no .sort() — the tree must do the ordering. You may define helper functions.
+
+The program scaffolding (input reading, TNode class, tree building and the inorder printer) is already set up for you. Implement only this function:
+
+    def insert_all(root, xs):
+
+root is the root TNode of the registry (possibly None-shaped only in theory — inputs are non-empty) and xs is the batch list. Insert every id and return the root.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the registry BST in level order (-1 marks a missing child).
+Line 3: m, the number of batch ids.
+Line 4: m integers — the batch (all distinct, none already in the tree).
+
+Output Format:
+One line with the registry in ascending order after the batch, space-separated.
+
+Constraints:
+1 <= n, m <= 1000
+1 <= value <= 1000000
+sampleinput1='3\n10 5 15\n2\n12 3'
+sampleoutput1='3 5 10 12 15'
+sampleinput2='1\n20\n1\n10'
+sampleoutput2='10 20'
+input1='7\n50 30 70 20 40 60 80\n3\n55 10 90'
+output1='10 20 30 40 50 55 60 70 80 90'
+input2='3\n15 10 20\n1\n18'
+output2='10 15 18 20'
+input3='5\n25 12 30 6 18\n2\n3 20'
+output3='3 6 12 18 20 25 30'
+CONSTRAINTS: 1 <= n, m <= 1000; 1 <= value <= 1000000; batch ids distinct and absent
+SRC: 'def insert_one(root, x):\n    if root is None:\n        return TNode(x)\n    if x < root.val:\n        root.left = insert_one(root.left, x)\n    else:\n        root.right = insert_one(root.right, x)\n    return root\n\ndef insert_all(root, xs):\n    for x in xs:\n        root = insert_one(root, x)\n    return root\n'
+====================================================================================================
+[14] title='Drop the Leaf Ticket' diff=medium topic='Binary Search Trees and Heaps' sub='BST Insertion and Deletion' type=practice bl='sorted(,.sort(,remove(' wl='left'
+DESC: A cancelled support ticket turns out to sit at a leaf of the ticket tree (no children). Remove it cleanly: descend by the ordering, unlink the leaf, and keep every other ticket. No sorted(), no .sort(), no remove().
+
+The program scaffolding (input reading, TNode class, tree building and the inorder printer) is already set up for you. Implement only this function:
+
+    def delete_leaf(root, x):
+
+root is the root TNode of the ticket BST and x is a leaf value guaranteed to be present. Unlink that leaf and return the root.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the ticket BST in level order (-1 marks a missing child).
+Line 3: the leaf value x to drop.
+
+Output Format:
+One line with the remaining tickets in ascending order, space-separated.
+
+Constraints:
+2 <= n <= 1000
+1 <= value, x <= 1000000
+x is a leaf node of the tree.
+sampleinput1='3\n10 5 15\n5'
+sampleoutput1='10 15'
+sampleinput2='3\n10 5 15\n15'
+sampleoutput2='5 10'
+input1='7\n50 30 70 20 40 60 80\n20'
+output1='30 40 50 60 70 80'
+input2='5\n10 5 15 3 7\n3'
+output2='5 7 10 15'
+input3='6\n20 10 30 5 15 25\n25'
+output3='5 10 15 20 30'
+CONSTRAINTS: 2 <= n <= 1000; 1 <= value, x <= 1000000; x is a leaf
+SRC: 'def delete_leaf(root, x):\n    if root is None:\n        return None\n    if x < root.val:\n        root.left = delete_leaf(root.left, x)\n    elif x > root.val:\n        root.right = delete_leaf(root.right, x)\n    else:\n        return None\n    return root\n'
+====================================================================================================
+[15] title='Drain the Priority Heap' diff=medium topic='Binary Search Trees and Heaps' sub='Priority Operations' type=practice bl='sorted(,.sort(' wl='heappop'
+DESC: At closing time the dispatch desk drains its min-heap completely: every pop hands over the current most urgent (smallest) ticket, so draining yields the tickets in ascending order. Build the heap with heapq.heapify, then pop until it is empty. No sorted() and no .sort() — the heap does the ordering.
+
+The program scaffolding (input reading and main) is already set up for you; heapq is already imported. Implement only this function:
+
+    def drain_heap(nums):
+
+nums is the raw ticket list. Return the values in the order they are popped. The harness prints them space-separated.
+
+Input Format:
+Line 1: n, the number of tickets.
+Line 2: n integers — the raw tickets.
+
+Output Format:
+One line with the drained (ascending) tickets, space-separated.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+sampleinput1='5\n5 3 8 1 9'
+sampleoutput1='1 3 5 8 9'
+sampleinput2='1\n7'
+sampleoutput2='7'
+input1='6\n7 2 9 4 1 8'
+output1='1 2 4 7 8 9'
+input2='4\n10 -3 6 0'
+output2='-3 0 6 10'
+input3='7\n9 1 8 2 7 3 6'
+output3='1 2 3 6 7 8 9'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+SRC: 'def drain_heap(nums):\n    heap = list(nums)\n    heapq.heapify(heap)\n    drained = []\n    while heap:\n        drained.append(heapq.heappop(heap))\n    return drained\n'
+====================================================================================================
+[16] title='Validate the Registry' diff=hard topic='Binary Search Trees and Heaps' sub='Validating a BST' type=practice bl='sorted(,.sort(' wl='left'
+DESC: Before the query engine touches a registry tree, it must prove the tree really is a binary search tree: every left descendant must be SMALLER than the node and every right descendant LARGER — duplicates make it invalid. The reliable check carries a (low, high) bound window down the recursion. No sorting shortcuts allowed.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def is_bst(root):
+
+root is the root TNode of the registry. Return True when the tree satisfies the strict BST property, False otherwise. The harness prints True or False. You may define helper functions.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the tree in level order (-1 marks a missing child).
+
+Output Format:
+One line, True or False.
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+The tree has at least one node.
+sampleinput1='7\n50 30 70 20 40 60 80'
+sampleoutput1='True'
+sampleinput2='5\n10 5 15 12 3'
+sampleoutput2='False'
+input1='1\n9'
+output1='True'
+input2='6\n10 5 15 -1 8 12 20'
+output2='True'
+input3='5\n7 3 9 8 4'
+output3='False'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; tree non-empty; duplicates invalid
+SRC: 'def is_bst(root):\n    def check(node, lo, hi):\n        if node is None:\n            return True\n        if node.val <= lo or node.val >= hi:\n            return False\n        return check(node.left, lo, node.val) and check(node.right, node.val, hi)\n    return check(root, float("-inf"), float("inf"))\n'
+====================================================================================================
+[17] title='Kth Largest via Size-K Heap' diff=hard topic='Binary Search Trees and Heaps' sub='Kth Largest Element' type=practice bl='sorted(,.sort(' wl='heapq'
+DESC: A streaming monitor must report the k-th LARGEST reading without sorting the whole feed. Keep a MIN-heap of at most k readings: push while the heap is under k, and whenever a new reading beats the heap's smallest, replace it. When the stream ends, the heap root is exactly the k-th largest. No sorted() and no .sort().
+
+The program scaffolding (input reading and main) is already set up for you; heapq is already imported. Implement only this function:
+
+    def kth_largest(nums, k):
+
+nums is the stream of readings and k is the rank (1-based, always valid). Return the k-th largest value.
+
+Input Format:
+Line 1: n, the number of readings.
+Line 2: n integers — the readings (duplicates allowed).
+Line 3: k.
+
+Output Format:
+One line with the k-th largest reading.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+1 <= k <= n
+sampleinput1='6\n4 9 1 7 5 8\n3'
+sampleoutput1='7'
+sampleinput2='1\n3\n1'
+sampleoutput2='3'
+input1='7\n12 3 9 15 8 20 6\n2'
+output1='15'
+input2='5\n10 -5 30 0 25\n4'
+output2='0'
+input3='6\n2 2 2 5 5 9\n4'
+output3='2'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000; 1 <= k <= n
+SRC: 'def kth_largest(nums, k):\n    heap = []\n    for x in nums:\n        if len(heap) < k:\n            heapq.heappush(heap, x)\n        elif x > heap[0]:\n            heapq.heapreplace(heap, x)\n    return heap[0]\n'
+====================================================================================================
+[18] title='Remove a Registry Code' diff=hard topic='Binary Search Trees and Heaps' sub='BST Insertion and Deletion' type=practice bl='sorted(,.sort(,remove(' wl='left'
+DESC: A registry code is being retired. Full BST deletion has three cases: a leaf is unlinked, a one-child node is replaced by its child, and a two-children node takes its inorder successor's value before the successor is deleted from the right subtree. No sorted(), no .sort(), no remove().
+
+The program scaffolding (input reading, TNode class, tree building and the inorder printer) is already set up for you. Implement only this function:
+
+    def bst_delete(root, x):
+
+root is the root TNode of the registry BST and x is a value guaranteed to be present. Delete that node correctly and return the root. You may define helper functions.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the registry BST in level order (-1 marks a missing child).
+Line 3: the code x to remove.
+
+Output Format:
+One line with the registry in ascending order after the removal, space-separated.
+
+Constraints:
+2 <= n <= 1000
+1 <= value, x <= 1000000
+x is present in the tree.
+sampleinput1='7\n50 30 70 20 40 60 80\n50'
+sampleoutput1='20 30 40 60 70 80'
+sampleinput2='5\n10 5 15 -1 7\n5'
+sampleoutput2='7 10 15'
+input1='7\n50 30 70 20 40 60 80\n30'
+output1='20 40 50 60 70 80'
+input2='5\n10 5 15 3 7\n10'
+output2='3 5 7 15'
+input3='5\n10 5 15 3 7\n7'
+output3='3 5 10 15'
+CONSTRAINTS: 2 <= n <= 1000; 1 <= value, x <= 1000000; x present in the tree
+SRC: 'def bst_delete(root, x):\n    if root is None:\n        return None\n    if x < root.val:\n        root.left = bst_delete(root.left, x)\n    elif x > root.val:\n        root.right = bst_delete(root.right, x)\n    else:\n        if root.left is None:\n            return root.right\n        if root.right is None:\n            return root.left\n        successor = root.right\n        while successor
+====================================================================================================
+[19] title='Codes in the Price Band' diff=hard topic='Binary Search Trees and Heaps' sub='BST Search' type=practice bl='sorted(,.sort(' wl='left'
+DESC: A price query asks how many registry codes fall inside the band [lo, hi] (inclusive on both ends). Because the tree is ordered, a pruned recursion can skip whole subtrees: below lo only the right branch can qualify, above hi only the left. No sorting shortcuts.
+
+The program scaffolding (input reading, TNode class and tree building) is already set up for you. Implement only this function:
+
+    def count_range(root, lo, hi):
+
+root is the root TNode of the registry BST. Return the number of node values with lo <= value <= hi.
+
+Input Format:
+Line 1: n, the number of values in the level-order serialization.
+Line 2: n integers — the registry BST in level order (-1 marks a missing child).
+Line 3: lo.
+Line 4: hi (lo <= hi).
+
+Output Format:
+One line with the count.
+
+Constraints:
+1 <= n <= 1000
+1 <= value, lo, hi <= 1000000
+lo <= hi
+sampleinput1='7\n50 30 70 20 40 60 80\n40\n70'
+sampleoutput1='4'
+sampleinput2='1\n9\n5\n9'
+sampleoutput2='1'
+input1='7\n50 30 70 20 40 60 80\n15\n35'
+output1='2'
+input2='5\n10 5 15 3 7\n7\n15'
+output2='3'
+input3='6\n20 10 30 5 15 25\n21\n29'
+output3='1'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= value, lo, hi <= 1000000; lo <= hi
+SRC: 'def count_range(root, lo, hi):\n    if root is None:\n        return 0\n    if root.val < lo:\n        return count_range(root.right, lo, hi)\n    if root.val > hi:\n        return count_range(root.left, lo, hi)\n    return 1 + count_range(root.left, lo, hi) + count_range(root.right, lo, hi)\n'

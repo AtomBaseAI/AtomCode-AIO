@@ -1,0 +1,984 @@
+=== DAY 10 ===
+TOPIC: Doubly and Circular Linked Lists | subtopics: ['general', 'Doubly Linked Nodes', 'Circular Linked Lists', 'Two-Direction Traversal', 'Insertion and Deletion', 'Use Cases']
+
+================================================================================
+[0] Append to the Audit Chain   lang=python type=practice diff=easy
+TOPIC: Doubly and Circular Linked Lists | SUB: Insertion and Deletion
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000
+DESCRIPTION:
+An audit trail appends each new event at the TAIL of a doubly linked chain; the tail's next and the new node's prev must both be wired.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def insert_back(head, x):
+
+head is the head Node of the audit chain. Allocate Node(x), link it after the current tail (fix the tail's next and the new node's prev) and return the head. The harness prints the chain forward AND backward to verify both directions.
+
+Input Format:
+Line 1: n, the number of events.
+Line 2: n integers — the event codes in chain order.
+Line 3: the new event code x.
+
+Output Format:
+Line 1: the chain forward, space-separated.
+Line 2: the chain backward, space-separated.
+(Both lines are printed by the harness.)
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+  sampleinput1: "3\n1 2 3\n4"
+  sampleoutput1: "1 2 3 4\n4 3 2 1"
+  sampleinput2: "1\n9\n0"
+  sampleoutput2: "9 0\n0 9"
+  input1: "2\n5 6\n7"
+  output1: "5 6 7\n7 6 5"
+  input2: "4\n10 20 30 40\n50"
+  output2: "10 20 30 40 50\n50 40 30 20 10"
+  input3: "3\n2 4 6\n8"
+  output3: "2 4 6 8\n8 6 4 2"
+SOURCECODE:
+def insert_back(head, x):
+    node = Node(x)
+    if head is None:
+        return node
+    tail = head
+    while tail.next is not None:
+        tail = tail.next
+    tail.next = node
+    node.prev = tail
+    return head
+
+
+================================================================================
+[1] Ledger Scan From the Tail   lang=python type=practice diff=medium
+TOPIC: Doubly and Circular Linked Lists | SUB: Two-Direction Traversal
+BLACKLIST: reversed(
+WHITELIST: prev
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000
+DESCRIPTION:
+A ledger chain is newest-first at the tail; the auditor scans BACKWARD from the tail using the prev pointers and reports how far from the end the target sits.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def find_from_tail(tail, x):
+
+tail is the TAIL Node of a doubly linked chain and x is the queried code. Return the 0-based index counting FROM the tail (tail itself is 0), or -1 when x is not in the chain.
+
+Input Format:
+Line 1: n, the number of entries.
+Line 2: n integers — the entries in chain order (head to tail).
+Line 3: the queried code x.
+
+Output Format:
+One line with the index from the tail, or -1.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+  sampleinput1: "4\n1 2 3 4\n3"
+  sampleoutput1: "1"
+  sampleinput2: "5\n10 20 30 40 50\n10"
+  sampleoutput2: "4"
+  input1: "3\n7 8 9\n5"
+  output1: "-1"
+  input2: "4\n2 4 6 8\n4"
+  output2: "2"
+  input3: "1\n9\n9"
+  output3: "0"
+SOURCECODE:
+def find_from_tail(tail, x):
+    node = tail
+    idx = 0
+    while node is not None:
+        if node.value == x:
+            return idx
+        node = node.prev
+        idx += 1
+    return -1
+
+
+================================================================================
+[2] Doubly Chain Length   lang=python type=practice diff=easy
+TOPIC: Doubly and Circular Linked Lists | SUB: Doubly Linked Nodes
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def dll_length(head):
+
+head is the head Node of a doubly linked chain (each node has value, prev and next). Return the number of nodes by walking the chain forward.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+
+Output Format:
+One line with the number of nodes.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n4 8 15 16 23"
+  sampleoutput1: "5"
+  sampleinput2: "1\n7"
+  sampleoutput2: "1"
+  input1: "3\n10 20 30"
+  output1: "3"
+  input2: "6\n1 2 3 4 5 6"
+  output2: "6"
+  input3: "4\n-5 0 5 10"
+  output3: "4"
+SOURCECODE:
+def dll_length(head):
+    count = 0
+    node = head
+    while node is not None:
+        count += 1
+        node = node.next
+    return count
+
+
+================================================================================
+[3] Build a Doubly Chain   lang=python type=practice diff=easy
+TOPIC: Doubly and Circular Linked Lists | SUB: Doubly Linked Nodes
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+This time YOU allocate the nodes: a text editor loads its history as a doubly linked chain, and both pointer directions must be correct or the backward view breaks.
+
+The program scaffolding (input reading and the two printers) is already set up for you. Implement only this function:
+
+    def build_dll(values):
+
+Build one Node per value (Node has value, prev and next): link each node to the previous one via prev and to the next one via next, and return the head. The harness then prints the chain forward AND backward to verify both directions.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+Line 1: the chain forward, space-separated.
+Line 2: the chain backward (tail to head), space-separated.
+(Both lines are printed by the harness.)
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4"
+  sampleoutput1: "1 2 3 4\n4 3 2 1"
+  sampleinput2: "1\n9"
+  sampleoutput2: "9\n9"
+  input1: "3\n10 20 30"
+  output1: "10 20 30\n30 20 10"
+  input2: "5\n1 2 3 4 5"
+  output2: "1 2 3 4 5\n5 4 3 2 1"
+  input3: "2\n7 8"
+  output3: "7 8\n8 7"
+SOURCECODE:
+def build_dll(values):
+    head = None
+    tail = None
+    for v in values:
+        node = Node(v)
+        node.prev = tail
+        if head is None:
+            head = node
+        else:
+            tail.next = node
+        tail = node
+    return head
+
+
+================================================================================
+[4] Circular Chain Length   lang=python type=practice diff=easy
+TOPIC: Doubly and Circular Linked Lists | SUB: Circular Linked Lists
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+The program scaffolding (input reading, Node class and circular chain building) is already set up for you. Implement only this function:
+
+    def circular_length(head):
+
+head is the head Node of a CIRCULAR singly chain — the tail's next pointer loops back to the head. Count the nodes by walking one full lap and stopping when you are back at the start.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in circle order.
+
+Output Format:
+One line with the number of nodes.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n4 8 15 16 23"
+  sampleoutput1: "5"
+  sampleinput2: "1\n7"
+  sampleoutput2: "1"
+  input1: "3\n10 20 30"
+  output1: "3"
+  input2: "6\n1 2 3 4 5 6"
+  output2: "6"
+  input3: "2\n9 4"
+  output3: "2"
+SOURCECODE:
+def circular_length(head):
+    count = 1
+    node = head.next
+    while node is not head:
+        count += 1
+        node = node.next
+    return count
+
+
+================================================================================
+[5] Is the Chain Circular?   lang=python type=practice diff=easy
+TOPIC: Doubly and Circular Linked Lists | SUB: Circular Linked Lists
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; c is 0 or 1; -1000000 <= value <= 1000000
+DESCRIPTION:
+A playlist loader receives a singly chain and must check whether the last track loops back to the first. Walk the chain: reaching None means linear, returning to the head means circular.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def is_circular(head):
+
+head is the head Node of a singly chain whose tail either links back to head or to None. Return True when the chain is circular, False otherwise.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+Line 3: c (1 = the tail loops back to the head, 0 = linear chain).
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= n <= 1000
+c is 0 or 1
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4\n1"
+  sampleoutput1: "True"
+  sampleinput2: "4\n1 2 3 4\n0"
+  sampleoutput2: "False"
+  input1: "1\n7\n1"
+  output1: "True"
+  input2: "3\n5 6 7\n0"
+  output2: "False"
+  input3: "2\n8 9\n1"
+  output3: "True"
+SOURCECODE:
+def is_circular(head):
+    node = head.next
+    while node is not None:
+        if node is head:
+            return True
+        node = node.next
+    return False
+
+
+================================================================================
+[6] One Lap Values   lang=python type=practice diff=easy
+TOPIC: Doubly and Circular Linked Lists | SUB: Circular Linked Lists
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+The program scaffolding (input reading, Node class and circular chain building) is already set up for you. Implement only this function:
+
+    def circular_values(head):
+
+head is the head Node of a CIRCULAR singly chain. Return the list of values seen during exactly one lap around the circle, starting at head and stopping when you return to it.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in circle order.
+
+Output Format:
+One line with the values of one lap, space-separated (printed by the harness).
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n4 8 15 16 23"
+  sampleoutput1: "4 8 15 16 23"
+  sampleinput2: "1\n7"
+  sampleoutput2: "7"
+  input1: "3\n10 20 30"
+  output1: "10 20 30"
+  input2: "6\n1 2 3 4 5 6"
+  output2: "1 2 3 4 5 6"
+  input3: "2\n9 4"
+  output3: "9 4"
+SOURCECODE:
+def circular_values(head):
+    out = []
+    node = head
+    out.append(node.value)
+    node = node.next
+    while node is not head:
+        out.append(node.value)
+        node = node.next
+    return out
+
+
+================================================================================
+[7] Neighbours at a Position   lang=python type=practice diff=easy
+TOPIC: Doubly and Circular Linked Lists | SUB: Two-Direction Traversal
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; 1 <= value <= 1000000; 0 <= i < n
+DESCRIPTION:
+A browser history chain stores pages in a doubly linked chain; the UI highlights a page and shows its previous and next page. Read both directions through the node's prev and next pointers.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def neighbours(head, i):
+
+head is the head Node of a doubly linked chain and i is a valid 0-based position. Return the list [previous value, value, next value], using -1 whenever the neighbour does not exist (head has no previous, tail has no next).
+
+Input Format:
+Line 1: n, the number of pages.
+Line 2: n integers — the page ids in chain order (all positive).
+Line 3: the position i (0-based, i < n).
+
+Output Format:
+One line with the three reported values, space-separated (printed by the harness).
+
+Constraints:
+1 <= n <= 1000
+1 <= value <= 1000000
+0 <= i < n
+  sampleinput1: "4\n1 2 3 4\n2"
+  sampleoutput1: "2 3 4"
+  sampleinput2: "3\n5 6 7\n0"
+  sampleoutput2: "-1 5 6"
+  input1: "4\n1 2 3 4\n3"
+  output1: "3 4 -1"
+  input2: "1\n9\n0"
+  output2: "-1 9 -1"
+  input3: "5\n2 4 6 8 10\n1"
+  output3: "2 4 6"
+SOURCECODE:
+def neighbours(head, i):
+    node = head
+    k = 0
+    while k < i:
+        node = node.next
+        k += 1
+    left = node.prev.value if node.prev is not None else -1
+    right = node.next.value if node.next is not None else -1
+    return [left, node.value, right]
+
+
+================================================================================
+[8] Round-Robin Handoff   lang=python type=practice diff=easy
+TOPIC: Doubly and Circular Linked Lists | SUB: Use Cases
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; 0 <= k <= 100000; -1000000 <= value <= 1000000
+DESCRIPTION:
+A round-robin dispatcher keeps its jobs on a circular chain and passes a token from job to job; after k handoffs the token sits on a specific job. Walk the circle k steps.
+
+The program scaffolding (input reading, Node class and circular chain building) is already set up for you. Implement only this function:
+
+    def turn_holder(head, k):
+
+head is the head Node of the circular chain and k >= 0 is the number of handoffs. Return the value of the node reached by moving k steps from head (k may wrap around the circle several times).
+
+Input Format:
+Line 1: n, the number of jobs.
+Line 2: n integers — the job ids in circle order.
+Line 3: the number of handoffs k (0 <= k <= 100000).
+
+Output Format:
+One line with the job id holding the token.
+
+Constraints:
+1 <= n <= 1000
+0 <= k <= 100000
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4\n5"
+  sampleoutput1: "2"
+  sampleinput2: "3\n10 20 30\n3"
+  sampleoutput2: "10"
+  input1: "5\n1 2 3 4 5\n0"
+  output1: "1"
+  input2: "2\n7 9\n1"
+  output2: "9"
+  input3: "4\n1 2 3 4\n7"
+  output3: "4"
+SOURCECODE:
+def turn_holder(head, k):
+    node = head
+    i = 0
+    while i < k:
+        node = node.next
+        i += 1
+    return node.value
+
+
+================================================================================
+[9] Latest History Entry   lang=python type=practice diff=easy
+TOPIC: Doubly and Circular Linked Lists | SUB: Doubly Linked Nodes
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+An editor's action history lives on a doubly linked chain; the newest action sits at the tail. The UI badge reports it by walking the chain forward to its end.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def last_action(head):
+
+head is the head Node of the history chain (at least one node). Return the value of the tail node.
+
+Input Format:
+Line 1: n, the number of actions.
+Line 2: n integers — the action ids in chain order (oldest first).
+
+Output Format:
+One line with the newest action id.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n4 8 15 16 23"
+  sampleoutput1: "23"
+  sampleinput2: "1\n7"
+  sampleoutput2: "7"
+  input1: "4\n3 1 2 9"
+  output1: "9"
+  input2: "3\n10 -20 30"
+  output2: "30"
+  input3: "6\n1 2 3 4 5 6"
+  output3: "6"
+SOURCECODE:
+def last_action(head):
+    node = head
+    while node.next is not None:
+        node = node.next
+    return node.value
+
+
+================================================================================
+[10] Priority Ticket to the Front   lang=python type=practice diff=easy
+TOPIC: Doubly and Circular Linked Lists | SUB: Insertion and Deletion
+BLACKLIST: 
+WHITELIST: 
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000
+DESCRIPTION:
+A service kiosk keeps waiting tickets on a doubly linked chain; an emergency ticket must be inserted at the FRONT with both pointer directions fixed.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def insert_front(head, x):
+
+head is the head Node of the ticket chain. Allocate Node(x), place it before the current head (set its next, fix the old head's prev) and return the new head. The harness prints the chain forward AND backward to verify both directions.
+
+Input Format:
+Line 1: n, the number of tickets.
+Line 2: n integers — the ticket numbers in chain order.
+Line 3: the emergency ticket number x.
+
+Output Format:
+Line 1: the chain forward, space-separated.
+Line 2: the chain backward, space-separated.
+(Both lines are printed by the harness.)
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+  sampleinput1: "3\n10 20 30\n5"
+  sampleoutput1: "5 10 20 30\n30 20 10 5"
+  sampleinput2: "1\n7\n3"
+  sampleoutput2: "3 7\n7 3"
+  input1: "4\n1 2 3 4\n0"
+  output1: "0 1 2 3 4\n4 3 2 1 0"
+  input2: "2\n8 9\n1"
+  output2: "1 8 9\n9 8 1"
+  input3: "3\n5 6 7\n7"
+  output3: "7 5 6 7\n7 6 5 7"
+SOURCECODE:
+def insert_front(head, x):
+    node = Node(x)
+    node.next = head
+    if head is not None:
+        head.prev = node
+    return node
+
+
+================================================================================
+[11] Cancel Booking at Position   lang=python type=practice diff=medium
+TOPIC: Doubly and Circular Linked Lists | SUB: Insertion and Deletion
+BLACKLIST: pop(,remove(
+WHITELIST: prev
+INPUTCONSTRAINTS: 2 <= n <= 1000; 0 <= pos < n; -1000000 <= value <= 1000000
+DESCRIPTION:
+A reservation chain stores bookings in a doubly linked chain; the desk cancels the booking at 0-based position pos by unlinking that node from BOTH sides.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def dll_delete_at(head, pos):
+
+head is the head Node of the chain and pos < n. Unlink the node at position pos (fix the neighbour's prev/next and the head when pos is 0) and return the (possibly new) head. The harness prints the chain forward AND backward to verify both directions.
+
+Input Format:
+Line 1: n, the number of bookings.
+Line 2: n integers — the booking ids in chain order.
+Line 3: the position pos (0-based, pos < n).
+
+Output Format:
+Line 1: the chain forward, space-separated.
+Line 2: the chain backward, space-separated.
+(Both lines are printed by the harness.)
+
+Constraints:
+2 <= n <= 1000
+0 <= pos < n
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4\n0"
+  sampleoutput1: "2 3 4\n4 3 2"
+  sampleinput2: "5\n10 20 30 40 50\n2"
+  sampleoutput2: "10 20 40 50\n50 40 20 10"
+  input1: "3\n7 8 9\n2"
+  output1: "7 8\n8 7"
+  input2: "4\n1 2 3 4\n3"
+  output2: "1 2 3\n3 2 1"
+  input3: "5\n2 4 6 8 10\n4"
+  output3: "2 4 6 8\n8 6 4 2"
+SOURCECODE:
+def dll_delete_at(head, pos):
+    node = head
+    i = 0
+    while i < pos:
+        node = node.next
+        i += 1
+    if node.prev is not None:
+        node.prev.next = node.next
+    else:
+        head = node.next
+    if node.next is not None:
+        node.next.prev = node.prev
+    return head
+
+
+================================================================================
+[12] Join the Round-Robin Roster   lang=python type=practice diff=medium
+TOPIC: Doubly and Circular Linked Lists | SUB: Circular Linked Lists
+BLACKLIST: insert(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000
+DESCRIPTION:
+A round-robin roster is a circular singly chain; a new worker joins at the END of the circle (just before wrapping back to the head). Allocate the node and rewire the circle.
+
+The program scaffolding (input reading, Node class and circular chain building) is already set up for you. Implement only this function:
+
+    def circular_insert_back(head, x):
+
+head is the head Node of a non-empty circular chain. Allocate Node(x) and insert it between the tail and the head, then return the head. The harness prints one lap of the resulting circle.
+
+Input Format:
+Line 1: n, the number of workers.
+Line 2: n integers — the worker ids in circle order.
+Line 3: the new worker id x.
+
+Output Format:
+One line with the circle from the head, space-separated (printed by the harness).
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+  sampleinput1: "3\n1 2 3\n4"
+  sampleoutput1: "1 2 3 4"
+  sampleinput2: "1\n9\n8"
+  sampleoutput2: "9 8"
+  input1: "4\n5 6 7 8\n3"
+  output1: "5 6 7 8 3"
+  input2: "2\n10 20\n30"
+  output2: "10 20 30"
+  input3: "3\n2 4 6\n2"
+  output3: "2 4 6 2"
+SOURCECODE:
+def circular_insert_back(head, x):
+    node = Node(x)
+    tail = head
+    while tail.next is not head:
+        tail = tail.next
+    tail.next = node
+    node.next = head
+    return head
+
+
+================================================================================
+[13] Slot the Rush Job In Order   lang=python type=practice diff=medium
+TOPIC: Doubly and Circular Linked Lists | SUB: Insertion and Deletion
+BLACKLIST: insert(
+WHITELIST: prev
+INPUTCONSTRAINTS: 1 <= n <= 1000; 0 <= pos <= n; -1000000 <= value, x <= 1000000
+DESCRIPTION:
+A doubly linked job chain takes a rush job at any 0-based position pos (0 <= pos <= n). Allocate the node and wire all four affected pointers.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def dll_insert_at(head, pos, x):
+
+head is the head Node of the chain. Insert Node(x) so it lands at 0-based position pos (inserting at pos = n appends after the tail) and return the (possibly new) head. The harness prints the chain forward AND backward to verify both directions.
+
+Input Format:
+Line 1: n, the number of jobs.
+Line 2: n integers — the job ids in chain order.
+Line 3: the position pos (0 <= pos <= n).
+Line 4: the rush job id x.
+
+Output Format:
+Line 1: the chain forward, space-separated.
+Line 2: the chain backward, space-separated.
+(Both lines are printed by the harness.)
+
+Constraints:
+1 <= n <= 1000
+0 <= pos <= n
+-1000000 <= value, x <= 1000000
+  sampleinput1: "3\n1 2 3\n0\n9"
+  sampleoutput1: "9 1 2 3\n3 2 1 9"
+  sampleinput2: "3\n1 2 3\n1\n9"
+  sampleoutput2: "1 9 2 3\n3 2 9 1"
+  input1: "4\n10 20 30 40\n4\n50"
+  output1: "10 20 30 40 50\n50 40 30 20 10"
+  input2: "2\n5 6\n1\n4"
+  output2: "5 4 6\n6 4 5"
+  input3: "3\n7 8 9\n2\n0"
+  output3: "7 8 0 9\n9 0 8 7"
+SOURCECODE:
+def dll_insert_at(head, pos, x):
+    node = Node(x)
+    if pos == 0:
+        node.next = head
+        head.prev = node
+        return node
+    prev = head
+    i = 0
+    while i < pos - 1:
+        prev = prev.next
+        i += 1
+    node.prev = prev
+    node.next = prev.next
+    if prev.next is not None:
+        prev.next.prev = node
+    prev.next = node
+    return head
+
+
+================================================================================
+[14] Circular Doubly Check   lang=python type=practice diff=medium
+TOPIC: Doubly and Circular Linked Lists | SUB: Circular Linked Lists
+BLACKLIST: set(,dict(
+WHITELIST: prev
+INPUTCONSTRAINTS: 1 <= n <= 1000; c is 0 or 1; -1000000 <= value <= 1000000
+DESCRIPTION:
+A media player chain is either a linear doubly chain or a circular one (tail.next = head AND head.prev = tail). Verify the doubly chain's shape.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def is_dll_circular(head):
+
+head is the head Node of a doubly chain. Return True when the chain is circular (the head's prev is set and the circle closes back to head), False when it is linear.
+
+Input Format:
+Line 1: n, the number of nodes.
+Line 2: n integers — the node values in chain order.
+Line 3: c (1 = the harness closed the circle in both directions, 0 = linear chain).
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= n <= 1000
+c is 0 or 1
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4\n1"
+  sampleoutput1: "True"
+  sampleinput2: "4\n1 2 3 4\n0"
+  sampleoutput2: "False"
+  input1: "1\n7\n1"
+  output1: "True"
+  input2: "3\n5 6 7\n0"
+  output2: "False"
+  input3: "2\n8 9\n1"
+  output3: "True"
+SOURCECODE:
+def is_dll_circular(head):
+    if head.prev is not None:
+        return True
+    node = head
+    while node.next is not None:
+        node = node.next
+    return node.next is head
+
+
+================================================================================
+[15] Split the Patrol Circle   lang=python type=practice diff=medium
+TOPIC: Doubly and Circular Linked Lists | SUB: Circular Linked Lists
+BLACKLIST: len(
+WHITELIST: next
+INPUTCONSTRAINTS: 2 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+A patrol circle must be split into two halves for the night shift. Use slow/fast pointers to find the middle, then close each half into its own circle and report both.
+
+The program scaffolding (input reading, Node class and circular chain building) is already set up for you. Implement only this function:
+
+    def split_circle(head):
+
+head is the head Node of a circular singly chain with at least 2 nodes. Split it into two circular halves (first half gets the extra node when n is odd) and return the tuple (head1, head2). The harness prints one lap of each half.
+
+Input Format:
+Line 1: n, the number of patrols.
+Line 2: n integers — the patrol ids in circle order.
+
+Output Format:
+Line 1: the first half as a circle from its head, space-separated.
+Line 2: the second half as a circle from its head, space-separated.
+(Both lines are printed by the harness.)
+
+Constraints:
+2 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4"
+  sampleoutput1: "1 2\n3 4"
+  sampleinput2: "5\n1 2 3 4 5"
+  sampleoutput2: "1 2 3\n4 5"
+  input1: "2\n7 9"
+  output1: "7\n9"
+  input2: "6\n2 4 6 8 10 12"
+  output2: "2 4 6\n8 10 12"
+  input3: "3\n5 10 15"
+  output3: "5 10\n15"
+SOURCECODE:
+def split_circle(head):
+    slow = head
+    fast = head
+    while fast.next is not head and fast.next.next is not head:
+        slow = slow.next
+        fast = fast.next.next
+    head2 = slow.next
+    slow.next = head
+    tail2 = head2
+    while tail2.next is not head:
+        tail2 = tail2.next
+    tail2.next = head2
+    return head, head2
+
+
+================================================================================
+[16] The Ration Circle Survivor   lang=python type=practice diff=hard
+TOPIC: Doubly and Circular Linked Lists | SUB: Use Cases
+BLACKLIST: pop(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 12; 1 <= k <= 5; -1000000 <= value <= 1000000
+DESCRIPTION:
+A relief shelter passes rations around a circle: counting starts at the head person and every k-th person steps out with their ration, then the count resumes with the next person. Report the id of the one person left holding a ration (the classic Josephus problem on a circular chain).
+
+The program scaffolding (input reading, Node class and circular chain building) is already set up for you. Implement only this function:
+
+    def josephus_survivor(head, k):
+
+head is the head Node of a circular chain of ids and k >= 1. Repeatedly unlink every k-th node (start counting at head; unlinking with a prev pointer that trails one behind works well) until a single node remains, then return its value.
+
+Input Format:
+Line 1: n, the number of people.
+Line 2: n integers — the person ids in circle order.
+Line 3: the counting step k.
+
+Output Format:
+One line with the surviving person's id.
+
+Constraints:
+1 <= n <= 12
+1 <= k <= 5
+-1000000 <= value <= 1000000
+  sampleinput1: "5\n1 2 3 4 5\n2"
+  sampleoutput1: "3"
+  sampleinput2: "6\n10 20 30 40 50 60\n3"
+  sampleoutput2: "10"
+  input1: "1\n7\n5"
+  output1: "7"
+  input2: "4\n3 6 9 12\n1"
+  output2: "12"
+  input3: "7\n1 2 3 4 5 6 7\n4"
+  output3: "2"
+SOURCECODE:
+def josephus_survivor(head, k):
+    prev = head
+    while prev.next is not head:
+        prev = prev.next
+    while prev.next is not prev:
+        i = 1
+        while i < k:
+            prev = prev.next
+            i += 1
+        prev.next = prev.next.next
+    return prev.value
+
+
+================================================================================
+[17] Insert the Reading In Order   lang=python type=practice diff=hard
+TOPIC: Doubly and Circular Linked Lists | SUB: Insertion and Deletion
+BLACKLIST: sorted(,.sort(
+WHITELIST: prev
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value, x <= 1000000; values ascending
+DESCRIPTION:
+A lab's temperature log is a doubly linked chain kept in ascending order; a new reading must slot in with all prev/next links intact. Equal readings go after the existing ones.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def dll_insert_ascending(head, x):
+
+head is the head Node of an ascending doubly chain. Allocate Node(x), insert it keeping the chain ascending (head case included) and return the (possibly new) head. The harness prints the chain forward AND backward to verify both directions.
+
+Input Format:
+Line 1: n, the number of readings.
+Line 2: n integers in ascending order.
+Line 3: the new reading x.
+
+Output Format:
+Line 1: the chain forward, space-separated.
+Line 2: the chain backward, space-separated.
+(Both lines are printed by the harness.)
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value, x <= 1000000
+  sampleinput1: "4\n1 3 5 7\n4"
+  sampleoutput1: "1 3 4 5 7\n7 5 4 3 1"
+  sampleinput2: "3\n2 4 6\n0"
+  sampleoutput2: "0 2 4 6\n6 4 2 0"
+  input1: "1\n9\n9"
+  output1: "9 9\n9 9"
+  input2: "5\n1 2 3 4 5\n6"
+  output2: "1 2 3 4 5 6\n6 5 4 3 2 1"
+  input3: "4\n1 3 5 7\n3"
+  output3: "1 3 3 5 7\n7 5 3 3 1"
+SOURCECODE:
+def dll_insert_ascending(head, x):
+    node = Node(x)
+    if head is None or x < head.value:
+        node.next = head
+        if head is not None:
+            head.prev = node
+        return node
+    prev = head
+    while prev.next is not None and prev.next.value <= x:
+        prev = prev.next
+    node.next = prev.next
+    node.prev = prev
+    if prev.next is not None:
+        prev.next.prev = node
+    prev.next = node
+    return head
+
+
+================================================================================
+[18] Patrol Loop Report   lang=python type=practice diff=hard
+TOPIC: Doubly and Circular Linked Lists | SUB: Circular Linked Lists
+BLACKLIST: set(,dict(
+WHITELIST: next
+INPUTCONSTRAINTS: 1 <= n <= 1000; c is 0 or 1; -1000000 <= value <= 1000000
+DESCRIPTION:
+A relay chain of patrol posts must loop for the night shift. Check whether it already loops back to the head; if it does, report it, otherwise link the tail to the head and report the conversion. The harness then prints one lap to prove the circle.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def ensure_circular(head):
+
+head is the head Node of a singly chain whose tail either links back to head (reply "already circular") or to None (link tail.next = head and reply "converted").
+
+Input Format:
+Line 1: n, the number of posts.
+Line 2: n integers — the post ids in chain order.
+Line 3: c (1 = the harness already linked the tail to the head, 0 = linear chain).
+
+Output Format:
+Line 1: the report — "already circular" or "converted".
+Line 2: one lap of the resulting circle, space-separated.
+(Both lines are printed by the harness.)
+
+Constraints:
+1 <= n <= 1000
+c is 0 or 1
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4\n0"
+  sampleoutput1: "converted\n1 2 3 4"
+  sampleinput2: "4\n1 2 3 4\n1"
+  sampleoutput2: "already circular\n1 2 3 4"
+  input1: "1\n9\n1"
+  output1: "already circular\n9"
+  input2: "1\n9\n0"
+  output2: "converted\n9"
+  input3: "3\n5 6 7\n0"
+  output3: "converted\n5 6 7"
+SOURCECODE:
+def ensure_circular(head):
+    node = head
+    while node.next is not None:
+        if node.next is head:
+            return "already circular"
+        node = node.next
+    node.next = head
+    return "converted"
+
+
+================================================================================
+[19] Flip the Timeline   lang=python type=practice diff=hard
+TOPIC: Doubly and Circular Linked Lists | SUB: Two-Direction Traversal
+BLACKLIST: reversed(
+WHITELIST: prev
+INPUTCONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+DESCRIPTION:
+A timeline viewer flips a doubly linked history chain so the newest entry comes first: every node's prev and next swap roles, and the tail becomes the new head.
+
+The program scaffolding (input reading, Node class and chain building) is already set up for you. Implement only this function:
+
+    def reverse_dll(head):
+
+head is the head Node of a doubly linked chain. Reverse the chain by swapping each node's prev and next while walking it (after the swap, advance through node.prev!) and return the new head (the old tail). The harness prints the chain forward AND backward to verify both directions.
+
+Input Format:
+Line 1: n, the number of entries.
+Line 2: n integers — the entries in chain order (oldest first).
+
+Output Format:
+Line 1: the flipped chain forward, space-separated.
+Line 2: the flipped chain backward, space-separated.
+(Both lines are printed by the harness.)
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+  sampleinput1: "4\n1 2 3 4"
+  sampleoutput1: "4 3 2 1\n1 2 3 4"
+  sampleinput2: "1\n7"
+  sampleoutput2: "7\n7"
+  input1: "3\n10 20 30"
+  output1: "30 20 10\n10 20 30"
+  input2: "5\n1 2 3 4 5"
+  output2: "5 4 3 2 1\n1 2 3 4 5"
+  input3: "2\n8 9"
+  output3: "9 8\n8 9"
+SOURCECODE:
+def reverse_dll(head):
+    node = head
+    new_head = head
+    while node is not None:
+        node.prev, node.next = node.next, node.prev
+        new_head = node
+        node = node.prev
+    return new_head

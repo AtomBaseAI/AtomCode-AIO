@@ -1,0 +1,634 @@
+DAY 12 topics=['Queues and Deques']
+====================================================================================================
+[0] title='Serve in FIFO Order' diff=easy topic='Queues and Deques' sub='FIFO Principle' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def serve_order(values):
+
+Enqueue every value into a deque-based queue, then dequeue everything (popleft) and return the serving order as a list — the FIFO order.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the values in serving order, space-separated.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+sampleinput1='4\n5 7 9 2'
+sampleoutput1='5 7 9 2'
+sampleinput2='1\n42'
+sampleoutput2='42'
+input1='6\n3 1 4 1 5 9'
+output1='3 1 4 1 5 9'
+input2='5\n-2 0 7 -8 3'
+output2='-2 0 7 -8 3'
+input3='8\n10 20 30 40 50 60 70 80'
+output3='10 20 30 40 50 60 70 80'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+SRC: 'def serve_order(values):\n    q = deque(values)\n    out = []\n    while q:\n        out.append(q.popleft())\n    return out\n'
+====================================================================================================
+[1] title='Deque From Both Ends' diff=easy topic='Queues and Deques' sub='Deque Operations' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def pop_ends(values):
+
+Fill a deque with the values, then pop once from the front (popleft) and once from the back (pop). Return the tuple (front value, back value).
+
+Input Format:
+Line 1: n, the number of values (n >= 2).
+Line 2: n integers.
+
+Output Format:
+One line with the popped front value, then the popped back value, space-separated.
+
+Constraints:
+2 <= n <= 1000
+-1000000 <= value <= 1000000
+sampleinput1='5\n1 2 3 4 5'
+sampleoutput1='1 5'
+sampleinput2='2\n7 8'
+sampleoutput2='7 8'
+input1='6\n10 20 30 40 50 60'
+output1='10 60'
+input2='3\n-1 -2 -3'
+output2='-1 -3'
+input3='4\n100 200 300 400'
+output3='100 400'
+CONSTRAINTS: 2 <= n <= 1000; -1000000 <= value <= 1000000
+SRC: 'def pop_ends(values):\n    dq = deque(values)\n    left = dq.popleft()\n    right = dq.pop()\n    return left, right\n'
+====================================================================================================
+[2] title='Rotate the Deque Right' diff=easy topic='Queues and Deques' sub='Deque Operations' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def rotated(values, k):
+
+Fill a deque with the values and rotate it k steps to the right (rotate(k)), then return the resulting list.
+
+Input Format:
+Line 1: n and k, space-separated (0 <= k < n).
+Line 2: n integers.
+
+Output Format:
+One line with the rotated values, space-separated.
+
+Constraints:
+1 <= n <= 1000
+0 <= k < n
+sampleinput1='5 2\n1 2 3 4 5'
+sampleoutput1='4 5 1 2 3'
+sampleinput2='4 1\n7 8 9 10'
+sampleoutput2='10 7 8 9'
+input1='1 0\n42'
+output1='42'
+input2='6 3\n1 2 3 4 5 6'
+output2='4 5 6 1 2 3'
+input3='5 4\n5 4 3 2 1'
+output3='4 3 2 1 5'
+CONSTRAINTS: 1 <= n <= 1000; 0 <= k < n
+SRC: 'def rotated(values, k):\n    dq = deque(values)\n    dq.rotate(k)\n    return list(dq)\n'
+====================================================================================================
+[3] title='Front After k Serves' diff=easy topic='Queues and Deques' sub='FIFO Principle' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def front_after_serves(values, k):
+
+Enqueue all values into a queue, serve (popleft) k customers, then return the tuple (front value, current queue size).
+
+Input Format:
+Line 1: n and k, space-separated (0 <= k < n).
+Line 2: n integers.
+
+Output Format:
+One line with the front value and the queue size, space-separated.
+
+Constraints:
+1 <= n <= 1000
+0 <= k < n
+sampleinput1='5 2\n1 2 3 4 5'
+sampleoutput1='3 3'
+sampleinput2='4 1\n7 8 9 10'
+sampleoutput2='8 3'
+input1='1 0\n42'
+output1='42 1'
+input2='6 3\n1 2 3 4 5 6'
+output2='4 3'
+input3='5 4\n5 4 3 2 1'
+output3='1 1'
+CONSTRAINTS: 1 <= n <= 1000; 0 <= k < n
+SRC: 'def front_after_serves(values, k):\n    q = deque(values)\n    for _ in range(k):\n        q.popleft()\n    return q[0], len(q)\n'
+====================================================================================================
+[4] title='Reverse a Queue with a Deque' diff=easy topic='Queues and Deques' sub='FIFO Principle' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def reversed_queue(values):
+
+Reverse the queue by dequeuing from the front of the input and appending each value to the FRONT of a new deque (appendleft). Return the reversed list.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with the values in reverse order, space-separated.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+sampleinput1='4\n5 7 9 2'
+sampleoutput1='2 9 7 5'
+sampleinput2='1\n42'
+sampleoutput2='42'
+input1='6\n3 1 4 1 5 9'
+output1='9 5 1 4 1 3'
+input2='5\n-2 0 7 -8 3'
+output2='3 -8 7 0 -2'
+input3='8\n10 20 30 40 50 60 70 80'
+output3='80 70 60 50 40 30 20 10'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+SRC: 'def reversed_queue(values):\n    dq = deque()\n    for v in values:\n        dq.appendleft(v)\n    return list(dq)\n'
+====================================================================================================
+[5] title='Deque Symmetry Check' diff=easy topic='Queues and Deques' sub='Deque Operations' type=practice bl='' wl=''
+DESC: The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def symmetric(values):
+
+Load the values into a deque and repeatedly compare the two ends (popleft vs pop). Return True if the sequence reads the same from both directions, else False.
+
+Input Format:
+Line 1: n, the number of values.
+Line 2: n integers.
+
+Output Format:
+One line with True or False.
+
+Constraints:
+1 <= n <= 1000
+-1000000 <= value <= 1000000
+sampleinput1='5\n1 2 3 2 1'
+sampleoutput1='True'
+sampleinput2='4\n1 2 3 4'
+sampleoutput2='False'
+input1='1\n9'
+output1='True'
+input2='6\n1 2 3 3 2 1'
+output2='True'
+input3='3\n7 7 7'
+output3='True'
+CONSTRAINTS: 1 <= n <= 1000; -1000000 <= value <= 1000000
+SRC: 'def symmetric(values):\n    dq = deque(values)\n    while len(dq) > 1:\n        if dq.popleft() != dq.pop():\n            return False\n    return True\n'
+====================================================================================================
+[6] title='Printer Job Lanes' diff=easy topic='Queues and Deques' sub='FIFO Principle' type=practice bl='' wl=''
+DESC: An office printer serves all urgent jobs first (priority 1, in arrival order), then all normal jobs (priority 2, in arrival order) — two FIFO lanes.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def print_order(jobs):
+
+jobs is a list of strings "name prio" (prio is 1 or 2). Enqueue by priority and return the list of job names in the order they print.
+
+Input Format:
+Line 1: n, the number of jobs.
+Lines 2..n+1: one job per line: name prio.
+
+Output Format:
+One line with the job names in print order, space-separated.
+
+Constraints:
+1 <= n <= 1000
+job names are single words
+sampleinput1='4\ncards 1\nreport 2\nslides 1\nmemo 2'
+sampleoutput1='cards slides report memo'
+sampleinput2='3\nalpha 2\nbeta 2\ngamma 2'
+sampleoutput2='alpha beta gamma'
+input1='5\nscan1 1\nscan2 2\nscan3 1\nscan4 2\nscan5 1'
+output1='scan1 scan3 scan5 scan2 scan4'
+input2='2\nonly 1\nlate 2'
+output2='only late'
+input3='6\nj1 2\nj2 1\nj3 2\nj4 2\nj5 1\nj6 1'
+output3='j2 j5 j6 j1 j3 j4'
+CONSTRAINTS: 1 <= n <= 1000; prio is 1 or 2; names are single words
+SRC: 'def print_order(jobs):\n    urgent = deque()\n    normal = deque()\n    for job in jobs:\n        name, prio = job.split()\n        if prio == "1":\n            urgent.append(name)\n        else:\n            normal.append(name)\n    out = []\n    while urgent:\n        out.append(urgent.popleft())\n    while normal:\n        out.append(normal.popleft())\n    return out\n'
+====================================================================================================
+[7] title='Hot Potato Survivor' diff=easy topic='Queues and Deques' sub='Queue Applications' type=practice bl='' wl=''
+DESC: Children stand in a circle playing hot potato: the potato is passed p-1 times, and the child holding it then leaves the circle. Play repeats until one child remains.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def survivor(names, p):
+
+Simulate with a queue: for each round, rotate the queue p-1 times (popleft then append) and then remove the holder (popleft). Return the survivor's name.
+
+Input Format:
+Line 1: n and p, space-separated (p >= 1).
+Line 2: n names, space-separated (single words, in circle order starting anywhere).
+
+Output Format:
+One line with the surviving name.
+
+Constraints:
+1 <= n <= 1000
+1 <= p <= 1000
+sampleinput1='5 2\nana bob cid dee eli'
+sampleoutput1='cid'
+sampleinput2='4 3\na b c d'
+sampleoutput2='a'
+input1='1 5\nsolo'
+output1='solo'
+input2='6 1\np q r s t u'
+output2='u'
+input3='7 4\nm1 m2 m3 m4 m5 m6 m7'
+output3='m2'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= p <= 1000
+SRC: 'def survivor(names, p):\n    q = deque(names)\n    while len(q) > 1:\n        for _ in range(p - 1):\n            q.append(q.popleft())\n        q.popleft()\n    return q[0]\n'
+====================================================================================================
+[8] title='Toll Booth Express Lane' diff=easy topic='Queues and Deques' sub='FIFO Principle' type=practice bl='' wl=''
+DESC: At a toll booth every k-th car in serving order is diverted to the express lane for free flow.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def diverted(cars, k):
+
+cars arrive in queue order; serve them one by one and send every k-th car (1-based count across all serves) to the express lane. Return the list of diverted plates in the order they were diverted. At least one car is diverted in every test.
+
+Input Format:
+Line 1: n and k, space-separated (k >= 1).
+Line 2: n car plates, space-separated (single tokens).
+
+Output Format:
+One line with the diverted plates, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= k <= n
+sampleinput1='6 2\nKA01 KA02 KA03 KA04 KA05 KA06'
+sampleoutput1='KA02 KA04 KA06'
+sampleinput2='4 4\nT1 T2 T3 T4'
+sampleoutput2='T4'
+input1='5 1\nA B C D E'
+output1='A B C D E'
+input2='7 3\np1 p2 p3 p4 p5 p6 p7'
+output2='p3 p6'
+input3='3 3\nx y z'
+output3='z'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= k <= n; plates are single tokens
+SRC: 'def diverted(cars, k):\n    q = deque(cars)\n    i = 0\n    out = []\n    while q:\n        car = q.popleft()\n        i += 1\n        if i % k == 0:\n            out.append(car)\n    return out\n'
+====================================================================================================
+[9] title='Sensor Window Averages' diff=easy topic='Queues and Deques' sub='Sliding-Window Examples' type=practice bl='' wl=''
+DESC: A sensor dashboard reports the average reading of every window of k consecutive samples, printed rounded to 2 decimals.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def window_averages(nums, k):
+
+Return the list of window averages: for each i from 0 to n-k, the average of nums[i..i+k-1]. The harness prints each average rounded to 2 decimals.
+
+Input Format:
+Line 1: n and k, space-separated (1 <= k <= n).
+Line 2: n integers.
+
+Output Format:
+One line per window with its average printed rounded to 2 decimals.
+
+Constraints:
+1 <= n <= 1000
+1 <= k <= n
+sampleinput1='6 2\n1 2 3 4 5 6'
+sampleoutput1='1.50\n2.50\n3.50\n4.50\n5.50'
+sampleinput2='4 4\n10 20 30 40'
+sampleoutput2='25.00'
+input1='1 1\n7'
+output1='7.00'
+input2='5 3\n2 4 6 8 10'
+output2='4.00\n6.00\n8.00'
+input3='6 2\n1 2 1 2 1 2'
+output3='1.50\n1.50\n1.50\n1.50\n1.50'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= k <= n
+SRC: 'def window_averages(nums, k):\n    res = []\n    for i in range(len(nums) - k + 1):\n        res.append(sum(nums[i:i + k]) / k)\n    return res\n'
+====================================================================================================
+[10] title='Circular Queue Ticket Desk' diff=medium topic='Queues and Deques' sub='Circular Queues' type=practice bl='deque' wl='return'
+DESC: A ticket desk runs a circular queue with fixed capacity cap on a ring buffer (indices wrap with modulo). Operations are "enq x", "deq" and "front"; enqueuing when full is ignored; dequeuing or peeking when empty reports EMPTY.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def circular_queue_ops(cap, ops):
+
+Implement the ring buffer (head index + count, modulo wrapping) — do NOT use collections.deque. Return the list of results: each "deq" yields the dequeued value or "EMPTY", each "front" yields the front value or "EMPTY" ("enq" produces no output).
+
+Input Format:
+Line 1: cap, the capacity.
+Line 2: m, the number of operations.
+Lines 3..m+2: one operation per line.
+
+Output Format:
+One line per result (a number or the word EMPTY).
+
+Constraints:
+1 <= cap <= 100
+1 <= m <= 2000
+-1000000 <= x <= 1000000
+sampleinput1='3\n7\nenq 1\nenq 2\ndeq\nenq 3\nenq 4\nfront\ndeq'
+sampleoutput1='1\n2\n2'
+sampleinput2='2\n5\nenq 5\nenq 6\nenq 7\ndeq\ndeq'
+sampleoutput2='5\n6'
+input1='1\n4\ndeq\nenq 9\nfront\ndeq'
+output1='EMPTY\n9\n9'
+input2='4\n6\nenq 10\nenq 20\ndeq\ndeq\ndeq\nfront'
+output2='10\n20\nEMPTY\nEMPTY'
+input3='3\n8\nenq 1\nenq 2\nenq 3\nenq 4\ndeq\nenq 4\nfront\ndeq'
+output3='1\n2\n2'
+CONSTRAINTS: 1 <= cap <= 100; 1 <= m <= 2000; enq when full is ignored
+SRC: 'def circular_queue_ops(cap, ops):\n    buf = [None] * cap\n    head = 0\n    count = 0\n    res = []\n    for op in ops:\n        parts = op.split()\n        if parts[0] == "enq":\n            if count < cap:\n                buf[(head + count) % cap] = int(parts[1])\n                count += 1\n        elif parts[0] == "deq":\n            if count == 0:\n                res.append("EMPTY")\n    
+====================================================================================================
+[11] title='Numbers Made of 5s and 6s' diff=medium topic='Queues and Deques' sub='Queue Applications' type=practice bl='itertools' wl='popleft('
+DESC: A security keypad only has the digits 5 and 6. A kiosk lists, in increasing order, every positive number up to n whose decimal digits are only 5s and 6s — generated with a queue.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def fives_sixes(n):
+
+Seed a queue with 5 and 6, then repeatedly dequeue a number x, record it, and enqueue x*10+5 and x*10+6 while they are <= n. Return the recorded numbers in increasing order.
+
+Input Format:
+One line with n.
+
+Output Format:
+One line per qualifying number, in increasing order.
+
+Constraints:
+1 <= n <= 1000000
+sampleinput1='10'
+sampleoutput1='5\n6'
+sampleinput2='66'
+sampleoutput2='5\n6\n55\n56\n65\n66'
+input1='600'
+output1='5\n6\n55\n56\n65\n66\n555\n556\n565\n566'
+input2='5556'
+output2='5\n6\n55\n56\n65\n66\n555\n556\n565\n566\n655\n656\n665\n666\n5555\n5556'
+input3='1000000'
+output3='5\n6\n55\n56\n65\n66\n555\n556\n565\n566\n655\n656\n665\n666\n5555\n5556\n5565\n5566\n5655\n5656\n5665\n5666\n6555\n6556\n6565\n6566\n6655\n6656\n6665\n6666\n55555\n55556\n55565\n55566\n55655\n55656\n55665\n55666\n56555\n56556\n56565\n56566\n56655\n56656\n56665\n56666\n65555\n65556\n65565\n65566\n65655\n65656\n65665\n65666\n66555\n66556\n66565\n66566\n66655\n66656\n66665\n66666\n555555\n555556\n555565\n555566\n555655\n555656\n555665\n555666\n556555\n556556\n556565\n556566\n556655\n556656\n556665\n556666\n565555\n565556\n565565\n565566\n565655\n565656\n565665\n565666\n566555\n566556\n566565\n566566\n566655\n566656\n566665\n566666\n655555\n655556\n655565\n655566\n655655\n655656\n655665\n655666\n656555\n656556\n656565\n656566\n656655\n656656\n656665\n656666\n665555\n665556\n665565\n665566\n665655\n665656\n665665\n665666\n666555\n666556\n666565\n666566\n666655\n666656\n666665\n666666'
+CONSTRAINTS: 1 <= n <= 1000000
+SRC: 'def fives_sixes(n):\n    res = []\n    q = deque()\n    for seed in (5, 6):\n        if seed <= n:\n            q.append(seed)\n    while q:\n        x = q.popleft()\n        res.append(x)\n        for d in (5, 6):\n            y = x * 10 + d\n            if y <= n:\n                q.append(y)\n    return res\n'
+====================================================================================================
+[12] title='First Negative in Every Window' diff=medium topic='Queues and Deques' sub='Sliding-Window Examples' type=practice bl='sorted(' wl='popleft('
+DESC: A logistics controller scans every window of k consecutive delivery times and reports the first negative delay in each window (0 if the window has none).
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def first_negatives(nums, k):
+
+Use a deque of indices of negative values, evicting indices that fall out of the window, and return the list of answers.
+
+Input Format:
+Line 1: n and k, space-separated (1 <= k <= n).
+Line 2: n integers.
+
+Output Format:
+One line with n-k+1 answers, space-separated.
+
+Constraints:
+1 <= n <= 1000
+1 <= k <= n
+-1000 <= value <= 1000
+sampleinput1='8 3\n12 -1 -7 8 -15 30 16 28'
+sampleoutput1='-1 -1 -7 -15 -15 0'
+sampleinput2='5 2\n1 2 3 4 5'
+sampleoutput2='0 0 0 0'
+input1='1 1\n-9'
+output1='-9'
+input2='6 6\n-1 2 -3 4 -5 6'
+output2='-1'
+input3='7 3\n2 -2 3 -4 5 -6 7'
+output3='-2 -2 -4 -4 -6'
+CONSTRAINTS: 1 <= n <= 1000; 1 <= k <= n; -1000 <= value <= 1000
+SRC: 'def first_negatives(nums, k):\n    dq = deque()\n    res = []\n    for i, x in enumerate(nums):\n        if x < 0:\n            dq.append(i)\n        if i >= k and dq and dq[0] <= i - k:\n            dq.popleft()\n        if i >= k - 1:\n            res.append(nums[dq[0]] if dq else 0)\n    return res\n'
+====================================================================================================
+[13] title='Round Robin Job Finish Order' diff=medium topic='Queues and Deques' sub='Queue Applications' type=practice bl='sorted(' wl='popleft('
+DESC: A CPU scheduler runs jobs round-robin: each job gets quantum time units per turn; a job that still has remaining work rejoins the back of the queue.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def completion_order(bursts, quantum):
+
+bursts are the CPU bursts of jobs indexed 0..n-1. Simulate with a deque and return the list of job indices in the order they finish.
+
+Input Format:
+Line 1: n and quantum, space-separated (quantum >= 1).
+Line 2: n integers (the bursts, each >= 1).
+
+Output Format:
+One line with the finishing indices, space-separated.
+
+Constraints:
+1 <= n <= 100
+1 <= quantum <= 20
+1 <= burst <= 50
+sampleinput1='4 2\n5 2 3 1'
+sampleoutput1='1 3 2 0'
+sampleinput2='3 3\n4 4 4'
+sampleoutput2='0 1 2'
+input1='1 5\n7'
+output1='0'
+input2='5 1\n2 2 2 2 2'
+output2='0 1 2 3 4'
+input3='4 10\n1 2 3 4'
+output3='0 1 2 3'
+CONSTRAINTS: 1 <= n <= 100; 1 <= quantum <= 20; 1 <= burst <= 50
+SRC: 'def completion_order(bursts, quantum):\n    q = deque(range(len(bursts)))\n    left = list(bursts)\n    done = []\n    while q:\n        i = q.popleft()\n        step = left[i] if left[i] < quantum else quantum\n        left[i] -= step\n        if left[i] == 0:\n            done.append(i)\n        else:\n            q.append(i)\n    return done\n'
+====================================================================================================
+[14] title='Petrol Pump Circuit Start' diff=medium topic='Queues and Deques' sub='Queue Applications' type=practice bl='sorted(' wl='return'
+DESC: A truck circles a route of petrol pumps. Pump i provides petrol[i] litres and the leg to the next pump costs dist[i] litres. The truck starts with an empty tank and carries whatever it has collected.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def start_station(petrol, dist):
+
+Return the smallest index from which the truck can complete the full circuit, or -1 if no start works (tank never dips below zero mid-leg).
+
+Input Format:
+Line 1: n, the number of pumps.
+Line 2: n integers (petrol per pump).
+Line 3: n integers (distance to the next pump).
+
+Output Format:
+One line with the smallest valid start index or -1.
+
+Constraints:
+1 <= n <= 1000
+0 <= petrol[i], dist[i] <= 1000
+sampleinput1='4\n4 6 7 4\n6 5 3 5'
+sampleoutput1='1'
+sampleinput2='3\n1 2 3\n3 2 1'
+sampleoutput2='1'
+input1='3\n2 3 4\n3 4 3'
+output1='-1'
+input2='1\n5\n3'
+output2='0'
+input3='5\n3 4 5 1 2\n4 5 1 2 3'
+output3='2'
+CONSTRAINTS: 1 <= n <= 1000; 0 <= petrol[i], dist[i] <= 1000
+SRC: 'def start_station(petrol, dist):\n    total = 0\n    curr = 0\n    start = 0\n    for i in range(len(petrol)):\n        d = petrol[i] - dist[i]\n        total += d\n        curr += d\n        if curr < 0:\n            start = i + 1\n            curr = 0\n    return start if total >= 0 else -1\n'
+====================================================================================================
+[15] title='Interleave the Two Halves' diff=medium topic='Queues and Deques' sub='Deque Operations' type=practice bl='sorted(' wl='popleft('
+DESC: A shuffle playlist interleaves the first half of a track list with the second half: the first track of each half alternates.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def interleaved(values):
+
+values has an even length. Split it into two halves, load each into a deque, and return the interleaved list [a0, b0, a1, b1, ...].
+
+Input Format:
+Line 1: n, the number of values (n is even).
+Line 2: n integers.
+
+Output Format:
+One line with the interleaved values, space-separated.
+
+Constraints:
+2 <= n <= 1000
+n is even
+-1000000 <= value <= 1000000
+sampleinput1='4\n1 2 3 4'
+sampleoutput1='1 3 2 4'
+sampleinput2='6\n10 20 30 40 50 60'
+sampleoutput2='10 40 20 50 30 60'
+input1='2\n7 8'
+output1='7 8'
+input2='8\n1 1 2 2 3 3 4 4'
+output2='1 3 1 3 2 4 2 4'
+input3='4\n-1 -2 -3 -4'
+output3='-1 -3 -2 -4'
+CONSTRAINTS: 2 <= n <= 1000; n is even; -1000000 <= value <= 1000000
+SRC: 'def interleaved(values):\n    first = deque(values[: len(values) // 2])\n    second = deque(values[len(values) // 2 :])\n    out = []\n    while first:\n        out.append(first.popleft())\n        out.append(second.popleft())\n    return out\n'
+====================================================================================================
+[16] title='Trading Window Maximum' diff=hard topic='Queues and Deques' sub='Sliding-Window Examples' type=practice bl='sorted(' wl='popleft('
+DESC: A market feed analyses every window of k consecutive prices and reports the maximum of each window.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def window_maxes(nums, k):
+
+Use a monotonic deque of indices (front holds the window's max) and return the list of window maxima.
+
+Input Format:
+Line 1: n and k, space-separated (1 <= k <= n).
+Line 2: n integers.
+
+Output Format:
+One line with n-k+1 window maxima, space-separated.
+
+Constraints:
+1 <= n <= 2000
+1 <= k <= n
+-1000000 <= value <= 1000000
+sampleinput1='8 3\n1 3 -1 -3 5 3 6 7'
+sampleoutput1='3 3 5 5 6 7'
+sampleinput2='4 4\n2 4 1 3'
+sampleoutput2='4'
+input1='1 1\n9'
+output1='9'
+input2='6 2\n5 5 5 5 5 5'
+output2='5 5 5 5 5'
+input3='10 4\n4 3 5 1 2 6 7 0 9 8'
+output3='5 5 6 7 7 9 9'
+CONSTRAINTS: 1 <= n <= 2000; 1 <= k <= n; -1000000 <= value <= 1000000
+SRC: 'def window_maxes(nums, k):\n    dq = deque()\n    res = []\n    for i, x in enumerate(nums):\n        while dq and nums[dq[-1]] <= x:\n            dq.pop()\n        dq.append(i)\n        if dq[0] <= i - k:\n            dq.popleft()\n        if i >= k - 1:\n            res.append(nums[dq[0]])\n    return res\n'
+====================================================================================================
+[17] title='Live Chat First Unique Letter' diff=hard topic='Queues and Deques' sub='Queue Applications' type=practice bl='sorted(' wl='popleft('
+DESC: A live chat monitor shows, after every arriving character, the first character that has appeared exactly once so far (or - when none exists).
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def stream_chars(s):
+
+Maintain a queue of still-unique candidates and a frequency map; after each character, evict repeated fronts. Return the list of answers, one per position (use "-" when no unique character exists).
+
+Input Format:
+One line containing the stream s (lowercase letters).
+
+Output Format:
+One line per position with the first unique character so far, or -.
+
+Constraints:
+1 <= len(s) <= 1000
+sampleinput1='aabcbc'
+sampleoutput1='a\n-\nb\nb\nc\n-'
+sampleinput2='abcabc'
+sampleoutput2='a\na\na\nb\nc\n-'
+input1='z'
+output1='z'
+input2='aabb'
+output2='a\n-\nb\n-'
+input3='abacabadabacaba'
+output3='a\na\nb\nb\nb\nc\nc\nc\nc\nc\nc\nd\nd\nd\nd'
+CONSTRAINTS: 1 <= len(s) <= 1000; lowercase letters
+SRC: 'def stream_chars(s):\n    count = {}\n    q = deque()\n    res = []\n    for ch in s:\n        count[ch] = count.get(ch, 0) + 1\n        q.append(ch)\n        while q and count[q[0]] > 1:\n            q.popleft()\n        res.append(q[0] if q else "-")\n    return res\n'
+====================================================================================================
+[18] title='Cooling Window Minimum' diff=hard topic='Queues and Deques' sub='Sliding-Window Examples' type=practice bl='sorted(' wl='popleft('
+DESC: A weather system tracks every window of k consecutive temperatures and reports the minimum of each window.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def window_mins(nums, k):
+
+Use a monotonic deque of indices (front holds the window's min) and return the list of window minima.
+
+Input Format:
+Line 1: n and k, space-separated (1 <= k <= n).
+Line 2: n integers.
+
+Output Format:
+One line with n-k+1 window minima, space-separated.
+
+Constraints:
+1 <= n <= 2000
+1 <= k <= n
+-1000000 <= value <= 1000000
+sampleinput1='8 3\n2 5 1 4 7 3 6 8'
+sampleoutput1='1 1 1 3 3 3'
+sampleinput2='4 4\n9 1 8 2'
+sampleoutput2='1'
+input1='1 1\n-7'
+output1='-7'
+input2='6 2\n3 3 1 1 2 2'
+output2='3 1 1 1 2'
+input3='10 4\n7 6 5 4 3 2 1 0 9 8'
+output3='4 3 2 1 0 0 0'
+CONSTRAINTS: 1 <= n <= 2000; 1 <= k <= n; -1000000 <= value <= 1000000
+SRC: 'def window_mins(nums, k):\n    dq = deque()\n    res = []\n    for i, x in enumerate(nums):\n        while dq and nums[dq[-1]] >= x:\n            dq.pop()\n        dq.append(i)\n        if dq[0] <= i - k:\n            dq.popleft()\n        if i >= k - 1:\n            res.append(nums[dq[0]])\n    return res\n'
+====================================================================================================
+[19] title='Shortest Surge at Least K' diff=hard topic='Queues and Deques' sub='Sliding-Window Examples' type=practice bl='sorted(' wl='popleft('
+DESC: A power-grid monitor needs the shortest consecutive stretch of readings whose sum is at least target. Readings may be negative, so a plain sliding window does not work — use prefix sums with a monotonic deque of prefix indices.
+
+The program scaffolding (input reading and main) is already set up for you. Implement only this function:
+
+    def shortest_subarray(nums, target):
+
+Return the length of the shortest subarray with sum >= target, or -1 if no subarray qualifies.
+
+Input Format:
+Line 1: n and target, space-separated.
+Line 2: n integers.
+
+Output Format:
+One line with the length or -1.
+
+Constraints:
+1 <= n <= 1000
+-100 <= value <= 100
+-100 <= target <= 10000
+sampleinput1='5 8\n2 -1 3 4 6'
+sampleoutput1='2'
+sampleinput2='3 4\n1 2 3'
+sampleoutput2='2'
+input1='4 100\n1 2 3 4'
+output1='-1'
+input2='6 7\n2 -1 2 4 -2 3'
+output2='4'
+input3='5 3\n-2 -3 -4 -5 -6'
+output3='-1'
+CONSTRAINTS: 1 <= n <= 1000; -100 <= value <= 100; -100 <= target <= 10000
+SRC: 'def shortest_subarray(nums, target):\n    n = len(nums)\n    prefix = [0]\n    for x in nums:\n        prefix.append(prefix[-1] + x)\n    dq = deque()\n    best = n + 1\n    for j in range(n + 1):\n        while dq and prefix[j] - prefix[dq[0]] >= target:\n            if j - dq[0] < best:\n                best = j - dq[0]\n            dq.popleft()\n        while dq and prefix[dq[-1]] >= prefix[j]

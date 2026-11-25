@@ -1,0 +1,549 @@
+DAY 7 topics=[{"name":"Efficient Sorting Algorithms","subtopics":["general","Merge Sort","Quicksort","Partitioning","Recursion in Sorting","Auxiliary Memory and Stability"]}] questions=20
+=== q00 [practice] lang=c diff=easy score=10 topic=Efficient Sorting Algorithms/Merge Sort
+title: Merge Sort Ascending
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void merge_sort(int arr[], int n)
+
+It must sort arr[0..n-1] in ascending order, in place, using merge sort: recursively sort the left half and the right half, then merge the two sorted halves through a temporary array.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the n values in ascending order, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="5\n5 2 9 1 7" OUT="1 2 5 7 9"
+s2: IN="1\n42" OUT="42"
+t1: IN="6\n3 1 4 1 5 9" OUT="1 1 3 4 5 9"
+t2: IN="4\n10 -3 5 0" OUT="-3 0 5 10"
+t3: IN="7\n8 8 2 9 2 1 3" OUT="1 2 2 3 8 8 9"
+srccode_len=643
+=== q01 [practice] lang=c diff=easy score=10 topic=Efficient Sorting Algorithms/Merge Sort
+title: Merge Two Sorted Halves
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void merge_halves(int arr[], int n, int mid, int out[])
+
+arr[0..mid-1] and arr[mid..n-1] are each sorted ascending. It must merge the two runs into out[0..n-1] in ascending order (on equal values take from the left run first).
+
+Input Format:
+Line 1: n and mid. Line 2: n space-separated integers (first mid ascending, rest ascending).
+
+Output Format:
+One line with the n merged values, space-separated.
+
+Constraints:
+2 <= n <= 10000, 1 <= mid < n, |value| <= 1000000000
+constraints: 2 <= n <= 10000, 1 <= mid < n, |value| <= 1000000000
+s1: IN="4\n2\n1 3 2 4" OUT="1 2 3 4"
+s2: IN="3\n1\n5 2 8" OUT="2 5 8"
+t1: IN="6\n3\n1 4 7 2 3 9" OUT="1 2 3 4 7 9"
+t2: IN="5\n2\n-2 6 -1 0 3" OUT="-2 -1 0 3 6"
+t3: IN="7\n4\n10 20 30 40 5 15 25" OUT="5 10 15 20 25 30 40"
+srccode_len=292
+=== q02 [practice] lang=c diff=easy score=10 topic=Efficient Sorting Algorithms/Partitioning
+title: Lomuto Partition Index
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int lomuto_partition(int arr[], int n)
+
+It must run ONE Lomuto partition pass using the LAST element arr[n-1] as the pivot: walk j from 0 to n-2, keep elements <= pivot packed at the front, then swap the pivot into position i+1. It must return the pivot's final 0-based index.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the pivot's final index.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="5\n3 8 2 5 4" OUT="2"
+s2: IN="1\n7" OUT="0"
+t1: IN="6\n9 3 6 1 8 6" OUT="3"
+t2: IN="4\n5 4 3 2" OUT="0"
+t3: IN="5\n2 2 2 2 2" OUT="4"
+srccode_len=360
+=== q03 [practice] lang=c diff=easy score=10 topic=Efficient Sorting Algorithms/Quicksort
+title: Quicksort the Array
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void quick_sort(int arr[], int n)
+
+It must sort arr[0..n-1] in ascending order, in place, using quicksort: pick the last element as the Lomuto pivot, partition, then recursively sort both sides.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the n values in ascending order, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="6\n7 2 9 3 1 5" OUT="1 2 3 5 7 9"
+s2: IN="2\n2 1" OUT="1 2"
+t1: IN="5\n4 4 4 4 4" OUT="4 4 4 4 4"
+t2: IN="5\n-1 0 -5 3 2" OUT="-5 -1 0 2 3"
+t3: IN="8\n9 8 7 6 5 4 3 2" OUT="2 3 4 5 6 7 8 9"
+srccode_len=527
+=== q04 [practice] lang=c diff=easy score=10 topic=Efficient Sorting Algorithms/Quicksort
+title: Kth Smallest Element
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int kth_smallest(int arr[], int n, int k)
+
+It must return the k-th smallest value of the array in sorted (non-decreasing) order — duplicates count, so k is 1-based over the sorted sequence.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: k.
+
+Output Format:
+One line with the k-th smallest value.
+
+Constraints:
+1 <= n <= 10000, 1 <= k <= n, |value| <= 1000000000
+constraints: 1 <= n <= 10000, 1 <= k <= n, |value| <= 1000000000
+s1: IN="5\n7 10 4 3 20\n3" OUT="7"
+s2: IN="4\n2 2 1 3\n2" OUT="2"
+t1: IN="6\n15 6 8 1 30 22\n4" OUT="15"
+t2: IN="3\n5 5 5\n1" OUT="5"
+t3: IN="7\n9 1 8 2 7 3 6\n7" OUT="9"
+srccode_len=284
+=== q05 [practice] lang=c diff=easy score=10 topic=Efficient Sorting Algorithms/Partitioning
+title: Partition With First Pivot
+desc: The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int partition_first(int arr[], int n)
+
+It must partition with the FIRST element as the pivot using the Lomuto scheme: first swap arr[0] with arr[n-1] so the pivot sits at the end, then run the standard last-pivot Lomuto pass (elements <= pivot packed left, pivot swapped into its final slot). It must return the pivot's final 0-based index.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the pivot's final index.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="5\n4 3 2 1 5" OUT="3"
+s2: IN="1\n9" OUT="0"
+t1: IN="4\n2 8 7 1" OUT="1"
+t2: IN="6\n3 9 3 9 3 9" OUT="2"
+t3: IN="3\n5 5 5" OUT="2"
+srccode_len=416
+=== q06 [practice] lang=c diff=easy score=10 topic=Efficient Sorting Algorithms/Auxiliary Memory and Stability
+title: Left Picks in the Merge
+desc: A billing engine merges two sorted invoice runs. To keep stable ordering it must take from the LEFT run whenever the two front values are equal. Your job is to report how many elements end up taken from the left run.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int merge_left_picks(int arr[], int n, int mid)
+
+arr[0..mid-1] (left run) and arr[mid..n-1] (right run) are each sorted ascending. Merge the two runs with the stable rule "on ties take from the left" and return the number of elements taken from the left run, including left-run elements copied after the right run is exhausted.
+
+Input Format:
+Line 1: n and mid. Line 2: n space-separated integers (first mid ascending, rest ascending).
+
+Output Format:
+One line with the count of elements taken from the left run.
+
+Constraints:
+2 <= n <= 10000, 1 <= mid < n, |value| <= 1000000000
+constraints: 2 <= n <= 10000, 1 <= mid < n, |value| <= 1000000000
+s1: IN="4\n2\n1 3 2 4" OUT="2"
+s2: IN="2\n1\n1 1" OUT="1"
+t1: IN="6\n3\n1 3 5 2 4 6" OUT="3"
+t2: IN="5\n2\n2 2 1 3 4" OUT="2"
+t3: IN="6\n3\n1 2 3 1 2 3" OUT="3"
+srccode_len=434
+=== q07 [practice] lang=c diff=easy score=10 topic=Efficient Sorting Algorithms/Partitioning
+title: Rearrange Around the Last Price
+desc: A market monitor rearranges a day's price readings around the closing price: everything <= the closing price moves to the front block (preserving Lomuto scan order), everything else stays behind it. The closing price itself (the last reading) is the pivot.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int partition_last(int arr[], int n)
+
+It must run ONE Lomuto partition pass with pivot = arr[n-1], rearranging arr in place, and return the pivot's final index. The harness prints the rearranged array.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers (the last one is the pivot).
+
+Output Format:
+One line with the n rearranged values, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="5\n10 80 30 90 40" OUT="10 30 40 90 80"
+s2: IN="3\n1 2 3" OUT="1 2 3"
+t1: IN="6\n9 4 7 1 8 5" OUT="4 1 5 9 8 7"
+t2: IN="4\n-2 7 -5 0" OUT="-2 -5 0 7"
+t3: IN="5\n3 3 3 3 3" OUT="3 3 3 3 3"
+srccode_len=358
+=== q08 [practice] lang=c diff=easy score=10 topic=Efficient Sorting Algorithms/Quicksort
+title: Kth Cheapest Fare
+desc: A travel desk lists the day's fares in arbitrary order and must answer "what is the k-th cheapest fare?" quickly. Duplicates count: the sorted (non-decreasing) sequence is indexed 1-based.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int kth_cheapest(int arr[], int n, int k)
+
+It must return the k-th smallest fare.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: k.
+
+Output Format:
+One line with the k-th smallest value.
+
+Constraints:
+1 <= n <= 10000, 1 <= k <= n, |value| <= 1000000000
+constraints: 1 <= n <= 10000, 1 <= k <= n, |value| <= 1000000000
+s1: IN="4\n25 10 60 40\n2" OUT="25"
+s2: IN="3\n8 8 8\n3" OUT="8"
+t1: IN="6\n45 12 78 23 9 56\n5" OUT="56"
+t2: IN="2\n100 1\n1" OUT="1"
+t3: IN="5\n30 20 50 20 10\n4" OUT="30"
+srccode_len=284
+=== q09 [practice] lang=c diff=easy score=10 topic=Efficient Sorting Algorithms/Recursion in Sorting
+title: Quicksort Recursion Depth
+desc: A profiling tool measures how deep quicksort's recursion actually goes: balanced partitions give a shallow tree, unlucky ones a deep one. The initial call counts as depth 1 and every recursive call goes one level deeper.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int quick_depth(int arr[], int n)
+
+It must run quicksort with the Lomuto scheme and the LAST element as pivot and return the maximum recursion depth reached (the initial call on the full array is depth 1).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the maximum recursion depth.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="5\n1 2 3 4 5" OUT="5"
+s2: IN="1\n7" OUT="1"
+t1: IN="5\n3 1 2 4 5" OUT="4"
+t2: IN="6\n6 5 4 3 2 1" OUT="6"
+t3: IN="7\n2 7 1 8 2 8 1" OUT="4"
+srccode_len=650
+=== q10 [practice] lang=c diff=medium score=20 topic=Efficient Sorting Algorithms/Merge Sort
+title: Merge Sort Comparison Count
+desc: An algorithm lab instruments merge sort: every time the merging step compares one element of the left run against one of the right run, that is ONE comparison. Element copies and the leftover tail copies are not comparisons.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int merge_comparisons(int arr[], int n)
+
+It must run a standard top-down merge sort (recursive halves, merge with a temporary array) and return the total number of element-vs-element comparisons performed during all merges.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the total comparison count.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: while
+s1: IN="4\n1 3 2 4" OUT="5"
+s2: IN="1\n9" OUT="0"
+t1: IN="6\n5 2 8 1 9 3" OUT="10"
+t2: IN="5\n1 2 3 4 5" OUT="5"
+t3: IN="7\n9 1 8 2 7 3 6" OUT="13"
+srccode_len=712
+=== q11 [practice] lang=c diff=medium score=20 topic=Efficient Sorting Algorithms/Quicksort
+title: Quicksort Comparison Count
+desc: The same lab instruments quicksort: every time the partition pass tests one element against the pivot (arr[j] <= pivot), that is ONE comparison. A partition of size s therefore makes exactly s-1 comparisons.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int quick_comparisons(int arr[], int n)
+
+It must run quicksort with the Lomuto scheme and the LAST element as pivot and return the total number of element-vs-pivot comparisons across all partitions.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the total comparison count.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: for
+s1: IN="5\n1 2 3 4 5" OUT="10"
+s2: IN="1\n8" OUT="0"
+t1: IN="5\n3 1 5 2 4" OUT="6"
+t2: IN="6\n2 4 1 6 3 5" OUT="9"
+t3: IN="4\n9 7 5 3" OUT="6"
+srccode_len=610
+=== q12 [practice] lang=c diff=medium score=20 topic=Efficient Sorting Algorithms/Merge Sort
+title: Merge Two Visitor Streams
+desc: A gallery counts two visitor streams, each already sorted ascending by badge number. Reception merges them into one sorted roster on the fly.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void merge_streams(int a[], int n, int b[], int m, int out[])
+
+It must merge the sorted arrays a[0..n-1] and b[0..m-1] into out[0..n+m-1] ascending (on equal values take from a first). No sorting from scratch — a single merging pass.
+
+Input Format:
+Line 1: n. Line 2: n sorted integers. Line 3: m. Line 4: m sorted integers.
+
+Output Format:
+One line with the n+m merged values, space-separated.
+
+Constraints:
+1 <= n, m <= 1000, |value| <= 1000000000
+constraints: 1 <= n, m <= 1000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: while
+s1: IN="3\n1 3 5\n3\n2 4 6" OUT="1 2 3 4 5 6"
+s2: IN="1\n7\n1\n3" OUT="3 7"
+t1: IN="4\n1 2 2 3\n3\n2 3 8" OUT="1 2 2 2 3 3 8"
+t2: IN="2\n-5 0\n4\n-9 -9 4 10" OUT="-9 -9 -5 0 4 10"
+t3: IN="5\n1 1 1 1 1\n2\n1 1" OUT="1 1 1 1 1 1 1"
+srccode_len=280
+=== q13 [practice] lang=c diff=medium score=20 topic=Efficient Sorting Algorithms/Partitioning
+title: Three-Way Partition Report
+desc: A warehouse scanner splits readings around a threshold v into three blocks: strictly smaller, exactly equal, strictly greater — each block keeps the original relative order (a stable 3-way split).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void three_way(int arr[], int n, int v, int out[])
+
+It must fill out[0..n-1] with: first all elements < v (original order), then all elements == v (original order), then all elements > v (original order).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: v.
+
+Output Format:
+One line with the n rearranged values, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value|, |v| <= 1000000000
+constraints: 1 <= n <= 10000, |value|, |v| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: for
+s1: IN="6\n4 9 4 1 7 4\n4" OUT="1 4 4 4 9 7"
+s2: IN="3\n5 5 5\n5" OUT="5 5 5"
+t1: IN="7\n3 -2 8 0 5 -2 6\n2" OUT="-2 0 -2 3 8 5 6"
+t2: IN="4\n10 -1 10 -1\n10" OUT="-1 -1 10 10"
+t3: IN="5\n2 2 2 2 2\n3" OUT="2 2 2 2 2"
+srccode_len=319
+=== q14 [practice] lang=c diff=medium score=20 topic=Efficient Sorting Algorithms/Auxiliary Memory and Stability
+title: Stable Merge of Student Records
+desc: Two campus lists hold (score, id) records, each sorted ascending by score. The registrar merges them and must guarantee stability: records with EQUAL scores keep the left list's records first.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void stable_merge(int s[], int id[], int t[], int tid[], int n, int m, int os[], int oid[])
+
+s[]/id[] are the left list's scores and ids (n records), t[]/tid[] the right list's (m records). Merge into os[]/oid[] ascending by score; on equal scores take from the LEFT list first.
+
+Input Format:
+Line 1: n and m. Line 2: 2n integers (score id for each left record). Line 3: 2m integers (score id for each right record).
+
+Output Format:
+One line with the merged records as "score id" pairs, space-separated (2*(n+m) integers).
+
+Constraints:
+1 <= n, m <= 1000, 0 <= score <= 1000000000, ids distinct inside each list
+constraints: 1 <= n, m <= 1000, 0 <= score <= 1000000000, ids distinct inside each list
+BLACKLIST: qsort
+WHITELIST: while
+s1: IN="1 1\n90 1\n90 2" OUT="90 1 90 2"
+s2: IN="2 1\n80 5 95 3\n85 7" OUT="80 5 85 7 95 3"
+t1: IN="3 2\n70 1 70 2 90 4\n70 3 85 8" OUT="70 1 70 2 70 3 85 8 90 4"
+t2: IN="1 3\n50 9\n40 1 60 2 60 3" OUT="40 1 50 9 60 2 60 3"
+t3: IN="2 2\n88 11 88 12\n88 21 88 22" OUT="88 11 88 12 88 21 88 22"
+srccode_len=588
+=== q15 [practice] lang=c diff=medium score=20 topic=Efficient Sorting Algorithms/Merge Sort
+title: Cross-Stream Inversion Count
+desc: Two servers emit timestamped events; a replication auditor counts "out-of-order pairs" ACROSS the streams: every pair (i, j) with a[i] > b[j] is one anomaly.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long cross_inversions(int a[], int n, int b[], int m)
+
+It must return the number of pairs (i, j), 0 <= i < n and 0 <= j < m, with a[i] > b[j].
+
+Input Format:
+Line 1: n. Line 2: n integers. Line 3: m. Line 4: m integers.
+
+Output Format:
+One line with the pair count.
+
+Constraints:
+1 <= n, m <= 1000, |value| <= 1000000000
+constraints: 1 <= n, m <= 1000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: for
+s1: IN="3\n3 7 1\n3\n2 4 5" OUT="4"
+s2: IN="2\n1 2\n2\n3 4" OUT="0"
+t1: IN="3\n5 5 5\n4\n1 2 3 4" OUT="12"
+t2: IN="2\n-1 0\n3\n-2 -1 0" OUT="3"
+t3: IN="1\n10\n1\n1" OUT="1"
+srccode_len=225
+=== q16 [practice] lang=c diff=hard score=30 topic=Efficient Sorting Algorithms/Merge Sort
+title: Count Inversions Efficiently
+desc: A trading backtester measures how disordered a price sequence is: an inversion is a pair of positions i < j with arr[i] > arr[j]. With large sequences the brute-force pair loop is too slow — count inversions in O(n log n) with a modified merge sort.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long count_inversions(int arr[], int n)
+
+It must return the number of inversions. Use a merge-sort based counter: while merging two sorted halves, every element taken from the RIGHT run before the remaining left-run elements contributes (number of remaining left elements) inversions.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the inversion count.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: merge
+s1: IN="3\n3 1 2" OUT="2"
+s2: IN="4\n1 2 3 4" OUT="0"
+t1: IN="5\n2 4 1 3 5" OUT="3"
+t2: IN="5\n5 4 3 2 1" OUT="10"
+t3: IN="6\n2 6 1 4 3 5" OUT="6"
+srccode_len=804
+=== q17 [practice] lang=c diff=hard score=30 topic=Efficient Sorting Algorithms/Recursion in Sorting
+title: Merge Versus Quicksort Duel
+desc: A benchmarking tool runs BOTH algorithms over the same workload and reports their instrumented comparison totals side by side: merge sort counts one comparison per element pair tested during merging; quicksort (Lomuto, last-element pivot) counts one per element tested against the pivot.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void compare_sorts(int arr[], int n, int *merge_cmp, int *quick_cmp)
+
+It must copy arr into two work buffers, run an instrumented top-down merge sort on one and an instrumented quicksort on the other, and store the two totals. The harness prints both counts plus which sorter used fewer comparisons ("merge", "quick" or "tie").
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line: merge comparisons, quick comparisons, and the winner word, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: while
+s1: IN="5\n1 2 3 4 5" OUT="5 10 merge"
+s2: IN="1\n7" OUT="0 0 tie"
+t1: IN="5\n3 1 5 2 4" OUT="7 6 quick"
+t2: IN="4\n9 7 5 3" OUT="4 6 merge"
+t3: IN="6\n2 4 1 6 3 5" OUT="10 9 quick"
+srccode_len=1424
+=== q18 [practice] lang=c diff=hard score=30 topic=Efficient Sorting Algorithms/Merge Sort
+title: Count Significant Inversions
+desc: A risk engine flags "significant inversions": pairs of positions i < j where arr[i] > 2 * arr[j] — a drop of more than half. Count them efficiently with a merge-sort based sweep.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long sig_inversions(int arr[], int n)
+
+It must return the number of pairs i < j with arr[i] > 2 * arr[j]. While merging two sorted halves, sweep a pointer over the left half for each right-half element (both halves are ascending, so the pointer only moves forward).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the significant inversion count.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000 (2*value fits in int)
+constraints: 1 <= n <= 10000, |value| <= 1000000000 (2*value fits in int)
+BLACKLIST: qsort
+WHITELIST: merge
+s1: IN="3\n3 1 2" OUT="1"
+s2: IN="2\n10 1" OUT="1"
+t1: IN="4\n5 1 2 0" OUT="5"
+t2: IN="3\n1 2 3" OUT="0"
+t3: IN="5\n8 4 2 1 0" OUT="7"
+srccode_len=870
+=== q19 [practice] lang=c diff=hard score=30 topic=Efficient Sorting Algorithms/Partitioning
+title: Partition Around Median-of-Three
+desc: A tuned quicksort defends against bad pivots by taking the median of the first, middle and last elements (positions 0, n/2, n-1) as the pivot. The median value is the middle of the three; if values tie, the pivot element is the one at the SMALLEST position index holding the median value. That element is swapped to the end, then a Lomuto pass runs with it as pivot.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int partition_mo3(int arr[], int n)
+
+It must perform exactly that procedure and return the pivot's final 0-based index. The harness prints the index and the rearranged array.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+Line 1: the pivot's final index. Line 2: the n rearranged values, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: for
+s1: IN="4\n3 1 4 2" OUT="2\n2 1 3 4"
+s2: IN="1\n5" OUT="0\n5"
+t1: IN="6\n4 6 2 1 5 3" OUT="2\n2 1 3 6 5 4"
+t2: IN="5\n5 2 8 1 9" OUT="3\n5 2 1 8 9"
+t3: IN="7\n1 3 5 7 9 2 4" OUT="3\n1 3 2 4 9 5 7"
+srccode_len=834

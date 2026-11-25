@@ -1,0 +1,872 @@
+===== Q0 [easy/10] Front and Rear of the Queue | topic=Queues and Deques sub=FIFO Principle type=practice
+BL:"" WL:""
+DESC:
+A queue serves from the front and accepts at the rear — identify both endpoints.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void front_rear(const int *q, int n, int *f, int *r)
+
+It must store q[0] (the front) into *f and q[n-1] (the rear) into *r. The harness prints both.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated values in queue order.
+
+Output Format:
+One line with the front, then the rear, space-separated.
+
+Constraints:
+1 <= n <= 2000, -1000 <= values <= 1000
+TC s1 IN<4
+3 7 1 9> EXP<3 9>
+TC s2 IN<1
+5> EXP<5 5>
+TC t1 IN<5
+2 4 6 8 10> EXP<2 10>
+TC t2 IN<3
+-1 0 1> EXP<-1 1>
+TC t3 IN<6
+11 22 33 44 55 66> EXP<11 66>
+SRC:
+void front_rear(const int *q, int n, int *f, int *r) {
+    *f = q[0];
+    *r = q[n - 1];
+}
+===== Q1 [easy/10] Free Slots in a Circular Queue | topic=Queues and Deques sub=Circular Queues type=practice
+BL:"" WL:""
+DESC:
+A circular queue of fixed capacity still has room until its size reaches the capacity.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int free_slots(int capacity, int size)
+
+It must return capacity - size, the number of further enqueue operations that succeed.
+
+Input Format:
+One line with two integers: capacity and current size.
+
+Output Format:
+One line with the free slot count.
+
+Constraints:
+0 <= size <= capacity <= 100000
+TC s1 IN<10 3> EXP<7>
+TC s2 IN<5 5> EXP<0>
+TC t1 IN<20 0> EXP<20>
+TC t2 IN<8 7> EXP<1>
+TC t3 IN<10 1> EXP<9>
+SRC:
+int free_slots(int capacity, int size) {
+    return capacity - size;
+}
+===== Q2 [easy/10] Push-Front Arrival Order | topic=Queues and Deques sub=Deque Operations type=practice
+BL:"" WL:""
+DESC:
+A deque can accept elements at the front. Pushing every arriving element to the FRONT reverses the arrival order.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void push_front_order(const int *vals, int n, int *out)
+
+It must fill out with the deque contents after pushing all n values at the front in arrival order (out[i] = vals[n-1-i]). The harness prints out.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated arrival values.
+
+Output Format:
+One line with the deque contents front to back, space-separated.
+
+Constraints:
+1 <= n <= 2000, -1000 <= values <= 1000
+TC s1 IN<3
+1 2 3> EXP<3 2 1>
+TC s2 IN<4
+10 20 30 40> EXP<40 30 20 10>
+TC t1 IN<5
+1 2 3 4 5> EXP<5 4 3 2 1>
+TC t2 IN<2
+7 8> EXP<8 7>
+TC t3 IN<6
+9 8 7 6 5 4> EXP<4 5 6 7 8 9>
+SRC:
+void push_front_order(const int *vals, int n, int *out) {
+    for (int i = 0; i < n; i++) {
+        out[i] = vals[n - 1 - i];
+    }
+}
+===== Q3 [easy/10] Rear Insertion Index | topic=Queues and Deques sub=Circular Queues type=practice
+BL:"" WL:""
+DESC:
+In a circular queue backed by an array of capacity C, the rear insertion position wraps around using the modulo operator.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int rear_index(int capacity, int front, int size)
+
+It must return (front + size) % capacity, the array index where the next enqueue lands.
+
+Input Format:
+One line with three integers: capacity, front index and current size.
+
+Output Format:
+One line with the insertion index.
+
+Constraints:
+1 <= capacity <= 100000, 0 <= front < capacity, 0 <= size <= capacity
+TC s1 IN<10 7 5> EXP<2>
+TC s2 IN<8 0 8> EXP<0>
+TC t1 IN<10 9 3> EXP<2>
+TC t2 IN<12 11 2> EXP<1>
+TC t3 IN<6 0 6> EXP<0>
+SRC:
+int rear_index(int capacity, int front, int size) {
+    return (front + size) % capacity;
+}
+===== Q4 [easy/10] Sum of the First k Served | topic=Queues and Deques sub=Queue Applications type=practice
+BL:"" WL:""
+DESC:
+The first k elements of a queue are served in order; total up their values.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int sum_served(const int *q, int n, int k)
+
+It must return q[0] + q[1] + ... + q[k-1].
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated queue values.
+Line 3: k.
+
+Output Format:
+One line with the sum of the first k values.
+
+Constraints:
+1 <= n <= 2000, 1 <= k <= n, -1000 <= values <= 1000
+TC s1 IN<5
+4 1 3 2 5
+3> EXP<8>
+TC s2 IN<4
+10 20 30 40
+4> EXP<100>
+TC t1 IN<6
+1 2 3 4 5 6
+1> EXP<1>
+TC t2 IN<5
+9 8 7 6 5
+2> EXP<17>
+TC t3 IN<3
+100 200 300
+3> EXP<600>
+SRC:
+int sum_served(const int *q, int n, int k) {
+    int total = 0;
+    for (int i = 0; i < k; i++) {
+        total += q[i];
+    }
+    return total;
+}
+===== Q5 [easy/10] Front After k Serves | topic=Queues and Deques sub=FIFO Principle type=practice
+BL:"" WL:""
+DESC:
+After k people are served from the front, the person now at the front is the (k+1)-th arrival.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int front_after_k(const int *q, int n, int k)
+
+It must return q[k] (0-based; k is strictly less than n).
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated queue values.
+Line 3: k.
+
+Output Format:
+One line with the new front value.
+
+Constraints:
+1 <= n <= 2000, 0 <= k < n, -1000 <= values <= 1000
+TC s1 IN<5
+4 1 3 2 5
+2> EXP<3>
+TC s2 IN<4
+10 20 30 40
+0> EXP<10>
+TC t1 IN<6
+1 2 3 4 5 6
+5> EXP<6>
+TC t2 IN<3
+7 8 9
+1> EXP<8>
+TC t3 IN<4
+5 6 7 8
+3> EXP<8>
+SRC:
+int front_after_k(const int *q, int n, int k) {
+    return q[k];
+}
+===== Q6 [easy/10] Ticket Counter Next Token | topic=Queues and Deques sub=Queue Applications type=practice
+BL:"" WL:""
+DESC:
+A helpdesk issues tokens 1..issued. Each served customer consumes the smallest outstanding token.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int next_token(int issued, int served)
+
+It must return the token that will be served next, or -1 when every issued token has been served.
+
+Input Format:
+One line with two integers: issued and served.
+
+Output Format:
+One line with the next token number or -1.
+
+Constraints:
+0 <= served <= issued <= 100000
+TC s1 IN<10 4> EXP<5>
+TC s2 IN<5 5> EXP<-1>
+TC t1 IN<12 7> EXP<8>
+TC t2 IN<8 0> EXP<1>
+TC t3 IN<20 19> EXP<20>
+SRC:
+int next_token(int issued, int served) {
+    if (served >= issued) return -1;
+    return served + 1;
+}
+===== Q7 [easy/10] Print Job Queue Remaining Pages | topic=Queues and Deques sub=Queue Applications type=practice
+BL:"" WL:""
+DESC:
+An office printer keeps a FIFO queue of jobs with page counts. The first done jobs have already been served.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int total_remaining_pages(const int *jobs, int n, int done)
+
+It must return the sum of pages of jobs still waiting: jobs[done..n-1].
+
+Input Format:
+Line 1: n.
+Line 2: n page counts in queue order.
+Line 3: done, the number of jobs already printed.
+
+Output Format:
+One line with the remaining page total.
+
+Constraints:
+1 <= n <= 2000, 0 <= done <= n, 1 <= pages <= 500
+TC s1 IN<4
+12 5 8 3
+1> EXP<16>
+TC s2 IN<3
+10 20 30
+0> EXP<60>
+TC t1 IN<5
+4 4 4 4 4
+5> EXP<0>
+TC t2 IN<6
+7 2 9 4 1 6
+3> EXP<11>
+TC t3 IN<2
+15 25
+2> EXP<0>
+SRC:
+int total_remaining_pages(const int *jobs, int n, int done) {
+    int total = 0;
+    for (int i = done; i < n; i++) {
+        total += jobs[i];
+    }
+    return total;
+}
+===== Q8 [easy/10] Waiting List Position | topic=Queues and Deques sub=FIFO Principle type=practice
+BL:"" WL:""
+DESC:
+A clinic queue lists patient ids in arrival order. After some patients are served from the front, report where a given patient now stands.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int position_after(const int *q, int n, int target, int served)
+
+It must find the 1-based position of target in q; if that position is <= served the patient is already gone, so return 0; otherwise return the new 1-based position (old position minus served). target is always present.
+
+Input Format:
+Line 1: n.
+Line 2: n distinct patient ids in queue order.
+Line 3: target.
+Line 4: served.
+
+Output Format:
+One line with the new position, or 0 if already served.
+
+Constraints:
+1 <= n <= 2000, 0 <= served <= n
+TC s1 IN<5
+101 102 103 104 105
+103
+1> EXP<2>
+TC s2 IN<4
+7 8 9 10
+9
+0> EXP<3>
+TC t1 IN<6
+1 2 3 4 5 6
+6
+2> EXP<4>
+TC t2 IN<5
+10 20 30 40 50
+10
+2> EXP<0>
+TC t3 IN<4
+3 1 4 5
+4
+4> EXP<0>
+SRC:
+int position_after(const int *q, int n, int target, int served) {
+    for (int i = 0; i < n; i++) {
+        if (q[i] == target) {
+            if (i < served) return 0;
+            return i - served + 1;
+        }
+    }
+    return 0;
+}
+===== Q9 [easy/10] Round-Robin Front After Rotations | topic=Queues and Deques sub=Circular Queues type=practice
+BL:"" WL:""
+DESC:
+A round-robin scheduler serves the front task and immediately re-enqueues it at the rear — one full rotation per serve. After r rotations, which task is at the front?
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int front_after_rotations(const int *q, int n, int r)
+
+It must return q[r % n], the task that reaches the front after r rotations.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated task ids in queue order.
+Line 3: r, the number of rotations.
+
+Output Format:
+One line with the front task id.
+
+Constraints:
+1 <= n <= 2000, 0 <= r <= 1000000
+TC s1 IN<5
+1 2 3 4 5
+2> EXP<3>
+TC s2 IN<4
+10 20 30 40
+4> EXP<10>
+TC t1 IN<6
+1 2 3 4 5 6
+7> EXP<2>
+TC t2 IN<3
+7 8 9
+1> EXP<8>
+TC t3 IN<5
+9 6 3 1 4
+0> EXP<9>
+SRC:
+int front_after_rotations(const int *q, int n, int r) {
+    return q[r % n];
+}
+===== Q10 [medium/20] Reverse a Queue | topic=Queues and Deques sub=FIFO Principle type=practice
+BL:"printf" WL:"stack"
+DESC:
+An audit tool replays a queue of events in reverse order. Reversing a queue is a classic stack-plus-queue exercise.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void reverse_queue(const int *q, int n, int *out)
+
+It must fill out with the queue contents in reverse order. The harness prints out.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated values in queue order.
+
+Output Format:
+One line with the reversed contents, space-separated.
+
+Constraints:
+1 <= n <= 2000, -1000 <= values <= 1000
+TC s1 IN<4
+1 2 3 4> EXP<4 3 2 1>
+TC s2 IN<5
+10 9 8 7 6> EXP<6 7 8 9 10>
+TC t1 IN<3
+5 5 5> EXP<5 5 5>
+TC t2 IN<6
+1 3 5 7 9 11> EXP<11 9 7 5 3 1>
+TC t3 IN<2
+100 200> EXP<200 100>
+SRC:
+void reverse_queue(const int *q, int n, int *out) {
+    int stack[2005], top = 0;
+    for (int i = 0; i < n; i++) {
+        stack[top++] = q[i];
+    }
+    for (int i = 0; i < n; i++) {
+        out[i] = stack[--top];
+    }
+}
+===== Q11 [medium/20] Locker Codes of Fives and Sixes | topic=Queues and Deques sub=Queue Applications type=practice
+BL:"printf" WL:"queue"
+DESC:
+A locker system prints the first n valid locker codes: numbers made only of digits 5 and 6, listed in increasing order (5, 6, 55, 56, 65, 66, 555, ...). A queue generates them by appending 5 and 6 to each dequeued code.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void generate_56(int n, int *out)
+
+It must fill out[0..n-1] with the first n such codes in increasing order. The harness prints them.
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with n codes, space-separated.
+
+Constraints:
+1 <= n <= 10
+TC s1 IN<4> EXP<5 6 55 56>
+TC s2 IN<1> EXP<5>
+TC t1 IN<6> EXP<5 6 55 56 65 66>
+TC t2 IN<8> EXP<5 6 55 56 65 66 555 556>
+TC t3 IN<10> EXP<5 6 55 56 65 66 555 556 565 566>
+SRC:
+void generate_56(int n, int *out) {
+    long long queue[100];
+    int qh = 0, qt = 0;
+    queue[qt++] = 5;
+    queue[qt++] = 6;
+    for (int i = 0; i < n; i++) {
+        long long v = queue[qh++];
+        out[i] = (int)v;
+        queue[qt++] = v * 10 + 5;
+        queue[qt++] = v * 10 + 6;
+    }
+}
+===== Q12 [medium/20] Front-Back Card Interleave | topic=Queues and Deques sub=Deque Operations type=practice
+BL:"printf" WL:"front"
+DESC:
+A dealer shuffles a deck by alternating cards: front, back, front, back — until the deck is exhausted. With an odd count the middle card comes from the front.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void interleave(const int *q, int n, int *out)
+
+It must fill out by alternately taking from the front pointer and the back pointer. The harness prints out.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated card values.
+
+Output Format:
+One line with the interleaved order, space-separated.
+
+Constraints:
+1 <= n <= 2000, -1000 <= values <= 1000
+TC s1 IN<4
+1 2 3 4> EXP<1 4 2 3>
+TC s2 IN<5
+1 2 3 4 5> EXP<1 5 2 4 3>
+TC t1 IN<6
+10 20 30 40 50 60> EXP<10 60 20 50 30 40>
+TC t2 IN<3
+7 8 9> EXP<7 9 8>
+TC t3 IN<4
+5 6 7 8> EXP<5 8 6 7>
+SRC:
+void interleave(const int *q, int n, int *out) {
+    int front = 0, back = n - 1, idx = 0;
+    while (front <= back) {
+        out[idx++] = q[front++];
+        if (front <= back) out[idx++] = q[back--];
+    }
+}
+===== Q13 [medium/20] Fuel Circuit Start Point | topic=Queues and Deques sub=Circular Queues type=practice
+BL:"printf" WL:"for"
+DESC:
+Delivery trucks circle a route of n pumps. Pump i offers petrol[i] litres and the leg to the next pump costs dist[i] litres. Find the smallest pump index from which the truck can complete the full circuit (a valid start is guaranteed).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int tour_start(const int *petrol, const int *dist, int n)
+
+It must return the smallest starting index that can traverse all n pumps and return to it.
+
+Input Format:
+Line 1: n.
+Line 2: n petrol values.
+Line 3: n distance values.
+
+Output Format:
+One line with the start index.
+
+Constraints:
+1 <= n <= 20, 0 <= petrol[i], dist[i] <= 100
+TC s1 IN<3
+4 5 6
+3 4 5> EXP<0>
+TC s2 IN<4
+4 6 7 4
+6 5 3 5> EXP<1>
+TC t1 IN<2
+4 6
+5 5> EXP<1>
+TC t2 IN<5
+1 2 3 4 5
+3 4 5 1 2> EXP<3>
+TC t3 IN<1
+7
+3> EXP<0>
+SRC:
+int tour_start(const int *petrol, const int *dist, int n) {
+    for (int s = 0; s < n; s++) {
+        long long fuel = 0;
+        int ok = 1;
+        for (int i = 0; i < n && ok; i++) {
+            int p = (s + i) % n;
+            fuel += petrol[p] - dist[p];
+            if (fuel < 0) ok = 0;
+        }
+        if (ok) return s;
+    }
+    return -1;
+}
+===== Q14 [medium/20] Canteen Sandwich Line | topic=Queues and Deques sub=FIFO Principle type=practice
+BL:"printf" WL:"for"
+DESC:
+Students stand in a FIFO line; a stack of sandwiches serves from the top. A student takes the top sandwich only if they prefer it (0 = round, 1 = long); otherwise they move to the back of the line. When nobody in line wants the top sandwich, everyone remaining goes hungry. Count the students who cannot eat.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int hungry_students(const int *students, const int *sandwiches, int n)
+
+It must return how many students fail to get a sandwich. sandwiches[0] is the top of the stack.
+
+Input Format:
+Line 1: n.
+Line 2: n student preferences (0 or 1) in queue order.
+Line 3: n sandwich types (0 or 1), top first.
+
+Output Format:
+One line with the hungry count.
+
+Constraints:
+1 <= n <= 1000
+TC s1 IN<4
+1 1 0 0
+0 1 0 1> EXP<0>
+TC s2 IN<1
+0
+0> EXP<0>
+TC t1 IN<2
+1 1
+0 0> EXP<2>
+TC t2 IN<5
+1 0 1 0 1
+0 0 1 1 1> EXP<0>
+TC t3 IN<3
+0 0 1
+1 1 1> EXP<2>
+SRC:
+int hungry_students(const int *students, const int *sandwiches, int n) {
+    int count0 = 0, count1 = 0;
+    for (int i = 0; i < n; i++) {
+        if (students[i] == 0) count0++;
+        else count1++;
+    }
+    for (int j = 0; j < n; j++) {
+        if (sandwiches[j] == 0) {
+            if (count0 == 0) return count1;
+            count0--;
+        } else {
+            if (count1 == 0) return count0;
+            count1--;
+        }
+    }
+    return 0;
+}
+===== Q15 [medium/20] Replay Buffer: Reverse First k | topic=Queues and Deques sub=Deque Operations type=practice
+BL:"printf" WL:"stack"
+DESC:
+A media player reverses only the first k entries of its replay queue (a stack pops them back in reverse) and keeps the rest in order.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void reverse_first_k(const int *q, int n, int k, int *out)
+
+It must fill out with the first k entries reversed, followed by the remaining entries unchanged. The harness prints out.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated values.
+Line 3: k (1 <= k <= n).
+
+Output Format:
+One line with the new queue, space-separated.
+
+Constraints:
+1 <= n <= 2000, 1 <= k <= n, -1000 <= values <= 1000
+TC s1 IN<5
+1 2 3 4 5
+3> EXP<3 2 1 4 5>
+TC s2 IN<4
+10 20 30 40
+4> EXP<40 30 20 10>
+TC t1 IN<6
+1 2 3 4 5 6
+2> EXP<2 1 3 4 5 6>
+TC t2 IN<3
+7 8 9
+1> EXP<7 8 9>
+TC t3 IN<5
+9 6 3 1 4
+5> EXP<4 1 3 6 9>
+SRC:
+void reverse_first_k(const int *q, int n, int k, int *out) {
+    int stack[2005], top = 0;
+    for (int i = 0; i < k; i++) stack[top++] = q[i];
+    for (int i = 0; i < k; i++) out[i] = stack[--top];
+    for (int i = k; i < n; i++) out[i] = q[i];
+}
+===== Q16 [hard/30] Network Latency Sliding Maximum | topic=Queues and Deques sub=Sliding-Window Examples type=practice
+BL:"printf" WL:"deque"
+DESC:
+A network monitor reports the maximum latency recorded in every window of k consecutive probes (windows slide one probe at a time). A monotonic deque solves this in O(n).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void sliding_max(const int *arr, int n, int k, int *out)
+
+It must fill out[j] (0 <= j <= n-k) with the maximum of arr[j..j+k-1]. The harness prints the n-k+1 results.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated probe latencies.
+Line 3: k.
+
+Output Format:
+One line with n-k+1 maxima, space-separated.
+
+Constraints:
+1 <= k <= n <= 2000, -1000 <= latencies <= 1000
+TC s1 IN<8
+1 3 -1 -3 5 3 6 7
+3> EXP<3 3 5 5 6 7>
+TC s2 IN<5
+1 2 3 4 5
+2> EXP<2 3 4 5>
+TC t1 IN<4
+9 8 7 6
+2> EXP<9 8 7>
+TC t2 IN<6
+2 1 5 1 3 2
+1> EXP<2 1 5 1 3 2>
+TC t3 IN<5
+4 4 4 4 4
+3> EXP<4 4 4>
+SRC:
+void sliding_max(const int *arr, int n, int k, int *out) {
+    int deque[2005], head = 0, tail = 0;
+    for (int i = 0; i < n; i++) {
+        while (tail > head && arr[deque[tail - 1]] <= arr[i]) tail--;
+        deque[tail++] = i;
+        if (deque[head] <= i - k) head++;
+        if (i >= k - 1) out[i - k + 1] = arr[deque[head]];
+    }
+}
+===== Q17 [hard/30] First Non-Repeating Chat Character | topic=Queues and Deques sub=Queue Applications type=practice
+BL:"printf" WL:"queue"
+DESC:
+A live chat ticker shows, after every incoming character, the first character seen exactly once so far (or '-' when every character so far repeats). A queue of candidates plus a frequency table solves it in one pass.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void first_unique_stream(const char *s, char *out)
+
+It must fill out[i] with the first non-repeating character among s[0..i] (or '-' when none), and NUL-terminate out.
+
+Input Format:
+One token of lowercase letters.
+
+Output Format:
+One line with the per-position answers (a '-' is printed when there is no unique character).
+
+Constraints:
+1 <= length of s <= 1000, s contains only 'a'-'z'
+TC s1 IN<aabccxb> EXP<a-bbbbx>
+TC s2 IN<abcabc> EXP<aaabc->
+TC t1 IN<zztop> EXP<z-ttt>
+TC t2 IN<abracadabra> EXP<aaabbbbbrcc>
+TC t3 IN<xxyyzzq> EXP<x-y-z-q>
+SRC:
+void first_unique_stream(const char *s, char *out) {
+    int freq[26] = {0};
+    int queue[1005], qh = 0, qt = 0;
+    int n = 0;
+    while (s[n]) n++;
+    for (int i = 0; i < n; i++) {
+        freq[s[i] - 'a']++;
+        queue[qt++] = s[i];
+        while (qh < qt && freq[queue[qh] - 'a'] > 1) qh++;
+        out[i] = (qh < qt) ? queue[qh] : '-';
+    }
+    out[n] = '\0';
+}
+===== Q18 [hard/30] Longest Calm Window | topic=Queues and Deques sub=Sliding-Window Examples type=practice
+BL:"printf" WL:"deque"
+DESC:
+A server-health tool finds the longest contiguous window of load readings whose difference between the maximum and minimum stays within a calm limit. Two monotonic deques track the window max and min.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int longest_calm(const int *arr, int n, int limit)
+
+It must return the length of the longest window arr[l..r] with max - min <= limit.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated readings.
+Line 3: limit.
+
+Output Format:
+One line with the longest calm window length.
+
+Constraints:
+1 <= n <= 2000, 0 <= limit <= 1000000, -1000 <= readings <= 1000
+TC s1 IN<8
+1 3 -1 -3 5 3 6 7
+1000000> EXP<8>
+TC s2 IN<8
+1 3 -1 -3 5 3 6 7
+2> EXP<2>
+TC t1 IN<5
+4 8 2 9 1
+5> EXP<2>
+TC t2 IN<6
+1 1 1 1 1 1
+0> EXP<6>
+TC t3 IN<7
+5 2 7 3 9 1 8
+3> EXP<2>
+SRC:
+int longest_calm(const int *arr, int n, int limit) {
+    int dequeMax[2005], dequeMin[2005];
+    int hMax = 0, tMax = 0, hMin = 0, tMin = 0;
+    int best = 0, left = 0;
+    for (int right = 0; right < n; right++) {
+        while (tMax > hMax && arr[dequeMax[tMax - 1]] <= arr[right]) tMax--;
+        dequeMax[tMax++] = right;
+        while (tMin > hMin && arr[dequeMin[tMin - 1]] >= arr[right]) tMin--;
+        dequeMin[tMin++] = right;
+        while (arr[dequeMax[hMax]] - arr[dequeMin[hMin]] > limit) {
+            if (dequeMax[hMax] == left) hMax++;
+            if (dequeMin[hMin] == left) hMin++;
+            left++;
+        }
+        if (right - left + 1 > best) best = right - left + 1;
+    }
+    return best;
+}
+===== Q19 [hard/30] Smart Bulb Group Switching | topic=Queues and Deques sub=Queue Applications type=practice
+BL:"printf" WL:"queue"
+DESC:
+A smart home can switch a group of k consecutive bulbs at once. Every bulb that is OFF must be turned ON with as few group switches as possible (a switch flips k consecutive bulbs). Report the minimum number of switches, or -1 if it cannot be done.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int min_bit_flips(const int *arr, int n, int k)
+
+It must return the minimum number of group switches so every bulb ends ON (1 = ON, 0 = OFF), or -1 when impossible. Simulate with a queue that tracks which past switches still affect the current bulb.
+
+Input Format:
+Line 1: n.
+Line 2: n bulb states (0 or 1).
+Line 3: k.
+
+Output Format:
+One line with the minimum number of switches or -1.
+
+Constraints:
+1 <= k <= n <= 2000, arr[i] is 0 or 1
+TC s1 IN<3
+1 1 0
+2> EXP<-1>
+TC s2 IN<4
+0 0 0 0
+2> EXP<2>
+TC t1 IN<5
+1 0 1 0 1
+2> EXP<2>
+TC t2 IN<3
+1 1 0
+1> EXP<1>
+TC t3 IN<4
+0 1 0 1
+3> EXP<-1>
+SRC:
+int min_bit_flips(const int *arr, int n, int k) {
+    int queue[2005], qh = 0, qt = 0;
+    int flipped = 0, ans = 0;
+    for (int i = 0; i < n; i++) {
+        if (qt > qh && queue[qh] + k <= i) {
+            flipped ^= 1;
+            qh++;
+        }
+        int cur = arr[i] ^ flipped;
+        if (cur == 0) {
+            if (i + k > n) return -1;
+            ans++;
+            flipped ^= 1;
+            queue[qt++] = i;
+        }
+    }
+    return ans;
+}

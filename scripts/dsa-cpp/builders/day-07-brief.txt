@@ -1,0 +1,1435 @@
+
+
+===== Q0 =====
+title: Merge Sort a Vector
+blacklist: "" whitelist: ""
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Implement merge sort: recursively split the range at its midpoint, sort both halves, then merge them. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> merge_sort(std::vector<int> v)
+
+It must return the vector sorted ascending. The harness prints it space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the sorted elements.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+2 4 1 5 3
+--- TC1 EXPECTED ---
+1 2 3 4 5
+--- TC2 INPUT ---
+1
+8
+--- TC2 EXPECTED ---
+8
+--- TC3 INPUT ---
+6
+9 8 7 6 5 4
+--- TC3 EXPECTED ---
+4 5 6 7 8 9
+--- TC4 INPUT ---
+4
+4 4 4 4
+--- TC4 EXPECTED ---
+4 4 4 4
+--- TC5 INPUT ---
+7
+3 1 4 1 5 9 2
+--- TC5 EXPECTED ---
+1 1 2 3 4 5 9
+SOURCECODE (orig):
+void merge_ranges(std::vector<int> &v, int lo, int mid, int hi) {
+    std::vector<int> t;
+    int i = lo, j = mid;
+    while (i < mid && j < hi)
+        t.push_back(v[i] <= v[j] ? v[i++] : v[j++]);
+    while (i < mid) t.push_back(v[i++]);
+    while (j < hi) t.push_back(v[j++]);
+    for (int k = 0; k < (int)t.size(); k++) v[lo + k] = t[k];
+}
+
+void msort_rec(std::vector<int> &v, int lo, int hi) {
+    if (hi - lo <= 1) return;
+    int mid = lo + (hi - lo) / 2;
+    msort_rec(v, lo, mid);
+    msort_rec(v, mid, hi);
+    merge_ranges(v, lo, mid, hi);
+}
+
+std::vector<int> merge_sort(std::vector<int> v) {
+    msort_rec(v, 0, (int)v.size());
+    return v;
+}
+
+
+===== Q1 =====
+title: Quicksort a Vector
+blacklist: "" whitelist: ""
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Implement quicksort: partition the range around a pivot (Lomuto scheme with the last element as pivot), then recurse into the two sides. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> quick_sort(std::vector<int> v)
+
+It must return the vector sorted ascending. The harness prints it space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the sorted elements.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+2 4 1 5 3
+--- TC1 EXPECTED ---
+1 2 3 4 5
+--- TC2 INPUT ---
+1
+8
+--- TC2 EXPECTED ---
+8
+--- TC3 INPUT ---
+6
+9 8 7 6 5 4
+--- TC3 EXPECTED ---
+4 5 6 7 8 9
+--- TC4 INPUT ---
+4
+4 4 4 4
+--- TC4 EXPECTED ---
+4 4 4 4
+--- TC5 INPUT ---
+7
+3 1 4 1 5 9 2
+--- TC5 EXPECTED ---
+1 1 2 3 4 5 9
+SOURCECODE (orig):
+int qsort_partition(std::vector<int> &v, int lo, int hi) {
+    int pivot = v[hi], i = lo - 1;
+    for (int j = lo; j < hi; j++)
+        if (v[j] <= pivot) {
+            i++;
+            int t = v[i];
+            v[i] = v[j];
+            v[j] = t;
+        }
+    int t = v[i + 1];
+    v[i + 1] = v[hi];
+    v[hi] = t;
+    return i + 1;
+}
+
+void qsort_rec(std::vector<int> &v, int lo, int hi) {
+    if (lo >= hi) return;
+    int p = qsort_partition(v, lo, hi);
+    qsort_rec(v, lo, p - 1);
+    qsort_rec(v, p + 1, hi);
+}
+
+std::vector<int> quick_sort(std::vector<int> v) {
+    qsort_rec(v, 0, (int)v.size() - 1);
+    return v;
+}
+
+
+===== Q2 =====
+title: Lomuto Partition Index
+blacklist: "" whitelist: ""
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Run ONE Lomuto partition pass on the whole vector. The pivot is the LAST element. Scan j from 0 to n-2: whenever v[j] <= pivot, extend the "small" region and swap v[j] into it. Finally swap the pivot into position i+1 and return that index. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int lomuto_partition(std::vector<int> &v)
+
+The vector is partitioned in place; the harness prints the pivot index, then the partitioned vector on the next line.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+Line 1: the final pivot index. Line 2: the partitioned vector.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+3 8 2 5 1
+--- TC1 EXPECTED ---
+0
+1 8 2 5 3
+--- TC2 INPUT ---
+5
+2 1 4 3 5
+--- TC2 EXPECTED ---
+4
+2 1 4 3 5
+--- TC3 INPUT ---
+4
+4 4 4 4
+--- TC3 EXPECTED ---
+3
+4 4 4 4
+--- TC4 INPUT ---
+6
+7 2 9 4 3 8
+--- TC4 EXPECTED ---
+4
+7 2 4 3 8 9
+--- TC5 INPUT ---
+3
+1 2 3
+--- TC5 EXPECTED ---
+2
+1 2 3
+SOURCECODE (orig):
+int lomuto_partition(std::vector<int> &v) {
+    int n = (int)v.size();
+    int pivot = v[n - 1], i = -1;
+    for (int j = 0; j < n - 1; j++)
+        if (v[j] <= pivot) {
+            i++;
+            int t = v[i];
+            v[i] = v[j];
+            v[j] = t;
+        }
+    int t = v[i + 1];
+    v[i + 1] = v[n - 1];
+    v[n - 1] = t;
+    return i + 1;
+}
+
+
+===== Q3 =====
+title: Merge Two Sorted Halves
+blacklist: "" whitelist: ""
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+A vector's first floor(n/2) elements are sorted ascending and its remaining tail is sorted ascending as well. Perform the merge step of merge sort on the two halves in one linear sweep. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> merge_halves(const std::vector<int> &v)
+
+It must return the fully sorted merge. The harness prints it space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers (each half sorted ascending).
+
+Output Format:
+One line with the merged, fully sorted elements.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+6
+1 3 5 2 4 6
+--- TC1 EXPECTED ---
+1 2 3 4 5 6
+--- TC2 INPUT ---
+5
+1 4 2 3 5
+--- TC2 EXPECTED ---
+1 2 3 4 5
+--- TC3 INPUT ---
+1
+9
+--- TC3 EXPECTED ---
+9
+--- TC4 INPUT ---
+4
+-5 -5 -1 0
+--- TC4 EXPECTED ---
+-5 -5 -1 0
+--- TC5 INPUT ---
+7
+2 2 6 8 1 3 9
+--- TC5 EXPECTED ---
+2 2 6 8 1 3 9
+SOURCECODE (orig):
+std::vector<int> merge_halves(const std::vector<int> &v) {
+    int n = (int)v.size(), mid = n / 2;
+    std::vector<int> out;
+    int i = 0, j = mid;
+    while (i < mid && j < n)
+        out.push_back(v[i] <= v[j] ? v[i++] : v[j++]);
+    while (i < mid) out.push_back(v[i++]);
+    while (j < n) out.push_back(v[j++]);
+    return out;
+}
+
+
+===== Q4 =====
+title: Merge Sort Recursion Depth
+blacklist: "" whitelist: ""
+inputconstrains: "1 <= n <= 1000000000000000000"
+DESCRIPTION:
+Merge sort halves the range until pieces hold one element, so its recursion depth is the smallest d with 2^d >= n. Compute it with a loop that doubles a size counter — no log, no pow. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long merge_depth(long long n)
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with the smallest d such that 2^d >= n (0 for n = 1).
+
+Constraints:
+1 <= n <= 1000000000000000000
+--- TC1 INPUT ---
+1
+--- TC1 EXPECTED ---
+0
+--- TC2 INPUT ---
+2
+--- TC2 EXPECTED ---
+1
+--- TC3 INPUT ---
+5
+--- TC3 EXPECTED ---
+3
+--- TC4 INPUT ---
+8
+--- TC4 EXPECTED ---
+3
+--- TC5 INPUT ---
+1000000
+--- TC5 EXPECTED ---
+20
+SOURCECODE (orig):
+long long merge_depth(long long n) {
+    long long d = 0, size = 1;
+    while (size < n) {
+        size *= 2;
+        d++;
+    }
+    return d;
+}
+
+
+===== Q5 =====
+title: Check the Partition Property
+blacklist: "" whitelist: ""
+inputconstrains: "1 <= n <= 10000, 0 <= p < n, -1000000 <= values <= 1000000"
+DESCRIPTION:
+After a partition pass around index p, every element before p must be <= v[p] and every element after p must be >= v[p]. Write the validator. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    bool is_partitioned(const std::vector<int> &v, int p)
+
+The harness prints 1 when the property holds, 0 otherwise.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: p (0 <= p < n).
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= n <= 10000, 0 <= p < n, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+1 2 3 4 5
+2
+--- TC1 EXPECTED ---
+1
+--- TC2 INPUT ---
+5
+5 4 3 2 1
+2
+--- TC2 EXPECTED ---
+0
+--- TC3 INPUT ---
+4
+4 4 4 4
+1
+--- TC3 EXPECTED ---
+1
+--- TC4 INPUT ---
+6
+1 3 2 4 6 5
+3
+--- TC4 EXPECTED ---
+1
+--- TC5 INPUT ---
+3
+2 1 3
+0
+--- TC5 EXPECTED ---
+0
+SOURCECODE (orig):
+bool is_partitioned(const std::vector<int> &v, int p) {
+    for (int i = 0; i < p; i++)
+        if (v[i] > v[p]) return false;
+    for (int i = p + 1; i < (int)v.size(); i++)
+        if (v[i] < v[p]) return false;
+    return true;
+}
+
+
+===== Q6 =====
+title: Merge the Sorted Report Sections
+blacklist: "" whitelist: ""
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+A report was written in two sections, each already sorted ascending, and the sections were pasted back to back. Merge them into one fully sorted report in a single linear sweep. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> merge_sections(const std::vector<int> &v)
+
+It must return the fully sorted merge of the two halves (split at floor(n/2)). The harness prints it space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers (each half sorted ascending).
+
+Output Format:
+One line with the merged, fully sorted values.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+6
+10 30 50 20 40 60
+--- TC1 EXPECTED ---
+10 20 30 40 50 60
+--- TC2 INPUT ---
+2
+1 2
+--- TC2 EXPECTED ---
+1 2
+--- TC3 INPUT ---
+5
+2 4 1 6 9
+--- TC3 EXPECTED ---
+1 2 4 6 9
+--- TC4 INPUT ---
+3
+5 1 7
+--- TC4 EXPECTED ---
+1 5 7
+--- TC5 INPUT ---
+8
+1 2 3 4 1 2 3 4
+--- TC5 EXPECTED ---
+1 1 2 2 3 3 4 4
+SOURCECODE (orig):
+std::vector<int> merge_sections(const std::vector<int> &v) {
+    int n = (int)v.size(), mid = n / 2;
+    std::vector<int> out;
+    int i = 0, j = mid;
+    while (i < mid && j < n)
+        out.push_back(v[i] <= v[j] ? v[i++] : v[j++]);
+    while (i < mid) out.push_back(v[i++]);
+    while (j < n) out.push_back(v[j++]);
+    return out;
+}
+
+
+===== Q7 =====
+title: Partition the Audit Trail
+blacklist: "" whitelist: ""
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+An auditor splits a trail around its LAST entry: one Lomuto pass with the last element as pivot. Scan j from 0 to n-2; whenever v[j] <= pivot, extend the left region and swap v[j] into it; then swap the pivot into position i+1. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int audit_partition(std::vector<int> &v)
+
+The harness prints the final pivot index, then the partitioned trail on the next line.
+
+Input Format:
+Line 1: n. Line 2: n space-separated entries.
+
+Output Format:
+Line 1: the final pivot index. Line 2: the partitioned trail.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= entries <= 1000000
+--- TC1 INPUT ---
+5
+100 50 200 80 60
+--- TC1 EXPECTED ---
+1
+50 60 200 80 100
+--- TC2 INPUT ---
+4
+9 9 9 9
+--- TC2 EXPECTED ---
+3
+9 9 9 9
+--- TC3 INPUT ---
+3
+5 1 2
+--- TC3 EXPECTED ---
+1
+1 2 5
+--- TC4 INPUT ---
+6
+8 3 7 1 9 6
+--- TC4 EXPECTED ---
+2
+3 1 6 8 9 7
+--- TC5 INPUT ---
+2
+1 2
+--- TC5 EXPECTED ---
+1
+1 2
+SOURCECODE (orig):
+int audit_partition(std::vector<int> &v) {
+    int n = (int)v.size();
+    int pivot = v[n - 1], i = -1;
+    for (int j = 0; j < n - 1; j++)
+        if (v[j] <= pivot) {
+            i++;
+            int t = v[i];
+            v[i] = v[j];
+            v[j] = t;
+        }
+    int t = v[i + 1];
+    v[i + 1] = v[n - 1];
+    v[n - 1] = t;
+    return i + 1;
+}
+
+
+===== Q8 =====
+title: Quicksort the Price List
+blacklist: "" whitelist: ""
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+A market scraper returns prices in arrival order. Sort them with your own quicksort (Lomuto partition, last element as pivot, recursion on both sides). The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> quick_sort_prices(std::vector<int> v)
+
+It must return the prices sorted ascending. The harness prints them space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated prices.
+
+Output Format:
+One line with the sorted prices.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= prices <= 1000000
+--- TC1 INPUT ---
+6
+45 12 89 12 70 33
+--- TC1 EXPECTED ---
+12 12 33 45 70 89
+--- TC2 INPUT ---
+1
+7
+--- TC2 EXPECTED ---
+7
+--- TC3 INPUT ---
+5
+9 8 7 6 5
+--- TC3 EXPECTED ---
+5 6 7 8 9
+--- TC4 INPUT ---
+4
+-1 -1 0 1
+--- TC4 EXPECTED ---
+-1 -1 0 1
+--- TC5 INPUT ---
+8
+3 1 4 1 5 9 2 6
+--- TC5 EXPECTED ---
+1 1 2 3 4 5 6 9
+SOURCECODE (orig):
+int prices_partition(std::vector<int> &v, int lo, int hi) {
+    int pivot = v[hi], i = lo - 1;
+    for (int j = lo; j < hi; j++)
+        if (v[j] <= pivot) {
+            i++;
+            int t = v[i];
+            v[i] = v[j];
+            v[j] = t;
+        }
+    int t = v[i + 1];
+    v[i + 1] = v[hi];
+    v[hi] = t;
+    return i + 1;
+}
+
+void prices_rec(std::vector<int> &v, int lo, int hi) {
+    if (lo >= hi) return;
+    int p = prices_partition(v, lo, hi);
+    prices_rec(v, lo, p - 1);
+    prices_rec(v, p + 1, hi);
+}
+
+std::vector<int> quick_sort_prices(std::vector<int> v) {
+    prices_rec(v, 0, (int)v.size() - 1);
+    return v;
+}
+
+
+===== Q9 =====
+title: Pick the Sorter for the Device
+blacklist: "" whitelist: ""
+inputconstrains: "1 <= n <= 1000000000000000000, 0 <= budget <= 1000000000000000000"
+DESCRIPTION:
+An embedded device reserves one auxiliary slot per element BEFORE sorting: if n <= budget it runs merge sort (which needs that buffer), otherwise it falls back to quicksort. Given n and the buffer budget, report which sorter the device runs. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::string pick_sort(long long n, long long budget)
+
+It must return "MergeSort" when n <= budget, else "QuickSort".
+
+Input Format:
+One line with n and budget.
+
+Output Format:
+One line with MergeSort or QuickSort.
+
+Constraints:
+1 <= n <= 1000000000000000000, 0 <= budget <= 1000000000000000000
+--- TC1 INPUT ---
+100 100
+--- TC1 EXPECTED ---
+MergeSort
+--- TC2 INPUT ---
+100 99
+--- TC2 EXPECTED ---
+QuickSort
+--- TC3 INPUT ---
+1 0
+--- TC3 EXPECTED ---
+QuickSort
+--- TC4 INPUT ---
+50 50
+--- TC4 EXPECTED ---
+MergeSort
+--- TC5 INPUT ---
+1000000 1000000
+--- TC5 EXPECTED ---
+MergeSort
+SOURCECODE (orig):
+std::string pick_sort(long long n, long long budget) {
+    return n <= budget ? "MergeSort" : "QuickSort";
+}
+
+
+===== Q10 =====
+title: Merge Steps in Merge Sort
+blacklist: "std::sort,sort(" whitelist: "merge"
+inputconstrains: "1 <= n <= 1000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Instrument merge sort to count its merge steps. Use EXACTLY this scheme: recurse on [lo, mid) and [mid, hi) with mid = lo + (hi - lo) / 2 and base case when the range has 0 or 1 elements; the merge writes elements into a temporary array — count ONE step for EVERY element written into that temporary (taking from the left half on ties, then draining the remainders). The copy back into the vector does NOT count. Example: [3, 1, 2] takes 5 merge steps. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void merge_sort_count(std::vector<int> &v, long long &steps)
+
+The harness prints the sorted vector, then the step count on the next line.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+Line 1: the sorted vector. Line 2: the total merge steps.
+
+Constraints:
+1 <= n <= 1000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+3
+3 1 2
+--- TC1 EXPECTED ---
+1 2 3
+5
+--- TC2 INPUT ---
+1
+7
+--- TC2 EXPECTED ---
+7
+0
+--- TC3 INPUT ---
+4
+4 3 2 1
+--- TC3 EXPECTED ---
+1 2 3 4
+8
+--- TC4 INPUT ---
+5
+2 4 1 5 3
+--- TC4 EXPECTED ---
+1 2 3 4 5
+12
+--- TC5 INPUT ---
+2
+9 1
+--- TC5 EXPECTED ---
+1 9
+2
+SOURCECODE (orig):
+void merge_count(std::vector<int> &v, int lo, int mid, int hi, long long &steps) {
+    std::vector<int> t;
+    int i = lo, j = mid;
+    while (i < mid && j < hi) {
+        if (v[i] <= v[j]) {
+            t.push_back(v[i]);
+            i++;
+        } else {
+            t.push_back(v[j]);
+            j++;
+        }
+        steps++;
+    }
+    while (i < mid) {
+        t.push_back(v[i]);
+        i++;
+        steps++;
+    }
+    while (j < hi) {
+        t.push_back(v[j]);
+        j++;
+        steps++;
+    }
+    for (int k = 0; k < (int)t.size(); k++) v[lo + k] = t[k];
+}
+
+void msort_count_rec(std::vector<int> &v, int lo, int hi, long long &steps) {
+    if (hi - lo <= 1) return;
+    int mid = lo + (hi - lo) / 2;
+    msort_count_rec(v, lo, mid, steps);
+    msort_count_rec(v, mid, hi, steps);
+    merge_count(v, lo, mid, hi, steps);
+}
+
+void merge_sort_count(std::vector<int> &v, long long &steps) {
+    steps = 0;
+    msort_count_rec(v, 0, (int)v.size(), steps);
+}
+
+
+===== Q11 =====
+title: Kth Smallest Ticket Number
+blacklist: "std::sort,sort(" whitelist: "for"
+inputconstrains: "1 <= n <= 10000, 1 <= k <= n, -1000000 <= values <= 1000000"
+DESCRIPTION:
+A support queue holds ticket numbers with duplicates; the kth smallest counts duplicates (k is 1-based). Find it WITHOUT calling a library sort — quickselect with a Lomuto partition (last element as pivot) is the intended tool. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int kth_smallest(std::vector<int> v, int k)
+
+Input Format:
+Line 1: n. Line 2: n space-separated ticket numbers. Line 3: k.
+
+Output Format:
+One line with the kth smallest value.
+
+Constraints:
+1 <= n <= 10000, 1 <= k <= n, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+6
+7 10 4 3 20 15
+3
+--- TC1 EXPECTED ---
+7
+--- TC2 INPUT ---
+5
+2 2 2 2 2
+4
+--- TC2 EXPECTED ---
+2
+--- TC3 INPUT ---
+7
+12 5 8 5 9 20 1
+1
+--- TC3 EXPECTED ---
+1
+--- TC4 INPUT ---
+8
+3 1 4 1 5 9 2 6
+6
+--- TC4 EXPECTED ---
+5
+--- TC5 INPUT ---
+4
+-5 0 -5 10
+2
+--- TC5 EXPECTED ---
+-5
+SOURCECODE (orig):
+int lomuto_pick(std::vector<int> &v, int lo, int hi) {
+    int pivot = v[hi], i = lo - 1;
+    for (int j = lo; j < hi; j++)
+        if (v[j] <= pivot) {
+            i++;
+            int t = v[i];
+            v[i] = v[j];
+            v[j] = t;
+        }
+    int t = v[i + 1];
+    v[i + 1] = v[hi];
+    v[hi] = t;
+    return i + 1;
+}
+
+int kth_smallest(std::vector<int> v, int k) {
+    int lo = 0, hi = (int)v.size() - 1;
+    while (true) {
+        int p = lomuto_pick(v, lo, hi);
+        if (p == k - 1) return v[p];
+        if (p < k - 1) lo = p + 1;
+        else hi = p - 1;
+    }
+}
+
+
+===== Q12 =====
+title: Three-Way Partition of Mail
+blacklist: "std::sort,sort(" whitelist: "for"
+inputconstrains: "1 <= n <= 10000, -1000000 <= values, pivot <= 1000000"
+DESCRIPTION:
+A mail sorter groups letters around a priority value, keeping each group in its ORIGINAL relative order (a stable three-way partition): first everything < pivot, then everything == pivot, then everything > pivot. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void three_way_partition(std::vector<int> &v, int pivot)
+
+The harness prints the reordered vector space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: pivot.
+
+Output Format:
+One line with the partitioned vector.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values, pivot <= 1000000
+--- TC1 INPUT ---
+6
+3 1 4 1 5 9
+4
+--- TC1 EXPECTED ---
+3 1 1 4 5 9
+--- TC2 INPUT ---
+5
+2 2 2 2 2
+2
+--- TC2 EXPECTED ---
+2 2 2 2 2
+--- TC3 INPUT ---
+4
+-1 0 -1 1
+0
+--- TC3 EXPECTED ---
+-1 -1 0 1
+--- TC4 INPUT ---
+1
+7
+7
+--- TC4 EXPECTED ---
+7
+--- TC5 INPUT ---
+7
+5 3 8 3 9 5 1
+5
+--- TC5 EXPECTED ---
+3 3 1 5 5 8 9
+SOURCECODE (orig):
+void three_way_partition(std::vector<int> &v, int pivot) {
+    std::vector<int> less, equal, greater;
+    for (int x : v) {
+        if (x < pivot) less.push_back(x);
+        else if (x == pivot) equal.push_back(x);
+        else greater.push_back(x);
+    }
+    int i = 0;
+    for (int x : less) v[i++] = x;
+    for (int x : equal) v[i++] = x;
+    for (int x : greater) v[i++] = x;
+}
+
+
+===== Q13 =====
+title: Merge Comparisons in Merge Sort
+blacklist: "std::sort,sort(" whitelist: "merge"
+inputconstrains: "1 <= n <= 1000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Instrument merge sort to count element COMPARISONS. Use EXACTLY the standard scheme: recurse on [lo, mid) and [mid, hi) with mid = lo + (hi - lo) / 2, base case 0 or 1 elements. During a merge, each evaluation of "left element <= right element" is ONE comparison; draining a remainder half and copying back compare nothing. Example: [2, 1] costs 1 comparison, [3, 1, 2] costs 3. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void merge_sort_comp(std::vector<int> &v, long long &comparisons)
+
+The harness prints the sorted vector, then the comparison count on the next line.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+Line 1: the sorted vector. Line 2: the total comparisons.
+
+Constraints:
+1 <= n <= 1000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+2
+2 1
+--- TC1 EXPECTED ---
+1 2
+1
+--- TC2 INPUT ---
+3
+3 1 2
+--- TC2 EXPECTED ---
+1 2 3
+3
+--- TC3 INPUT ---
+4
+4 3 2 1
+--- TC3 EXPECTED ---
+1 2 3 4
+4
+--- TC4 INPUT ---
+1
+5
+--- TC4 EXPECTED ---
+5
+0
+--- TC5 INPUT ---
+6
+5 6 1 2 3 4
+--- TC5 EXPECTED ---
+1 2 3 4 5 6
+9
+SOURCECODE (orig):
+void merge_comp(std::vector<int> &v, int lo, int mid, int hi, long long &comparisons) {
+    std::vector<int> t;
+    int i = lo, j = mid;
+    while (i < mid && j < hi) {
+        comparisons++;
+        if (v[i] <= v[j]) {
+            t.push_back(v[i]);
+            i++;
+        } else {
+            t.push_back(v[j]);
+            j++;
+        }
+    }
+    while (i < mid) {
+        t.push_back(v[i]);
+        i++;
+    }
+    while (j < hi) {
+        t.push_back(v[j]);
+        j++;
+    }
+    for (int k = 0; k < (int)t.size(); k++) v[lo + k] = t[k];
+}
+
+void msort_comp_rec(std::vector<int> &v, int lo, int hi, long long &comparisons) {
+    if (hi - lo <= 1) return;
+    int mid = lo + (hi - lo) / 2;
+    msort_comp_rec(v, lo, mid, comparisons);
+    msort_comp_rec(v, mid, hi, comparisons);
+    merge_comp(v, lo, mid, hi, comparisons);
+}
+
+void merge_sort_comp(std::vector<int> &v, long long &comparisons) {
+    comparisons = 0;
+    msort_comp_rec(v, 0, (int)v.size(), comparisons);
+}
+
+
+===== Q14 =====
+title: Hoare Partition Point
+blacklist: "std::sort,sort(" whitelist: "while"
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Run ONE Hoare partition pass on the whole vector, exactly as defined: capture the pivot as the FIRST element once; then repeat — advance i while v[i] < pivot, retreat j while v[j] > pivot; if i >= j return j, otherwise swap v[i] and v[j] and continue. Return the split point j. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int hoare_partition(std::vector<int> &v)
+
+The harness prints j, then the partitioned vector on the next line.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+Line 1: the returned index j. Line 2: the partitioned vector.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+3 8 2 5 1
+--- TC1 EXPECTED ---
+1
+1 2 8 5 3
+--- TC2 INPUT ---
+4
+2 2 2 2
+--- TC2 EXPECTED ---
+1
+2 2 2 2
+--- TC3 INPUT ---
+5
+1 2 3 4 5
+--- TC3 EXPECTED ---
+0
+1 2 3 4 5
+--- TC4 INPUT ---
+5
+5 4 3 2 1
+--- TC4 EXPECTED ---
+3
+1 4 3 2 5
+--- TC5 INPUT ---
+3
+7 7 1
+--- TC5 EXPECTED ---
+1
+1 7 7
+SOURCECODE (orig):
+int hoare_partition(std::vector<int> &v) {
+    int n = (int)v.size();
+    int pivot = v[0], i = -1, j = n;
+    while (true) {
+        do { i++; } while (v[i] < pivot);
+        do { j--; } while (v[j] > pivot);
+        if (i >= j) return j;
+        int t = v[i];
+        v[i] = v[j];
+        v[j] = t;
+    }
+}
+
+
+===== Q15 =====
+title: Bottom-Up Merge Sort
+blacklist: "std::sort,sort(" whitelist: "while"
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+A stack-limited device needs merge sort WITHOUT recursion. Implement it bottom-up: merge runs of width 1, then 2, then 4, ... doubling the width each round until one run covers the array (each round merges consecutive run pairs [i, i+width) and [i+width, i+2*width), clamped to n). Calling a sort routine is banned; no recursion allowed. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> bottom_up_merge(std::vector<int> v)
+
+It must return the vector sorted ascending. The harness prints it space-separated.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the sorted elements.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+2 4 1 5 3
+--- TC1 EXPECTED ---
+1 2 3 4 5
+--- TC2 INPUT ---
+1
+8
+--- TC2 EXPECTED ---
+8
+--- TC3 INPUT ---
+6
+9 8 7 6 5 4
+--- TC3 EXPECTED ---
+4 5 6 7 8 9
+--- TC4 INPUT ---
+4
+4 4 4 4
+--- TC4 EXPECTED ---
+4 4 4 4
+--- TC5 INPUT ---
+7
+3 1 4 1 5 9 2
+--- TC5 EXPECTED ---
+1 1 2 3 4 5 9
+SOURCECODE (orig):
+std::vector<int> bottom_up_merge(std::vector<int> v) {
+    int n = (int)v.size();
+    std::vector<int> t(n);
+    for (int width = 1; width < n; width *= 2) {
+        for (int lo = 0; lo < n; lo += 2 * width) {
+            int mid = lo + width < n ? lo + width : n;
+            int hi = lo + 2 * width < n ? lo + 2 * width : n;
+            int i = lo, j = mid, k = lo;
+            while (i < mid && j < hi)
+                t[k++] = v[i] <= v[j] ? v[i++] : v[j++];
+            while (i < mid) t[k++] = v[i++];
+            while (j < hi) t[k++] = v[j++];
+        }
+        for (int i = 0; i < n; i++) v[i] = t[i];
+    }
+    return v;
+}
+
+
+===== Q16 =====
+title: Counting Inversions Fast
+blacklist: "std::sort,sort(" whitelist: "merge"
+inputconstrains: "1 <= n <= 5000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+An inversion is a pair of positions i < j with v[i] > v[j] — a direct measure of how unsorted the data is. Count them in O(n log n) by augmenting merge sort: when the merge takes an element from the RIGHT half while the left half still has i elements pending, those i elements all form inversions with it. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    long long inversion_count(std::vector<int> v)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the number of inversions.
+
+Constraints:
+1 <= n <= 5000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+5
+2 4 1 3 5
+--- TC1 EXPECTED ---
+3
+--- TC2 INPUT ---
+1
+7
+--- TC2 EXPECTED ---
+0
+--- TC3 INPUT ---
+4
+4 3 2 1
+--- TC3 EXPECTED ---
+6
+--- TC4 INPUT ---
+6
+1 3 2 3 1 2
+--- TC4 EXPECTED ---
+6
+--- TC5 INPUT ---
+5
+1 1 1 1 1
+--- TC5 EXPECTED ---
+0
+SOURCECODE (orig):
+long long merge_inv(std::vector<int> &v, int lo, int mid, int hi) {
+    std::vector<int> t;
+    int i = lo, j = mid;
+    long long inv = 0;
+    while (i < mid && j < hi) {
+        if (v[i] <= v[j]) {
+            t.push_back(v[i]);
+            i++;
+        } else {
+            t.push_back(v[j]);
+            j++;
+            inv += mid - i;
+        }
+    }
+    while (i < mid) t.push_back(v[i++]);
+    while (j < hi) t.push_back(v[j++]);
+    for (int k = 0; k < (int)t.size(); k++) v[lo + k] = t[k];
+    return inv;
+}
+
+long long msort_inv(std::vector<int> &v, int lo, int hi) {
+    if (hi - lo <= 1) return 0;
+    int mid = lo + (hi - lo) / 2;
+    long long inv = msort_inv(v, lo, mid) + msort_inv(v, mid, hi);
+    return inv + merge_inv(v, lo, mid, hi);
+}
+
+long long inversion_count(std::vector<int> v) {
+    return msort_inv(v, 0, (int)v.size());
+}
+
+
+===== Q17 =====
+title: Comparison Duel: Merge vs Quick
+blacklist: "std::sort,sort(" whitelist: "merge"
+inputconstrains: "1 <= n <= 1000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+Two sorting modules are benchmarked on the same data. Report how many element comparisons each performs, under these EXACT rules. Merge sort: recurse on [lo, mid) and [mid, hi) with mid = lo + (hi - lo) / 2, base case 0 or 1 elements; during a merge each evaluation of "left <= right" is one comparison; draining remainders and copying back compare nothing. Quicksort: on range [lo, hi] (inclusive) with pivot v[hi], the Lomuto scan compares each of the hi - lo elements v[lo..hi-1] against the pivot exactly once (moves happen when v[j] <= pivot); after the split recurse on [lo, p-1] and [p+1, hi]; ranges of length <= 1 compare nothing. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void compare_counts(std::vector<int> v, long long &mergeComp, long long &quickComp)
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with mergeComp, then quickComp, space-separated.
+
+Constraints:
+1 <= n <= 1000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+4
+4 3 2 1
+--- TC1 EXPECTED ---
+4 6
+--- TC2 INPUT ---
+1
+7
+--- TC2 EXPECTED ---
+0 0
+--- TC3 INPUT ---
+3
+2 2 2
+--- TC3 EXPECTED ---
+2 3
+--- TC4 INPUT ---
+5
+2 4 1 3 5
+--- TC4 EXPECTED ---
+7 10
+--- TC5 INPUT ---
+2
+1 2
+--- TC5 EXPECTED ---
+1 1
+SOURCECODE (orig):
+long long merge_dual(std::vector<int> &v, int lo, int mid, int hi) {
+    std::vector<int> t;
+    int i = lo, j = mid;
+    long long c = 0;
+    while (i < mid && j < hi) {
+        c++;
+        if (v[i] <= v[j]) {
+            t.push_back(v[i]);
+            i++;
+        } else {
+            t.push_back(v[j]);
+            j++;
+        }
+    }
+    while (i < mid) {
+        t.push_back(v[i]);
+        i++;
+    }
+    while (j < hi) {
+        t.push_back(v[j]);
+        j++;
+    }
+    for (int k = 0; k < (int)t.size(); k++) v[lo + k] = t[k];
+    return c;
+}
+
+long long msort_dual(std::vector<int> &v, int lo, int hi) {
+    if (hi - lo <= 1) return 0;
+    int mid = lo + (hi - lo) / 2;
+    return msort_dual(v, lo, mid) + msort_dual(v, mid, hi) +
+           merge_dual(v, lo, mid, hi);
+}
+
+int qs_dual(std::vector<int> &v, int lo, int hi) {
+    int pivot = v[hi], i = lo - 1;
+    for (int j = lo; j < hi; j++)
+        if (v[j] <= pivot) {
+            i++;
+            int t = v[i];
+            v[i] = v[j];
+            v[j] = t;
+        }
+    int t = v[i + 1];
+    v[i + 1] = v[hi];
+    v[hi] = t;
+    return i + 1;
+}
+
+long long qsort_dual(std::vector<int> &v, int lo, int hi) {
+    if (hi - lo + 1 <= 1) return 0;
+    int p = qs_dual(v, lo, hi);
+    return (hi - lo) + qsort_dual(v, lo, p - 1) + qsort_dual(v, p + 1, hi);
+}
+
+void compare_counts(std::vector<int> v, long long &mergeComp, long long &quickComp) {
+    mergeComp = msort_dual(v, 0, (int)v.size());
+    quickComp = qsort_dual(v, 0, (int)v.size() - 1);
+}
+
+
+===== Q18 =====
+title: Stable Standings via Merge Sort
+blacklist: "std::sort,sort(" whitelist: "merge"
+inputconstrains: "1 <= n <= 1000, -1000000 <= keys <= 1000000, ids distinct"
+DESCRIPTION:
+A contest must rank players by score ascending, STABLY: equal scores keep arrival order. Achieve it with merge sort that takes from the LEFT half on ties (that is exactly what makes merge sort stable). You receive keys (line 2) and arrival ids (line 3, aligned by position); return the ids in the stable order. std::sort and std::stable_sort are banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    std::vector<int> merge_sort_ids(const std::vector<int> &keys, const std::vector<int> &ids)
+
+Input Format:
+Line 1: n. Line 2: n space-separated keys. Line 3: n distinct space-separated ids.
+
+Output Format:
+One line with the ids in stable key order.
+
+Constraints:
+1 <= n <= 1000, -1000000 <= keys <= 1000000, ids distinct
+--- TC1 INPUT ---
+5
+3 1 2 3 1
+101 102 103 104 105
+--- TC1 EXPECTED ---
+103 0 104 102 105
+--- TC2 INPUT ---
+4
+9 9 9 9
+5 6 7 8
+--- TC2 EXPECTED ---
+6 7 8 0
+--- TC3 INPUT ---
+6
+2 2 1 1 2 1
+10 11 12 13 14 15
+--- TC3 EXPECTED ---
+13 14 0 11 12 15
+--- TC4 INPUT ---
+2
+5 5
+8 3
+--- TC4 EXPECTED ---
+3 0
+--- TC5 INPUT ---
+1
+0
+9
+--- TC5 EXPECTED ---
+0
+SOURCECODE (orig):
+void merge_pairs(const std::vector<int> &keys, std::vector<int> &order,
+                 int lo, int mid, int hi) {
+    std::vector<int> t;
+    int i = lo, j = mid;
+    while (i < mid && j < hi)
+        t.push_back(keys[order[i]] <= keys[order[j]] ? order[i++] : order[j++]);
+    while (i < mid) t.push_back(order[i++]);
+    while (j < hi) t.push_back(order[j++]);
+    for (int k = 0; k < (int)t.size(); k++) order[lo + k] = t[k];
+}
+
+void msort_pairs(const std::vector<int> &keys, std::vector<int> &order,
+                 int lo, int hi) {
+    if (hi - lo <= 1) return;
+    int mid = lo + (hi - lo) / 2;
+    msort_pairs(keys, order, lo, mid);
+    msort_pairs(keys, order, mid, hi);
+    merge_pairs(keys, order, lo, mid, hi);
+}
+
+std::vector<int> merge_sort_ids(const std::vector<int> &keys, const std::vector<int> &ids) {
+    int n = (int)keys.size();
+    std::vector<int> order(n);
+    for (int i = 0; i < n; i++) order[i] = i;
+    msort_pairs(keys, order, 0, n);
+    std::vector<int> out(n);
+    for (int i = 0; i < n; i++) out[i] = ids[order[i]];
+    return out;
+}
+
+
+===== Q19 =====
+title: Quicksort Pivot Flight Recorder
+blacklist: "std::sort,sort(" whitelist: "for"
+inputconstrains: "1 <= n <= 10000, -1000000 <= values <= 1000000"
+DESCRIPTION:
+A teaching tool records which pivot positions quicksort chooses. Run quicksort with this EXACT scheme: on range [lo, hi] (inclusive) with at least 2 elements, run a Lomuto partition with pivot v[hi] (move while v[j] <= pivot), record the returned pivot index p, then recurse into [lo, p-1] FIRST and [p+1, hi] after. Return the sorted vector and the recorded pivot indices in order. Calling a sort routine is banned. The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void quicksort_trace(std::vector<int> &v, std::vector<int> &pivots)
+
+The harness prints the sorted vector, then the recorded pivot indices space-separated on the next line.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+Line 1: the sorted vector. Line 2: the recorded pivot indices.
+
+Constraints:
+1 <= n <= 10000, -1000000 <= values <= 1000000
+--- TC1 INPUT ---
+4
+4 3 2 1
+--- TC1 EXPECTED ---
+1 2 3 4
+0 3 1
+--- TC2 INPUT ---
+2
+1 2
+--- TC2 EXPECTED ---
+1 2
+1
+--- TC3 INPUT ---
+3
+2 2 2
+--- TC3 EXPECTED ---
+2 2 2
+2 1
+--- TC4 INPUT ---
+5
+3 1 4 1 5
+--- TC4 EXPECTED ---
+1 1 3 4 5
+4 1 2
+--- TC5 INPUT ---
+5
+2 4 1 3 5
+--- TC5 EXPECTED ---
+1 2 3 4 5
+4 2 0
+SOURCECODE (orig):
+int lomuto_trace(std::vector<int> &v, int lo, int hi) {
+    int pivot = v[hi], i = lo - 1;
+    for (int j = lo; j < hi; j++)
+        if (v[j] <= pivot) {
+            i++;
+            int t = v[i];
+            v[i] = v[j];
+            v[j] = t;
+        }
+    int t = v[i + 1];
+    v[i + 1] = v[hi];
+    v[hi] = t;
+    return i + 1;
+}
+
+void qs_trace(std::vector<int> &v, int lo, int hi, std::vector<int> &pivots) {
+    if (hi - lo + 1 <= 1) return;
+    int p = lomuto_trace(v, lo, hi);
+    pivots.push_back(p);
+    qs_trace(v, lo, p - 1, pivots);
+    qs_trace(v, p + 1, hi, pivots);
+}
+
+void quicksort_trace(std::vector<int> &v, std::vector<int> &pivots) {
+    pivots.clear();
+    qs_trace(v, 0, (int)v.size() - 1, pivots);
+}

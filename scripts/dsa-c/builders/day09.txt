@@ -1,0 +1,561 @@
+DAY 9 topics=[{"name":"Singly Linked Lists","subtopics":["general","Node Structures","Dynamic Allocation","Traversal","Insertion and Deletion","Reversing a List"]}] questions=20
+=== q00 [practice] lang=c diff=easy score=10 topic=Singly Linked Lists/Traversal
+title: List Length
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node; and the harness builds a singly linked list from the input (line 1: n; line 2: n values).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int list_length(Node *head)
+
+It must return the number of nodes in the list (0 for an empty list).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the node count.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="4\n10 20 30 40" OUT="4"
+s2: IN="1\n7" OUT="1"
+t1: IN="6\n1 2 3 4 5 6" OUT="6"
+t2: IN="3\n5 5 5" OUT="3"
+t3: IN="2\n9 8" OUT="2"
+srccode_len=128
+=== q01 [practice] lang=c diff=easy score=10 topic=Singly Linked Lists/Node Structures
+title: List Sum
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node; and the harness builds a singly linked list from the input (line 1: n; line 2: n values).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int list_sum(Node *head)
+
+It must return the sum of the data values of all nodes (0 for an empty list).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the sum.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="4\n1 2 3 4" OUT="10"
+s2: IN="1\n-9" OUT="-9"
+t1: IN="5\n10 20 30 40 50" OUT="150"
+t2: IN="3\n7 0 7" OUT="14"
+t3: IN="2\n-3 8" OUT="5"
+srccode_len=136
+=== q02 [practice] lang=c diff=easy score=10 topic=Singly Linked Lists/Traversal
+title: Find Value Index
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node; and the harness builds a singly linked list from the input (line 1: n; line 2: n values; line 3: target).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int list_find(Node *head, int target)
+
+It must return the FIRST 0-based index of a node whose data equals target, or -1 when the target is not in the list.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: target.
+
+Output Format:
+One line with the index or -1.
+
+Constraints:
+1 <= n <= 10000, |value|, |target| <= 1000000000
+constraints: 1 <= n <= 10000, |value|, |target| <= 1000000000
+s1: IN="4\n10 20 30 40\n30" OUT="2"
+s2: IN="3\n1 2 3\n9" OUT="-1"
+t1: IN="5\n4 8 15 16 23\n4" OUT="0"
+t2: IN="4\n7 7 7 7\n7" OUT="0"
+t3: IN="6\n4 8 15 16 23 42\n42" OUT="5"
+srccode_len=190
+=== q03 [practice] lang=c diff=easy score=10 topic=Singly Linked Lists/Reversing a List
+title: Reverse the List
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node; and the harness builds a singly linked list from the input (line 1: n; line 2: n values).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_reverse(Node *head)
+
+It must reverse the list by relinking the next pointers (three-pointer walk: prev, cur, nxt) and return the new head. The harness prints the reversed list.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the list values after reversal, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="3\n1 2 3" OUT="3 2 1"
+s2: IN="1\n5" OUT="5"
+t1: IN="5\n10 20 30 40 50" OUT="50 40 30 20 10"
+t2: IN="2\n-1 -2" OUT="-2 -1"
+t3: IN="6\n1 3 5 7 9 11" OUT="11 9 7 5 3 1"
+srccode_len=224
+=== q04 [practice] lang=c diff=easy score=10 topic=Singly Linked Lists/Node Structures
+title: Middle Element
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node; and the harness builds a singly linked list from the input (line 1: n; line 2: n values).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int list_middle(Node *head)
+
+It must return the data of the middle node, defined as the node at 0-based index floor(n/2). For odd n that is the exact middle; for even n it is the second of the two middle nodes.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the middle value.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="5\n1 2 3 4 5" OUT="3"
+s2: IN="4\n10 20 30 40" OUT="30"
+t1: IN="1\n9" OUT="9"
+t2: IN="6\n2 4 6 8 10 12" OUT="8"
+t3: IN="7\n1 1 2 3 5 8 13" OUT="3"
+srccode_len=247
+=== q05 [practice] lang=c diff=easy score=10 topic=Singly Linked Lists/Traversal
+title: Count Value Occurrences
+desc: The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node; and the harness builds a singly linked list from the input (line 1: n; line 2: n values; line 3: value).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int list_count(Node *head, int value)
+
+It must return how many nodes hold data equal to value.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: value.
+
+Output Format:
+One line with the occurrence count.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="5\n1 2 2 3 2\n2" OUT="3"
+s2: IN="3\n4 5 6\n7" OUT="0"
+t1: IN="6\n9 9 1 9 2 9\n9" OUT="4"
+t2: IN="1\n8\n8" OUT="1"
+t3: IN="4\n-1 -1 -1 2\n-1" OUT="3"
+srccode_len=172
+=== q06 [practice] lang=c diff=easy score=10 topic=Singly Linked Lists/Insertion and Deletion
+title: Insert Into Sorted Playlist
+desc: A music app keeps a playlist of track lengths already sorted ascending and inserts a new track without breaking the order. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_insert_sorted(Node *head, int value)
+
+It must allocate a new node (malloc) holding value and insert it so the list stays ascending: place it before the first node whose data is greater than value (equal values stay ahead of the new node); when the list is empty or all values are smaller, the node goes to the front / end respectively. Return the (possibly new) head.
+
+Input Format:
+Line 1: n. Line 2: n sorted integers. Line 3: the value to insert.
+
+Output Format:
+One line with the resulting list, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="4\n10 20 30 40\n25" OUT="10 20 25 30 40"
+s2: IN="1\n5\n3" OUT="3 5"
+t1: IN="3\n1 3 5\n5" OUT="1 3 5 5"
+t2: IN="2\n-10 -5\n0" OUT="-10 -5 0"
+t3: IN="5\n2 4 6 8 10\n1" OUT="1 2 4 6 8 10"
+srccode_len=409
+=== q07 [practice] lang=c diff=easy score=10 topic=Singly Linked Lists/Traversal
+title: Fetch the Kth Entry
+desc: An audit tool reads a linked chain of log entries and fetches the entry at a given 0-based position. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int list_get(Node *head, int index)
+
+It must return the data of the node at 0-based index (the index is always valid).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: index.
+
+Output Format:
+One line with the fetched value.
+
+Constraints:
+1 <= n <= 10000, 0 <= index < n, |value| <= 1000000000
+constraints: 1 <= n <= 10000, 0 <= index < n, |value| <= 1000000000
+s1: IN="4\n10 20 30 40\n2" OUT="30"
+s2: IN="1\n7\n0" OUT="7"
+t1: IN="5\n3 6 9 12 15\n4" OUT="15"
+t2: IN="3\n5 1 4\n1" OUT="1"
+t3: IN="6\n2 4 6 8 10 12\n5" OUT="12"
+srccode_len=155
+=== q08 [practice] lang=c diff=easy score=10 topic=Singly Linked Lists/Insertion and Deletion
+title: Remove the Ledger Head
+desc: A ledger queue always serves its first record: free the head node and advance to the next one. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_delete_front(Node *head)
+
+It must free the first node (free) and return the new head. The list always has at least 2 nodes. The harness prints the remaining list.
+
+Input Format:
+Line 1: n (at least 2). Line 2: n space-separated integers.
+
+Output Format:
+One line with the remaining list, space-separated.
+
+Constraints:
+2 <= n <= 10000, |value| <= 1000000000
+constraints: 2 <= n <= 10000, |value| <= 1000000000
+s1: IN="3\n5 6 7" OUT="6 7"
+s2: IN="2\n1 2" OUT="2"
+t1: IN="4\n10 20 30 40" OUT="20 30 40"
+t2: IN="2\n-5 5" OUT="5"
+t3: IN="5\n1 2 3 4 5" OUT="2 3 4 5"
+srccode_len=134
+=== q09 [practice] lang=c diff=easy score=10 topic=Singly Linked Lists/Reversing a List
+title: Reverse-Print the Audit Trail
+desc: An audit viewer replays a trail newest-last by walking the linked chain recursively to the end and printing on the way back — the call stack unwinds the trail in reverse without modifying any node. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void list_print_reverse(Node *head)
+
+It must PRINT the list values in reverse order on one line, space-separated, followed by a newline. Do not modify the list; print exactly one trailing space is also fine (output is trimmed). The harness prints nothing else.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the values in reverse order.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+s1: IN="3\n4 5 6" OUT="6 5 4"
+s2: IN="1\n8" OUT="8"
+t1: IN="4\n1 2 3 4" OUT="4 3 2 1"
+t2: IN="2\n10 -10" OUT="-10 10"
+t3: IN="5\n9 7 5 3 1" OUT="1 3 5 7 9"
+srccode_len=172
+=== q10 [practice] lang=c diff=medium score=20 topic=Singly Linked Lists/Dynamic Allocation
+title: Insert at Position
+desc: A scheduler splices a new job node into a linked queue at an arbitrary 0-based position (inserting at n appends). The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_insert_at(Node *head, int index, int value)
+
+It must allocate the node with malloc and insert it so it becomes the node at 0-based index (0 <= index <= n; index == n appends). Return the (possibly new) head. Your code must use malloc — no static node pools.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: index. Line 4: value.
+
+Output Format:
+One line with the resulting list, space-separated.
+
+Constraints:
+1 <= n <= 10000, 0 <= index <= n, |value| <= 1000000000
+constraints: 1 <= n <= 10000, 0 <= index <= n, |value| <= 1000000000
+BLACKLIST: static
+WHITELIST: malloc
+s1: IN="3\n1 2 3\n1\n99" OUT="1 99 2 3"
+s2: IN="2\n5 6\n2\n7" OUT="5 6 7"
+t1: IN="1\n8\n0\n3" OUT="3 8"
+t2: IN="4\n10 20 30 40\n0\n1" OUT="1 10 20 30 40"
+t3: IN="3\n4 5 6\n3\n9" OUT="4 5 6 9"
+srccode_len=351
+=== q11 [practice] lang=c diff=medium score=20 topic=Singly Linked Lists/Insertion and Deletion
+title: Delete at Index
+desc: A log rotator drops the entry at a given 0-based position from a linked chain, freeing its node and relinking the neighbours. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_delete_at(Node *head, int index)
+
+It must free the node at 0-based index (0 <= index < n; the list keeps at least one node afterwards) and return the (possibly new) head. Use a loop to reach the position.
+
+Input Format:
+Line 1: n (at least 2). Line 2: n space-separated integers. Line 3: index.
+
+Output Format:
+One line with the resulting list, space-separated.
+
+Constraints:
+2 <= n <= 10000, 0 <= index < n, |value| <= 1000000000
+constraints: 2 <= n <= 10000, 0 <= index < n, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: while
+s1: IN="3\n1 2 3\n1" OUT="1 3"
+s2: IN="2\n4 5\n0" OUT="5"
+t1: IN="4\n10 20 30 40\n3" OUT="10 20 30"
+t2: IN="2\n7 8\n1" OUT="7"
+t3: IN="5\n1 2 3 4 5\n2" OUT="1 2 4 5"
+srccode_len=351
+=== q12 [practice] lang=c diff=medium score=20 topic=Singly Linked Lists/Traversal
+title: Rotate the List Left
+desc: A playlist shifter rotates a linked queue left by k positions: the node at index k becomes the new head and the old tail links to the old head. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_rotate(Node *head, int k)
+
+It must rotate the list left by k (0 < k < n) by relinking pointers — find the tail, break the chain after node k-1, and connect tail to the old head. Return the new head.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: k.
+
+Output Format:
+One line with the rotated list, space-separated.
+
+Constraints:
+2 <= n <= 10000, 0 < k < n, |value| <= 1000000000
+constraints: 2 <= n <= 10000, 0 < k < n, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->next
+s1: IN="5\n1 2 3 4 5\n2" OUT="4 5 1 2 3"
+s2: IN="3\n7 8 9\n1" OUT="9 7 8"
+t1: IN="4\n1 2 3 4\n3" OUT="2 3 4 1"
+t2: IN="4\n4 3 2 1\n2" OUT="2 1 4 3"
+t3: IN="6\n1 2 3 4 5 6\n5" OUT="2 3 4 5 6 1"
+srccode_len=422
+=== q13 [practice] lang=c diff=medium score=20 topic=Singly Linked Lists/Traversal
+title: Second Largest Value
+desc: A scoring service walks a linked chain of DISTINCT scores and reports the runner-up. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int list_second_max(Node *head)
+
+The values are distinct and the list has at least 2 nodes. It must return the second largest data value in the list.
+
+Input Format:
+Line 1: n (at least 2). Line 2: n distinct space-separated integers.
+
+Output Format:
+One line with the second largest value.
+
+Constraints:
+2 <= n <= 10000, |value| <= 1000000000 (values distinct)
+constraints: 2 <= n <= 10000, |value| <= 1000000000 (values distinct)
+BLACKLIST: qsort
+WHITELIST: while
+s1: IN="4\n3 9 2 7" OUT="7"
+s2: IN="2\n1 2" OUT="1"
+t1: IN="5\n10 40 30 20 50" OUT="40"
+t2: IN="3\n-1 -5 -3" OUT="-3"
+t3: IN="4\n100 3 200 50" OUT="100"
+srccode_len=449
+=== q14 [practice] lang=c diff=medium score=20 topic=Singly Linked Lists/Node Structures
+title: Swap Adjacent Pairs
+desc: A router pipeline swaps every pair of adjacent stages: values at indices 0-1 swap, 2-3 swap, and so on; with an odd count the last value stays put. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_swap_pairs(Node *head)
+
+It must produce the pairwise-swapped list (relinking nodes or swapping data values — the harness prints the resulting sequence either way) and return the head.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the pairwise-swapped values, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->next
+s1: IN="4\n1 2 3 4" OUT="2 1 4 3"
+s2: IN="1\n7" OUT="7"
+t1: IN="5\n1 2 3 4 5" OUT="2 1 4 3 5"
+t2: IN="2\n-1 -2" OUT="-2 -1"
+t3: IN="6\n10 20 30 40 50 60" OUT="20 10 40 30 60 50"
+srccode_len=239
+=== q15 [practice] lang=c diff=medium score=20 topic=Singly Linked Lists/Insertion and Deletion
+title: Dedupe the Sorted Log
+desc: A log compressor removes duplicate entries from an already sorted chain, keeping only the first occurrence of each value and freeing the dropped nodes. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_dedupe(Node *head)
+
+The list is sorted ascending (duplicates possible, at least one node). It must unlink every node whose data equals its predecessor's data (free it) and return the head.
+
+Input Format:
+Line 1: n. Line 2: n sorted space-separated integers.
+
+Output Format:
+One line with the deduplicated list, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: while
+s1: IN="5\n1 1 2 3 3" OUT="1 2 3"
+s2: IN="1\n7" OUT="7"
+t1: IN="6\n1 2 2 2 3 4" OUT="1 2 3 4"
+t2: IN="4\n5 5 5 5" OUT="5"
+t3: IN="5\n-3 -3 -1 0 0" OUT="-3 -1 0"
+srccode_len=327
+=== q16 [practice] lang=c diff=hard score=30 topic=Singly Linked Lists/Insertion and Deletion
+title: Delete Every Matching Node
+desc: A filter purges EVERY node holding a given value from a linked chain, freeing them and relinking around the gaps — including runs at the very head. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_delete_all(Node *head, int value)
+
+It must free every node whose data equals value and return the (possibly NULL) head. The harness prints "empty" when the resulting list is empty, otherwise the remaining values.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: value.
+
+Output Format:
+One line: the remaining list space-separated, or "empty".
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->next
+s1: IN="5\n1 2 2 3 2\n2" OUT="1 3"
+s2: IN="3\n4 4 4\n4" OUT="empty"
+t1: IN="4\n1 2 3 4\n5" OUT="1 2 3 4"
+t2: IN="5\n7 1 7 2 7\n7" OUT="1 2"
+t3: IN="2\n9 9\n1" OUT="9 9"
+srccode_len=486
+=== q17 [practice] lang=c diff=hard score=30 topic=Singly Linked Lists/Insertion and Deletion
+title: Merge Two Sorted Lists
+desc: A reporting service merges two already-sorted linked chains into one sorted chain by REUSING the existing nodes (no new allocations): relink the next pointers while walking both lists. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_merge(Node *a, Node *b)
+
+Both lists are sorted ascending and non-empty. It must return the head of the merged sorted list built from the same nodes (on equal values take from a first).
+
+Input Format:
+Line 1: n. Line 2: n sorted integers. Line 3: m. Line 4: m sorted integers.
+
+Output Format:
+One line with the merged list, space-separated.
+
+Constraints:
+1 <= n, m <= 10000, |value| <= 1000000000
+constraints: 1 <= n, m <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->next
+s1: IN="3\n1 3 5\n3\n2 4 6" OUT="1 2 3 4 5 6"
+s2: IN="1\n7\n1\n3" OUT="3 7"
+t1: IN="4\n1 2 2 3\n3\n2 3 8" OUT="1 2 2 2 3 3 8"
+t2: IN="2\n-5 0\n4\n-9 -9 4 10" OUT="-9 -9 -5 0 4 10"
+t3: IN="5\n1 1 1 1 1\n2\n1 1" OUT="1 1 1 1 1 1 1"
+srccode_len=400
+=== q18 [practice] lang=c diff=hard score=30 topic=Singly Linked Lists/Insertion and Deletion
+title: Insertion Sort the List
+desc: A tiny firmware sorts a linked chain with insertion sort: take nodes off the input chain one by one and insert each into the right slot of a growing sorted chain, relinking pointers only. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_insertion_sort(Node *head)
+
+It must rearrange the existing nodes into ascending order (no new nodes, no data copying shortcuts needed — relink the chain) and return the new head.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the sorted list, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->next
+s1: IN="5\n5 2 9 1 7" OUT="1 2 5 7 9"
+s2: IN="1\n3" OUT="3"
+t1: IN="6\n3 1 4 1 5 9" OUT="1 1 3 4 5 9"
+t2: IN="4\n-2 7 -5 0" OUT="-5 -2 0 7"
+t3: IN="5\n2 2 1 3 1" OUT="1 1 2 2 3"
+srccode_len=501
+=== q19 [practice] lang=c diff=hard score=30 topic=Singly Linked Lists/Reversing a List
+title: Reorder List Alternating
+desc: A media player interleaves a queue as L0, Ln, L1, Ln-1, L2, Ln-2, ... — take from the front, then the back, alternately. The trick: find the middle, reverse the second half, then zip the two halves together. The node type is defined for you as typedef struct Node { int data; struct Node *next; } Node;.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    Node *list_reorder(Node *head)
+
+It must rearrange the existing nodes into the L0, Ln, L1, Ln-1, ... order by relinking pointers and return the head (a one-node list stays unchanged).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the reordered values, space-separated.
+
+Constraints:
+1 <= n <= 10000, |value| <= 1000000000
+constraints: 1 <= n <= 10000, |value| <= 1000000000
+BLACKLIST: qsort
+WHITELIST: ->next
+s1: IN="5\n1 2 3 4 5" OUT="1 5 2 4 3"
+s2: IN="1\n7" OUT="7"
+t1: IN="4\n1 2 3 4" OUT="1 4 2 3"
+t2: IN="2\n5 9" OUT="5 9"
+t3: IN="6\n1 2 3 4 5 6" OUT="1 6 2 5 3 4"
+srccode_len=711

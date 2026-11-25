@@ -1,0 +1,541 @@
+DAY 7 — 20 questions
+
+===== Q1: Positions Changed by Sort [medium/20] topic=Efficient Sorting Algorithms sub=Auxiliary Memory and Stability type=practice
+DESC: A librarian sorts the shelf with any correct ascending sort (Arrays.sort is fine) and wants to know how many books actually moved: positions whose value differs between the original and the sorted shelf. Values are distinct, so every correct sort gives the same answer. The class Main and its main method are already provided. Write only the required static method:
+
+    static int movedCount(int[] arr)
+
+It must return the number of indices i where the i-th smallest value is not already arr[i].
+
+Input Format:
+Line 1: n. Line 2: n distinct space-separated integers.
+
+Output Format:
+One line with the number of changed positions.
+
+Constraints:
+1 <= n <= 100000, -1000000000 <= value <= 1000000000
+BL: System.out.print | WL: return
+  sampleinput1="5\n4 2 5 1 3"
+  => sampleoutput1="4"
+  sampleinput2="4\n1 2 3 4"
+  => sampleoutput2="0"
+  input1="5\n5 4 3 2 1"
+  => output1="4"
+  input2="3\n2 1 3"
+  => output2="2"
+  input3="1\n7"
+  => output3="0"
+
+===== Q2: Merge Two Sorted Halves [easy/10] topic=Efficient Sorting Algorithms sub=Merge Sort type=practice
+DESC: Merge sort's core move: combine two sorted runs into one sorted array. The class Main and its main method are already provided. Write only the required static method:
+
+    static int[] mergeHalves(int[] arr)
+
+The first ceil(n/2) elements are sorted ascending and the remaining elements are sorted ascending. It must return a new array of length n holding all values ascending; on equal values take from the first half first.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers (each half sorted ascending).
+
+Output Format:
+One line with the merged array.
+
+Constraints:
+1 <= n <= 100000, -1000000000 <= value <= 1000000000
+BL:  | WL: 
+  sampleinput1="5\n1 3 5 2 4"
+  => sampleoutput1="1 2 3 4 5"
+  sampleinput2="4\n1 2 3 4"
+  => sampleoutput2="1 2 3 4"
+  input1="6\n2 4 6 1 3 5"
+  => output1="1 2 3 4 5 6"
+  input2="3\n5 9 1"
+  => output2="1 5 9"
+  input3="1\n7"
+  => output3="7"
+
+===== Q3: Merge Sort the Array [easy/10] topic=Efficient Sorting Algorithms sub=Merge Sort type=practice
+DESC: Implement full merge sort: recursively split at mid = (lo+hi)/2 and merge the sorted halves with an auxiliary array. The class Main and its main method are already provided. Write only the required static method:
+
+    static void mergeSortArr(int[] arr)
+
+It must sort arr ascending in place.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the array sorted ascending.
+
+Constraints:
+1 <= n <= 100000, -1000000000 <= value <= 1000000000
+BL:  | WL: 
+  sampleinput1="5\n5 2 9 1 5"
+  => sampleoutput1="1 2 5 5 9"
+  sampleinput2="4\n4 3 2 1"
+  => sampleoutput2="1 2 3 4"
+  input1="1\n0"
+  => output1="0"
+  input2="6\n3 -1 2 -1 8 0"
+  => output2="-1 -1 0 2 3 8"
+  input3="3\n1000000000 5 -1000000000"
+  => output3="-1000000000 5 1000000000"
+
+===== Q4: Merge Two Warehouse Batches [easy/10] topic=Efficient Sorting Algorithms sub=Merge Sort type=practice
+DESC: Two picking lanes deliver batches already sorted by item code; the packing station merges them into one sorted stream. On equal codes the first batch's item goes first. The class Main and its main method are already provided. Write only the required static method:
+
+    static int[] mergeBatches(int[] a, int[] b)
+
+a and b are each sorted ascending. It must return the merged ascending array of length a.length + b.length.
+
+Input Format:
+Line 1: n and m. Line 2: n sorted integers. Line 3: m sorted integers.
+
+Output Format:
+One line with the merged array.
+
+Constraints:
+1 <= n, m <= 100000, -1000000000 <= value <= 1000000000
+BL:  | WL: 
+  sampleinput1="3 3\n1 4 9\n2 3 10"
+  => sampleoutput1="1 2 3 4 9 10"
+  sampleinput2="1 1\n5\n5"
+  => sampleoutput2="5 5"
+  input1="2 3\n1 2\n3 4 5"
+  => output1="1 2 3 4 5"
+  input2="4 1\n-9 -4 0 7\n-1"
+  => output2="-9 -4 -1 0 7"
+  input3="3 2\n10 20 30\n5 15"
+  => output3="5 10 15 20 30"
+
+===== Q5: Lomuto Partition Index [easy/10] topic=Efficient Sorting Algorithms sub=Partitioning type=practice
+DESC: Quicksort starts by splitting a range around one pivot. The class Main and its main method are already provided. Write only the required static method:
+
+    static int partitionLast(int[] arr)
+
+Partition the whole array with the Lomuto scheme using the LAST element as pivot: scan j from 0 to n-2, move every element <= pivot to the front region, then swap the pivot into position i. It must return the pivot's final index.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the final index of the pivot.
+
+Constraints:
+1 <= n <= 100000, -1000000000 <= value <= 1000000000
+BL:  | WL: 
+  sampleinput1="5\n3 8 2 5 1"
+  => sampleoutput1="0"
+  sampleinput2="5\n1 3 2 5 4"
+  => sampleoutput2="3"
+  input1="1\n42"
+  => output1="0"
+  input2="6\n4 7 2 8 5 6"
+  => output2="3"
+  input3="4\n2 2 2 2"
+  => output3="3"
+
+===== Q6: Quicksort the List [easy/10] topic=Efficient Sorting Algorithms sub=Quicksort type=practice
+DESC: Implement quicksort: Lomuto partition with the last element as pivot (elements <= pivot move left, pivot swapped into its final slot), then recurse on both sides. The class Main and its main method are already provided. Write only the required static method:
+
+    static void quickSortArr(int[] arr)
+
+It must sort arr ascending in place.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the array sorted ascending.
+
+Constraints:
+1 <= n <= 2000, -1000000000 <= value <= 1000000000
+BL:  | WL: 
+  sampleinput1="6\n10 7 8 9 1 5"
+  => sampleoutput1="1 5 7 8 9 10"
+  sampleinput2="5\n3 3 1 2 3"
+  => sampleoutput2="1 2 3 3 3"
+  input1="1\n8"
+  => output1="8"
+  input2="5\n-2 5 0 -9 5"
+  => output2="-9 -2 0 5 5"
+  input3="4\n100 50 100 25"
+  => output3="25 50 100 100"
+
+===== Q7: Merge Sort Call Count [easy/10] topic=Efficient Sorting Algorithms sub=Recursion in Sorting type=practice
+DESC: Recursion in sorting, measured: every split spawns two mergeSort calls, and single-element parts still count as calls. The class Main and its main method are already provided. Write only the required static method:
+
+    static long mergeCalls(int n)
+
+With the merge-sort split mid = (lo+hi)/2 (left part = ceil(n/2) elements), calls(1) = 1 and calls(n) = 1 + calls(ceil(n/2)) + calls(floor(n/2)). It must return the total number of mergeSort invocations, including the top-level call.
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with the call count.
+
+Constraints:
+1 <= n <= 1000000000
+BL:  | WL: 
+  sampleinput1="1"
+  => sampleoutput1="1"
+  sampleinput2="2"
+  => sampleoutput2="3"
+  input1="3"
+  => output1="5"
+  input2="8"
+  => output2="15"
+  input3="1000"
+  => output3="1999"
+
+===== Q8: Inversion Pairs by Scan [easy/10] topic=Efficient Sorting Algorithms sub=Merge Sort type=practice
+DESC: An inversion is a pair i < j with arr[i] > arr[j] — the count measures how unsorted a list is, and merge sort can compute it fast. First, the brute-force view. The class Main and its main method are already provided. Write only the required static method:
+
+    static long countInversionsBrute(int[] arr)
+
+It must return the number of inversions (a double scan is fine at these sizes).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the inversion count.
+
+Constraints:
+1 <= n <= 1000, -1000000000 <= value <= 1000000000
+BL:  | WL: 
+  sampleinput1="4\n2 4 1 3"
+  => sampleoutput1="3"
+  sampleinput2="3\n3 2 1"
+  => sampleoutput2="3"
+  input1="1\n5"
+  => output1="0"
+  input2="5\n1 2 3 4 5"
+  => output2="0"
+  input3="6\n5 4 3 2 1 0"
+  => output3="15"
+
+===== Q9: Split Orders by Deadline [easy/10] topic=Efficient Sorting Algorithms sub=Partitioning type=practice
+DESC: A fulfilment line splits orders around a deadline day v: every order due on or before v is processed first, later ones afterwards. The split point is the first index holding an order due AFTER v. The class Main and its main method are already provided. Write only the required static method:
+
+    static int splitIndex(int[] arr, int v)
+
+It must return the number of elements <= v — exactly the first index whose value is > v (n when there is none).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: the deadline v.
+
+Output Format:
+One line with the split index.
+
+Constraints:
+1 <= n <= 100000, -1000000000 <= value, v <= 1000000000
+BL:  | WL: 
+  sampleinput1="5\n10 20 30 40 50\n25"
+  => sampleoutput1="2"
+  sampleinput2="4\n1 2 3 4\n4"
+  => sampleoutput2="4"
+  input1="3\n5 6 7\n2"
+  => output1="0"
+  input2="6\n3 1 4 1 5 9\n4"
+  => output2="4"
+  input3="1\n8\n8"
+  => output3="1"
+
+===== Q10: Cut the K Cheapest Deals [easy/10] topic=Efficient Sorting Algorithms sub=Quicksort type=practice
+DESC: Before a flash sale opens, the pricing team lists the k cheapest deals in ascending order. The class Main and its main method are already provided. Write only the required static method:
+
+    static int[] kCheapest(int[] arr, int k)
+
+It must return the k smallest values ascending (1 <= k <= arr.length).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: k.
+
+Output Format:
+One line with the k cheapest values ascending.
+
+Constraints:
+1 <= n <= 100000, 1 <= k <= n, -1000000000 <= value <= 1000000000
+BL:  | WL: 
+  sampleinput1="5\n40 10 30 20 50\n3"
+  => sampleoutput1="10 20 30"
+  sampleinput2="4\n9 9 9 9\n2"
+  => sampleoutput2="9 9"
+  input1="1\n7\n1"
+  => output1="7"
+  input2="6\n5 3 8 1 9 2\n6"
+  => output2="1 2 3 5 8 9"
+  input3="5\n100 4 100 4 1\n3"
+  => output3="1 4 4"
+
+===== Q11: Tournament Round Count [easy/10] topic=Efficient Sorting Algorithms sub=Recursion in Sorting type=practice
+DESC: A knockout tournament needs one match tree just like merge sort needs one merge tree: each round halves the field (ceil(n/2) advance, byes included) until a single champion remains. The class Main and its main method are already provided. Write only the required static method:
+
+    static int roundCount(int n)
+
+rounds(1) = 0 and rounds(n) = 1 + rounds(ceil(n/2)); equivalently the smallest d with 2^d >= n. It must return the number of rounds.
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with the round count.
+
+Constraints:
+1 <= n <= 1000000000
+BL:  | WL: 
+  sampleinput1="1"
+  => sampleoutput1="0"
+  sampleinput2="2"
+  => sampleoutput2="1"
+  input1="5"
+  => output1="3"
+  input2="8"
+  => output2="3"
+  input3="100"
+  => output3="7"
+
+===== Q12: Count Merge Writes [medium/20] topic=Efficient Sorting Algorithms sub=Merge Sort type=practice
+DESC: A profiler instruments merge sort: every element the merge routine writes back into the array counts as one merge write. Merging parts of sizes p and q performs p + q writes; a part of size <= 1 performs none. The class Main and its main method are already provided. Write only the required static method:
+
+    static long mergeWrites(int n)
+
+With the standard split mid = (lo+hi)/2 (left part = ceil(n/2) elements), writes(1) = 0 and writes(n) = writes(ceil(n/2)) + writes(floor(n/2)) + n. It must return the total number of merge writes for sorting n elements.
+
+Input Format:
+One line with n.
+
+Output Format:
+One line with the total merge writes.
+
+Constraints:
+1 <= n <= 1000000
+BL: System.out.print | WL: return
+  sampleinput1="1"
+  => sampleoutput1="0"
+  sampleinput2="2"
+  => sampleoutput2="2"
+  input1="3"
+  => output1="5"
+  input2="10"
+  => output2="34"
+  input3="100000"
+  => output3="1668928"
+
+===== Q13: Stable Pair Check [medium/20] topic=Efficient Sorting Algorithms sub=Auxiliary Memory and Stability type=practice
+DESC: The stability promise: after sorting records by value, records with EQUAL values must keep their original relative order. The shelf arrives pre-sorted by value; audit it pair by pair. The class Main and its main method are already provided. Write only the required static method:
+
+    static int stableOrder(int[] values, int[] ids)
+
+values[i] and ids[i] describe record i in shelf order (ids are distinct). It must return 1 when values is non-decreasing AND every pair i < j with values[i] == values[j] has ids[i] < ids[j]; otherwise 0.
+
+Input Format:
+Line 1: n. Line 2: n space-separated values. Line 3: n distinct space-separated ids.
+
+Output Format:
+One line with 1 or 0.
+
+Constraints:
+1 <= n <= 2000, -1000000000 <= value <= 1000000000, 1 <= id <= 1000000000
+BL: System.out.print | WL: return
+  sampleinput1="4\n1 2 2 3\n5 1 2 9"
+  => sampleoutput1="1"
+  sampleinput2="4\n1 2 2 3\n5 3 2 9"
+  => sampleoutput2="0"
+  input1="3\n3 2 1\n1 2 3"
+  => output1="0"
+  input2="5\n7 7 7 7 7\n1 2 3 4 5"
+  => output2="1"
+  input3="5\n7 7 7 7 7\n2 1 3 4 5"
+  => output3="0"
+
+===== Q14: Kth Smallest by Partition [medium/20] topic=Efficient Sorting Algorithms sub=Partitioning type=practice
+DESC: Quickselect finds the k-th smallest without full sorting: partition around a pivot and descend into the side containing rank k. Any correct method is fine — the answer is simply the k-th value in ascending order (duplicates count individually). The class Main and its main method are already provided. Write only the required static method:
+
+    static int kthSmallest(int[] arr, int k)
+
+k is 1-based and never exceeds arr.length. It must return the k-th smallest value.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: k.
+
+Output Format:
+One line with the k-th smallest value.
+
+Constraints:
+1 <= n <= 100000, 1 <= k <= n, -1000000000 <= value <= 1000000000
+BL: System.out.print | WL: return
+  sampleinput1="5\n7 10 4 3 20\n3"
+  => sampleoutput1="7"
+  sampleinput2="5\n7 10 4 3 20\n1"
+  => sampleoutput2="3"
+  input1="5\n7 10 4 3 20\n5"
+  => output1="20"
+  input2="6\n2 2 1 3 2 5\n4"
+  => output2="2"
+  input3="1\n-9\n1"
+  => output3="-9"
+
+===== Q15: Stable Three-Way Split [medium/20] topic=Efficient Sorting Algorithms sub=Partitioning type=practice
+DESC: A grading bench groups scores around a pass mark v: below, exactly at, and above — and within each group the original order must survive (a stable three-way partition). The class Main and its main method are already provided. Write only the required static method:
+
+    static int[] threeWaySplit(int[] arr, int v)
+
+It must return a new array with all values < v first (original order), then all values == v (original order), then all values > v (original order).
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers. Line 3: the mark v.
+
+Output Format:
+One line with the rearranged array.
+
+Constraints:
+1 <= n <= 100000, -1000000000 <= value, v <= 1000000000
+BL: System.out.print | WL: return
+  sampleinput1="6\n3 1 4 1 5 9\n4"
+  => sampleoutput1="3 1 1 4 5 9"
+  sampleinput2="4\n2 2 2 2\n2"
+  => sampleoutput2="2 2 2 2"
+  input1="5\n5 4 3 2 1\n3"
+  => output1="2 1 3 5 4"
+  input2="3\n-1 0 -1\n0"
+  => output2="-1 -1 0"
+  input3="1\n7\n7"
+  => output3="7"
+
+===== Q16: Lower Median of Scores [medium/20] topic=Efficient Sorting Algorithms sub=Partitioning type=practice
+DESC: The fairness board reports the median class size; for an even count it quotes the LOWER middle value. The class Main and its main method are already provided. Write only the required static method:
+
+    static int lowerMedian(int[] arr)
+
+Sort a copy: for odd n return the middle element, for even n the lower of the two middle elements.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the lower median.
+
+Constraints:
+1 <= n <= 100000, -1000000000 <= value <= 1000000000
+BL: System.out.print | WL: return
+  sampleinput1="5\n9 1 8 2 7"
+  => sampleoutput1="7"
+  sampleinput2="4\n9 1 8 2"
+  => sampleoutput2="2"
+  input1="1\n42"
+  => output1="42"
+  input2="6\n5 5 5 5 5 5"
+  => output2="5"
+  input3="7\n3 1 4 1 5 9 2"
+  => output3="3"
+
+===== Q17: Count Inversions Fast [hard/30] topic=Efficient Sorting Algorithms sub=Merge Sort type=practice
+DESC: The daily report needs the inversion count of a 100000-row feed — a double scan is far too slow. Use merge sort: while merging two sorted halves, every right-half element that moves past the remaining left-half elements counts that many inversions at once. The class Main and its main method are already provided. Write only the required static method:
+
+    static long countInversions(int[] arr)
+
+It must return the number of pairs i < j with arr[i] > arr[j].
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the inversion count.
+
+Constraints:
+1 <= n <= 100000, -1000000000 <= value <= 1000000000
+BL: System.out.print | WL: return
+  sampleinput1="5\n2 4 1 3 5"
+  => sampleoutput1="3"
+  sampleinput2="6\n5 4 3 2 1 0"
+  => sampleoutput2="15"
+  input1="1\n1"
+  => output1="0"
+  input2="7\n3 1 4 1 5 9 2"
+  => output2="7"
+  input3="10\n10 9 8 7 6 5 4 3 2 1"
+  => output3="45"
+
+===== Q18: Reverse Pair Count [hard/30] topic=Efficient Sorting Algorithms sub=Merge Sort type=practice
+DESC: A risk scanner flags a REVERSE PAIR when an earlier value is more than twice a later one: i < j and arr[i] > 2 * arr[j]. Values reach 1000000000, so compare in long — a modified merge sort counts these pairs in O(n log n). The class Main and its main method are already provided. Write only the required static method:
+
+    static long reversePairs(int[] arr)
+
+It must return the number of reverse pairs.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the reverse-pair count.
+
+Constraints:
+1 <= n <= 50000, -1000000000 <= value <= 1000000000
+BL: System.out.print | WL: return
+  sampleinput1="5\n1 3 2 3 1"
+  => sampleoutput1="2"
+  sampleinput2="3\n1000000000 1 1"
+  => sampleoutput2="2"
+  input1="4\n5 4 3 2"
+  => output1="1"
+  input2="6\n2 4 3 5 1 6"
+  => output2="3"
+  input3="2\n-1 -1000000000"
+  => output3="1"
+
+===== Q19: Smallest Missing Positive [hard/30] topic=Efficient Sorting Algorithms sub=Partitioning type=practice
+DESC: A warehouse slot audit must find the smallest positive item code that never appears — solvable in O(n) time and O(1) extra memory by cyclically placing every value v in 1..n at index v-1, then scanning for the first slot that does not hold its own code. The class Main and its main method are already provided. Write only the required static method:
+
+    static int smallestMissingPositive(int[] arr)
+
+It must return the smallest positive integer absent from arr.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the smallest missing positive.
+
+Constraints:
+1 <= n <= 100000, -1000000000 <= value <= 1000000000
+BL: System.out.print | WL: return
+  sampleinput1="4\n3 4 -1 1"
+  => sampleoutput1="2"
+  sampleinput2="1\n2"
+  => sampleoutput2="1"
+  input1="5\n1 2 3 4 5"
+  => output1="6"
+  input2="6\n7 8 9 11 12 13"
+  => output2="1"
+  input3="5\n1 1 2 2 3"
+  => output3="4"
+
+===== Q20: Quicksort Recursion Depth [hard/30] topic=Efficient Sorting Algorithms sub=Recursion in Sorting type=practice
+DESC: Lomuto quicksort with the last element as pivot builds a recursion tree; a bad pivot order drives it deep. The class Main and its main method are already provided. Write only the required static method:
+
+    static int quickDepth(int[] arr)
+
+Simulate the sort: partition arr[lo..hi] with the Lomuto scheme (last element pivot, elements <= pivot move left, pivot swapped into its final slot p), then recurse on [lo, p-1] and [p+1, hi]. depth(lo, hi) = 0 when lo >= hi, else 1 + max(depth of both sides). It must return the depth of the whole array.
+
+Input Format:
+Line 1: n. Line 2: n space-separated integers.
+
+Output Format:
+One line with the recursion depth.
+
+Constraints:
+1 <= n <= 2000, -1000000000 <= value <= 1000000000
+BL: System.out.print | WL: return
+  sampleinput1="5\n1 2 3 4 5"
+  => sampleoutput1="4"
+  sampleinput2="5\n3 1 2 5 4"
+  => sampleoutput2="2"
+  input1="1\n7"
+  => output1="0"
+  input2="6\n4 5 6 1 2 3"
+  => output2="3"
+  input3="4\n2 2 2 2"
+  => output3="3"

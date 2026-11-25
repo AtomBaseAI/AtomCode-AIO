@@ -1,0 +1,839 @@
+===== Q0 [easy/10] Top of the Stack | topic=Stacks sub=LIFO Principle type=practice
+BL:"" WL:""
+DESC:
+Warm up with the LIFO principle: the most recently pushed element is the top of the stack.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int stack_top(const int *stk, int top)
+
+It must return stk[top], the value sitting on top of the stack (top is the index of the top element; the stack is never empty here).
+
+Input Format:
+Line 1: n, the number of pushed values.
+Line 2: n space-separated integers, pushed in order.
+
+Output Format:
+One line with the top element.
+
+Constraints:
+1 <= n <= 2000, -1000 <= values <= 1000
+TC s1 IN<4
+10 20 30 40> EXP<40>
+TC s2 IN<1
+7> EXP<7>
+TC t1 IN<5
+2 4 6 8 10> EXP<10>
+TC t2 IN<3
+-1 -2 -3> EXP<-3>
+TC t3 IN<6
+5 3 9 1 7 8> EXP<8>
+SRC:
+int stack_top(const int *stk, int top) {
+    return stk[top];
+}
+===== Q1 [easy/10] Pop Order of a Stack | topic=Stacks sub=LIFO Principle type=practice
+BL:"" WL:""
+DESC:
+Popping a stack emits the elements in reverse push order — practise that exact sequence.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void pop_order(const int *stk, int top, int *out)
+
+It must fill out[0..top] with the pop sequence: out[j] = stk[top - j]. The harness prints out for you.
+
+Input Format:
+Line 1: n, the number of pushed values.
+Line 2: n space-separated integers, pushed in order.
+
+Output Format:
+One line with the n values in pop order, space-separated.
+
+Constraints:
+1 <= n <= 2000, -1000 <= values <= 1000
+TC s1 IN<3
+1 2 3> EXP<3 2 1>
+TC s2 IN<5
+10 20 30 40 50> EXP<50 40 30 20 10>
+TC t1 IN<2
+-5 5> EXP<5 -5>
+TC t2 IN<4
+9 7 5 3> EXP<3 5 7 9>
+TC t3 IN<6
+1 3 5 7 9 11> EXP<11 9 7 5 3 1>
+SRC:
+void pop_order(const int *stk, int top, int *out) {
+    for (int j = 0; j <= top; j++) {
+        out[j] = stk[top - j];
+    }
+}
+===== Q2 [easy/10] Peek the k-th Element from Top | topic=Stacks sub=Array-Based Stacks type=practice
+BL:"" WL:""
+DESC:
+Peeking looks at an element without popping it. Index 0 means the top of the stack.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int peek_k(const int *stk, int top, int k)
+
+It must return stk[top - k], the element that is k positions below the top (0 <= k <= top).
+
+Input Format:
+Line 1: n, the number of pushed values.
+Line 2: n space-separated integers, pushed in order.
+Line 3: k.
+
+Output Format:
+One line with the k-th element from the top.
+
+Constraints:
+1 <= n <= 2000, 0 <= k < n, -1000 <= values <= 1000
+TC s1 IN<4
+10 20 30 40
+2> EXP<20>
+TC s2 IN<3
+5 6 7
+0> EXP<7>
+TC t1 IN<5
+1 2 3 4 5
+4> EXP<1>
+TC t2 IN<6
+9 8 7 6 5 4
+3> EXP<7>
+TC t3 IN<2
+100 200
+1> EXP<100>
+SRC:
+int peek_k(const int *stk, int top, int k) {
+    return stk[top - k];
+}
+===== Q3 [easy/10] Sum of Stack Elements | topic=Stacks sub=Array-Based Stacks type=practice
+BL:"" WL:""
+DESC:
+Traverse an array-based stack from bottom to top and add everything up.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int stack_sum(const int *stk, int top)
+
+It must return the sum of stk[0..top].
+
+Input Format:
+Line 1: n, the number of pushed values.
+Line 2: n space-separated integers, pushed in order.
+
+Output Format:
+One line with the sum.
+
+Constraints:
+1 <= n <= 2000, -1000 <= values <= 1000
+TC s1 IN<4
+10 20 30 40> EXP<100>
+TC s2 IN<1
+7> EXP<7>
+TC t1 IN<5
+2 4 6 8 10> EXP<30>
+TC t2 IN<3
+-1 -2 -3> EXP<-6>
+TC t3 IN<6
+5 3 9 1 7 8> EXP<33>
+SRC:
+int stack_sum(const int *stk, int top) {
+    int total = 0;
+    for (int i = 0; i <= top; i++) {
+        total += stk[i];
+    }
+    return total;
+}
+===== Q4 [easy/10] Balanced Round Brackets | topic=Stacks sub=Balanced Parentheses type=practice
+BL:"" WL:""
+DESC:
+The classic first application of a stack: check that every ( is closed by a matching ).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int is_balanced(const char *s)
+
+It must return 1 when the string s (containing only '(' and ')') is balanced, and 0 otherwise. The harness prints YES or NO for you.
+
+Input Format:
+One token made only of '(' and ')' characters.
+
+Output Format:
+One line with YES or NO.
+
+Constraints:
+1 <= length of s <= 999
+TC s1 IN<(()())> EXP<YES>
+TC s2 IN<((()))> EXP<YES>
+TC t1 IN<()(())> EXP<YES>
+TC t2 IN<(()> EXP<NO>
+TC t3 IN<)(> EXP<NO>
+SRC:
+int is_balanced(const char *s) {
+    int open = 0;
+    for (int i = 0; s[i]; i++) {
+        if (s[i] == '(') {
+            open++;
+        } else {
+            open--;
+            if (open < 0) return 0;
+        }
+    }
+    return open == 0;
+}
+===== Q5 [easy/10] Elements Remaining After Pops | topic=Stacks sub=Linked-List Stacks type=practice
+BL:"" WL:""
+DESC:
+Every pop removes exactly one element from the stack.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int remaining(int pushed, int popped)
+
+It must return the number of elements still on the stack after popped successful pops.
+
+Input Format:
+One line with two integers: pushed and popped.
+
+Output Format:
+One line with the remaining count.
+
+Constraints:
+0 <= popped <= pushed <= 100000
+TC s1 IN<10 3> EXP<7>
+TC s2 IN<5 5> EXP<0>
+TC t1 IN<8 1> EXP<7>
+TC t2 IN<20 7> EXP<13>
+TC t3 IN<6 0> EXP<6>
+SRC:
+int remaining(int pushed, int popped) {
+    return pushed - popped;
+}
+===== Q6 [easy/10] Text Editor Undo History | topic=Stacks sub=LIFO Principle type=practice
+BL:"" WL:""
+DESC:
+A text editor records every action code on an undo stack. Undo pops the most recent action.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int undo_top(const int *actions, int n, int undos)
+
+It must return the action that ends up on top of the undo stack after undos undo steps, or -1 when every action has been undone.
+
+Input Format:
+Line 1: n, the number of recorded actions.
+Line 2: n action codes in the order they happened.
+Line 3: undos.
+
+Output Format:
+One line with the resulting top action or -1.
+
+Constraints:
+1 <= n <= 2000, 0 <= undos <= n, -1000 <= action codes <= 1000
+TC s1 IN<5
+1 2 3 4 5
+2> EXP<3>
+TC s2 IN<3
+7 8 9
+0> EXP<9>
+TC t1 IN<4
+10 20 30 40
+4> EXP<-1>
+TC t2 IN<6
+2 4 6 8 10 12
+3> EXP<6>
+TC t3 IN<2
+5 6
+1> EXP<5>
+SRC:
+int undo_top(const int *actions, int n, int undos) {
+    if (undos >= n) return -1;
+    return actions[n - 1 - undos];
+}
+===== Q7 [easy/10] Browser Back Button | topic=Stacks sub=Array-Based Stacks type=practice
+BL:"" WL:""
+DESC:
+A browser pushes every visited page id onto a history stack. Pressing Back pops one page.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int current_page(const int *history, int n, int backs)
+
+It must return the page id on top of the history after backs Back presses, or -1 when the history is exhausted (the user went back past the first page).
+
+Input Format:
+Line 1: n, the number of visited pages.
+Line 2: n page ids in visiting order.
+Line 3: backs.
+
+Output Format:
+One line with the current page id or -1.
+
+Constraints:
+1 <= n <= 2000, 0 <= backs <= n, 1 <= page ids <= 100000
+TC s1 IN<4
+101 102 103 104
+1> EXP<103>
+TC s2 IN<3
+11 22 33
+0> EXP<33>
+TC t1 IN<3
+11 22 33
+3> EXP<-1>
+TC t2 IN<5
+1 2 3 4 5
+2> EXP<3>
+TC t3 IN<2
+7 8
+1> EXP<7>
+SRC:
+int current_page(const int *history, int n, int backs) {
+    if (backs >= n) return -1;
+    return history[n - 1 - backs];
+}
+===== Q8 [easy/10] Config File Bracket Linter | topic=Stacks sub=Balanced Parentheses type=practice
+BL:"" WL:""
+DESC:
+A linter validates configuration snippets that may mix round and square brackets; every opener needs the matching closer.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int brackets_ok(const char *s)
+
+It must return 1 when every bracket in s (characters '(' ')' '[' ']') is properly matched and nested, and 0 otherwise. The harness prints YES or NO for you.
+
+Input Format:
+One token made only of '(' ')' '[' ']' characters.
+
+Output Format:
+One line with YES or NO.
+
+Constraints:
+1 <= length of s <= 999
+TC s1 IN<([)]> EXP<NO>
+TC s2 IN<([]{})> EXP<NO>
+TC t1 IN<(([]))> EXP<YES>
+TC t2 IN<[(){}]> EXP<NO>
+TC t3 IN<][]> EXP<NO>
+SRC:
+int brackets_ok(const char *s) {
+    char stack[1005];
+    int top = 0;
+    for (int i = 0; s[i]; i++) {
+        if (s[i] == '(' || s[i] == '[') {
+            stack[top++] = s[i];
+        } else {
+            if (top == 0) return 0;
+            char o = stack[--top];
+            if (s[i] == ')' && o != '(') return 0;
+            if (s[i] == ']' && o != '[') return 0;
+        }
+    }
+    return top == 0;
+}
+===== Q9 [easy/10] Next Greater Price (Single Query) | topic=Stacks sub=Next Greater Element type=practice
+BL:"" WL:""
+DESC:
+A price tracker answers one query: for a given day, what is the next strictly higher price after it?
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int next_greater_at(const int *arr, int n, int i)
+
+It must return the first arr[j] with j > i and arr[j] > arr[i], or -1 if no such element exists.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated prices.
+Line 3: i (0-based index).
+
+Output Format:
+One line with the next greater price or -1.
+
+Constraints:
+1 <= n <= 2000, 0 <= i < n, -1000 <= prices <= 1000
+TC s1 IN<5
+4 5 2 25 7
+3> EXP<-1>
+TC s2 IN<4
+1 3 2 4
+2> EXP<4>
+TC t1 IN<6
+9 8 7 6 5 4
+0> EXP<-1>
+TC t2 IN<5
+2 3 10 6 4
+4> EXP<-1>
+TC t3 IN<4
+5 4 3 8
+1> EXP<8>
+SRC:
+int next_greater_at(const int *arr, int n, int i) {
+    for (int j = i + 1; j < n; j++) {
+        if (arr[j] > arr[i]) return arr[j];
+    }
+    return -1;
+}
+===== Q10 [medium/20] Next Greater Element for Every Item | topic=Stacks sub=Next Greater Element type=practice
+BL:"printf" WL:"stack"
+DESC:
+A market data feed labels every price with the next strictly higher price that appears later in the list.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void next_greater(const int *arr, int n, int *out)
+
+It must fill out[i] with the first arr[j] such that j > i and arr[j] > arr[i]; use -1 when no greater element exists. The harness prints the out array. A single left-to-right pass with a stack solves this in O(n).
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated values.
+
+Output Format:
+One line with n answers, space-separated.
+
+Constraints:
+1 <= n <= 1000, -1000 <= values <= 1000
+TC s1 IN<4
+4 5 2 25> EXP<5 25 25 -1>
+TC s2 IN<5
+5 4 3 2 1> EXP<-1 -1 -1 -1 -1>
+TC t1 IN<6
+3 8 5 9 2 7> EXP<8 9 9 -1 7 -1>
+TC t2 IN<4
+1 1 2 2> EXP<2 2 -1 -1>
+TC t3 IN<7
+10 3 7 4 12 2 9> EXP<12 7 12 12 -1 9 -1>
+SRC:
+void next_greater(const int *arr, int n, int *out) {
+    int stack[1005], top = 0;
+    for (int i = 0; i < n; i++) out[i] = -1;
+    for (int i = 0; i < n; i++) {
+        while (top > 0 && arr[i] > arr[stack[top - 1]]) {
+            out[stack[--top]] = arr[i];
+        }
+        stack[top++] = i;
+    }
+}
+===== Q11 [medium/20] Valid Push and Pop Sequence | topic=Stacks sub=Array-Based Stacks type=practice
+BL:"printf" WL:"stack"
+DESC:
+A warehouse robot logs push and pop commands. Verify the pop log could really have come from processing the push log with one stack (each sequence holds the same distinct values 1..n).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int valid_sequence(const int *pushed, const int *popped, int n)
+
+It must return 1 if popped is a possible pop order of pushed, and 0 otherwise. The harness prints YES or NO.
+
+Input Format:
+Line 1: n.
+Line 2: n distinct values (the push order).
+Line 3: n distinct values (the claimed pop order).
+
+Output Format:
+One line with YES or NO.
+
+Constraints:
+1 <= n <= 1000, each sequence is a permutation of 1..n
+TC s1 IN<3
+1 2 3
+2 1 3> EXP<YES>
+TC s2 IN<4
+1 2 3 4
+4 3 2 1> EXP<YES>
+TC t1 IN<3
+1 2 3
+3 1 2> EXP<NO>
+TC t2 IN<5
+2 1 5 3 4
+1 2 3 5 4> EXP<YES>
+TC t3 IN<5
+1 2 3 4 5
+5 4 1 2 3> EXP<NO>
+SRC:
+int valid_sequence(const int *pushed, const int *popped, int n) {
+    int stack[1005], top = 0, j = 0;
+    for (int i = 0; i < n; i++) {
+        stack[top++] = pushed[i];
+        while (top > 0 && j < n && stack[top - 1] == popped[j]) {
+            top--;
+            j++;
+        }
+    }
+    return j == n;
+}
+===== Q12 [medium/20] Minimum on the Stack After Operations | topic=Stacks sub=LIFO Principle type=practice
+BL:"printf" WL:"min"
+DESC:
+A trading app replays a log of watchlist operations: a positive value v pushes price v, and -1 pops the most recent price. Report the minimum price still on the stack at the end (the final stack is never empty).
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int min_after_ops(const int *ops, int m)
+
+It must simulate the operations and return the minimum element on the stack after all of them. Track a running minimum alongside each push.
+
+Input Format:
+Line 1: m, the number of operations.
+Line 2: m integers — each a positive value (push) or -1 (pop; pops never run on an empty stack).
+
+Output Format:
+One line with the minimum remaining element.
+
+Constraints:
+1 <= m <= 1000, 1 <= pushed values <= 100, the final stack is non-empty
+TC s1 IN<5
+5 -1 3 -1 8> EXP<8>
+TC s2 IN<4
+10 20 -1 5> EXP<5>
+TC t1 IN<6
+4 9 2 -1 -1 7> EXP<4>
+TC t2 IN<3
+50 60 70> EXP<50>
+TC t3 IN<5
+12 -1 3 6 -1> EXP<3>
+SRC:
+int min_after_ops(const int *ops, int m) {
+    int stack[1005], mins[1005], top = 0;
+    for (int i = 0; i < m; i++) {
+        if (ops[i] == -1) {
+            top--;
+            continue;
+        }
+        stack[top] = ops[i];
+        mins[top] = (top == 0) ? ops[i] : (ops[i] < mins[top - 1] ? ops[i] : mins[top - 1]);
+        top++;
+    }
+    return mins[top - 1];
+}
+===== Q13 [medium/20] Reverse a Message Using a Stack | topic=Stacks sub=Array-Based Stacks type=practice
+BL:"printf" WL:"stack"
+DESC:
+A message de-obfuscator pushes every character onto a stack and then pops them all — which reads the text backwards.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void reverse_with_stack(const char *s, char *out)
+
+It must push each character of s, then pop everything into out (reversed), and NUL-terminate out.
+
+Input Format:
+One token (no spaces).
+
+Output Format:
+One line with the reversed text.
+
+Constraints:
+1 <= length of s <= 999, s contains only printable non-space characters
+TC s1 IN<hello> EXP<olleh>
+TC s2 IN<atom> EXP<mota>
+TC t1 IN<racecar> EXP<racecar>
+TC t2 IN<abc123> EXP<321cba>
+TC t3 IN<z> EXP<z>
+SRC:
+void reverse_with_stack(const char *s, char *out) {
+    char stack[1005];
+    int top = 0, i;
+    for (i = 0; s[i]; i++) {
+        stack[top++] = s[i];
+    }
+    for (i = 0; top > 0; i++) {
+        out[i] = stack[--top];
+    }
+    out[i] = '\0';
+}
+===== Q14 [medium/20] Minimum Bracket Removals | topic=Stacks sub=Balanced Parentheses type=practice
+BL:"printf" WL:"for"
+DESC:
+A log file contains a bracket string with some unmatched parentheses. Count the minimum number of brackets that must be removed to make it balanced.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int min_removals(const char *s)
+
+It must return the total number of unmatched brackets: every '(' left unclosed plus every ')' with no opener.
+
+Input Format:
+One token made only of '(' and ')' characters.
+
+Output Format:
+One line with the count.
+
+Constraints:
+1 <= length of s <= 999
+TC s1 IN<(()> EXP<1>
+TC s2 IN<())> EXP<1>
+TC t1 IN<()(())> EXP<0>
+TC t2 IN<())((> EXP<3>
+TC t3 IN<((((((> EXP<6>
+SRC:
+int min_removals(const char *s) {
+    int open = 0, bad = 0;
+    for (int i = 0; s[i]; i++) {
+        if (s[i] == '(') {
+            open++;
+        } else if (open > 0) {
+            open--;
+        } else {
+            bad++;
+        }
+    }
+    return open + bad;
+}
+===== Q15 [medium/20] Final Text After Backspaces | topic=Stacks sub=Linked-List Stacks type=practice
+BL:"printf" WL:"stack"
+DESC:
+A keyboard driver records keystrokes where '#' means backspace. Replay the log with a stack of typed characters to reconstruct the final text.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void final_text(const char *s, char *out)
+
+It must process s left to right: a normal character is pushed, '#' pops one character (ignored on an empty stack). Copy the surviving characters into out and NUL-terminate it.
+
+Input Format:
+One token of lowercase letters and '#'. At least one character survives.
+
+Output Format:
+One line with the final text.
+
+Constraints:
+1 <= length of s <= 999, the final text is non-empty
+TC s1 IN<abc#> EXP<ab>
+TC s2 IN<ab##c> EXP<c>
+TC t1 IN<a#b#c> EXP<c>
+TC t2 IN<xy#z#> EXP<x>
+TC t3 IN<code##s> EXP<cos>
+SRC:
+void final_text(const char *s, char *out) {
+    char stack[1005];
+    int top = 0, i, k = 0;
+    for (i = 0; s[i]; i++) {
+        if (s[i] == '#') {
+            if (top > 0) top--;
+        } else {
+            stack[top++] = s[i];
+        }
+    }
+    for (i = 0; i < top; i++) {
+        out[k++] = stack[i];
+    }
+    out[k] = '\0';
+}
+===== Q16 [hard/30] Postfix Expression Evaluator | topic=Stacks sub=LIFO Principle type=practice
+BL:"printf" WL:"stack"
+DESC:
+A firmware calculator evaluates Reverse Polish Notation offline: operands are single digits 0-9 and operators are + - * / (integer division), all separated by single spaces.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int eval_postfix(const char *expr)
+
+It must scan the tokens left to right, push operands, and on each operator pop b then pop a, compute a OP b, and push the result. Return the single value left on the stack. Division is integer division; b is never 0.
+
+Input Format:
+One line: a postfix expression with single-space-separated tokens.
+
+Output Format:
+One line with the evaluated value.
+
+Constraints:
+2 <= number of tokens <= 99, no division by zero
+TC s1 IN<2 3 +> EXP<5>
+TC s2 IN<9 2 - 3 *> EXP<21>
+TC t1 IN<6 2 3 + -> EXP<1>
+TC t2 IN<8 4 / 2 *> EXP<4>
+TC t3 IN<1 2 + 3 4 + *> EXP<21>
+SRC:
+int eval_postfix(const char *expr) {
+    int stack[200], top = 0, i = 0;
+    while (expr[i]) {
+        if (expr[i] == ' ') {
+            i++;
+            continue;
+        }
+        if (expr[i] >= '0' && expr[i] <= '9') {
+            stack[top++] = expr[i] - '0';
+        } else {
+            int b = stack[--top];
+            int a = stack[--top];
+            int r = 0;
+            if (expr[i] == '+') r = a + b;
+            else if (expr[i] == '-') r = a - b;
+            else if (expr[i] == '*') r = a * b;
+            else r = a / b;
+            stack[top++] = r;
+        }
+        i++;
+    }
+    return stack[top - 1];
+}
+===== Q17 [hard/30] Stock Span Analysis | topic=Stacks sub=Next Greater Element type=practice
+BL:"printf" WL:"stack"
+DESC:
+A trading dashboard shows, for each day, how many consecutive prior days (including today) had a price less than or equal to today's price — the stock span.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void stock_span(const int *prices, int n, int *out)
+
+It must fill out[i] with the span of day i. A stack of indices solves this in O(n).
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated prices.
+
+Output Format:
+One line with n spans, space-separated.
+
+Constraints:
+1 <= n <= 1000, 1 <= prices <= 1000
+TC s1 IN<6
+100 80 60 70 60 75> EXP<1 1 1 2 1 4>
+TC s2 IN<5
+10 20 30 40 50> EXP<1 2 3 4 5>
+TC t1 IN<4
+50 40 30 20> EXP<1 1 1 1>
+TC t2 IN<7
+2 1 2 1 2 1 2> EXP<1 1 3 1 5 1 7>
+TC t3 IN<5
+9 1 8 2 6> EXP<1 1 2 1 2>
+SRC:
+void stock_span(const int *prices, int n, int *out) {
+    int stack[1005], top = 0;
+    for (int i = 0; i < n; i++) {
+        while (top > 0 && prices[stack[top - 1]] <= prices[i]) {
+            top--;
+        }
+        out[i] = (top == 0) ? i + 1 : i - stack[top - 1];
+        stack[top++] = i;
+    }
+}
+===== Q18 [hard/30] Circular Next Greater Element | topic=Stacks sub=Next Greater Element type=practice
+BL:"printf" WL:"stack"
+DESC:
+A sensor ring wraps around: the element after the last one is the first one again. Compute the next strictly greater element for every position, searching circularly.
+
+The program scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    void nge_circular(const int *arr, int n, int *out)
+
+It must fill out[i] with the next strictly greater value found by scanning forward (wrapping around once); use -1 when none exists.
+
+Input Format:
+Line 1: n.
+Line 2: n space-separated values.
+
+Output Format:
+One line with n answers, space-separated.
+
+Constraints:
+1 <= n <= 1000, -1000 <= values <= 1000
+TC s1 IN<3
+1 2 3> EXP<2 3 -1>
+TC s2 IN<5
+5 4 3 2 1> EXP<-1 5 5 5 5>
+TC t1 IN<4
+1 3 2 4> EXP<3 4 4 -1>
+TC t2 IN<6
+8 3 1 9 5 7> EXP<9 9 9 -1 7 8>
+TC t3 IN<6
+4 4 4 4 4 4> EXP<-1 -1 -1 -1 -1 -1>
+SRC:
+void nge_circular(const int *arr, int n, int *out) {
+    int stack[2005], top = 0;
+    for (int i = 2 * n - 1; i >= 0; i--) {
+        int idx = i % n;
+        while (top > 0 && arr[stack[top - 1]] <= arr[idx]) {
+            top--;
+        }
+        if (i < n) out[idx] = (top == 0) ? -1 : arr[stack[top - 1]];
+        stack[top++] = idx;
+    }
+}
+===== Q19 [hard/30] Longest Valid Bracket Substring | topic=Stacks sub=Balanced Parentheses type=practice
+BL:"printf" WL:"stack"
+DESC:
+A log-quality metric reports the length of the longest contiguous, fully balanced substring of parentheses in a log line.
+
+The scaffolding (includes and main) is already set up for you.
+
+Implement only this function:
+
+    int longest_valid(const char *s)
+
+It must return the length of the longest contiguous substring of s (characters '(' and ')') that is balanced; return 0 when none exists. A stack of indices (seeded with -1) solves this in one pass.
+
+Input Format:
+One token made only of '(' and ')' characters.
+
+Output Format:
+One line with the length.
+
+Constraints:
+1 <= length of s <= 999
+TC s1 IN<(()> EXP<2>
+TC s2 IN<)()())> EXP<4>
+TC t1 IN<()(()> EXP<2>
+TC t2 IN<(> EXP<0>
+TC t3 IN<()(())> EXP<6>
+SRC:
+int longest_valid(const char *s) {
+    int stack[1005], top = 0, best = 0;
+    stack[top++] = -1;
+    for (int i = 0; s[i]; i++) {
+        if (s[i] == '(') {
+            stack[top++] = i;
+        } else {
+            top--;
+            if (top == 0) {
+                stack[top++] = i;
+            } else {
+                int len = i - stack[top - 1];
+                if (len > best) best = len;
+            }
+        }
+    }
+    return best;
+}
