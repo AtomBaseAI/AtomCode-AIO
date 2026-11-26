@@ -43,10 +43,9 @@ export const addMCQ = async (
         await db.mCQQuestion.create({
             data: {
                 ...parsedData,
-                // Scalar FK — the generated UncheckedCreateInput accepts it
-                // unconditionally (relation `connect` payloads are rejected
-                // whenever any scalar field key is present).
-                moduleId: values.moduleId,
+                // Many-to-many attach: the MCQ connects to the module via the
+                // join relation (the same MCQ may also serve other modules).
+                modules: { connect: { id: values.moduleId } },
             },
         });
     } else if (mcqtype === "assessment" && values.assessmentId) {
@@ -89,7 +88,10 @@ export const updateMCQ = async (
     if (!session) return { error: "Only admins can update MCQs." };
 
     // Strip the id from the written data — it is only the where-key.
-    const { id: mcqId, ...data } = values;
+    // moduleId/assessmentId are routing hints, not writable columns
+    // (questions attach to modules via the many-to-many join; assessment
+    // attachment lives in assessmentsId and is managed elsewhere).
+    const { id: mcqId, moduleId: _moduleId, assessmentId: _assessmentId, ...data } = values;
     await db.mCQQuestion.update({
         where: {
             id: mcqId

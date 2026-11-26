@@ -43,11 +43,8 @@ const MCQMain = async ({ params }: { params: Promise<{ cid: string, mid: string,
         return <ModuleLockedScreen lock={lock} backHref={`/student/courses/${cid}/module`} />
     }
     const courseModule = await getCourseModuleByModuleID(mid)
-    // The query already scopes to this module (moduleId = mid), the boolean
-    // filter is just a defensive guard. Plain rows satisfy the MCQ schema
-    // type, so no type predicate is needed here.
-    const ModuleMCQs = (await getAllMCQByModuleId(mid))
-        .filter((mcq) => mcq.moduleId !== null);
+    // The query scopes to this module through the many-to-many relation.
+    const ModuleMCQs = await getAllMCQByModuleId(mid);
 
     return (
         <ContextMenu>

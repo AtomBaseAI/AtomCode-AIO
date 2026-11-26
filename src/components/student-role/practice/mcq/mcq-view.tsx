@@ -27,7 +27,8 @@ interface MCQ {
     description: string;
     id: string;
     iscodesnippet: boolean;
-    moduleId: string | null;
+    // Many-to-many rows no longer carry a moduleId FK.
+    moduleId?: string | null;
     referenceimg?: string | null;
     subtopic?: string | null;
     title: string;

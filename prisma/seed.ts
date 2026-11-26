@@ -227,7 +227,32 @@ async function main() {
     (await db.questionGroup.findFirst({ where: { title: "Seed Questions" } })) ??
     (await db.questionGroup.create({ data: { title: "Seed Questions" } }));
 
-  if ((await db.mCQQuestion.count({ where: { moduleId: mod1.id } })) === 0) {
+  /**
+   * Many-to-many attach helper: connect existing questions to a module via
+   * the implicit join tables. Safe to re-run (ON CONFLICT DO NOTHING).
+   */
+  const attachToModule = async (
+    moduleId: string,
+    codeIds: string[] = [],
+    mcqIds: string[] = []
+  ) => {
+    for (const qid of codeIds) {
+      await db.$executeRawUnsafe(
+        `INSERT INTO "_ModuleCodeQuestions" ("A", "B") VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+        qid,
+        moduleId
+      );
+    }
+    for (const qid of mcqIds) {
+      await db.$executeRawUnsafe(
+        `INSERT INTO "_ModuleMcqQuestions" ("A", "B") VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+        qid,
+        moduleId
+      );
+    }
+  };
+
+  const seedMcqIdsForMod1 = async () => {
     await db.mCQQuestion.createMany({
       data: [
         {
@@ -240,7 +265,6 @@ async function main() {
           Option3: "Just Virtual Memory",
           Option4: "Java Variable Machine",
           CorrectOption: 1,
-          moduleId: mod1.id,
           questionGroupId: seedGroup.id,
           iscodesnippet: false,
         },
@@ -255,22 +279,29 @@ async function main() {
           Option3: "main(String[] args)",
           Option4: "run()",
           CorrectOption: 3,
-          moduleId: mod1.id,
           questionGroupId: seedGroup.id,
           iscodesnippet: false,
         },
       ],
     });
+    const created = await db.mCQQuestion.findMany({
+      where: { questionGroupId: seedGroup.id, title: { in: ["JVM stands for", "Entry point of Java"] } },
+      select: { id: true },
+    });
+    await attachToModule(mod1.id, [], created.map((q) => q.id));
+  };
+
+  if ((await db.mCQQuestion.count({ where: { modules: { some: { id: mod1.id } }, questionGroupId: seedGroup.id } })) === 0) {
+    await seedMcqIdsForMod1();
   }
 
-  if ((await db.codeQuestion.count({ where: { moduleId: mod1.id } })) === 0) {
+  const seedCodeForMod1 = async () => {
     await db.codeQuestion.createMany({
       data: [
         {
           title: "Hello Atom",
           description:
             "Print `Hello, Atom!` to stdout. No trailing spaces.",
-          moduleId: mod1.id,
           questionGroupId: seedGroup.id,
           sampleinput1: "",
           sampleinput2: "",
@@ -297,7 +328,6 @@ async function main() {
           title: "Sum of Two",
           description:
             "Read two integers separated by space and print their sum.",
-          moduleId: mod1.id,
           questionGroupId: seedGroup.id,
           sampleinput1: "2 3",
           sampleinput2: "10 20",
@@ -322,9 +352,18 @@ async function main() {
         },
       ],
     });
+    const created = await db.codeQuestion.findMany({
+      where: { questionGroupId: seedGroup.id, title: { in: ["Hello Atom", "Sum of Two"] } },
+      select: { id: true },
+    });
+    await attachToModule(mod1.id, created.map((q) => q.id), []);
+  };
+
+  if ((await db.codeQuestion.count({ where: { modules: { some: { id: mod1.id } }, questionGroupId: seedGroup.id } })) === 0) {
+    await seedCodeForMod1();
   }
 
-  if ((await db.mCQQuestion.count({ where: { moduleId: mod2.id } })) === 0) {
+  const seedMcqForMod2 = async () => {
     await db.mCQQuestion.createMany({
       data: [
         {
@@ -337,12 +376,20 @@ async function main() {
           Option3: "inherits",
           Option4: "super",
           CorrectOption: 2,
-          moduleId: mod2.id,
           questionGroupId: seedGroup.id,
           iscodesnippet: false,
         },
       ],
     });
+    const created = await db.mCQQuestion.findFirst({
+      where: { questionGroupId: seedGroup.id, title: "Keyword for inheritance" },
+      select: { id: true },
+    });
+    if (created) await attachToModule(mod2.id, [], [created.id]);
+  };
+
+  if ((await db.mCQQuestion.count({ where: { modules: { some: { id: mod2.id } }, questionGroupId: seedGroup.id } })) === 0) {
+    await seedMcqForMod2();
   }
 
   const assessment =

@@ -119,8 +119,8 @@ async function countCourse(cid: string): Promise<CleanupSection[]> {
 async function countModule(mid: string): Promise<CleanupSection[]> {
     const [codeQuestions, mcqQuestions, userModuleData, userMcqData, userCodeQuestionData, references] =
         await Promise.all([
-            db.codeQuestion.count({ where: { moduleId: mid } }),
-            db.mCQQuestion.count({ where: { moduleId: mid } }),
+            db.codeQuestion.count({ where: { modules: { some: { id: mid } } } }),
+            db.mCQQuestion.count({ where: { modules: { some: { id: mid } } } }),
             db.userModuleData.count({ where: { moduleId: mid } }),
             db.userMCQData.count({ where: { moduleId: mid } }),
             db.userCodeQuestionData.count({ where: { moduleId: mid } }),
@@ -131,7 +131,7 @@ async function countModule(mid: string): Promise<CleanupSection[]> {
         {
             key: "questions",
             label: "Questions",
-            subtitle: "Code & MCQ questions of this module (student submissions go with them)",
+            subtitle: "Code & MCQ questions attached to this module (shared questions stay in other modules)",
             count: codeQuestions + mcqQuestions,
         },
         {
@@ -282,10 +282,9 @@ async function countCodeQuestion(qid: string): Promise<CleanupSection[]> {
         db.codeQuestion.findUnique({
             where: { id: qid },
             select: {
-                moduleId: true,
+                modules: { select: { title: true } },
                 assessmentsId: true,
                 questionGroupId: true,
-                module: { select: { title: true } },
                 Assessments: { select: { title: true } },
                 questionGroup: { select: { title: true } },
             },
@@ -294,8 +293,7 @@ async function countCodeQuestion(qid: string): Promise<CleanupSection[]> {
         db.userAssessmentCodeData.count({ where: { questionId: qid } }),
     ]);
 
-    const attachments: string[] = [];
-    if (question?.module?.title) attachments.push(`module "${question.module.title}"`);
+    const attachments: string[] = question?.modules.map((m) => `module "${m.title}"`) ?? [];
     if (question?.Assessments?.title) attachments.push(`assessment "${question.Assessments.title}"`);
     if (question?.questionGroup?.title) attachments.push(`group "${question.questionGroup.title}"`);
 
@@ -332,17 +330,15 @@ async function countMcqQuestion(mcqId: string): Promise<CleanupSection[]> {
     const mcq = await db.mCQQuestion.findUnique({
         where: { id: mcqId },
         select: {
-            moduleId: true,
+            modules: { select: { title: true } },
             assessmentsId: true,
             questionGroupId: true,
-            module: { select: { title: true } },
             Assessments: { select: { title: true } },
             questionGroup: { select: { title: true } },
         },
     });
 
-    const attachments: string[] = [];
-    if (mcq?.module?.title) attachments.push(`module "${mcq.module.title}"`);
+    const attachments: string[] = mcq?.modules.map((m) => `module "${m.title}"`) ?? [];
     if (mcq?.Assessments?.title) attachments.push(`assessment "${mcq.Assessments.title}"`);
     if (mcq?.questionGroup?.title) attachments.push(`group "${mcq.questionGroup.title}"`);
 
@@ -388,17 +384,42 @@ async function removeCourseSection(tx: PrismaTx, cid: string, section: string | 
         removed += r.count;
     }
     // Modules & questions: every module-scoped row must go BEFORE the modules
-    // themselves (student data → questions → references → modules).
+    // themselves (student data → owned questions → references → modules).
+    // Questions are many-to-many: only questions whose ENTIRE module
+    // assignment falls inside this course are deleted from the bank —
+    // questions shared with other courses are merely detached (cascade).
     if (hit("modules") || hit("questions")) {
-        const [umd, umcq, ucq, code, mcq, refs] = await Promise.all([
+        const [umd, umcq, ucq, refs] = await Promise.all([
             tx.userModuleData.deleteMany({ where: { moduleId: { in: mids } } }),
             tx.userMCQData.deleteMany({ where: { moduleId: { in: mids } } }),
             tx.userCodeQuestionData.deleteMany({ where: { moduleId: { in: mids } } }),
-            tx.codeQuestion.deleteMany({ where: { moduleId: { in: mids } } }),
-            tx.mCQQuestion.deleteMany({ where: { moduleId: { in: mids } } }),
             tx.moduleReferences.deleteMany({ where: { moduleId: { in: mids } } }),
         ]);
-        removed += sum(umd.count, umcq.count, ucq.count, code.count, mcq.count, refs.count);
+        const codeOnly = await tx.codeQuestion.findMany({
+            where: {
+                modules: { some: { id: { in: mids } } },
+                AND: [{ modules: { none: { id: { notIn: mids } } } }],
+            },
+            select: { id: true },
+        });
+        const mcqOnly = await tx.mCQQuestion.findMany({
+            where: {
+                modules: { some: { id: { in: mids } } },
+                AND: [{ modules: { none: { id: { notIn: mids } } } }],
+            },
+            select: { id: true },
+        });
+        const codeIds = codeOnly.map((q) => q.id);
+        const mcqIds = mcqOnly.map((q) => q.id);
+        const [code, mcq] = await Promise.all([
+            codeIds.length
+                ? tx.codeQuestion.deleteMany({ where: { id: { in: codeIds } } })
+                : Promise.resolve({ count: 0 }),
+            mcqIds.length
+                ? tx.mCQQuestion.deleteMany({ where: { id: { in: mcqIds } } })
+                : Promise.resolve({ count: 0 }),
+        ]);
+        removed += sum(umd.count, umcq.count, ucq.count, refs.count, code.count, mcq.count);
     }
     // Assessments: the student attempt rows referencing them go first (FK).
     if (hit("assessments")) {
@@ -438,12 +459,34 @@ async function removeModuleSection(tx: PrismaTx, mid: string, section: string | 
         ]);
         removed += a.count + b.count + c.count;
     }
-    // Questions: their per-question submission rows cascade via schema
-    // (UserCodeQuestionData / userAssessmentCodeData), so no extra wipe.
+    // Questions: only questions used EXCLUSIVELY by this module are deleted
+    // from the bank; shared questions are just detached when the module row
+    // goes (join-row cascade). Per-question submission rows cascade via
+    // schema (UserCodeQuestionData / userAssessmentCodeData).
     if (hit("questions")) {
+        const codeOnly = await tx.codeQuestion.findMany({
+            where: {
+                modules: { some: { id: mid } },
+                AND: [{ modules: { none: { id: { notIn: [mid] } } } }],
+            },
+            select: { id: true },
+        });
+        const mcqOnly = await tx.mCQQuestion.findMany({
+            where: {
+                modules: { some: { id: mid } },
+                AND: [{ modules: { none: { id: { notIn: [mid] } } } }],
+            },
+            select: { id: true },
+        });
+        const codeIds = codeOnly.map((q) => q.id);
+        const mcqIds = mcqOnly.map((q) => q.id);
         const [code, mcq] = await Promise.all([
-            tx.codeQuestion.deleteMany({ where: { moduleId: mid } }),
-            tx.mCQQuestion.deleteMany({ where: { moduleId: mid } }),
+            codeIds.length
+                ? tx.codeQuestion.deleteMany({ where: { id: { in: codeIds } } })
+                : Promise.resolve({ count: 0 }),
+            mcqIds.length
+                ? tx.mCQQuestion.deleteMany({ where: { id: { in: mcqIds } } })
+                : Promise.resolve({ count: 0 }),
         ]);
         removed += code.count + mcq.count;
     }
@@ -560,21 +603,20 @@ async function removeCodeQuestionSection(tx: PrismaTx, qid: string, section: str
     if (hit("attachments")) {
         const question = await tx.codeQuestion.findUnique({
             where: { id: qid },
-            select: { moduleId: true, assessmentsId: true },
+            select: { modules: { select: { id: true } }, assessmentsId: true },
         });
         if (question) {
             // NOTE: the question-group link is a REQUIRED FK (cascade delete) —
             // it cannot be "disconnected"; it disappears with the question
             // itself when it is finally deleted.
-            const attached = [
-                question.moduleId,
-                question.assessmentsId,
-            ].filter(Boolean).length;
+            const attached =
+                question.modules.length + (question.assessmentsId ? 1 : 0);
             if (attached > 0) {
                 await tx.codeQuestion.update({
                     where: { id: qid },
                     data: {
-                        module: { disconnect: true },
+                        // Detach from EVERY module (many-to-many).
+                        modules: { set: [] },
                         Assessments: { disconnect: true },
                     },
                 });
@@ -594,17 +636,17 @@ async function removeMcqQuestionSection(tx: PrismaTx, mcqId: string, section: st
     if (section !== null && section !== "attachments") return 0;
     const mcq = await tx.mCQQuestion.findUnique({
         where: { id: mcqId },
-        select: { moduleId: true, assessmentsId: true },
+        select: { modules: { select: { id: true } }, assessmentsId: true },
     });
     if (!mcq) return 0;
     // NOTE: question-group link is a REQUIRED FK — see removeCodeQuestionSection.
-    const attached = [mcq.moduleId, mcq.assessmentsId]
-        .filter(Boolean).length;
+    const attached = mcq.modules.length + (mcq.assessmentsId ? 1 : 0);
     if (attached > 0) {
         await tx.mCQQuestion.update({
             where: { id: mcqId },
             data: {
-                module: { disconnect: true },
+                // Detach from EVERY module (many-to-many).
+                modules: { set: [] },
                 Assessments: { disconnect: true },
             },
         });

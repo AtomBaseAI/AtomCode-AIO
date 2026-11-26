@@ -34,7 +34,15 @@ export const submitquestion = async (values: z.infer<typeof UserQuestionDataSche
 
     const question = await db.codeQuestion.findUnique({
         where: { id: questionId },
-        select: { id: true, lang: true, maxscore: true, moduleId: true },
+        select: {
+            id: true,
+            lang: true,
+            maxscore: true,
+            // Many-to-many: the question may serve modules of several
+            // courses; the enrollment gate runs against the module the
+            // student is practicing in (or any module holding it).
+            modules: { select: { id: true, courseId: true } },
+        },
     });
     if (!question) {
         return { error: "Question not found." };
@@ -42,12 +50,12 @@ export const submitquestion = async (values: z.infer<typeof UserQuestionDataSche
 
     // Enrollment gate: module → course → the student must hold a UserCourse
     // row for that course.
-    const effectiveModuleId = question.moduleId ?? moduleId;
-    const module_ = effectiveModuleId
-        ? await db.module.findUnique({
-              where: { id: effectiveModuleId },
-              select: { courseId: true },
-          })
+    const attachedModule = moduleId
+        ? question.modules.find((m) => m.id === moduleId)
+        : undefined;
+    const gateModule = attachedModule ?? question.modules[0];
+    const module_ = gateModule
+        ? { courseId: gateModule.courseId }
         : null;
     if (module_) {
         const enrollment = await db.userCourse.findFirst({

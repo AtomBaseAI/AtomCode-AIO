@@ -37,7 +37,9 @@ interface CodeQuestion {
     id: string;
     title: string;
     description: string;
-    moduleId: string | null;
+    // Questions attach to modules via the many-to-many join now — rows no
+    // longer carry a moduleId FK.
+    moduleId?: string | null;
     sampleinput1: string;
     sampleinput2: string;
     sampleoutput1: string;

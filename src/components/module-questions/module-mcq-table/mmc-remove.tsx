@@ -22,7 +22,7 @@ import { useForm } from "react-hook-form"
 import { Input } from "@/components/ui/input"
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { RemoveModuleMCQSchema } from '@/schemas/module-schema'
 import { removemodulemcq } from '@/actions/module'
 import { toast } from 'sonner'
@@ -30,17 +30,22 @@ import { toast } from 'sonner'
 /**
  * Row-level "Remove" action for the module MCQ table.
  *
- * Detaches the MCQ from the module (clears the moduleId FK) — the MCQ itself
- * stays in the question bank and can be re-added later, so it is
- * intentionally NOT styled/worded as a destructive delete.
+ * Detaches the MCQ from the module (removes the many-to-many join row) —
+ * the MCQ itself stays in the question bank and can be re-added later, and
+ * remains attached to any other modules it serves, so it is intentionally
+ * NOT styled/worded as a destructive delete.
  */
-const RemoveModuleMCQ = ({ mcqId, mid }: { mcqId: string, mid: string }) => {
+const RemoveModuleMCQ = ({ mcqId, mid }: { mcqId: string, mid?: string }) => {
+    // The module id comes from the route (/admin/courses/[cid]/modules/[mid]/mcq)
+    // — MCQ rows no longer carry a moduleId FK (many-to-many attachments).
+    const routeMid = useParams<{ mid: string }>()?.mid
+    const moduleId = mid || routeMid || ""
 
     const form = useForm<z.infer<typeof RemoveModuleMCQSchema>>({
         resolver: zodResolver(RemoveModuleMCQSchema),
         defaultValues: {
             id: mcqId,
-            mid: mid
+            mid: moduleId
         }
     })
 

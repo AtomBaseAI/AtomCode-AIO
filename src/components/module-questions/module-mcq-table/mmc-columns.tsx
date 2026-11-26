@@ -115,7 +115,8 @@ export const columns: ColumnDef<MCQTableType>[] = [
           <span className="flex gap-2">
             <MCPreview question={data} />
             <EditMCQForm mcq={data} />
-            <RemoveModuleMCQ mcqId={qid} mid={data?.moduleId ?? ""} />
+            {/* RemoveModuleMCQ resolves the module id from the route params. */}
+            <RemoveModuleMCQ mcqId={qid} />
           </span>
         </div>
       )

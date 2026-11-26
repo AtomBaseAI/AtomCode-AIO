@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   if (!ok) return fail(403, "You are not enrolled in this module's course");
 
   const question = await db.codeQuestion.findFirst({
-    where: { id: questionId, moduleId },
+    where: { id: questionId, modules: { some: { id: moduleId } } },
   });
   if (!question) return fail(404, "Code question not found in this module");
 

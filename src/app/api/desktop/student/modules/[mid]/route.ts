@@ -30,8 +30,8 @@ export async function GET(
 
   try {
     const [mcqs, codeQuestions, progress, mcqSubmission] = await Promise.all([
-      db.mCQQuestion.findMany({ where: { moduleId: mid } }),
-      db.codeQuestion.findMany({ where: { moduleId: mid } }),
+      db.mCQQuestion.findMany({ where: { modules: { some: { id: mid } } } }),
+      db.codeQuestion.findMany({ where: { modules: { some: { id: mid } } } }),
       db.userModuleData.findFirst({
         where: { userId: uid, moduleId: mid },
       }),

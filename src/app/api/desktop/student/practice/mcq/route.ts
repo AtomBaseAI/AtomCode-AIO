@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     }
 
     const mcqs = await db.mCQQuestion.findMany({
-      where: { moduleId },
+      where: { modules: { some: { id: moduleId } } },
       select: { id: true, CorrectOption: true },
     });
 

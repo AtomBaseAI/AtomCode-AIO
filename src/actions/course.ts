@@ -1,9 +1,51 @@
 "use server"
 import { db } from "@/lib/db"
+import { type Prisma } from "@prisma/client"
 import * as z from 'zod'
 import { revalidatePath } from "next/cache"
 import { AddCourseSchema, CourseUpdateSchema, DeleteCourseSchema } from "@/schemas/course-schema"
 import { requireAdmin } from "@/lib/action-guards";
+
+/**
+ * Shared-aware question cleanup for course deletion (many-to-many era):
+ * a question attached to modules of a DIFFERENT course must survive; only
+ * questions whose ENTIRE module assignment falls inside the deleting
+ * courses' modules are removed from the bank. Detaching the rest happens
+ * via cascade when the module rows go.
+ */
+async function deleteCourseOwnedQuestions(
+    tx: Prisma.TransactionClient,
+    moduleIds: string[]
+): Promise<number> {
+    if (moduleIds.length === 0) return 0;
+    const [code, mcq] = await Promise.all([
+        tx.codeQuestion.findMany({
+            where: {
+                modules: { some: { id: { in: moduleIds } } },
+                AND: [{ modules: { none: { id: { notIn: moduleIds } } } }],
+            },
+            select: { id: true },
+        }),
+        tx.mCQQuestion.findMany({
+            where: {
+                modules: { some: { id: { in: moduleIds } } },
+                AND: [{ modules: { none: { id: { notIn: moduleIds } } } }],
+            },
+            select: { id: true },
+        }),
+    ]);
+    const codeIds = code.map((q) => q.id);
+    const mcqIds = mcq.map((q) => q.id);
+    const [a, b] = await Promise.all([
+        codeIds.length
+            ? tx.codeQuestion.deleteMany({ where: { id: { in: codeIds } } })
+            : Promise.resolve({ count: 0 }),
+        mcqIds.length
+            ? tx.mCQQuestion.deleteMany({ where: { id: { in: mcqIds } } })
+            : Promise.resolve({ count: 0 }),
+    ]);
+    return a.count + b.count;
+}
 
 export const addcourse = async (values: z.infer<typeof AddCourseSchema>) => {
     const session = await requireAdmin();
@@ -60,12 +102,10 @@ export const deletecourse = async (
         ])
         // 2. Course feedbacks.
         await tx.feedbacks.deleteMany({ where: { courseId: cid } })
-        // 3. Module content — questions and references hang off modules.
-        await Promise.all([
-            tx.codeQuestion.deleteMany({ where: { moduleId: { in: mids } } }),
-            tx.mCQQuestion.deleteMany({ where: { moduleId: { in: mids } } }),
-            tx.moduleReferences.deleteMany({ where: { moduleId: { in: mids } } }),
-        ])
+        // 3. Module content — questions only used by this course go with it
+        //    (shared ones are detached by the module cascade); references.
+        await deleteCourseOwnedQuestions(tx, mids)
+        await tx.moduleReferences.deleteMany({ where: { moduleId: { in: mids } } })
         // 4. Assessments, then the modules.
         await tx.assessments.deleteMany({ where: { courseId: cid } })
         await tx.module.deleteMany({ where: { courseId: cid } })
@@ -140,12 +180,10 @@ export const deletecoursesbulk = async (ids: string[]) => {
         ]);
         // 2. Course feedbacks.
         await tx.feedbacks.deleteMany({ where: { courseId: { in: existingIds } } });
-        // 3. Module content — questions and references hang off modules.
-        await Promise.all([
-            tx.codeQuestion.deleteMany({ where: { moduleId: { in: mids } } }),
-            tx.mCQQuestion.deleteMany({ where: { moduleId: { in: mids } } }),
-            tx.moduleReferences.deleteMany({ where: { moduleId: { in: mids } } }),
-        ]);
+        // 3. Module content — questions only used by these courses go with
+        //    them (shared ones are detached by the module cascade); refs.
+        await deleteCourseOwnedQuestions(tx, mids);
+        await tx.moduleReferences.deleteMany({ where: { moduleId: { in: mids } } });
         // 4. Assessments, then the modules.
         await tx.assessments.deleteMany({ where: { courseId: { in: existingIds } } });
         await tx.module.deleteMany({ where: { courseId: { in: existingIds } } });

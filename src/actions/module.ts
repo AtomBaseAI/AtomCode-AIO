@@ -1,5 +1,6 @@
 "use server"
 import { db } from "@/lib/db"
+import { type Prisma } from "@prisma/client"
 import * as z from 'zod'
 import { revalidatePath } from "next/cache"
 import { requireAdmin } from "@/lib/action-guards"
@@ -30,6 +31,46 @@ export const addmodule = async (values: z.infer<typeof AddModuleSchema>) => {
  * None of the relations cascade in the schema, so a bare module.delete
  * would hit FK constraints whenever any of these rows exist.
  */
+/**
+ * Shared-aware question cleanup for module/course deletion. Questions are
+ * now many-to-many — a question attached to modules of ANOTHER course must
+ * survive; only questions whose ENTIRE module assignment falls inside the
+ * deleting set are removed from the bank. Detaching the rest happens via
+ * cascade when the module rows go.
+ */
+async function deleteOrphanedQuestions(
+    tx: Prisma.TransactionClient,
+    moduleIds: string[]
+): Promise<number> {
+    if (moduleIds.length === 0) return 0;
+    const [code, mcq] = await Promise.all([
+        tx.codeQuestion.findMany({
+            where: {
+                modules: { some: { id: { in: moduleIds } } },
+                AND: [{ modules: { none: { id: { notIn: moduleIds } } } }],
+            },
+            select: { id: true },
+        }),
+        tx.mCQQuestion.findMany({
+            where: {
+                modules: { some: { id: { in: moduleIds } } },
+                AND: [{ modules: { none: { id: { notIn: moduleIds } } } }],
+            },
+            select: { id: true },
+        }),
+    ]);
+    const [codeIds, mcqIds] = [code.map((q) => q.id), mcq.map((q) => q.id)];
+    const [a, b] = await Promise.all([
+        codeIds.length
+            ? tx.codeQuestion.deleteMany({ where: { id: { in: codeIds } } })
+            : Promise.resolve({ count: 0 }),
+        mcqIds.length
+            ? tx.mCQQuestion.deleteMany({ where: { id: { in: mcqIds } } })
+            : Promise.resolve({ count: 0 }),
+    ]);
+    return a.count + b.count;
+}
+
 export const deletemodule = async (
     values: z.infer<typeof DeleteModuleSchema>
 ) => {
@@ -48,12 +89,10 @@ export const deletemodule = async (
             tx.userMCQData.deleteMany({ where: { moduleId: mid } }),
             tx.userCodeQuestionData.deleteMany({ where: { moduleId: mid } }),
         ])
-        // Questions always go together with their references.
-        await Promise.all([
-            tx.codeQuestion.deleteMany({ where: { moduleId: mid } }),
-            tx.mCQQuestion.deleteMany({ where: { moduleId: mid } }),
-            tx.moduleReferences.deleteMany({ where: { moduleId: mid } }),
-        ])
+        // Questions only used by this module go with it; questions shared
+        // with other modules/courses are just detached (join-row cascade).
+        await deleteOrphanedQuestions(tx, [mid]);
+        await tx.moduleReferences.deleteMany({ where: { moduleId: mid } });
         // The module row itself.
         await tx.module.delete({ where: { id: mid } })
     })
@@ -174,12 +213,10 @@ export const deletemodulesbulk = async (ids: string[]) => {
             tx.userMCQData.deleteMany({ where: { moduleId: { in: existingIds } } }),
             tx.userCodeQuestionData.deleteMany({ where: { moduleId: { in: existingIds } } }),
         ]);
-        // Questions always go together with their references.
-        await Promise.all([
-            tx.codeQuestion.deleteMany({ where: { moduleId: { in: existingIds } } }),
-            tx.mCQQuestion.deleteMany({ where: { moduleId: { in: existingIds } } }),
-            tx.moduleReferences.deleteMany({ where: { moduleId: { in: existingIds } } }),
-        ]);
+        // Questions only used by these modules go with them; shared ones are
+        // just detached (join-row cascade on module delete).
+        await deleteOrphanedQuestions(tx, existingIds);
+        await tx.moduleReferences.deleteMany({ where: { moduleId: { in: existingIds } } });
         // The module rows themselves.
         await tx.module.deleteMany({ where: { id: { in: existingIds } } });
     });
@@ -191,9 +228,9 @@ export const deletemodulesbulk = async (ids: string[]) => {
 }
 
 /**
- * Add existing MCQs to a module. An MCQQuestion belongs to at most one
- * module (nullable moduleId FK), so only unassigned MCQs (moduleId = null)
- * are addable — connecting an assigned one would silently move it.
+ * Add existing MCQs to a module. MCQs are many-to-many — the same MCQ may
+ * serve modules of different courses, so any bank MCQ that is not ALREADY
+ * part of this module can be added without moving it away from another.
  */
 export const addmodulemcqs = async (moduleId: string, mcqIds: string[]) => {
     const session = await requireAdmin();
@@ -206,19 +243,16 @@ export const addmodulemcqs = async (moduleId: string, mcqIds: string[]) => {
 
     const module_ = await db.module.findUnique({
         where: { id: moduleId },
-        select: { id: true },
+        select: { id: true, mcqQuestions: { select: { id: true } } },
     });
     if (!module_) return { error: "Module not found." };
 
-    const mcqs = await db.mCQQuestion.findMany({
-        where: { id: { in: validIds } },
-        select: { id: true, moduleId: true },
-    });
-    const addableIds = mcqs
-        .filter((m) => m.moduleId === null)
-        .map((m) => m.id);
+    // Exclude MCQs already attached to THIS module (idempotent re-adds are
+    // pointless); attachment to OTHER modules no longer blocks.
+    const alreadyHere = new Set(module_.mcqQuestions.map((m) => m.id));
+    const addableIds = validIds.filter((id) => !alreadyHere.has(id));
     if (addableIds.length === 0) {
-        return { error: "Selected MCQs are already assigned to a module." };
+        return { error: "Selected MCQs are already part of this module." };
     }
 
     await db.module.update({
@@ -239,19 +273,20 @@ export const addmodulemcqs = async (moduleId: string, mcqIds: string[]) => {
 }
 
 /**
- * Remove a single MCQ from a module — clears the moduleId FK only. The MCQ
- * itself stays in the question bank and can be re-added later.
+ * Remove a single MCQ from a module — detaches the many-to-many relation
+ * only. The MCQ itself stays in the question bank and can be re-added, and
+ * remains attached to any other modules it serves.
  */
 export const removemodulemcq = async (mcqId: string, mid: string) => {
     const session = await requireAdmin();
     if (!session) return { error: "Only admins can manage module MCQs." };
 
-    const mcq = await db.mCQQuestion.findUnique({
-        where: { id: mcqId },
-        select: { moduleId: true },
+    const module_ = await db.module.findUnique({
+        where: { id: mid },
+        select: { mcqQuestions: { select: { id: true } } },
     });
-    if (!mcq) return { error: "MCQ not found." };
-    if (mcq.moduleId !== mid) {
+    if (!module_) return { error: "Module not found." };
+    if (!module_.mcqQuestions.some((m) => m.id === mcqId)) {
         return { error: "MCQ is not part of this module." };
     }
 

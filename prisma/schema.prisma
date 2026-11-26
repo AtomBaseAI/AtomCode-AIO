@@ -245,8 +245,12 @@ model Module {
   language             String
   maxscore             Int
   concepturl           String?
-  mcqQuestions         MCQQuestion[]
-  codeQuestions        CodeQuestion[]
+  // Questions attach to modules through an implicit many-to-many — the
+  // SAME question (from any question-group bank) may live in modules of
+  // DIFFERENT courses at once. Prisma owns the join tables; attach via
+  // relation connect/disconnect, filter via modules: { some: {...} }.
+  codeQuestions        CodeQuestion[]         @relation("ModuleCodeQuestions")
+  mcqQuestions         MCQQuestion[]          @relation("ModuleMcqQuestions")
   userModuleData       UserModuleData[]
   userMCQData          UserMCQData[]
   userCodeQuestionData UserCodeQuestionData[]
@@ -296,8 +300,9 @@ model CodeQuestion {
   id                     String                   @id @default(uuid())
   title                  String
   description            String                   @db.Text
-  moduleId               String?
-  module                 Module?                  @relation(fields: [moduleId], references: [id])
+  // Modules this question is assigned to (many-to-many) — one question
+  // may serve modules of different courses at once.
+  modules                Module[]                 @relation("ModuleCodeQuestions")
   sampleinput1           String                   @db.Text
   sampleinput2           String                   @db.Text
   sampleoutput1          String                   @db.Text
@@ -353,7 +358,6 @@ model CodeQuestion {
   testResults            String?                  @db.Text
   testedAt               DateTime?
 
-  @@index([moduleId])
   @@index([assessmentsId])
   @@index([questionGroupId])
 }
@@ -428,14 +432,15 @@ model MCQQuestion {
   Option3         String
   Option4         String
   CorrectOption   Int
-  moduleId        String?
+  // Modules this MCQ is assigned to (many-to-many) — one MCQ may serve
+  // modules of different courses at once.
+  modules         Module[]       @relation("ModuleMcqQuestions")
   referenceimg    String?
   codesnippet     String?        @db.Text
   snippetLang     String?
   iscodesnippet   Boolean
   /** "easy" | "medium" | "hard" — mirrors CodeQuestion.difficulty. */
   difficulty      String         @default("easy")
-  module          Module?        @relation(fields: [moduleId], references: [id])
   Assessments     Assessments?   @relation(fields: [assessmentsId], references: [id])
   assessmentsId   String?
   // Every MCQ lives in exactly one question-group bank (cascade on group
@@ -446,7 +451,6 @@ model MCQQuestion {
   // Comma-separated topic tags.
   tags            String?
 
-  @@index([moduleId])
   @@index([assessmentsId])
   @@index([questionGroupId])
 }

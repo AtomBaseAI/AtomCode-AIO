@@ -44,19 +44,18 @@ export const getMCQById = async (id: string) => {
 }
 
 /**
- * Question-bank MCQs not assigned to any module (moduleId = null) — the
- * pickable pool for the module "Add MCQ" page. An MCQQuestion belongs to at
- * most one module (nullable moduleId FK), so unassigned rows are exactly the
- * ones that can be added to a module without moving them away from another.
+ * The FULL question-bank MCQ pool for the module "Add MCQ" page. MCQs are
+ * many-to-many now — the same MCQ may serve modules of different courses,
+ * so every bank MCQ is pickable (the page filters out MCQs that are already
+ * part of the target module).
  */
-export const getUnassignedMCQs = async () => {
+export const getAllBankMcqs = async () => {
     try {
         return await db.mCQQuestion.findMany({
-            where: { moduleId: null },
             orderBy: { title: "asc" },
         });
     } catch (error) {
-        console.error("Error fetching unassigned MCQs:", error);
+        console.error("Error fetching bank MCQs:", error);
         return [];
     }
 };

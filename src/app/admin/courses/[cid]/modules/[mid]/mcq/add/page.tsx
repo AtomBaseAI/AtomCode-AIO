@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { getModuleById } from '@/data/modules'
 import { getCourseById } from '@/data/courses'
-import { getModuleMCQsByModuleId, getUnassignedMCQs } from '@/data/mcq'
+import { getModuleMCQsByModuleId, getAllBankMcqs } from '@/data/mcq'
 import Link from 'next/link'
 import React from 'react'
 import { MCQAddDataTable } from "@/components/module-questions/module-mcq-add-table/mca-data-table"
@@ -20,10 +20,10 @@ const AddModuleMCQs = async ({ params }: { params: Promise<{ cid: string; mid: s
     const modulez = await fetchModule(mid)
     const course = await getCourseById(cid)
 
-    // Pool = question-bank MCQs not attached to any module. An MCQQuestion
-    // belongs to at most one module (nullable moduleId FK), so unassigned
-    // rows are exactly the ones that can be added without reassigning.
-    const bankMcqs = await getUnassignedMCQs()
+    // Pool = the FULL question bank. MCQs are many-to-many now — the same
+    // MCQ may already serve other modules/courses and can still be added
+    // here without moving it away from them.
+    const bankMcqs = await getAllBankMcqs()
 
     // Defensive filter (mirrors the code-questions add page): hide MCQs that
     // are already part of this module.
@@ -61,7 +61,7 @@ const AddModuleMCQs = async ({ params }: { params: Promise<{ cid: string; mid: s
                 <div className="flex flex-wrap items-center justify-between gap-2 space-y-2">
                     <div>
                         <p className="text-muted-foreground flex items-center justify-center">
-                            Add MCQs to module — {parsedMcqs.length} unassigned MCQ(s) in the question bank
+                            Add MCQs to module — {parsedMcqs.length} bank MCQ(s) not already in this module
                         </p>
                     </div>
                     <div className="flex justify-center items-center gap-x-4">
@@ -71,7 +71,7 @@ const AddModuleMCQs = async ({ params }: { params: Promise<{ cid: string; mid: s
 
                 {parsedMcqs.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-3 rounded-md border border-dashed p-10 text-center">
-                        <p className="text-sm font-medium">No unassigned MCQs available.</p>
+                        <p className="text-sm font-medium">No bank MCQs available to add.</p>
                         <p className="text-sm text-muted-foreground">
                             Every MCQ in the question bank is already attached to a module.
                             Use Bulk Upload on the module MCQ page to import new ones.
