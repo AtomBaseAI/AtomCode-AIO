@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DataTableColumnHeader } from "@/components/data-tables/data-table-column-header"
 import { StudentTableType } from "@/schemas/student-schema"
-import StudentDeleteHelper from "@/components/course-student/course-student-table/cs-deletehelper"
+import StudentUnassignHelper from "@/components/course-student/course-student-table/cs-unassignhelper"
 import { bathces, departments, sections } from "@/components/data-tables/data-table-config-data"
 
 
@@ -171,8 +171,7 @@ export const columns: ColumnDef<StudentTableType>[] = [
       return (
         <div className="flex items-center">
           <span className="flex gap-2">
-            {/* <DeleteCourseStudent uid={id} /> */}
-            <StudentDeleteHelper uid={id} />
+            <StudentUnassignHelper uid={id} />
           </span>
         </div>
       )

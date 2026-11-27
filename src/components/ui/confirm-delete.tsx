@@ -10,6 +10,9 @@ export const CONFIRM_DELETE_PHRASE = "confirm delete"
 /** Display version shown in the label / input placeholder (lowercase, same as the phrase). */
 export const CONFIRM_DELETE_HINT = "confirm delete"
 
+/** Default destructive verb used in the helper label ("… to enable delete"). */
+const DEFAULT_ACTION_LABEL = "delete"
+
 /**
  * Sanitizes typed confirmation text:
  * - folds every letter to lowercase (input "accepts only small case letters")
@@ -24,13 +27,27 @@ export function normalizeConfirmText(raw: string): string {
     .slice(0, 24)
 }
 
+/**
+ * True when the typed text matches the confirmation phrase. Pass a custom
+ * phrase for non-delete destructive guards (e.g. "confirm unassign");
+ * defaults to the classic "confirm delete".
+ */
+export function isConfirmText(value: string, phrase: string = CONFIRM_DELETE_PHRASE): boolean {
+  return value.trim() === phrase
+}
+
+/** Back-compat wrapper for the default "confirm delete" phrase. */
 export function isConfirmDeleteText(value: string): boolean {
-  return value.trim() === CONFIRM_DELETE_PHRASE
+  return isConfirmText(value, CONFIRM_DELETE_PHRASE)
 }
 
 interface ConfirmDeleteInputProps {
   value: string
   onValueChange: (value: string) => void
+  /** Exact lowercase phrase that enables the action. Defaults to "confirm delete". */
+  phrase?: string
+  /** Verb shown in the helper label ("delete", "unassign", …). Defaults to "delete". */
+  actionLabel?: string
   /** Optional explicit id; a unique auto id is generated when omitted. */
   id?: string
   className?: string
@@ -49,17 +66,23 @@ interface ConfirmDeleteInputProps {
  *   const [confirmText, setConfirmText] = useState("")
  *   <ConfirmDeleteInput value={confirmText} onValueChange={setConfirmText} />
  *   <Button disabled={isLoading || !isConfirmDeleteText(confirmText)} ... />
+ *
+ * Custom phrase / verb (e.g. an unassign dialog):
+ *   <ConfirmDeleteInput phrase="confirm unassign" actionLabel="unassign" ... />
+ *   <Button disabled={!isConfirmText(confirmText, "confirm unassign")} ... />
  */
 export function ConfirmDeleteInput({
   value,
   onValueChange,
+  phrase = CONFIRM_DELETE_PHRASE,
+  actionLabel = DEFAULT_ACTION_LABEL,
   id,
   className,
   autoFocus,
 }: ConfirmDeleteInputProps) {
   const autoId = React.useId()
   const inputId = id ?? `confirm-delete${autoId}`
-  const confirmed = isConfirmDeleteText(value)
+  const confirmed = isConfirmText(value, phrase)
   const dirty = value.trim().length > 0 && !confirmed
 
   return (
@@ -70,9 +93,9 @@ export function ConfirmDeleteInput({
       >
         Type{" "}
         <span className="text-primary font-semibold">
-          &quot;{CONFIRM_DELETE_HINT}&quot;
+          &quot;{phrase}&quot;
         </span>{" "}
-        below to enable delete
+        below to enable {actionLabel}
       </label>
       <Input
         id={inputId}
@@ -84,8 +107,8 @@ export function ConfirmDeleteInput({
         autoCorrect="off"
         spellCheck={false}
         autoFocus={autoFocus}
-        aria-label={`Type ${CONFIRM_DELETE_HINT} to confirm deletion`}
-        placeholder={CONFIRM_DELETE_HINT}
+        aria-label={`Type ${phrase} to confirm ${actionLabel}`}
+        placeholder={phrase}
         value={value}
         onChange={(event) => onValueChange(normalizeConfirmText(event.target.value))}
         onPaste={(event) => {

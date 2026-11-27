@@ -16,6 +16,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { useParams } from "next/navigation"
+import { UserMinus } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -139,8 +140,9 @@ export function CourseStaffDataTable<TData, TValue>({
         <BulkActionButton
           table={table}
           action={(ids: string[]) => deletecoursestaffsbulk(ids, cid)}
-          label="Remove from course"
-          dialogTitle="Remove selected staff from the course"
+          label="Unassign from course"
+          icon={<UserMinus className="size-4" />}
+          dialogTitle="Unassign selected staff from the course"
           dialogDescription="The selected staff members will lose access to this course. Their accounts are NOT deleted."
         />
       </BulkActionBar>

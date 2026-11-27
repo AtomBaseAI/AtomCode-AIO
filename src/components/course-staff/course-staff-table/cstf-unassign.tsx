@@ -1,12 +1,11 @@
-import *as z from 'zod'
+import * as z from 'zod'
 import { Button } from '@/components/ui/button'
-import { LoaderIcon, Trash } from 'lucide-react'
+import { LoaderIcon, UserMinus } from 'lucide-react'
 import {
     Dialog,
     DialogClose,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -16,7 +15,6 @@ import {
     FormControl,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage
 } from "@/components/ui/form"
 
@@ -25,19 +23,24 @@ import { Input } from "@/components/ui/input"
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, useTransition } from 'react'
 import { FormError } from '@/components/auth/form-error'
-import { FormSuccess } from '@/components/auth/form-success'
-import { DeleteCourseStudentSchema } from '@/schemas/student-schema'
-import { deletecoursestudent } from '@/actions/usercourse'
 import { toast } from 'sonner'
-import { ConfirmDeleteInput, isConfirmDeleteText } from '@/components/ui/confirm-delete'
-import SmartDeleteCleanup from '@/components/ui/smart-delete-cleanup'
-// import { deletecoursestudent } from '@/actions/usercourse'
+import { DeleteCourseStaffSchema } from '@/schemas/staff-schema'
+import { deletecoursestaff } from '@/actions/staffcourse'
+import { ConfirmDeleteInput, isConfirmText } from '@/components/ui/confirm-delete'
 
-const DeleteCourseStudent = ({ cid, uid }: { cid: string, uid: string }) => {
-    const form = useForm<z.infer<typeof DeleteCourseStudentSchema>>({
-        resolver: zodResolver(DeleteCourseStudentSchema),
+/** The typed phrase that enables the unassign button. */
+const CONFIRM_UNASSIGN_PHRASE = "confirm unassign"
+
+/**
+ * Row-level "Unassign" action for the course staffs table. Removes the staff
+ * member from the course WITHOUT deleting their account — replaces the old
+ * Delete button, which was misleading.
+ */
+const UnassignCourseStaff = ({ cid, uid }: { cid: string, uid: string }) => {
+    const form = useForm<z.infer<typeof DeleteCourseStaffSchema>>({
+        resolver: zodResolver(DeleteCourseStaffSchema),
         defaultValues: {
-            uid: uid,
+            sid: uid,
             cid: cid
         }
     })
@@ -45,24 +48,22 @@ const DeleteCourseStudent = ({ cid, uid }: { cid: string, uid: string }) => {
     const [isLoading, startTransition] = useTransition()
     const [open, setOpen] = useState(false)
     const [error, setError] = useState<string | undefined>("")
-    const [success, setSuccess] = useState<string | undefined>("")
     const [confirmText, setConfirmText] = useState("")
-    const handleSubmit = (values: z.infer<typeof DeleteCourseStudentSchema>) => {
+    const handleSubmit = (values: z.infer<typeof DeleteCourseStaffSchema>) => {
         setError("")
-        setSuccess("")
-        if (!isConfirmDeleteText(confirmText)) {
-            setError("Type the confirmation phrase to enable delete")
+        if (!isConfirmText(confirmText, CONFIRM_UNASSIGN_PHRASE)) {
+            setError("Type the confirmation phrase to enable unassign")
             return
         }
         startTransition(() => {
-            deletecoursestudent(values.uid, values.cid)
+            deletecoursestaff(values.sid, values.cid)
                 .then((data) => {
-                    // setError(data.error)
-                    // setSuccess(data.success)
                     if (data.success) {
                         form.reset()
                         setOpen(false)
                         toast.success(data.success);
+                    } else if (data.error) {
+                        setError(data.error)
                     }
                 })
                 .catch(() => toast.error("Something went wrong!"));
@@ -70,31 +71,34 @@ const DeleteCourseStudent = ({ cid, uid }: { cid: string, uid: string }) => {
     }
     return (
         <>
-
             <Dialog open={open} onOpenChange={(o) => { setConfirmText(""); setOpen(o) }} >
                 <DialogTrigger asChild>
-                    <Button variant='outline' size='icon' className="border-destructive bg-transparent hover:bg-red-400/20">
-                        <Trash className="size-5 bg-transparent text-destructive" />
+                    <Button
+                        variant='outline'
+                        size='sm'
+                        aria-label={`Unassign staff ${uid} from this course`}
+                        className="h-8 gap-1.5 border-amber-500/60 text-amber-600 hover:bg-amber-500/10 hover:text-amber-700"
+                    >
+                        <UserMinus className="size-4" />
+                        Unassign
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Delete Student</DialogTitle>
+                        <DialogTitle>Unassign Staff</DialogTitle>
                     </DialogHeader>
                     <DialogDescription>
-                        This action is irreversable, Are you sure want to delete ?
+                        This will remove the staff member from this course. Their
+                        account will NOT be deleted.
                     </DialogDescription>
                     <div className="grid gap-6">
-                        {/* Cleanup sections — run before the final delete */}
-                        <SmartDeleteCleanup entity="course-student" id={uid} cid={cid} />
-
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmit)}>
                                 <div className="grid gap-2">
                                     <div className="grid gap-1">
                                         <FormField
                                             control={form.control}
-                                            name="uid"
+                                            name="sid"
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormControl>
@@ -109,24 +113,42 @@ const DeleteCourseStudent = ({ cid, uid }: { cid: string, uid: string }) => {
                                         />
                                     </div>
 
+                                    <div className="grid gap-1">
+                                        <FormField
+                                            control={form.control}
+                                            name="cid"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            type="hidden"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
 
                                     <FormError message={error} />
-                                    <FormSuccess message={success} />
-                                    <ConfirmDeleteInput value={confirmText} onValueChange={setConfirmText} />
-                                    <p className="text-muted-foreground text-xs">
-                                        Tip: the delete button below also clears any records left behind automatically.
-                                    </p>
+                                    <ConfirmDeleteInput
+                                        value={confirmText}
+                                        onValueChange={setConfirmText}
+                                        phrase={CONFIRM_UNASSIGN_PHRASE}
+                                        actionLabel="unassign"
+                                    />
                                     <span className='grid w-full grid-cols-2 gap-2'>
                                         <DialogClose asChild>
-                                            <Button className='w-full'>
+                                            <Button variant='outline' className='w-full'>
                                                 Cancel
                                             </Button>
                                         </DialogClose>
-                                        <Button disabled={isLoading || !isConfirmDeleteText(confirmText)} variant='destructive' className='w-full'>
+                                        <Button disabled={isLoading || !isConfirmText(confirmText, CONFIRM_UNASSIGN_PHRASE)} variant='destructive' className='w-full'>
                                             {isLoading && (
                                                 <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
                                             )}
-                                            Delete
+                                            Unassign
                                         </Button>
                                     </span>
                                 </div>
@@ -140,4 +162,4 @@ const DeleteCourseStudent = ({ cid, uid }: { cid: string, uid: string }) => {
     )
 }
 
-export default DeleteCourseStudent
+export default UnassignCourseStaff

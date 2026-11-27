@@ -3,6 +3,28 @@ import { db } from "@/lib/db"
 import * as z from 'zod'
 import { revalidatePath } from "next/cache"
 import { requireAdmin, requireAdminOrCourseStaff } from "@/lib/action-guards"
+
+/**
+ * Invalidates every surface that renders this course's staff assignment
+ * state — in BOTH URL namespaces the UI can be browsed under (admin panel
+ * and the /superadmin mirror) plus the staff-side course pages. Without
+ * the per-course paths the client router cache (staleTimes.dynamic = 30s)
+ * keeps serving the pre-mutation page, so newly assigned staff "don't
+ * show" on the course staffs page.
+ */
+function revalidateCourseStaff(courseId: string) {
+    revalidatePath("/admin/courses");
+    revalidatePath(`/admin/courses/${courseId}`);
+    revalidatePath(`/admin/courses/${courseId}/staffs`);
+    revalidatePath(`/admin/courses/${courseId}/staffs/add`);
+    revalidatePath("/superadmin/courses");
+    revalidatePath(`/superadmin/courses/${courseId}`);
+    revalidatePath(`/superadmin/courses/${courseId}/staffs`);
+    revalidatePath(`/superadmin/courses/${courseId}/staffs/add`);
+    revalidatePath("/staff/courses");
+    revalidatePath(`/staff/courses/${courseId}`);
+}
+
 export const addcoursestaffs = async (
     courseId: string,
     studentIds: string[]
@@ -23,9 +45,13 @@ export const addcoursestaffs = async (
                 staffId,
                 courseId,
                 active: true
-            }))
+            })),
+            // Re-assigning an already assigned staff member is a no-op
+            // (unique (staffId, courseId)) — repeated Assign clicks stay
+            // idempotent.
+            skipDuplicates: true,
         });
-        revalidatePath(`/admin/courses/`);
+        revalidateCourseStaff(courseId);
         return { success: "Staffs added to Course successfully!" };
     } catch (error) {
         console.error("Error adding Staffs to course:", error);
@@ -68,8 +94,8 @@ export const deletecoursestaff = async (
             });
         });
 
-        revalidatePath(`/admin/courses`);
-        return { success: "Staff deleted from course successfully!" };
+        revalidateCourseStaff(cid);
+        return { success: "Staff unassigned from course successfully!" };
     } catch (error) {
         console.error("Error deleting Staff from course:", error);
         return { error: error instanceof Error ? error.message : "Failed to delete staff from course." };
@@ -136,7 +162,6 @@ export const deletecoursestaffsbulk = async (
         where: { courseId: cid, staffId: { in: validIds } },
     });
 
-    revalidatePath("/admin/courses");
-    revalidatePath("/staff/courses");
-    return { success: `${result.count} staff member(s) removed from the course.` };
+    revalidateCourseStaff(cid);
+    return { success: `${result.count} staff member(s) unassigned from the course.` };
 }

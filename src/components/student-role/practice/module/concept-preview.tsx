@@ -42,7 +42,7 @@ export default function ConceptPreview({ concepturl }: { concepturl: string }) {
             </DialogTrigger>
             <DialogContent
                 aria-describedby={undefined}
-                className={`p-0 border-0 bg-transparent shadow-none max-w-none ${isEnlarged ? "w-[100vw] h-[100vh]" : "w-[50vw] h-[50vh]"
+                className={`p-0 border-0 bg-transparent shadow-none max-w-none sm:max-w-none ${isEnlarged ? "w-[95vw] h-[95vh]" : "w-[50vw] h-[50vh]"
                     } transition-all duration-300 ease-in-out [&>button]:hidden`}
             >
                 <DialogTitle className="sr-only">Concept Preview</DialogTitle>

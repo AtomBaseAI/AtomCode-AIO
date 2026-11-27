@@ -30,7 +30,6 @@ import { MCQDataTableToolbar } from "@/components/mcq/mcq-table/mc-data-table-to
 import { makeSelectColumn } from "@/components/data-tables/select-column"
 import { BulkActionBar } from "@/components/data-tables/bulk-action-bar"
 import { BulkActionButton } from "@/components/data-tables/bulk-action-button"
-import { ExportSelectedCsvButton } from "@/components/data-tables/export-selected-csv"
 import { removemodulemcqsbulk } from "@/actions/module"
 
 interface DataTableProps<TData, TValue> {
@@ -149,26 +148,9 @@ export function ModuleMCQDataTable<TData, TValue>({
         <BulkActionButton
           table={table}
           action={(ids) => removemodulemcqsbulk(mid, ids)}
-          label="Remove from module"
-          dialogTitle="Remove selected MCQs from the module"
+          label="Unassign from module"
+          dialogTitle="Unassign selected MCQs from the module"
           dialogDescription="The MCQs stay in the question bank; they are only detached from this module and can be added back later."
-        />
-        <ExportSelectedCsvButton
-          table={table}
-          filename="module-mcqs"
-          columns={[
-            { key: "id", label: "ID" },
-            { key: "title", label: "Question" },
-            { key: "description", label: "Description" },
-            { key: "difficulty", label: "Difficulty" },
-            { key: "topic", label: "Topic" },
-            { key: "subtopic", label: "Subtopic" },
-            { key: "Option1", label: "Option 1" },
-            { key: "Option2", label: "Option 2" },
-            { key: "Option3", label: "Option 3" },
-            { key: "Option4", label: "Option 4" },
-            { key: "CorrectOption", label: "Correct Option" },
-          ]}
         />
       </BulkActionBar>
     </div>

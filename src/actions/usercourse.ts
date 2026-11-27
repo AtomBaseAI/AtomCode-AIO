@@ -3,6 +3,27 @@ import { db } from "@/lib/db"
 import * as z from 'zod'
 import { revalidatePath } from "next/cache"
 import { requireAdmin, requireAdminOrCourseStaff } from "@/lib/action-guards"
+
+/**
+ * Invalidates every surface that renders this course's enrollment state —
+ * in BOTH URL namespaces the UI can be browsed under (admin panel, the
+ * /superadmin mirror the super admin is canonicalized to, and the staff
+ * course view). Without the per-course paths the client router cache
+ * (staleTimes.dynamic = 30s) keeps serving the pre-mutation page, so
+ * newly assigned students "don't show" and removed ones linger.
+ */
+function revalidateCourseStudents(courseId: string) {
+    revalidatePath("/admin/courses");
+    revalidatePath(`/admin/courses/${courseId}`);
+    revalidatePath(`/admin/courses/${courseId}/students`);
+    revalidatePath(`/admin/courses/${courseId}/students/add`);
+    revalidatePath("/superadmin/courses");
+    revalidatePath(`/superadmin/courses/${courseId}`);
+    revalidatePath(`/superadmin/courses/${courseId}/students`);
+    revalidatePath(`/superadmin/courses/${courseId}/students/add`);
+    revalidatePath(`/staff/courses/${courseId}/students`);
+}
+
 export const addcoursestudents = async (
     courseId: string,
     studentIds: string[]
@@ -24,9 +45,12 @@ export const addcoursestudents = async (
                 courseId,
                 active: true,
                 completionPercentage: 0
-            }))
+            })),
+            // Re-assigning an already enrolled student is a no-op (unique
+            // (userId, courseId)) — repeated Assign clicks stay idempotent.
+            skipDuplicates: true,
         });
-        revalidatePath(`/admin/courses/`);
+        revalidateCourseStudents(courseId);
         return { success: "Students added to Course successfully!" };
     } catch (error) {
         console.error("Error adding Students to course:", error);
@@ -89,8 +113,8 @@ export const deletecoursestudent = async (
             });
         });
 
-        revalidatePath(`/admin/courses`);
-        return { success: "Student deleted from course successfully!" };
+        revalidateCourseStudents(cid);
+        return { success: "Student unassigned from course successfully!" };
     } catch (error) {
         console.error("Error deleting student from course:", error);
         throw error;
@@ -186,7 +210,6 @@ export const deletecoursestudentsbulk = async (
         });
     });
 
-    revalidatePath("/admin/courses");
-    revalidatePath(`/staff/courses/${cid}/students`);
-    return { success: `${result.count} student(s) removed from the course.` };
+    revalidateCourseStudents(cid);
+    return { success: `${result.count} student(s) unassigned from the course.` };
 }

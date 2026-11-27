@@ -53,7 +53,10 @@ export function ModuleDataTable<TData, TValue>({
   const [sorting, setSorting] = React.useState<SortingState>([])
 
   const pathname = usePathname()
-  const isAdminArea = pathname?.startsWith("/admin") ?? false
+  // Super admin browses the same pages under the /superadmin/* mirror URL
+  // (next.config fallback rewrite) — bulk management actions must show there too.
+  const isAdminArea =
+    pathname?.startsWith("/admin") === true || pathname?.startsWith("/superadmin") === true
 
   const allColumns = React.useMemo(
     () =>

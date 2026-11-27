@@ -480,6 +480,9 @@ model StaffCourse {
   staff    Staff   @relation(fields: [staffId], references: [id])
   course   Course  @relation(fields: [courseId], references: [id])
 
+  // One assignment per (staff, course) — repeated "Assign" clicks must be
+  // idempotent, duplicate rows were breaking the keyed course-staff table.
+  @@unique([staffId, courseId])
   @@index([staffId])
   @@index([courseId])
 }
@@ -493,6 +496,9 @@ model UserCourse {
   user                 User    @relation(fields: [userId], references: [id])
   course               Course  @relation(fields: [courseId], references: [id])
 
+  // One enrollment per (user, course) — repeated "Assign" clicks must be
+  // idempotent, duplicate rows were breaking the keyed course-student table.
+  @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
 }

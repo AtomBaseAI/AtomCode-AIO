@@ -74,7 +74,12 @@ export async function requireUser(): Promise<Session | null> {
 
 /**
  * Returns the session when the caller is an admin OR a staff member assigned
- * to the given course (StaffCourse record), else null.
+ * to the given course (StaffCourse record), else null. The super admin
+ * inherits every admin panel capability (same contract as requireAdmin), so
+ * "superadmin" passes here too — without this, a superadmin could ASSIGN
+ * students/staff (actions guarded by requireAdmin succeed) while the course
+ * students/staffs pages (guarded here) rendered "no students" — the
+ * assigned-but-not-showing glitch.
  */
 export async function requireAdminOrCourseStaff(
     courseId: string
@@ -82,10 +87,10 @@ export async function requireAdminOrCourseStaff(
     const session = await auth();
     const role = (session?.user as { role?: string } | undefined)?.role;
     if (!session?.user) return null;
-    if (role === "admin") {
+    if (role === "admin" || role === "superadmin") {
         // Revocation re-check (jv vs live row). False → treat as unauthenticated.
         const valid = await assertSessionValid(
-            "admin",
+            role as string,
             session.user.id,
             (session.user as { jv?: number }).jv
         );

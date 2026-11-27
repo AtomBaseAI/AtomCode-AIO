@@ -3,7 +3,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "@/components/data-tables/data-table-column-header"
 import { departments } from "@/components/data-tables/data-table-config-data"
 import { StaffTableType } from "@/schemas/staff-schema"
-import StaffDeleteHelper from "@/components/course-staff/course-staff-table/cstf-deletehelper"
+import StaffUnassignHelper from "@/components/course-staff/course-staff-table/cstf-unassignhelper"
 
 
 export const columns: ColumnDef<StaffTableType>[] = [
@@ -105,8 +105,7 @@ export const columns: ColumnDef<StaffTableType>[] = [
       return (
         <div className="flex items-center">
           <span className="flex gap-2">
-            {/* <DeleteCourseStudent uid={id} /> */}
-            <StaffDeleteHelper uid={id} />
+            <StaffUnassignHelper uid={id} />
           </span>
         </div>
       )
