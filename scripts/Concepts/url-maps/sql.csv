@@ -1,0 +1,21 @@
+title,url
+Introduction to Databases and SQL,https://conceptsv2.atomapps.space/topics/sql/introduction-to-sql/hidenav
+Data Definition Language (DDL),https://conceptsv2.atomapps.space/topics/sql/ddl-in-sql/hidenav
+Data Types and Constraints,https://conceptsv2.atomapps.space/topics/sql/data-types-and-constraints/hidenav
+"Data Manipulation (INSERT, UPDATE, DELETE)",https://conceptsv2.atomapps.space/topics/sql/dml-in-sql/hidenav
+SELECT Basics,https://conceptsv2.atomapps.space/topics/sql/select-basics/hidenav
+Filtering with WHERE,https://conceptsv2.atomapps.space/topics/sql/filtering-with-where/hidenav
+Sorting and Limiting,https://conceptsv2.atomapps.space/topics/sql/sorting-and-limiting/hidenav
+Aggregate Functions,https://conceptsv2.atomapps.space/topics/sql/aggregate-functions/hidenav
+GROUP BY and HAVING,https://conceptsv2.atomapps.space/topics/sql/group-by-and-having/hidenav
+INNER and OUTER Joins,https://conceptsv2.atomapps.space/topics/sql/inner-and-outer-joins/hidenav
+Cross and Self Joins,https://conceptsv2.atomapps.space/topics/sql/cross-and-self-joins/hidenav
+Subqueries,https://conceptsv2.atomapps.space/topics/sql/subqueries-in-sql/hidenav
+Set Operations,https://conceptsv2.atomapps.space/topics/sql/set-operations/hidenav
+Common Table Expressions (CTEs),https://conceptsv2.atomapps.space/topics/sql/ctes-in-sql/hidenav
+Window Functions,https://conceptsv2.atomapps.space/topics/sql/window-functions/hidenav
+Views,https://conceptsv2.atomapps.space/topics/sql/views-in-sql/hidenav
+Indexes and Performance,https://conceptsv2.atomapps.space/topics/sql/indexes-and-performance/hidenav
+Transactions and ACID,https://conceptsv2.atomapps.space/topics/sql/transactions-and-acid/hidenav
+Stored Procedures and Functions,https://conceptsv2.atomapps.space/topics/sql/stored-procedures-and-functions/hidenav
+Triggers and Events,https://conceptsv2.atomapps.space/topics/sql/triggers-and-events/hidenav
