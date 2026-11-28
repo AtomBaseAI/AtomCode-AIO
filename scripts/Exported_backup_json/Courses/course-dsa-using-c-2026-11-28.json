@@ -1,7 +1,7 @@
 {
   "atomcodeExport": true,
   "version": 2,
-  "exportedAt": "2026-11-26T15:13:20.561Z",
+  "exportedAt": "2026-11-28T02:47:03.904Z",
   "kind": "course",
   "course": {
     "title": "DSA Using C++",
@@ -25,7 +25,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-1-introduction-to-dsa-and-c-setup/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/introduction-to-dsa-and-c-setup/hidenav",
       "references": [
         {
           "title": "Day 1: Introduction to DSA and C++ Setup — Full Video Lecture",
@@ -431,7 +431,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-2-algorithm-analysis-and-complexity/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/algorithm-analysis-and-complexity/hidenav",
       "references": [
         {
           "title": "Day 2: Algorithm Analysis and Complexity — Full Video Lecture",
@@ -837,7 +837,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-3-arrays-and-vectors/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/arrays-and-vectors/hidenav",
       "references": [
         {
           "title": "Day 3: Arrays and Vectors — Full Video Lecture",
@@ -1243,7 +1243,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-4-strings-and-character-processing/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/strings-and-character-processing/hidenav",
       "references": [
         {
           "title": "Day 4: Strings and Character Processing — Full Video Lecture",
@@ -1649,7 +1649,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-5-searching-algorithms/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/searching-algorithms/hidenav",
       "references": [
         {
           "title": "Day 5: Searching Algorithms — Full Video Lecture",
@@ -2055,7 +2055,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-6-sorting-algorithms-basics/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/sorting-algorithms-basics/hidenav",
       "references": [
         {
           "title": "Day 6: Sorting Algorithms – Basics — Full Video Lecture",
@@ -2461,7 +2461,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-7-efficient-sorting-algorithms/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/efficient-sorting-algorithms/hidenav",
       "references": [
         {
           "title": "Day 7: Efficient Sorting Algorithms — Full Video Lecture",
@@ -2867,7 +2867,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-8-recursion-and-backtracking-basics/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/recursion-and-backtracking-basics/hidenav",
       "references": [
         {
           "title": "Day 8: Recursion and Backtracking Basics — Full Video Lecture",
@@ -3273,7 +3273,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-9-singly-linked-lists/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/singly-linked-lists/hidenav",
       "references": [
         {
           "title": "Day 9: Singly Linked Lists — Full Video Lecture",
@@ -3679,7 +3679,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-10-doubly-and-circular-linked-lists/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/doubly-and-circular-linked-lists/hidenav",
       "references": [
         {
           "title": "Day 10: Doubly and Circular Linked Lists — Full Video Lecture",
@@ -4085,7 +4085,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-11-stacks/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/stacks/hidenav",
       "references": [
         {
           "title": "Day 11: Stacks — Full Video Lecture",
@@ -4491,7 +4491,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-12-queues-and-deques/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/queues-and-deques/hidenav",
       "references": [
         {
           "title": "Day 12: Queues and Deques — Full Video Lecture",
@@ -4897,7 +4897,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-13-hashing-and-stl-associative-containers/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/hashing-and-stl-associative-containers/hidenav",
       "references": [
         {
           "title": "Day 13: Hashing and STL Associative Containers — Full Video Lecture",
@@ -5303,7 +5303,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-14-trees-and-binary-trees/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/trees-and-binary-trees/hidenav",
       "references": [
         {
           "title": "Day 14: Trees and Binary Trees — Full Video Lecture",
@@ -5709,7 +5709,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-15-binary-search-trees-and-heaps/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/binary-search-trees-and-heaps/hidenav",
       "references": [
         {
           "title": "Day 15: Binary Search Trees and Heaps — Full Video Lecture",
@@ -6115,7 +6115,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-16-graph-fundamentals-and-traversals/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/graph-fundamentals-and-traversals/hidenav",
       "references": [
         {
           "title": "Day 16: Graph Fundamentals and Traversals — Full Video Lecture",
@@ -6521,7 +6521,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-17-graph-algorithms/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/graph-algorithms/hidenav",
       "references": [
         {
           "title": "Day 17: Graph Algorithms — Full Video Lecture",
@@ -6927,7 +6927,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-18-greedy-algorithms/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/greedy-algorithms/hidenav",
       "references": [
         {
           "title": "Day 18: Greedy Algorithms — Full Video Lecture",
@@ -7333,7 +7333,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-19-dynamic-programming/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/dynamic-programming/hidenav",
       "references": [
         {
           "title": "Day 19: Dynamic Programming — Full Video Lecture",
@@ -7739,7 +7739,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-20-advanced-problem-solving-and-revision/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/dsa-cpp/advanced-problem-solving-and-revision/hidenav",
       "references": [
         {
           "title": "Day 20: Advanced Problem Solving and Revision — Full Video Lecture",

@@ -1,7 +1,7 @@
 {
   "atomcodeExport": true,
   "version": 2,
-  "exportedAt": "2026-11-26T15:13:46.354Z",
+  "exportedAt": "2026-11-28T02:47:34.982Z",
   "kind": "course",
   "course": {
     "title": "Ruby Programming",
@@ -25,7 +25,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-1-introduction-to-ruby/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/introduction-to-ruby/hidenav",
       "references": [
         {
           "title": "Day 1: Introduction to Ruby — Full Video Lecture",
@@ -431,7 +431,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-2-ruby-syntax-and-data-types/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/ruby-syntax-and-data-types/hidenav",
       "references": [
         {
           "title": "Day 2: Ruby Syntax and Data Types — Full Video Lecture",
@@ -837,7 +837,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-3-operators/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/operators-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 3: Operators — Full Video Lecture",
@@ -1243,7 +1243,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-4-control-flow/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/control-flow-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 4: Control Flow — Full Video Lecture",
@@ -1649,7 +1649,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-5-loops-and-iterators/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/loops-and-iterators-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 5: Loops and Iterators — Full Video Lecture",
@@ -2055,7 +2055,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-6-methods/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/methods-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 6: Methods — Full Video Lecture",
@@ -2461,7 +2461,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-7-arrays/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/arrays-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 7: Arrays — Full Video Lecture",
@@ -2867,7 +2867,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-8-hashes/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/hashes-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 8: Hashes — Full Video Lecture",
@@ -3273,7 +3273,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-9-strings/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/strings-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 9: Strings — Full Video Lecture",
@@ -3679,7 +3679,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-10-symbols-and-ranges/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/symbols-and-ranges/hidenav",
       "references": [
         {
           "title": "Day 10: Symbols and Ranges — Full Video Lecture",
@@ -4085,7 +4085,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-11-blocks-procs-and-lambdas/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/blocks-procs-and-lambdas/hidenav",
       "references": [
         {
           "title": "Day 11: Blocks Procs and Lambdas — Full Video Lecture",
@@ -4491,7 +4491,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-12-exception-handling/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/exception-handling-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 12: Exception Handling — Full Video Lecture",
@@ -4897,7 +4897,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-13-modules-and-mixins/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/modules-and-mixins/hidenav",
       "references": [
         {
           "title": "Day 13: Modules and Mixins — Full Video Lecture",
@@ -5303,7 +5303,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-14-object-oriented-programming-basics/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/oop-basics-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 14: Object-Oriented Programming Basics — Full Video Lecture",
@@ -5709,7 +5709,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-15-inheritance-and-class-design/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/inheritance-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 15: Inheritance and Class Design — Full Video Lecture",
@@ -6115,7 +6115,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-16-metaprogramming-basics/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/metaprogramming-basics/hidenav",
       "references": [
         {
           "title": "Day 16: Metaprogramming Basics — Full Video Lecture",
@@ -6521,7 +6521,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-17-file-handling/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/file-handling-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 17: File Handling — Full Video Lecture",
@@ -6927,7 +6927,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-18-regular-expressions/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/regex-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 18: Regular Expressions — Full Video Lecture",
@@ -7333,7 +7333,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-19-threads-and-concurrency/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/threads-in-ruby/hidenav",
       "references": [
         {
           "title": "Day 19: Threads and Concurrency — Full Video Lecture",
@@ -7739,7 +7739,7 @@
       "modulestatus": "active",
       "language": "ruby",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/ruby/day-20-gems-and-standard-library/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/ruby/gems-and-standard-library/hidenav",
       "references": [
         {
           "title": "Day 20: Gems and Standard Library — Full Video Lecture",

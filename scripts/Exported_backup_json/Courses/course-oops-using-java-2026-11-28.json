@@ -1,7 +1,7 @@
 {
   "atomcodeExport": true,
   "version": 2,
-  "exportedAt": "2026-11-26T15:14:00.093Z",
+  "exportedAt": "2026-11-28T02:47:47.177Z",
   "kind": "course",
   "course": {
     "title": "OOPS using JAVA",
@@ -25,7 +25,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 380,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-1-introduction-to-java/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/introduction-to-java/hidenav",
       "references": [
         {
           "title": "Day 1: Introduction to Java — Full Video Lecture",
@@ -415,7 +415,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-2-operators/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/operators-in-java/hidenav",
       "references": [
         {
           "title": "Day 2: Operators — Full Video Lecture",
@@ -821,7 +821,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-3-control-statements/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/control-statements-in-java/hidenav",
       "references": [
         {
           "title": "Day 3: Control Statements — Full Video Lecture",
@@ -1227,7 +1227,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-4-looping-statements/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/looping-statements-in-java/hidenav",
       "references": [
         {
           "title": "Day 4: Looping Statements — Full Video Lecture",
@@ -1633,7 +1633,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-5-functions-and-modular-programming/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/functions-in-java/hidenav",
       "references": [
         {
           "title": "Day 5: Functions and Modular Programming — Full Video Lecture",
@@ -2039,7 +2039,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-6-recursion/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/recursion-in-java/hidenav",
       "references": [
         {
           "title": "Day 6: Recursion — Full Video Lecture",
@@ -2445,7 +2445,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-7-1d-arrays/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/arrays-in-java/hidenav",
       "references": [
         {
           "title": "Day 7: 1D Arrays — Full Video Lecture",
@@ -2851,7 +2851,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-8-2d-arrays/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/2d-arrays-in-java/hidenav",
       "references": [
         {
           "title": "Day 8: 2D Arrays — Full Video Lecture",
@@ -3257,7 +3257,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-9-strings/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/strings-in-java/hidenav",
       "references": [
         {
           "title": "Day 9: Strings — Full Video Lecture",
@@ -3663,7 +3663,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 390,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-10-introduction-to-oop/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/intro-to-oop-java/hidenav",
       "references": [
         {
           "title": "Day 10: Introduction to OOP — Full Video Lecture",
@@ -4058,7 +4058,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-11-classes-and-objects/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/classes-and-objects/hidenav",
       "references": [
         {
           "title": "Day 11: Classes and Objects — Full Video Lecture",
@@ -4464,7 +4464,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-12-constructors-and-overloading/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/constructors-and-overloading/hidenav",
       "references": [
         {
           "title": "Day 12: Constructors and Overloading — Full Video Lecture",
@@ -4870,7 +4870,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-13-inheritance-and-interfaces/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/inheritance-and-interfaces/hidenav",
       "references": [
         {
           "title": "Day 13: Inheritance and Interfaces — Full Video Lecture",
@@ -5276,7 +5276,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-14-polymorphism/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/polymorphism-in-java/hidenav",
       "references": [
         {
           "title": "Day 14: Polymorphism — Full Video Lecture",
@@ -5682,7 +5682,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-15-exception-handling/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/exception-handling-in-java/hidenav",
       "references": [
         {
           "title": "Day 15: Exception Handling — Full Video Lecture",
@@ -6088,7 +6088,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-16-collections-framework-1/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/collections-framework-1/hidenav",
       "references": [
         {
           "title": "Day 16: Collections Framework 1 — Full Video Lecture",
@@ -6494,7 +6494,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-17-collections-framework-2/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/collections-framework-2/hidenav",
       "references": [
         {
           "title": "Day 17: Collections Framework 2 — Full Video Lecture",
@@ -6900,7 +6900,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-18-multithreading-and-concurrency/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/multithreading-in-java/hidenav",
       "references": [
         {
           "title": "Day 18: Multithreading and Concurrency — Full Video Lecture",
@@ -7306,7 +7306,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-19-generics-and-lambda-expressions/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/generics-and-lambdas/hidenav",
       "references": [
         {
           "title": "Day 19: Generics and Lambda Expressions — Full Video Lecture",
@@ -7712,7 +7712,7 @@
       "modulestatus": "active",
       "language": "java",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/java/day-20-file-handling-in-java/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/java/file-handling-in-java/hidenav",
       "references": [
         {
           "title": "Day 20: File Handling in Java — Full Video Lecture",

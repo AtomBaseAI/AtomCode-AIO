@@ -1,7 +1,7 @@
 {
   "atomcodeExport": true,
   "version": 2,
-  "exportedAt": "2026-11-26T15:13:35.950Z",
+  "exportedAt": "2026-11-28T02:47:24.731Z",
   "kind": "course",
   "course": {
     "title": "SQL Programming",
@@ -25,7 +25,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-1-introduction-to-databases-and-sql/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/introduction-to-sql/hidenav",
       "references": [
         {
           "title": "Day 1: Introduction to Databases and SQL — Full Video Lecture",
@@ -431,7 +431,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-2-data-definition-language-ddl/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/ddl-in-sql/hidenav",
       "references": [
         {
           "title": "Day 2: Data Definition Language (DDL) — Full Video Lecture",
@@ -837,7 +837,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-3-data-types-and-constraints/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/data-types-and-constraints/hidenav",
       "references": [
         {
           "title": "Day 3: Data Types and Constraints — Full Video Lecture",
@@ -1243,7 +1243,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-4-data-manipulation-insert-update-delete/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/dml-in-sql/hidenav",
       "references": [
         {
           "title": "Day 4: Data Manipulation (INSERT UPDATE DELETE) — Full Video Lecture",
@@ -1649,7 +1649,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-5-select-basics/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/select-basics/hidenav",
       "references": [
         {
           "title": "Day 5: SELECT Basics — Full Video Lecture",
@@ -2055,7 +2055,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-6-filtering-with-where/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/filtering-with-where/hidenav",
       "references": [
         {
           "title": "Day 6: Filtering with WHERE — Full Video Lecture",
@@ -2461,7 +2461,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-7-sorting-and-limiting/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/sorting-and-limiting/hidenav",
       "references": [
         {
           "title": "Day 7: Sorting and Limiting — Full Video Lecture",
@@ -2867,7 +2867,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-8-aggregate-functions/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/aggregate-functions/hidenav",
       "references": [
         {
           "title": "Day 8: Aggregate Functions — Full Video Lecture",
@@ -3273,7 +3273,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-9-group-by-and-having/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/group-by-and-having/hidenav",
       "references": [
         {
           "title": "Day 9: GROUP BY and HAVING — Full Video Lecture",
@@ -3679,7 +3679,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-10-inner-and-outer-joins/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/inner-and-outer-joins/hidenav",
       "references": [
         {
           "title": "Day 10: INNER and OUTER Joins — Full Video Lecture",
@@ -4085,7 +4085,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-11-cross-and-self-joins/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/cross-and-self-joins/hidenav",
       "references": [
         {
           "title": "Day 11: Cross and Self Joins — Full Video Lecture",
@@ -4491,7 +4491,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-12-subqueries/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/subqueries-in-sql/hidenav",
       "references": [
         {
           "title": "Day 12: Subqueries — Full Video Lecture",
@@ -4897,7 +4897,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-13-set-operations/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/set-operations/hidenav",
       "references": [
         {
           "title": "Day 13: Set Operations — Full Video Lecture",
@@ -5303,7 +5303,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-14-common-table-expressions-ctes/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/ctes-in-sql/hidenav",
       "references": [
         {
           "title": "Day 14: Common Table Expressions (CTEs) — Full Video Lecture",
@@ -5709,7 +5709,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-15-window-functions/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/window-functions/hidenav",
       "references": [
         {
           "title": "Day 15: Window Functions — Full Video Lecture",
@@ -6115,7 +6115,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-16-views/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/views-in-sql/hidenav",
       "references": [
         {
           "title": "Day 16: Views — Full Video Lecture",
@@ -6521,7 +6521,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-17-indexes-and-performance/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/indexes-and-performance/hidenav",
       "references": [
         {
           "title": "Day 17: Indexes and Performance — Full Video Lecture",
@@ -6927,7 +6927,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-18-transactions-and-acid/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/transactions-and-acid/hidenav",
       "references": [
         {
           "title": "Day 18: Transactions and ACID — Full Video Lecture",
@@ -7333,7 +7333,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-19-stored-procedures-and-functions/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/stored-procedures-and-functions/hidenav",
       "references": [
         {
           "title": "Day 19: Stored Procedures and Functions — Full Video Lecture",
@@ -7739,7 +7739,7 @@
       "modulestatus": "active",
       "language": "sql",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/sql/day-20-triggers-and-events/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/sql/triggers-and-events/hidenav",
       "references": [
         {
           "title": "Day 20: Triggers and Events — Full Video Lecture",

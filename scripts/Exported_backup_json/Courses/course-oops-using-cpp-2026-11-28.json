@@ -1,7 +1,7 @@
 {
   "atomcodeExport": true,
   "version": 2,
-  "exportedAt": "2026-11-26T15:13:55.516Z",
+  "exportedAt": "2026-11-28T02:47:43.022Z",
   "kind": "course",
   "course": {
     "title": "OOPS using CPP",
@@ -25,7 +25,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 390,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-1-introduction-to-c/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/introduction-to-cpp/hidenav",
       "references": [
         {
           "title": "Day 1: Introduction to C++ — Full Video Lecture",
@@ -420,7 +420,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 390,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-2-operators/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/operators-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 2: Operators — Full Video Lecture",
@@ -815,7 +815,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-3-control-statements/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/control-statements-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 3: Control Statements — Full Video Lecture",
@@ -1221,7 +1221,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-4-looping-statements/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/looping-statements-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 4: Looping Statements — Full Video Lecture",
@@ -1627,7 +1627,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-5-functions-and-modular-programming/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/functions-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 5: Functions and Modular Programming — Full Video Lecture",
@@ -2033,7 +2033,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-6-recursion/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/recursion-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 6: Recursion — Full Video Lecture",
@@ -2439,7 +2439,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-7-1d-arrays/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/arrays-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 7: 1D Arrays — Full Video Lecture",
@@ -2845,7 +2845,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-8-2d-arrays/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/2d-arrays-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 8: 2D Arrays — Full Video Lecture",
@@ -3251,7 +3251,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-9-strings/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/strings-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 9: Strings — Full Video Lecture",
@@ -3657,7 +3657,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-10-pattern-manipulation/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/pattern-manipulation-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 10: Pattern Manipulation — Full Video Lecture",
@@ -4063,7 +4063,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-11-pointers-and-dynamic-memory/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/pointers-and-dynamic-memory-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 11: Pointers and Dynamic Memory — Full Video Lecture",
@@ -4469,7 +4469,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-12-introduction-to-object-oriented-programming-oop/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/oop-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 12: Introduction to Object-Oriented Programming (OOP) — Full Video Lecture",
@@ -4875,7 +4875,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-13-constructors-and-destructors/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/constructors-and-destructors/hidenav",
       "references": [
         {
           "title": "Day 13: Constructors and Destructors — Full Video Lecture",
@@ -5281,7 +5281,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 380,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-14-inheritance/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/inheritance-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 14: Inheritance — Full Video Lecture",
@@ -5665,7 +5665,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-15-polymorphism/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/polymorphism-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 15: Polymorphism — Full Video Lecture",
@@ -6071,7 +6071,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-16-templates-and-stl/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/templates-and-stl/hidenav",
       "references": [
         {
           "title": "Day 16: Templates and STL — Full Video Lecture",
@@ -6477,7 +6477,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-17-exception-handling-multithreading/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/exception-handling-and-multithreading/hidenav",
       "references": [
         {
           "title": "Day 17: Exception Handling, Multithreading — Full Video Lecture",
@@ -6883,7 +6883,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-18-advanced-oop-abstract-classes-virtual-functions/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/abstract-classes-and-virtual-functions/hidenav",
       "references": [
         {
           "title": "Day 18: Advanced OOP (Abstract Classes, Virtual Functions) — Full Video Lecture",
@@ -7289,7 +7289,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-19-operator-overloading/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/operator-overloading-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 19: Operator Overloading — Full Video Lecture",
@@ -7695,7 +7695,7 @@
       "modulestatus": "active",
       "language": "cpp",
       "maxscore": 400,
-      "concepturl": "https://www.geeksforgeeks.org/cpp/day-20-file-handling/",
+      "concepturl": "https://conceptsv2.atomapps.space/topics/cpp/file-handling-in-cpp/hidenav",
       "references": [
         {
           "title": "Day 20: File Handling — Full Video Lecture",
